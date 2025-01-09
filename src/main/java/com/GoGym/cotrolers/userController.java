@@ -37,23 +37,17 @@ public class userController {
         model.addAttribute("message", "Logowanie");
         return "Login";
     }
-
-
-
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("user", new UserRegistrationDTO());
         model.addAttribute("message", "Register User");
         return "registerUser";
     }
-
     @PostMapping("/register")
     public String processRegister(@ModelAttribute UserRegistrationDTO userDTO) {
         userService.registerUser(userDTO);
         return "redirect:/Login";
     }
-
-
 }
 
 
