@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    /* Footer zawsze na dole */
+    }
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    }
+
+    /* Ustawienie pełnej wysokości strony */
+    html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    }
+
+    /* Główna zawartość zajmuje całą dostępną przestrzeń */
+    .content {
+    flex: 1;
+
+</head>
+<body th:fragment="header">
+<div class="w3-top" >
+    <div class="w3-bar w3-orange w3-card w3-left-align w3-large" >
+        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-red" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu">
+            <i class="fa fa-bars"></i>
+        </a>
+        <a href="#" th:href="@{/home}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Home</a>
+        <a href="#" th:href="@{/budget}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Budżet</a>
+        <a href="#" th:href="@{/addIncome}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Przychody</a>
+        <a href="#" th:href="@{/addExpense}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Wydatki</a>
+        <!-- Przycisk "Loguj" wyrównany do prawej -->
+        <a href="/logout" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Wyloguj się</a>
+    </div>
+
+    <!-- Navbar on small screens -->
+    <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
+        <a href="#" th:href="@{/home}" class="w3-bar-item w3-button w3-padding-large">Home</a>
+        <a href="#" th:href="@{/budget}" class="w3-bar-item w3-button w3-padding-large">Budżet</a>
+        <a href="#" th:href="@{/addIncome}" class="w3-bar-item w3-button w3-padding-large">Przychody</a>
+        <a href="#" th:href="@{/addExpense}" class="w3-bar-item w3-button w3-padding-large">Wydatki</a>
+        <a href="/logout" class="w3-bar-item w3-button w3-padding-large">Wyloguj się</a>
+    </div>
+</div>
+<!-- Header -->
+<header class="w3-container w3-orange w3-center" style="padding:128px 16px">
+    <h1 class="w3-margin w3-jumbo" th:text="${message}"></h1>
+</header>
+</body>
+</html>
