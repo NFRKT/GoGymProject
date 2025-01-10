@@ -20,10 +20,7 @@ public class SecurityConfig  {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();  // Użyj BCryptPasswordEncoder
     }
-    @Bean
-    public BCryptPasswordEncoder bcryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
     @Bean
@@ -51,16 +48,17 @@ public class SecurityConfig  {
         return http.build();
     }
 
+    // Konfiguracja AuthenticationManager z PasswordEncoder
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder
-                .userDetailsService(customUserDetailsService)  // Twoja usługa do weryfikacji użytkowników
-                .passwordEncoder(bcryptPasswordEncoder());  // Użycie PasswordEncoder
-
-        return authenticationManagerBuilder.build();
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+                .userDetailsService(customUserDetailsService)
+                .passwordEncoder(passwordEncoder()) // Użyj passwordEncoder
+                .and()
+                .build();
     }
+
+
 
 }
 

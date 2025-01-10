@@ -58,6 +58,7 @@ public class userService {
    // }
 
     public user findByEmail(String email) {
-        return UserRepository.findByEmail(email);
+        return UserRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Nie znaleziono użytkownika o podanym adresie email: " + email));
     }
 }

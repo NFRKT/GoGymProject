@@ -37,8 +37,6 @@ import java.util.*;
 public class ControlerGoGymHome {
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-    @Autowired
     @PersistenceContext
     private EntityManager entityManager;
     @Autowired
@@ -46,26 +44,11 @@ public class ControlerGoGymHome {
     private userService UserService;
     @Autowired
     private userRepository UserRepository;
-    private double minus = 0;
     @GetMapping("/home")
     public String home(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName(); // Login zalogowanego użytkownika
         model.addAttribute("username", username);
         return "home";
-    }
-    @Scheduled(cron = "0 0 0 1 * ?")
-    public void executeMonthlyTask() {
-
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-
-        user loggedInUser = UserRepository.findByEmail(currentUsername);
-        if (loggedInUser == null) {
-            throw new IllegalStateException("Nie znaleziono zalogowanego użytkownika");
-        }
-
-
     }
 }
