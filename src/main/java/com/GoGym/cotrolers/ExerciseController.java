@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.HashSet;
 import java.util.List;
 
+
 @Controller
 public class ExerciseController {
 
@@ -25,12 +26,23 @@ public class ExerciseController {
     }
 
     @GetMapping("/exercises")
-    public String getExercisesList(Model model) {
-        List<Exercise> exercises = exerciseService.getAllExercises(); // Pobieramy ćwiczenia
+    public String getExercises(Model model) {
+        List<Exercise> exercises = exerciseService.getAllExercises();
 
-        model.addAttribute("exercises", exercises); // Dodajemy ćwiczenia do modelu
-        return "exercises-list"; // Zwracamy widok z listą ćwiczeń
+        // Konwersja kolekcji w każdym obiekcie Exercise
+        for (Exercise exercise : exercises) {
+            if (exercise.getEquipment() != null) {
+                exercise.setEquipment(new HashSet<>(exercise.getEquipment()));
+            }
+            if (exercise.getBodyParts() != null) {
+                exercise.setBodyParts(new HashSet<>(exercise.getBodyParts()));
+            }
+        }
+
+        model.addAttribute("exercises", exercises);
+        return "exercises-list";
     }
+
 
    // @GetMapping("/exercises")
    // public String getAllExercises(Model model) {

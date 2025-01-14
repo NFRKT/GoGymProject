@@ -91,20 +91,21 @@
       <td th:text="${exercise.description}"></td>
       <td th:text="${exercise.difficulty}"></td>
       <td>
-        <span th:if="${exercise.equipment != null and !exercise.equipment.isEmpty()}">
-          <span th:each="item, iterStat : ${exercise.equipment}"
-                th:text="${item} + (iterStat.hasNext ? ', ' : '')"></span>
-        </span>
+  <span th:if="${exercise.equipment != null and !exercise.equipment.isEmpty()}">
+    <span th:each="item, iterStat : ${exercise.equipment}"
+          th:text="${item} + (iterStat.hasNext ? ', ' : '')"></span>
+  </span>
         <span th:if="${exercise.equipment == null or exercise.equipment.isEmpty()}">Brak</span>
       </td>
+
       <td>
-        <span th:if="${exercise.bodyParts != null and !exercise.bodyParts.isEmpty()}">
-          <span th:each="item, iterStat : ${exercise.bodyParts}"
-                th:text="${item} + (iterStat.hasNext ? ', ' : '')"></span>
-        </span>
+  <span th:if="${exercise.bodyParts != null and !exercise.bodyParts.isEmpty()}">
+    <span th:each="item, iterStat : ${exercise.bodyParts}"
+          th:text="${item} + (iterStat.hasNext ? ', ' : '')"></span>
+  </span>
         <span th:if="${exercise.bodyParts == null or exercise.bodyParts.isEmpty()}">Brak</span>
       </td>
-      <td>
+
         <a th:href="@{/api/exercises/{id}(id=${exercise.idExercise})}">Szczegóły</a>
       </td>
     </tr>
