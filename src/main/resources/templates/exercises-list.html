@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista Ćwiczeń</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 80%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      width: 90%;
+      margin: 0 auto;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Lista Ćwiczeń</h1>
+
+  <table>
+    <thead>
+    <tr>
+      <th>Id</th>
+      <th>Nazwa</th>
+      <th>Opis</th>
+      <th>Trudność</th>
+      <th>Sprzęt</th>
+      <th>Część Ciała</th>
+      <th>Akcje</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="exercise : ${exercises}">
+      <td th:text="${exercise.idExercise}"></td>
+      <td th:text="${exercise.name}"></td>
+      <td th:text="${exercise.description}"></td>
+      <td th:text="${exercise.difficulty}"></td>
+      <td>
+        <!-- Wyświetlanie sprzętu przypisanego do ćwiczenia -->
+        <span th:text="${exercise.equipment != null ? exercise.equipment : 'Brak'}"></span>
+      </td>
+      <td>
+        <!-- Wyświetlanie części ciała przypisanych do ćwiczenia -->
+        <span th:text="${exercise.bodyParts != null ? exercise.bodyParts : 'Brak'}"></span>
+      </td>
+      <td>
+        <a th:href="@{/api/exercises/{id}(id=${exercise.idExercise})}">Szczegóły</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <a href="/home" class="back-link">Powrót do strony głównej</a>
+</div>
+
+</body>
+</html>
