@@ -21,6 +21,8 @@ public class Exercise {
     @Enumerated(EnumType.STRING) // Dodajemy to, aby upewnić się, że enum jest zapisany jako tekst
     private Difficulty difficulty;
 
+    @Column(name = "jpg")
+    private String jpg;
     @ManyToMany
     @JoinTable(
             name = "exercise_bodypart",
@@ -48,13 +50,14 @@ public class Exercise {
 
     // Konstruktor z argumentami
     public Exercise(Long idExercise, String name, String description, Difficulty difficulty,
-                    Set<BodyPart> bodyParts, Set<Equipment> equipment) {
+                    Set<BodyPart> bodyParts, Set<Equipment> equipment, String jpg) {
         this.idExercise = idExercise;
         this.name = name;
         this.description = description;
         this.difficulty = difficulty;
         this.bodyParts = bodyParts;
         this.equipment = equipment;
+        this.jpg = jpg;
     }
 
     public Long getIdExercise() {
@@ -103,5 +106,13 @@ public class Exercise {
 
     public void setEquipment(Set<Equipment> equipment) {
         this.equipment = equipment;
+    }
+
+    public String getJpg() {
+        return jpg;
+    }
+
+    public void setJpg(String jpg) {
+        this.jpg = jpg;
     }
 }

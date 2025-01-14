@@ -32,26 +32,48 @@ public class ExerciseController {
     }
 
     @GetMapping("/exercises")
-    public String getExercises(@RequestParam(defaultValue = "0") int page, Model model) {
-        int pageSize = 25; // Ilość elementów na stronie
-        Pageable pageable = PageRequest.of(page, pageSize);
-        Page<Exercise> exercisesPage = exerciseRepository.findAll(pageable);
+    public String getExercises(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) String bodyPart,
+            @RequestParam(required = false) String name,
+            Model model) {
 
-        // Konwersja kolekcji w każdym obiekcie Exercise
-        for (Exercise exercise : exercisesPage.getContent()) {
-            if (exercise.getEquipment() != null) {
-                exercise.setEquipment(new HashSet<>(exercise.getEquipment()));
-            }
-            if (exercise.getBodyParts() != null) {
-                exercise.setBodyParts(new HashSet<>(exercise.getBodyParts()));
+        int pageSize = 25; // Liczba elementów na stronę
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        // Konwersja difficulty na Enum
+        Exercise.Difficulty difficultyEnum = null;
+        if (difficulty != null && !difficulty.isEmpty()) {
+            try {
+                difficultyEnum = Exercise.Difficulty.valueOf(difficulty.toLowerCase()); // Obsługuje "beginner", "intermediate", "advanced"
+            } catch (IllegalArgumentException e) {
+                // Obsługa nieprawidłowej wartości
+                model.addAttribute("error", "Nieprawidłowy poziom trudności: " + difficulty);
             }
         }
+
+        // Filtrowanie z paginacją
+        Page<Exercise> exercisesPage = exerciseRepository.filter(difficultyEnum, bodyPart, name, pageable);
 
         model.addAttribute("exercisesPage", exercisesPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", exercisesPage.getTotalPages());
+        model.addAttribute("difficulty", difficulty);
+        model.addAttribute("bodyPart", bodyPart);
+        model.addAttribute("name", name);
 
         return "exercises-list";
+    }
+
+
+    @GetMapping("/exercise/{id}")
+    public String getExerciseDetails(@PathVariable Integer id, Model model) {
+        Exercise exercise = exerciseRepository.findById(id)
+              .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ćwiczenia o ID: " + id));
+
+        model.addAttribute("exercise", exercise);
+        return "exercise-details";
     }
 
 
