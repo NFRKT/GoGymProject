@@ -2,6 +2,7 @@ package com.GoGym.cotrolers;
 
 import com.GoGym.Module.Exercise;
 import com.GoGym.Service.ExerciseService;
+import com.GoGym.repository.ExerciseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,24 +14,31 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.HashSet;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 
 @Controller
 public class ExerciseController {
 
     private final ExerciseService exerciseService;
+    private final ExerciseRepository exerciseRepository;
 
     @Autowired
-    public ExerciseController(ExerciseService exerciseService) {
+    public ExerciseController(ExerciseService exerciseService, ExerciseRepository exerciseRepository) {
         this.exerciseService = exerciseService;
+        this.exerciseRepository = exerciseRepository;
     }
 
     @GetMapping("/exercises")
-    public String getExercises(Model model) {
-        List<Exercise> exercises = exerciseService.getAllExercises();
+    public String getExercises(@RequestParam(defaultValue = "0") int page, Model model) {
+        int pageSize = 25; // Ilość elementów na stronie
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Exercise> exercisesPage = exerciseRepository.findAll(pageable);
 
         // Konwersja kolekcji w każdym obiekcie Exercise
-        for (Exercise exercise : exercises) {
+        for (Exercise exercise : exercisesPage.getContent()) {
             if (exercise.getEquipment() != null) {
                 exercise.setEquipment(new HashSet<>(exercise.getEquipment()));
             }
@@ -39,9 +47,13 @@ public class ExerciseController {
             }
         }
 
-        model.addAttribute("exercises", exercises);
+        model.addAttribute("exercisesPage", exercisesPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", exercisesPage.getTotalPages());
+
         return "exercises-list";
     }
+
 
 
    // @GetMapping("/exercises")
