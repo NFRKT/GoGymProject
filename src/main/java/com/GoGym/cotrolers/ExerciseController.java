@@ -1,8 +1,10 @@
 package com.GoGym.cotrolers;
 
 import com.GoGym.Module.BodyPart;
+import com.GoGym.Module.Equipment;
 import com.GoGym.Module.Exercise;
 import com.GoGym.Service.BodyPartService;
+import com.GoGym.Service.EquipmentService;
 import com.GoGym.Service.ExerciseService;
 import com.GoGym.repository.ExerciseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,14 @@ public class ExerciseController {
     private final ExerciseService exerciseService;
     private final ExerciseRepository exerciseRepository;
     private final BodyPartService bodyPartService;
+    private final EquipmentService equipmentService;
 
     @Autowired
-    public ExerciseController(ExerciseService exerciseService, ExerciseRepository exerciseRepository, BodyPartService bodyPartService) {
+    public ExerciseController(ExerciseService exerciseService, ExerciseRepository exerciseRepository, BodyPartService bodyPartService, EquipmentService equipmentService) {
         this.exerciseService = exerciseService;
         this.exerciseRepository = exerciseRepository;
         this.bodyPartService = bodyPartService;
+        this.equipmentService = equipmentService;
     }
 
     @GetMapping("/exercises")
@@ -40,6 +44,7 @@ public class ExerciseController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) String difficulty,
             @RequestParam(required = false) String bodyPart,
+            @RequestParam(required = false) String equipment,
             @RequestParam(required = false) String name,
             Model model) {
 
@@ -60,10 +65,15 @@ public class ExerciseController {
         List<BodyPart> bodyParts = bodyPartService.findAll();
         model.addAttribute("bodyParts", bodyParts);
 
+        // Pobieranie listy sprzętów
+        List<Equipment> equipments = equipmentService.findAll();
+        model.addAttribute("equipments", equipments);
+
         // Filtrowanie z paginacją
         Page<Exercise> exercisesPage = exerciseRepository.filter(
                 difficultyEnum,
                 (bodyPart != null && !bodyPart.isEmpty()) ? bodyPart : null,
+                (equipment != null && !equipment.isEmpty()) ? equipment : null,
                 (name != null && !name.isEmpty()) ? name : null,
                 pageable
         );
@@ -73,10 +83,12 @@ public class ExerciseController {
         model.addAttribute("totalPages", exercisesPage.getTotalPages());
         model.addAttribute("difficulty", difficulty);
         model.addAttribute("bodyPart", bodyPart);
+        model.addAttribute("equipment", equipment);
         model.addAttribute("name", name);
 
         return "exercises-list";
     }
+
 
 
 

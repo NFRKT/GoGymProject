@@ -175,6 +175,11 @@
       <option value="" th:selected="${bodyPart == null}">Wszystkie części ciała</option>
       <option th:each="part : ${bodyParts}" th:value="${part.name}" th:text="${part.name}">Część ciała</option>
     </select>
+    <select name="equipment" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+      <option value="" th:selected="${equipment == null}">Wszystkie sprzęty</option>
+      <option th:each="equip : ${equipments}" th:value="${equip.name}" th:text="${equip.name}">Sprzęt</option>
+
+    </select>
     <input type="text" name="name" placeholder="Wyszukaj nazwę ćwiczenia" th:value="${name}" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
     <button type="submit" style="padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
       Filtruj
@@ -202,14 +207,15 @@
   <!-- Paginacja -->
   <div class="pagination">
     <button th:if="${currentPage > 0}"
-            th:attr="onclick=|window.location.href='?page=${currentPage - 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&name=${name ?: ''}'|">
+            th:attr="onclick=|window.location.href='?page=${currentPage - 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&equipment=${equipment ?: ''}&name=${name ?: ''}'|">
       Poprzednia
     </button>
     <button th:if="${currentPage < totalPages - 1}"
-            th:attr="onclick=|window.location.href='?page=${currentPage + 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&name=${name ?: ''}'|">
+            th:attr="onclick=|window.location.href='?page=${currentPage + 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&equipment=${equipment ?: ''}&name=${name ?: ''}'|">
       Następna
     </button>
   </div>
+
 
 
 
@@ -240,6 +246,7 @@ function resetFilters() {
     const url = new URL(window.location.href);
     url.searchParams.delete("difficulty");
     url.searchParams.delete("bodyPart");
+    url.searchParams.delete("equipment");
     url.searchParams.delete("name");
     url.searchParams.set("page", 0); // Przejście na pierwszą stronę
     window.location.href = url.href;
@@ -252,27 +259,21 @@ function navigatePage(page) {
     // Ustaw numer strony
     url.searchParams.set("page", page);
 
-    // Pobierz wszystkie aktywne filtry
+    // Pobierz wartości filtrów z formularza
     const difficulty = document.querySelector('select[name="difficulty"]').value;
     const bodyPart = document.querySelector('select[name="bodyPart"]').value;
+    const equipment = document.querySelector('select[name="equipment"]').value;
     const name = document.querySelector('input[name="name"]').value;
 
     if (difficulty) url.searchParams.set("difficulty", difficulty);
     if (bodyPart) url.searchParams.set("bodyPart", bodyPart);
+    if (equipment) url.searchParams.set("equipment", equipment);
     if (name) url.searchParams.set("name", name);
 
-    // Wywołanie fetch
-    fetch(url)
-        .then(response => response.text())
-        .then(html => {
-            document.querySelector('.exercise-grid').innerHTML =
-                new DOMParser().parseFromString(html, 'text/html').querySelector('.exercise-grid').innerHTML;
-
-            // Zaktualizuj paginację
-            document.querySelector('.pagination').innerHTML =
-                new DOMParser().parseFromString(html, 'text/html').querySelector('.pagination').innerHTML;
-        });
+    // Przejdź do nowego URL
+    window.location.href = url.href;
 }
+
 
 
 
