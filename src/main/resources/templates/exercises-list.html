@@ -164,18 +164,27 @@
 <div class="container">
   <h1>Lista Ćwiczeń</h1>
 
-  <!-- Filtrowanie -->
-  <form method="get" th:action="@{/exercises}">
-    <select name="difficulty">
+  <form method="get" th:action="@{/exercises}" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; justify-content: center;">
+    <select name="difficulty" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
       <option value="" th:selected="${difficulty == null}">Wszystkie trudności</option>
       <option value="beginner" th:selected="${difficulty == 'beginner'}">Łatwy</option>
       <option value="intermediate" th:selected="${difficulty == 'intermediate'}">Średni</option>
       <option value="advanced" th:selected="${difficulty == 'advanced'}">Trudny</option>
     </select>
-    <!--<input type="text" name="bodyPart" placeholder="Część ciała" th:value="${bodyPart}">-->
-    <input type="text" name="name" placeholder="Wyszukaj nazwę ćwiczenia" th:value="${name}">
-    <button type="submit">Filtruj</button>
+    <select name="bodyPart" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+      <option value="" th:selected="${bodyPart == null}">Wszystkie części ciała</option>
+      <option th:each="part : ${bodyParts}" th:value="${part.name}" th:text="${part.name}">Część ciała</option>
+    </select>
+    <input type="text" name="name" placeholder="Wyszukaj nazwę ćwiczenia" th:value="${name}" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+    <button type="submit" style="padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+      Filtruj
+    </button>
+    <button type="button" onclick="resetFilters()" style="padding: 8px 12px; background-color: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+      Resetuj filtry
+    </button>
   </form>
+
+
 
 
   <!-- Siatka ćwiczeń -->
@@ -192,9 +201,22 @@
 
   <!-- Paginacja -->
   <div class="pagination">
-    <button th:if="${currentPage > 0}" th:onclick="|window.location.href='?page=${currentPage - 1}'|">Poprzednia</button>
-    <button th:if="${currentPage < totalPages - 1}" th:onclick="|window.location.href='?page=${currentPage + 1}'|">Następna</button>
+    <button th:if="${currentPage > 0}"
+            th:attr="onclick=|window.location.href='?page=${currentPage - 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&name=${name ?: ''}'|">
+      Poprzednia
+    </button>
+    <button th:if="${currentPage < totalPages - 1}"
+            th:attr="onclick=|window.location.href='?page=${currentPage + 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&name=${name ?: ''}'|">
+      Następna
+    </button>
   </div>
+
+
+
+
+
+</div>
+
 </div>
 
 
@@ -213,6 +235,61 @@ document.querySelector('form').addEventListener('submit', function(event) {
                 new DOMParser().parseFromString(html, 'text/html').querySelector('.exercise-grid').innerHTML;
         });
 });
+
+function resetFilters() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("difficulty");
+    url.searchParams.delete("bodyPart");
+    url.searchParams.delete("name");
+    url.searchParams.set("page", 0); // Przejście na pierwszą stronę
+    window.location.href = url.href;
+}
+
+
+function navigatePage(page) {
+    const url = new URL(window.location.href);
+
+    // Ustaw numer strony
+    url.searchParams.set("page", page);
+
+    // Pobierz wszystkie aktywne filtry
+    const difficulty = document.querySelector('select[name="difficulty"]').value;
+    const bodyPart = document.querySelector('select[name="bodyPart"]').value;
+    const name = document.querySelector('input[name="name"]').value;
+
+    if (difficulty) url.searchParams.set("difficulty", difficulty);
+    if (bodyPart) url.searchParams.set("bodyPart", bodyPart);
+    if (name) url.searchParams.set("name", name);
+
+    // Wywołanie fetch
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector('.exercise-grid').innerHTML =
+                new DOMParser().parseFromString(html, 'text/html').querySelector('.exercise-grid').innerHTML;
+
+            // Zaktualizuj paginację
+            document.querySelector('.pagination').innerHTML =
+                new DOMParser().parseFromString(html, 'text/html').querySelector('.pagination').innerHTML;
+        });
+}
+
+
+
 </script>
 </body>
 </html>
+<!-- function navigate(button, direction) {
+    const url = new URL(window.location.href);
+    const page = button.dataset[direction === 'prev' ? 'pagePrev' : 'pageNext'];
+    const difficulty = button.dataset.difficulty || '';
+    const bodyPart = button.dataset.bodypart || '';
+    const name = button.dataset.name || '';
+
+    url.searchParams.set('page', page);
+    if (difficulty) url.searchParams.set('difficulty', difficulty);
+    if (bodyPart) url.searchParams.set('bodyPart', bodyPart);
+    if (name) url.searchParams.set('name', name);
+
+    window.location.href = url.href;
+}-->

@@ -1,6 +1,8 @@
 package com.GoGym.cotrolers;
 
+import com.GoGym.Module.BodyPart;
 import com.GoGym.Module.Exercise;
+import com.GoGym.Service.BodyPartService;
 import com.GoGym.Service.ExerciseService;
 import com.GoGym.repository.ExerciseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +26,13 @@ public class ExerciseController {
 
     private final ExerciseService exerciseService;
     private final ExerciseRepository exerciseRepository;
+    private final BodyPartService bodyPartService;
 
     @Autowired
-    public ExerciseController(ExerciseService exerciseService, ExerciseRepository exerciseRepository) {
+    public ExerciseController(ExerciseService exerciseService, ExerciseRepository exerciseRepository, BodyPartService bodyPartService) {
         this.exerciseService = exerciseService;
         this.exerciseRepository = exerciseRepository;
+        this.bodyPartService = bodyPartService;
     }
 
     @GetMapping("/exercises")
@@ -39,22 +43,30 @@ public class ExerciseController {
             @RequestParam(required = false) String name,
             Model model) {
 
-        int pageSize = 25; // Liczba elementów na stronę
+        int pageSize = 9; // Ustawienie na 9 elementów na stronę
         Pageable pageable = PageRequest.of(page, pageSize);
 
         // Konwersja difficulty na Enum
         Exercise.Difficulty difficultyEnum = null;
         if (difficulty != null && !difficulty.isEmpty()) {
             try {
-                difficultyEnum = Exercise.Difficulty.valueOf(difficulty.toLowerCase()); // Obsługuje "beginner", "intermediate", "advanced"
+                difficultyEnum = Exercise.Difficulty.valueOf(difficulty.toLowerCase());
             } catch (IllegalArgumentException e) {
-                // Obsługa nieprawidłowej wartości
                 model.addAttribute("error", "Nieprawidłowy poziom trudności: " + difficulty);
             }
         }
 
+        // Pobieranie listy części ciała
+        List<BodyPart> bodyParts = bodyPartService.findAll();
+        model.addAttribute("bodyParts", bodyParts);
+
         // Filtrowanie z paginacją
-        Page<Exercise> exercisesPage = exerciseRepository.filter(difficultyEnum, bodyPart, name, pageable);
+        Page<Exercise> exercisesPage = exerciseRepository.filter(
+                difficultyEnum,
+                (bodyPart != null && !bodyPart.isEmpty()) ? bodyPart : null,
+                (name != null && !name.isEmpty()) ? name : null,
+                pageable
+        );
 
         model.addAttribute("exercisesPage", exercisesPage);
         model.addAttribute("currentPage", page);
@@ -65,6 +77,8 @@ public class ExerciseController {
 
         return "exercises-list";
     }
+
+
 
 
     @GetMapping("/exercise/{id}")

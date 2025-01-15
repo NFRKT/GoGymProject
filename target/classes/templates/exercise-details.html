@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Szczegóły Ćwiczenia</title>
+</head>
+<body>
+<div class="container">
+  <h1 th:text="${exercise.name}"></h1>
+  <img th:src="${exercise.jpg}" alt="Exercise Image">
+  <p th:text="${exercise.description}"></p>
+  <p>Trudność: <span th:text="${exercise.difficulty}"></span></p>
+  <p>Części ciała: <span th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}"></span></p>
+  <p>Sprzęt: <span th:text="${#strings.arrayJoin(exercise.equipment.toArray(), ', ')}"></span></p>
+  <a href="/exercises">Powrót do listy</a>
+</div>
+</body>
+</html>

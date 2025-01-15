@@ -14,18 +14,17 @@ import java.util.Optional;
 @Repository
 public interface ExerciseRepository extends JpaRepository<Exercise, Integer> {
 
-    @Query("SELECT e FROM Exercise e " +
+    @Query("SELECT DISTINCT e FROM Exercise e " +
+            "LEFT JOIN e.bodyParts bp " +
             "WHERE (:difficulty IS NULL OR e.difficulty = :difficulty) " +
-            "AND (:bodyPart IS NULL OR :bodyPart MEMBER OF e.bodyParts)" +
+            "AND (:bodyPart IS NULL OR bp.name = :bodyPart) " +
             "AND (:name IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')))")
     Page<Exercise> filter(
-            @Param("difficulty") Exercise.Difficulty difficulty, // Zmieniono typ na Enum
+            @Param("difficulty") Exercise.Difficulty difficulty,
             @Param("bodyPart") String bodyPart,
             @Param("name") String name,
             Pageable pageable);
 
+
     Optional<Exercise> findById(Integer idExercise);
 }
-
-
-

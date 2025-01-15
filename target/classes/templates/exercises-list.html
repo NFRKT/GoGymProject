@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <meta charset="UTF-8">
   <title>Lista Ćwiczeń</title>
   <style>
@@ -88,67 +89,207 @@
     .pagination a:hover {
         background-color: #ddd;
     }
+
+    .exercise-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 kolumny */
+        gap: 20px; /* Odstępy między elementami */
+        padding: 20px;
+    }
+
+    .exercise-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        padding: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .exercise-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .exercise-image {
+        max-width: 100%; /* Dostosowanie do rozmiaru karty */
+        height: auto; /* Zachowanie proporcji */
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+
+    .exercise-card h3 {
+        font-size: 1.2em;
+        margin: 10px 0;
+        color: #333;
+    }
+
+    .exercise-card p {
+        font-size: 0.9em;
+        color: #666;
+        margin: 5px 0;
+    }
+
+    .exercise-card a {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 8px 12px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+
+    .exercise-card a:hover {
+        background-color: #0056b3;
+    }
+
+    @media (max-width: 768px) {
+      .exercise-grid {
+          grid-template-columns: repeat(2, 1fr); /* 2 kolumny na węższych ekranach */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .exercise-grid {
+          grid-template-columns: 1fr; /* 1 kolumna na najmniejszych ekranach */
+      }
+    }
+
+
   </style>
 </head>
 <body>
-
 <div class="container">
   <h1>Lista Ćwiczeń</h1>
 
-  <table>
-    <thead>
-    <tr>
-      <th>Id</th>
-      <th>Nazwa</th>
-      <th>Opis</th>
-      <th>Trudność</th>
-      <th>Sprzęt</th>
-      <th>Część Ciała</th>
-      <th>Akcje</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="exercise : ${exercisesPage.content}">
-      <td th:text="${exercise.idExercise}"></td>
-      <td th:text="${exercise.name}"></td>
-      <td th:text="${exercise.description}"></td>
-      <td th:text="${exercise.difficulty}"></td>
-      <td>
-                <span th:if="${exercise.equipment != null and !exercise.equipment.isEmpty()}">
-                    <span th:each="item, iterStat : ${exercise.equipment}"
-                          th:text="${item} + (iterStat.hasNext ? ', ' : '')"></span>
-                </span>
-        <span th:if="${exercise.equipment == null or exercise.equipment.isEmpty()}">Brak</span>
-      </td>
-      <td>
-                <span th:if="${exercise.bodyParts != null and !exercise.bodyParts.isEmpty()}">
-                    <span th:each="item, iterStat : ${exercise.bodyParts}"
-                          th:text="${item} + (iterStat.hasNext ? ', ' : '')"></span>
-                </span>
-        <span th:if="${exercise.bodyParts == null or exercise.bodyParts.isEmpty()}">Brak</span>
-      </td>
-      <td>
-        <a th:href="@{/api/exercises/{id}(id=${exercise.idExercise})}">Szczegóły</a>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  <form method="get" th:action="@{/exercises}" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; justify-content: center;">
+    <select name="difficulty" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+      <option value="" th:selected="${difficulty == null}">Wszystkie trudności</option>
+      <option value="beginner" th:selected="${difficulty == 'beginner'}">Łatwy</option>
+      <option value="intermediate" th:selected="${difficulty == 'intermediate'}">Średni</option>
+      <option value="advanced" th:selected="${difficulty == 'advanced'}">Trudny</option>
+    </select>
+    <select name="bodyPart" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+      <option value="" th:selected="${bodyPart == null}">Wszystkie części ciała</option>
+      <option th:each="part : ${bodyParts}" th:value="${part.name}" th:text="${part.name}">Część ciała</option>
+    </select>
+    <input type="text" name="name" placeholder="Wyszukaj nazwę ćwiczenia" th:value="${name}" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+    <button type="submit" style="padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+      Filtruj
+    </button>
+    <button type="button" onclick="resetFilters()" style="padding: 8px 12px; background-color: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+      Resetuj filtry
+    </button>
+  </form>
 
-  <div class="pagination">
-    <a th:if="${currentPage > 0}" th:href="@{/exercises(page=${currentPage - 1})}">Poprzednia</a>
 
-    <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
-        <a th:href="@{/exercises(page=${pageNum})}"
-           th:classappend="${pageNum == currentPage} ? 'active'"
-           th:text="${pageNum + 1}"></a>
-    </span>
 
-    <a th:if="${currentPage < totalPages - 1}" th:href="@{/exercises(page=${currentPage + 1})}">Następna</a>
+
+  <!-- Siatka ćwiczeń -->
+  <div class="exercise-grid">
+    <div th:each="exercise : ${exercisesPage.content}" class="exercise-card">
+      <img th:src="${exercise.jpg}" alt="Exercise Image" class="exercise-image">
+      <h3 th:text="${exercise.name}">Nazwa ćwiczenia</h3>
+      <p th:text="${exercise.difficulty}">Poziom trudności</p>
+      <p th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}">Części ciała</p>
+      <a th:href="@{/exercise/{id}(id=${exercise.idExercise})}">Zobacz szczegóły</a>
+    </div>
   </div>
 
 
-  <a href="/home" class="back-link">Powrót do strony głównej</a>
+  <!-- Paginacja -->
+  <div class="pagination">
+    <button th:if="${currentPage > 0}"
+            th:attr="onclick=|window.location.href='?page=${currentPage - 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&name=${name ?: ''}'|">
+      Poprzednia
+    </button>
+    <button th:if="${currentPage < totalPages - 1}"
+            th:attr="onclick=|window.location.href='?page=${currentPage + 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&name=${name ?: ''}'|">
+      Następna
+    </button>
+  </div>
+
+
+
+
+
 </div>
 
+</div>
+
+
+<script>
+document.querySelector('form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const url = new URL(window.location.href);
+    const formData = new FormData(event.target);
+    formData.forEach((value, key) => url.searchParams.set(key, value));
+
+    fetch(url, { method: 'GET' })
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector('.exercise-grid').innerHTML =
+                new DOMParser().parseFromString(html, 'text/html').querySelector('.exercise-grid').innerHTML;
+        });
+});
+
+function resetFilters() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("difficulty");
+    url.searchParams.delete("bodyPart");
+    url.searchParams.delete("name");
+    url.searchParams.set("page", 0); // Przejście na pierwszą stronę
+    window.location.href = url.href;
+}
+
+
+function navigatePage(page) {
+    const url = new URL(window.location.href);
+
+    // Ustaw numer strony
+    url.searchParams.set("page", page);
+
+    // Pobierz wszystkie aktywne filtry
+    const difficulty = document.querySelector('select[name="difficulty"]').value;
+    const bodyPart = document.querySelector('select[name="bodyPart"]').value;
+    const name = document.querySelector('input[name="name"]').value;
+
+    if (difficulty) url.searchParams.set("difficulty", difficulty);
+    if (bodyPart) url.searchParams.set("bodyPart", bodyPart);
+    if (name) url.searchParams.set("name", name);
+
+    // Wywołanie fetch
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector('.exercise-grid').innerHTML =
+                new DOMParser().parseFromString(html, 'text/html').querySelector('.exercise-grid').innerHTML;
+
+            // Zaktualizuj paginację
+            document.querySelector('.pagination').innerHTML =
+                new DOMParser().parseFromString(html, 'text/html').querySelector('.pagination').innerHTML;
+        });
+}
+
+
+
+</script>
 </body>
 </html>
+<!-- function navigate(button, direction) {
+    const url = new URL(window.location.href);
+    const page = button.dataset[direction === 'prev' ? 'pagePrev' : 'pageNext'];
+    const difficulty = button.dataset.difficulty || '';
+    const bodyPart = button.dataset.bodypart || '';
+    const name = button.dataset.name || '';
+
+    url.searchParams.set('page', page);
+    if (difficulty) url.searchParams.set('difficulty', difficulty);
+    if (bodyPart) url.searchParams.set('bodyPart', bodyPart);
+    if (name) url.searchParams.set('name', name);
+
+    window.location.href = url.href;
+}-->
