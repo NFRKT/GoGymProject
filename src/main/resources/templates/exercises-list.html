@@ -1,296 +1,309 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <meta charset="UTF-8">
+  <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  />
+  <meta charset="UTF-8" />
   <title>Lista Ćwiczeń</title>
   <style>
-
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 0;
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-top: 20px;
-    }
-
-    table {
-      width: 80%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      background-color: #fff;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    th, td {
-      padding: 10px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-
-    a {
-      color: #007bff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    .container {
-      width: 90%;
-      margin: 0 auto;
-    }
-
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 20px;
-      font-size: 1.2em;
-    }
-    .pagination {
-    text-align: center;
-    margin: 20px 0;
-    }
-
-    .pagination a {
-        margin: 0 5px;
-        text-decoration: none;
-        padding: 5px 10px;
-        border: 1px solid #ddd;
-        color: #007bff;
-    }
-
-    .pagination a.active {
-        font-weight: bold;
-        background-color: #007bff;
-        color: #fff;
-    }
-
-    .pagination a:hover {
-        background-color: #ddd;
-    }
-
-    .exercise-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr); /* 3 kolumny */
-        gap: 20px; /* Odstępy między elementami */
-        padding: 20px;
-    }
-
-    .exercise-card {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        padding: 15px;
-        transition: transform 0.3s ease;
-    }
-
-    .exercise-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .exercise-image {
-        max-width: 100%; /* Dostosowanie do rozmiaru karty */
-        height: auto; /* Zachowanie proporcji */
-        border-radius: 4px;
-        margin-bottom: 10px;
-    }
-
-    .exercise-card h3 {
-        font-size: 1.2em;
-        margin: 10px 0;
+      /* Stylizacja głównego elementu strony */
+      body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to bottom, #e3f2fd, #ffffff);
+        margin: 0;
+        padding: 0;
         color: #333;
-    }
+      }
 
-    .exercise-card p {
-        font-size: 0.9em;
-        color: #666;
+      h1 {
+        text-align: center;
+        color: #007bff;
+        font-size: 2.5em;
+        margin: 20px 0;
+        font-weight: bold;
+      }
+
+      /* Formularz filtrów */
+      form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      form select,
+      form input {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+        background: white;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        position: relative;
+        width: 200px;
+      }
+
+      form select {
+        background: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%22http://www.w3.org/2000/svg%22 viewBox%3D%220 0 4 5%22%3E%3Cpath fill%3D%22%23666%22 d%3D%22M2 0L0 2h4zM2 5L0 3h4z%22/%3E%3C/svg%3E')
+          no-repeat right 10px center;
+        background-size: 10px;
+      }
+
+      form input {
+        width: 300px;
+      }
+
+      form button {
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        font-size: 1em;
+        color: white;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      form button:hover {
+        background: linear-gradient(90deg, #0056b3, #00408b);
+      }
+
+      /* Siatka kart ćwiczeń */
+      .exercise-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 20px;
+      }
+
+      .exercise-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .exercise-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .exercise-card img {
+        max-width: 100%;
+        height: 150px;
+        object-fit: cover;
+      }
+
+      .exercise-card h3 {
+        margin: 15px 0 10px;
+        font-size: 1.2em;
+        color: #007bff;
+      }
+
+      .exercise-card p {
         margin: 5px 0;
-    }
+        color: #555;
+        font-size: 0.95em;
+      }
 
-    .exercise-card a {
-        display: inline-block;
-        margin-top: 10px;
-        padding: 8px 12px;
-        background-color: #007bff;
-        color: #fff;
+      .exercise-card a {
+        display: none; /* Usunięcie widocznego linka, bo cała karta jest klikana */
+      }
+
+      .exercise-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+
+      .exercise-card[data-link]:hover::after {
+        cursor: pointer;
+      }
+
+      /* Stylizacja paginacji */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 20px 0;
+      }
+
+      .pagination a {
+        padding: 10px 15px;
+        border: 1px solid #007bff;
+        border-radius: 5px;
+        color: #007bff;
         text-decoration: none;
-        border-radius: 4px;
-        font-size: 0.9em;
-    }
-
-    .exercise-card a:hover {
-        background-color: #0056b3;
-    }
-
-    @media (max-width: 768px) {
-      .exercise-grid {
-          grid-template-columns: repeat(2, 1fr); /* 2 kolumny na węższych ekranach */
+        font-weight: bold;
+        transition: background 0.3s ease, color 0.3s ease;
       }
-    }
 
-    @media (max-width: 480px) {
-      .exercise-grid {
-          grid-template-columns: 1fr; /* 1 kolumna na najmniejszych ekranach */
+      .pagination a.active,
+      .pagination a:hover {
+        background: #007bff;
+        color: white;
       }
-    }
 
-
-  </style>
+      @media (max-width: 768px) {
+        .pagination a {
+          padding: 8px 10px;
+        }
+      }
+    </style>
 </head>
 <body>
 <div class="container">
   <h1>Lista Ćwiczeń</h1>
-
-  <form method="get" th:action="@{/exercises}" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; justify-content: center;">
-    <select name="difficulty" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-      <option value="" th:selected="${difficulty == null}">Wszystkie trudności</option>
-      <option value="beginner" th:selected="${difficulty == 'beginner'}">Łatwy</option>
-      <option value="intermediate" th:selected="${difficulty == 'intermediate'}">Średni</option>
-      <option value="advanced" th:selected="${difficulty == 'advanced'}">Trudny</option>
+  <form id="form" method="get" th:action="@{/exercises}">
+    <select name="difficulty">
+      <option value="" th:selected="${difficulty == null}">
+        Wszystkie trudności
+      </option>
+      <option value="beginner" th:selected="${difficulty == 'beginner'}">
+        Łatwy
+      </option>
+      <option value="intermediate" th:selected="${difficulty == 'intermediate'}">
+        Średni
+      </option>
+      <option value="advanced" th:selected="${difficulty == 'advanced'}">
+        Trudny
+      </option>
     </select>
-    <select name="bodyPart" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-      <option value="" th:selected="${bodyPart == null}">Wszystkie części ciała</option>
-      <option th:each="part : ${bodyParts}" th:value="${part.name}" th:text="${part.name}">Część ciała</option>
+    <select name="bodyPart">
+      <option value="" th:selected="${bodyPart == null}">
+        Wszystkie części ciała
+      </option>
+      <option
+              th:each="part : ${bodyParts}"
+              th:value="${part.name}"
+              th:text="${part.name}"
+      >
+        Część ciała
+      </option>
     </select>
-    <select name="equipment" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-      <option value="" th:selected="${equipment == null}">Wszystkie sprzęty</option>
-      <option th:each="equip : ${equipments}" th:value="${equip.name}" th:text="${equip.name}">Sprzęt</option>
-
+    <select name="equipment">
+      <option value="" th:selected="${equipment == null}">
+        Wszystkie sprzęty
+      </option>
+      <option
+              th:each="equip : ${equipments}"
+              th:value="${equip.name}"
+              th:text="${equip.name}"
+      >
+        Sprzęt
+      </option>
     </select>
-    <input type="text" name="name" placeholder="Wyszukaj nazwę ćwiczenia" th:value="${name}" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-    <button type="submit" style="padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-      Filtruj
-    </button>
-    <button type="button" onclick="resetFilters()" style="padding: 8px 12px; background-color: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
-      Resetuj filtry
-    </button>
+    <input
+            type="text"
+            name="name"
+            placeholder="Wyszukaj nazwę ćwiczenia"
+            th:value="${name}"
+    />
+    <button type="submit" onclick="navigatePage(0)">Filtruj</button>
+    <button type="button" onclick="resetFilters()">Resetuj filtry</button>
   </form>
-
-
-
-
   <!-- Siatka ćwiczeń -->
   <div class="exercise-grid">
-    <div th:each="exercise : ${exercisesPage.content}" class="exercise-card">
-      <img th:src="${exercise.jpg}" alt="Exercise Image" class="exercise-image">
+    <div
+            th:each="exercise : ${exercisesPage.content}"
+            class="exercise-card"
+            th:attr="data-link=@{/exercise/{id}(id=${exercise.idExercise})}"
+            onclick="redirectTo(this)"
+    >
+      <img
+              th:src="${exercise.jpg}"
+              alt="Exercise Image"
+              class="exercise-image"
+      />
       <h3 th:text="${exercise.name}">Nazwa ćwiczenia</h3>
       <p th:text="${exercise.difficulty}">Poziom trudności</p>
-      <p th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}">Części ciała</p>
-      <a th:href="@{/exercise/{id}(id=${exercise.idExercise})}">Zobacz szczegóły</a>
+      <p
+              th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}"
+      >
+        Części ciała
+      </p>
     </div>
   </div>
-
-
   <!-- Paginacja -->
   <div class="pagination">
-    <button th:if="${currentPage > 0}"
-            th:attr="onclick=|window.location.href='?page=${currentPage - 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&equipment=${equipment ?: ''}&name=${name ?: ''}'|">
-      Poprzednia
-    </button>
-    <button th:if="${currentPage < totalPages - 1}"
-            th:attr="onclick=|window.location.href='?page=${currentPage + 1}&difficulty=${difficulty ?: ''}&bodyPart=${bodyPart ?: ''}&equipment=${equipment ?: ''}&name=${name ?: ''}'|">
-      Następna
-    </button>
+    <a
+            th:if="${currentPage > 0}"
+            href="javascript:void(0);"
+            th:attr="onclick=|navigatePage(${currentPage}-1)|"
+    >Poprzednia</a
+    >
+    <a
+            th:if="${currentPage < totalPages - 1}"
+            href="javascript:void(0);"
+            th:attr="onclick=|navigatePage(${currentPage}+1)|"
+    >Następna</a
+    >
   </div>
-
-
-
-
-
-
 </div>
+    <script>
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-</div>
+        const url = new URL(window.location.href);
+        const formData = new FormData(event.target);
+        formData.forEach((value, key) => url.searchParams.set(key, value));
 
+        fetch(url, { method: 'GET' })
+            .then(response => response.text())
+            .then(html => {
+                document.querySelector('.exercise-grid').innerHTML =
+                    new DOMParser().parseFromString(html, 'text/html').querySelector('.exercise-grid').innerHTML;
+            });
+    });
 
-<script>
-document.querySelector('form').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const url = new URL(window.location.href);
-    const formData = new FormData(event.target);
-    formData.forEach((value, key) => url.searchParams.set(key, value));
-
-    fetch(url, { method: 'GET' })
-        .then(response => response.text())
-        .then(html => {
-            document.querySelector('.exercise-grid').innerHTML =
-                new DOMParser().parseFromString(html, 'text/html').querySelector('.exercise-grid').innerHTML;
+    function navigatePage(page) {
+        const url = new URL(window.location.href);
+        // Ustaw numer strony
+        url.searchParams.set("page", page);
+        // Pobierz wartości filtrów z formularza
+        const formData = new FormData(document.querySelector('form'));
+        formData.forEach((value, key) => {
+            if (value) url.searchParams.set(key, value);
         });
-});
+        // Przekierowanie na nowy URL z parametrami
+        window.location.href = url.href;
+    }
 
-function resetFilters() {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("difficulty");
-    url.searchParams.delete("bodyPart");
-    url.searchParams.delete("equipment");
-    url.searchParams.delete("name");
-    url.searchParams.set("page", 0); // Przejście na pierwszą stronę
-    window.location.href = url.href;
-}
-
-
-function navigatePage(page) {
-    const url = new URL(window.location.href);
-
-    // Ustaw numer strony
-    url.searchParams.set("page", page);
-
-    // Pobierz wartości filtrów z formularza
-    const difficulty = document.querySelector('select[name="difficulty"]').value;
-    const bodyPart = document.querySelector('select[name="bodyPart"]').value;
-    const equipment = document.querySelector('select[name="equipment"]').value;
-    const name = document.querySelector('input[name="name"]').value;
-
-    if (difficulty) url.searchParams.set("difficulty", difficulty);
-    if (bodyPart) url.searchParams.set("bodyPart", bodyPart);
-    if (equipment) url.searchParams.set("equipment", equipment);
-    if (name) url.searchParams.set("name", name);
-
-    // Przejdź do nowego URL
-    window.location.href = url.href;
-}
-
-
-
-
-</script>
-</body>
+    function resetFilters() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("difficulty");
+        url.searchParams.delete("bodyPart");
+        url.searchParams.delete("equipment");
+        url.searchParams.delete("name");
+        url.searchParams.set("page", 0); // Przejście na pierwszą stronę
+        window.location.href = url.href;
+    }
+    // Obsługa przekierowania na kliknięcie w kafelek
+    function redirectTo(element) {
+      const link = element.getAttribute('data-link');
+      if (link) {
+        window.location.href = link;
+      }
+    }
+    </script>
+  </body>
 </html>
-<!-- function navigate(button, direction) {
-    const url = new URL(window.location.href);
-    const page = button.dataset[direction === 'prev' ? 'pagePrev' : 'pageNext'];
-    const difficulty = button.dataset.difficulty || '';
-    const bodyPart = button.dataset.bodypart || '';
-    const name = button.dataset.name || '';
-
-    url.searchParams.set('page', page);
-    if (difficulty) url.searchParams.set('difficulty', difficulty);
-    if (bodyPart) url.searchParams.set('bodyPart', bodyPart);
-    if (name) url.searchParams.set('name', name);
-
-    window.location.href = url.href;
-}-->

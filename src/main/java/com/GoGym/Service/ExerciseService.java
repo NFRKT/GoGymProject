@@ -41,8 +41,6 @@ public class ExerciseService {
                 .orElseThrow(() -> new IllegalArgumentException("Exercise not found"));
     }
 
-
-
     public void deleteExercise(Integer id) {
         exerciseRepository.deleteById(id);
     }

@@ -86,6 +86,7 @@ public class ExerciseController {
         model.addAttribute("equipment", equipment);
         model.addAttribute("name", name);
 
+
         return "exercises-list";
     }
 
