@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Stwórz Workout</title>
+  <script th:inline="javascript">
+    // Przekazujemy listę ćwiczeń do JavaScript
+    let exercises = /*[[${exercises}]]*/ [];
+
+    console.log("Exercises loaded:", exercises);
+    function addExerciseRow() {
+      const exerciseRow = `
+        <div class="exercise-row">
+          <label for="exercise">Ćwiczenie:</label>
+          <select name="exerciseIds[]" required>
+            <option value="" disabled selected>Wybierz ćwiczenie</option>
+            ${exercises.map(exercise => `<option value="${exercise.idExercise}">${exercise.name}</option>`).join('')}
+          </select>
+
+          <label>Serie:</label>
+          <input type="number" name="sets[]" min="1" required>
+
+          <label>Powtórzenia:</label>
+          <input type="number" name="reps[]" min="1" required>
+
+          <label>Ciężar (kg):</label>
+          <input type="number" name="weight[]" min="0">
+
+          <button type="button" onclick="removeExerciseRow(this)">Usuń</button>
+        </div>`;
+      document.getElementById('exercise-list').insertAdjacentHTML('beforeend', exerciseRow);
+    }
+
+    function removeExerciseRow(button) {
+      button.parentElement.remove();
+    }
+  </script>
+</head>
+<body>
+<h1>Stwórz Workout</h1>
+<form th:action="@{/workouts/create}" th:object="${workout}" method="post">
+  <label for="workoutDate">Data:</label>
+  <input type="date" id="workoutDate" th:field="*{workoutDate}" required>
+  <label for="intensity">Intensywność:</label>
+  <select id="intensity" th:field="*{intensity}" required>
+    <option value="low">Niska</option>
+    <option value="medium">Średnia</option>
+    <option value="high">Wysoka</option>
+  </select>
+
+  <label for="notes">Notatki:</label>
+  <textarea id="notes" th:field="*{notes}"></textarea>
+
+  <label for="start_time">Godzina rozpoczęcia:</label>
+  <input type="time" id="start_time" th:field="*{startTime}">
+
+  <label for="end_time">Godzina zakończenia:</label>
+  <input type="time" id="end_time" th:field="*{endTime}">
+
+  <h3>Dodaj ćwiczenia do treningu:</h3>
+  <button type="button" onclick="addExerciseRow()">Dodaj ćwiczenie do treningu</button>
+  <div id="exercise-list"></div>
+
+  <button type="submit">Stwórz trening</button>
+</form>
+
+<div th:if="${error}" class="error-message">
+  <p th:text="${error}"></p>
+</div>
+</body>
+</html>
