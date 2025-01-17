@@ -175,88 +175,36 @@
   <h1>Lista Ćwiczeń</h1>
   <form id="form" method="get" th:action="@{/exercises}">
     <select name="difficulty">
-      <option value="" th:selected="${difficulty == null}">
-        Wszystkie trudności
-      </option>
-      <option value="beginner" th:selected="${difficulty == 'beginner'}">
-        Łatwy
-      </option>
-      <option value="intermediate" th:selected="${difficulty == 'intermediate'}">
-        Średni
-      </option>
-      <option value="advanced" th:selected="${difficulty == 'advanced'}">
-        Trudny
-      </option>
+      <option value="" th:selected="${difficulty == null}">Wszystkie trudności</option>
+      <option value="beginner" th:selected="${difficulty == 'beginner'}">Łatwy</option>
+      <option value="intermediate" th:selected="${difficulty == 'intermediate'}">Średni</option>
+      <option value="advanced" th:selected="${difficulty == 'advanced'}">Trudny</option>
     </select>
     <select name="bodyPart">
-      <option value="" th:selected="${bodyPart == null}">
-        Wszystkie części ciała
-      </option>
-      <option
-              th:each="part : ${bodyParts}"
-              th:value="${part.name}"
-              th:text="${part.name}"
-      >
-        Część ciała
-      </option>
+      <option value="" th:selected="${bodyPart == null}">Wszystkie części ciała</option>
+      <option th:each="part : ${bodyParts}" th:value="${part.name}" th:text="${part.name}">Część ciała</option>
     </select>
     <select name="equipment">
-      <option value="" th:selected="${equipment == null}">
-        Wszystkie sprzęty
-      </option>
-      <option
-              th:each="equip : ${equipments}"
-              th:value="${equip.name}"
-              th:text="${equip.name}"
-      >
-        Sprzęt
-      </option>
+      <option value="" th:selected="${equipment == null}">Wszystkie sprzęty</option>
+      <option th:each="equip : ${equipments}" th:value="${equip.name}" th:text="${equip.name}">Sprzęt</option>
     </select>
-    <input
-            type="text"
-            name="name"
-            placeholder="Wyszukaj nazwę ćwiczenia"
-            th:value="${name}"
-    />
+    <input type="text" name="name" placeholder="Wyszukaj nazwę ćwiczenia" th:value="${name}"/>
     <button type="submit" onclick="navigatePage(0)">Filtruj</button>
     <button type="button" onclick="resetFilters()">Resetuj filtry</button>
   </form>
   <!-- Siatka ćwiczeń -->
   <div class="exercise-grid">
-    <div
-            th:each="exercise : ${exercisesPage.content}"
-            class="exercise-card"
-            th:attr="data-link=@{/exercise/{id}(id=${exercise.idExercise})}"
-            onclick="redirectTo(this)"
-    >
-      <img
-              th:src="${exercise.jpg}"
-              alt="Exercise Image"
-              class="exercise-image"
-      />
+    <div th:each="exercise : ${exercisesPage.content}" class="exercise-card" th:attr="data-link=@{/exercise/{id}(id=${exercise.idExercise})}" onclick="redirectTo(this)">
+      <img th:src="${exercise.jpg}" alt="Exercise Image" class="exercise-image"/>
       <h3 th:text="${exercise.name}">Nazwa ćwiczenia</h3>
       <p th:text="${exercise.difficulty}">Poziom trudności</p>
-      <p
-              th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}"
-      >
-        Części ciała
-      </p>
+      <p th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}">Części ciała</p>
     </div>
   </div>
   <!-- Paginacja -->
   <div class="pagination">
-    <a
-            th:if="${currentPage > 0}"
-            href="javascript:void(0);"
-            th:attr="onclick=|navigatePage(${currentPage}-1)|"
-    >Poprzednia</a
-    >
-    <a
-            th:if="${currentPage < totalPages - 1}"
-            href="javascript:void(0);"
-            th:attr="onclick=|navigatePage(${currentPage}+1)|"
-    >Następna</a
-    >
+    <a th:if="${currentPage > 0}" href="javascript:void(0);" th:attr="onclick=|navigatePage(${currentPage}-1)|">Poprzednia</a>
+    <a th:if="${currentPage < totalPages - 1}" href="javascript:void(0);" th:attr="onclick=|navigatePage(${currentPage}+1)|">Następna</a>
   </div>
 </div>
     <script>
@@ -289,6 +237,8 @@
     }
 
     function resetFilters() {
+        const form = document.querySelector('form');
+        form.reset(); // Resetuje wszystkie pola formularza
         const url = new URL(window.location.href);
         url.searchParams.delete("difficulty");
         url.searchParams.delete("bodyPart");

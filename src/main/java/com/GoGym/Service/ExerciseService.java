@@ -44,4 +44,5 @@ public class ExerciseService {
     public void deleteExercise(Integer id) {
         exerciseRepository.deleteById(id);
     }
+
 }

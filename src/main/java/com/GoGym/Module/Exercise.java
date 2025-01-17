@@ -1,5 +1,6 @@
 package com.GoGym.Module;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Set;
 
@@ -91,7 +92,7 @@ public class Exercise {
     public void setDifficulty(Difficulty difficulty) {
         this.difficulty = difficulty;
     }
-
+    @JsonIgnore
     public Set<BodyPart> getBodyParts() {
         return bodyParts;
     }
@@ -99,7 +100,7 @@ public class Exercise {
     public void setBodyParts(Set<BodyPart> bodyParts) {
         this.bodyParts = bodyParts;
     }
-
+    @JsonIgnore
     public Set<Equipment> getEquipment() {
         return equipment;
     }

@@ -1,9 +1,11 @@
 package com.GoGym.Module;
 import jakarta.persistence.*;
+import org.springframework.context.annotation.Bean;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Entity
+@Table(name = "user")  // Nazwa tabeli w bazie danych
 public class user {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

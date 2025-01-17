@@ -1,5 +1,6 @@
 package com.GoGym.Module;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ public class Equipment {
     private String name;
 
     @ManyToMany(mappedBy = "equipment")
+    @JsonIgnore
     private Set<Exercise> exercises;
 
     public Equipment() {

@@ -77,7 +77,7 @@ public class ExerciseController {
                 (name != null && !name.isEmpty()) ? name : null,
                 pageable
         );
-
+        model.addAttribute("exercises", exercisesPage.getContent());
         model.addAttribute("exercisesPage", exercisesPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", exercisesPage.getTotalPages());

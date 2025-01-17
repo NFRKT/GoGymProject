@@ -22,11 +22,6 @@ public class userService {
     public userService(userRepository UserRepository) {
         this.UserRepository = UserRepository;
     }
-    public List<user> hi(){
-        List<user> users = UserRepository.findAll();
-        System.out.println("Nurses: " + users); // Loguj dane
-        return users;
-    }
     public Optional<user> getFirstUser() {
         List<user> users = UserRepository.findAll();
         if (!users.isEmpty()) {
