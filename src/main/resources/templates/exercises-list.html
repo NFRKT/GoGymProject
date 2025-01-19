@@ -206,6 +206,7 @@
     <a th:if="${currentPage > 0}" href="javascript:void(0);" th:attr="onclick=|navigatePage(${currentPage}-1)|">Poprzednia</a>
     <a th:if="${currentPage < totalPages - 1}" href="javascript:void(0);" th:attr="onclick=|navigatePage(${currentPage}+1)|">Następna</a>
   </div>
+  <li><a href="/home">Home</a></li>
 </div>
     <script>
     document.querySelector('form').addEventListener('submit', function(event) {

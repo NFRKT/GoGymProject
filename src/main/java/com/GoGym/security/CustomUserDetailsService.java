@@ -1,30 +1,26 @@
 package com.GoGym.security;
 
-import com.GoGym.Module.user;
-import com.GoGym.Service.userService;
-import com.GoGym.repository.userRepository;
+import com.GoGym.module.User;
+import com.GoGym.service.UserService;
+import com.GoGym.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final userRepository userRepository;
-    private final userService userService;
+    private final UserRepository userRepository;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public CustomUserDetailsService(userRepository userRepository,
-                                    userService userService,
+    public CustomUserDetailsService(UserRepository userRepository,
+                                    UserService userService,
                                     @Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userService = userService;
@@ -34,10 +30,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // Wczytaj użytkownika z bazy danych
-        com.GoGym.Module.user user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // Zwróć instancję CustomUserDetails z klasą user
+        // Zwróć instancję CustomUserDetails z klasą User
         return new CustomUserDetails(user);
     }
     }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+      <html xmlns:th="http://www.thymeleaf.org">
+      <head>
+      <title>Panel Trenera</title>
+</head>
+<body>
+<h2>Panel Trenera</h2>
+<h3>Nowe zgłoszenia:</h3>
+<table>
+  <tr>
+    <th>Klient</th>
+    <th>Akcja</th>
+  </tr>
+  <tr th:each="request : ${requests}">
+    <td th:text="${request.client.firstName}"></td>
+    <td>
+      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post">
+        <input type="hidden" name="status" value="accepted">
+        <button type="submit">Akceptuj</button>
+      </form>
+      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post">
+        <input type="hidden" name="status" value="rejected">
+        <button type="submit">Odrzuć</button>
+      </form>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>

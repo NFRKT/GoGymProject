@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Panel Klienta</title>
+</head>
+<body>
+<h2>Panel Klienta</h2>
+<p>Aktualny trener: <span th:text="${trainerName}"></span></p>
+
+<form th:action="@{/requests/send}" method="post">
+  <input type="hidden" name="clientId" th:value="${clientId}" />
+
+
+  <label for="trainer">Wybierz trenera:</label>
+  <select name="trainerId" id="trainer">
+    <option th:each="trainer : ${trainers}"
+            th:value="${trainer.idUser}"
+            th:text="${trainer.firstName}"></option>
+  </select>
+  <button type="submit">Wyślij prośbę</button>
+</form>
+
+
+</body>
+</html>

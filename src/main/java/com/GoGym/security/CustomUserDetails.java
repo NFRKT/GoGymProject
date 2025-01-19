@@ -1,6 +1,6 @@
 package com.GoGym.security;
 
-import com.GoGym.Module.user;
+import com.GoGym.module.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,9 +10,9 @@ import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
 
-    private com.GoGym.Module.user user;
+    private User user;
 
-    public CustomUserDetails(user user) {
+    public CustomUserDetails(User user) {
         this.user = user;
     }
 
@@ -51,7 +51,7 @@ public class CustomUserDetails implements UserDetails {
         return true;
     }
 
-    public user getUser() {
+    public User getUser() {
         return user;
     }
 }

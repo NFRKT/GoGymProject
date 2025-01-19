@@ -1,7 +1,6 @@
 package com.GoGym.repository;
 
-import com.GoGym.Module.Exercise;
-import com.GoGym.Module.user;
+import com.GoGym.module.Exercise;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

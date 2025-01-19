@@ -1,0 +1,96 @@
+<!<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Workout Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to bottom, #6c757d, #343a40);
+      color: #fff;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #212529;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .workout-info, .exercise-list {
+      margin-bottom: 20px;
+    }
+
+    .workout-info p, .exercise-list p {
+      margin: 5px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #dee2e6;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #343a40;
+      color: #fff;
+    }
+
+    td {
+      background-color: #495057;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Szczegóły Treningu</h1>
+  <div class="workout-info">
+    <h2>Informacje ogólne</h2>
+    <p><strong>Data:</strong> <span th:text="${workout.workoutDate}"></span></p>
+    <p><strong>Intensywność:</strong> <span th:text="${workout.intensity}"></span></p>
+    <p><strong>Godzina rozpoczęcia:</strong> <span th:text="${workout.startTime}"></span></p>
+    <p><strong>Godzina zakończenia:</strong> <span th:text="${workout.endTime}"></span></p>
+    <p><strong>Notatki:</strong> <span th:text="${workout.notes}"></span></p>
+  </div>
+
+  <div class="exercise-list">
+    <h2>Ćwiczenia</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>Ćwiczenie</th>
+        <th>Serie</th>
+        <th>Powtórzenia</th>
+        <th>Ciężar (kg)</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="exercise : ${workout.workoutExercises}">
+        <td th:text="${exercise.exercise.name}"></td>
+        <td th:text="${exercise.sets}"></td>
+        <td th:text="${exercise.reps}"></td>
+        <td th:text="${exercise.weight}"></td>
+      </tr>
+      </tbody>
+    </table>
+    <li><a href="/home">Home</a></li>
+    <li><a href="/workouts">Workouts</a></li>
+  </div>
+</div>
+</body>
+</html>

@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @SpringBootApplication(scanBasePackages = "com.GoGym")
-@EntityScan(basePackages = "com.GoGym.Module")
+@EntityScan(basePackages = "com.GoGym.module")
 @EnableJpaRepositories(basePackages = "com.GoGym")  // Skanuje repozytoria
 @ComponentScan(basePackages = {"com.GoGym", "com.GoGym.security"})
 
