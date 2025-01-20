@@ -4,6 +4,7 @@ import com.GoGym.module.Request;
 import com.GoGym.module.TrainerClient;
 import com.GoGym.module.User;
 import com.GoGym.repository.RequestRepository;
+import com.GoGym.repository.TrainerClientRepository;
 import com.GoGym.repository.UserRepository;
 import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.RequestService;
@@ -26,34 +27,55 @@ public class RequestController {
     private final UserRepository userRepository;
     private final TrainerClientService trainerClientService;
 
+    //private final TrainerClientRepository trainerClientRepository;
+
     @Autowired
     public RequestController(RequestService requestService, RequestRepository requestRepository, UserRepository userRepository, TrainerClientService trainerClientService) {
         this.requestService = requestService;
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.trainerClientService = trainerClientService;
+        //this.trainerClientRepository = trainerClientRepository;
     }
+
+//    @PostMapping("/send")
+//    public Request sendRequest(@RequestParam Long clientId, @RequestParam Long trainerId) {
+//
+//        List<TrainerClient> existingTrainer = trainerClientService.getClientTrainers(clientId);
+//        User client = userRepository.findById(clientId)
+//                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o podanym ID"));
+//        User trainer = userRepository.findById(trainerId)
+//                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o podanym ID"));
+//
+//        Request request = new Request();
+//        request.setClient(client);
+//        request.setTrainer(trainer);
+//        request.setRequestStatus(Request.RequestStatus.pending);
+//        request.setRequestDate(new Timestamp(System.currentTimeMillis()));
+//
+//        return requestRepository.save(request);
+//    }
 
     @PostMapping("/send")
-    public Request sendRequest(@RequestParam Long clientId, @RequestParam Long trainerId) {
-        // Sprawdź, czy klient nie ma już trenera
-        List<TrainerClient> existingTrainer = trainerClientService.getClientTrainers(clientId);
-//        if (!existingTrainer.isEmpty()) {
-//            throw new IllegalArgumentException("Klient może mieć tylko jednego trenera");
-//        }
-        User client = userRepository.findById(clientId)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o podanym ID"));
+    public ResponseEntity<Void> sendRequest(@RequestParam Long trainerId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
+
         User trainer = userRepository.findById(trainerId)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o podanym ID"));
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera"));
 
-        Request request = new Request();
-        request.setClient(client);
-        request.setTrainer(trainer);
-        request.setRequestStatus(Request.RequestStatus.pending);
-        request.setRequestDate(new Timestamp(System.currentTimeMillis()));
+        Request newRequest = new Request();
+        newRequest.setClient(loggedInUser);
+        newRequest.setTrainer(trainer);
+        newRequest.setRequestDate(new Timestamp(System.currentTimeMillis()));
+        newRequest.setRequestStatus(Request.RequestStatus.pending);
 
-        return requestRepository.save(request);
+        requestRepository.save(newRequest);
+
+        return ResponseEntity.status(HttpStatus.FOUND).header("Location", "/trainer-clients/client-panel").build();
+
     }
+
 
     @PostMapping("/{requestId}/cancel")
     public ResponseEntity<String> cancelRequest(@PathVariable Long requestId, Authentication authentication) {

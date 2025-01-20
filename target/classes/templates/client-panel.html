@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <input type="hidden" name="clientId" th:value="${clientId}" />
   <label for="trainer">Trener:</label>
   <select name="trainerId" id="trainer" required>
-    <option value="" disabled selected>Wybierz trenera</option>
+    <option value="" >Wybierz trenera</option>
     <option th:each="trainer : ${trainers}"
             th:value="${trainer.idUser}"
             th:text="${trainer.firstName}"
@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <td th:text="${request.trainer.firstName}"></td>
     <td th:text="${#dates.format(request.requestDate, 'yyyy-MM-dd HH:mm')}"></td>
     <td>
-      <form data-request-id="${request.id}" th:action="@{/requests/{id}/cancel(id=${request.id})}" method="post">
+      <form th:attr="data-request-id=${request.id}" th:action="@{/requests/{id}/cancel(id=${request.id})}" method="post">
         <button type="button" data-confirm="true">Anuluj</button>
       </form>
     </td>
