@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface TrainerClientRepository extends JpaRepository<TrainerClient, Long> {
@@ -16,5 +17,8 @@ public interface TrainerClientRepository extends JpaRepository<TrainerClient, Lo
 
     @Query("SELECT DISTINCT tc.trainer FROM TrainerClient tc")
     List<User> findAllTrainers();
+
+    Optional<TrainerClient> findByTrainer_IdUserAndClient_IdUser(Long trainerId, Long clientId);
+
 
 }

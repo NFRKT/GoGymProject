@@ -28,7 +28,7 @@ public class RequestService {
         return requestRepository.findByTrainer_IdUserAndRequestStatus(trainerId, Request.RequestStatus.pending);
     }
 
-    public List<Request> getClientRequests(Long clientId) {
+    public List<Request> getRequestsByClientId(Long clientId) {
         return requestRepository.findByClient_IdUser(clientId);
     }
 
@@ -36,5 +36,9 @@ public class RequestService {
         Request request = requestRepository.findById(requestId).orElseThrow(() -> new IllegalArgumentException("Request not found"));
         request.setRequestStatus(status);
         return requestRepository.save(request);
+    }
+
+    public List<Request> getPendingRequestsByClient(Long clientId) {
+        return requestRepository.findByClient_IdUserAndRequestStatus(clientId, Request.RequestStatus.pending);
     }
 }

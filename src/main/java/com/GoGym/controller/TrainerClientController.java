@@ -1,5 +1,6 @@
 package com.GoGym.controller;
 
+import com.GoGym.module.Request;
 import com.GoGym.module.TrainerClient;
 import com.GoGym.module.User;
 import com.GoGym.repository.RequestRepository;
@@ -50,21 +51,38 @@ public class TrainerClientController {
         User loggedInUser = userDetails.getUser();
         Long clientId = loggedInUser.getIdUser();
 
+        // Pobierz listę obecnych trenerów klienta
         List<TrainerClient> clientTrainers = trainerClientService.getClientTrainers(clientId);
-        String trainerName = clientTrainers.isEmpty()
-                ? "Brak przypisanego trenera"
-                : clientTrainers.get(0).getTrainer().getFirstName();
+        List<Long> currentTrainerIds = clientTrainers.stream()
+                .map(tc -> tc.getTrainer().getIdUser())
+                .toList();
 
-        // Lista dostępnych trenerów
-        List<User> availableTrainers = trainerClientService.getAllTrainers();
+        // Lista trenerów z oczekującymi zapytaniami
+        List<Long> pendingRequestTrainerIds = requestService.getPendingRequestsByClient(clientId).stream()
+                .map(request -> request.getTrainer().getIdUser())
+                .toList();
 
-        // Ustaw dane w modelu
-        model.addAttribute("trainerName", trainerName);
+        // Pobierz listę wszystkich dostępnych trenerów i odfiltruj obecnych
+        List<User> availableTrainers = trainerClientService.getAllTrainers().stream()
+                .filter(trainer -> !currentTrainerIds.contains(trainer.getIdUser()))
+                .toList();
+
+        model.addAttribute("clientTrainers", clientTrainers);
         model.addAttribute("trainers", availableTrainers);
         model.addAttribute("clientId", clientId);
+        model.addAttribute("pendingTrainerIds", pendingRequestTrainerIds); // ID trenerów z oczekującymi zapytaniami
+        model.addAttribute("currentTrainerIds", currentTrainerIds); // ID obecnych trenerów
+
+        // Dodanie listy wysłanych zapytań
+        List<Request> requests = requestService.getRequestsByClientId(clientId);
+        model.addAttribute("requests", requests);
+
+        List<TrainerClient> trainerClients = trainerClientService.getClientTrainers(clientId);
+        model.addAttribute("clientTrainers", clientTrainers);
 
         return "client-panel"; // Załaduj widok Thymeleaf
     }
+
 
 
 
@@ -75,9 +93,28 @@ public class TrainerClientController {
         User loggedInTrainer = userDetails.getUser(); // Pobranie użytkownika z CustomUserDetails
         Long trainerId = loggedInTrainer.getIdUser(); // Pobranie ID trenera
 
+        List<TrainerClient> trainerClients = trainerClientService.getTrainerClients(trainerId);
+        model.addAttribute("trainerClients", trainerClients);
         model.addAttribute("requests", requestService.getRequestsForTrainer(trainerId));
         return "trainer-panel";
     }
+
+    @PostMapping("/reject")
+    public String rejectTrainer(@RequestParam Long trainerId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
+
+        // Znajdź relację klient-trener
+        TrainerClient trainerClient = trainerClientRepository.findByTrainer_IdUserAndClient_IdUser(trainerId, loggedInUser.getIdUser())
+                .orElseThrow(() -> new IllegalArgumentException("Nie masz przypisanego tego trenera"));
+
+        // Usuń relację
+        trainerClientRepository.delete(trainerClient);
+
+        return "redirect:/trainer-clients/client-panel";
+    }
+
+
 
 
 

@@ -1,27 +1,30 @@
 package com.GoGym.controller;
 
 import com.GoGym.module.Request;
+import com.GoGym.module.TrainerClient;
 import com.GoGym.module.User;
 import com.GoGym.repository.RequestRepository;
 import com.GoGym.repository.UserRepository;
-import com.GoGym.service.ExerciseService;
+import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.RequestService;
 import com.GoGym.service.TrainerClientService;
-import com.GoGym.service.WorkoutService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import java.sql.Timestamp;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @RestController
 @RequestMapping("/requests")
 public class RequestController {
 
-    private RequestService requestService;
-    private RequestRepository requestRepository;
-    private UserRepository userRepository;
-    private TrainerClientService trainerClientService;
+    private final RequestService requestService;
+    private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
+    private final TrainerClientService trainerClientService;
 
     @Autowired
     public RequestController(RequestService requestService, RequestRepository requestRepository, UserRepository userRepository, TrainerClientService trainerClientService) {
@@ -33,6 +36,11 @@ public class RequestController {
 
     @PostMapping("/send")
     public Request sendRequest(@RequestParam Long clientId, @RequestParam Long trainerId) {
+        // Sprawdź, czy klient nie ma już trenera
+        List<TrainerClient> existingTrainer = trainerClientService.getClientTrainers(clientId);
+//        if (!existingTrainer.isEmpty()) {
+//            throw new IllegalArgumentException("Klient może mieć tylko jednego trenera");
+//        }
         User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o podanym ID"));
         User trainer = userRepository.findById(trainerId)
@@ -47,6 +55,21 @@ public class RequestController {
         return requestRepository.save(request);
     }
 
+    @PostMapping("/{requestId}/cancel")
+    public ResponseEntity<String> cancelRequest(@PathVariable Long requestId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
+
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("Prośba nie istnieje"));
+
+        if (!request.getClient().getIdUser().equals(loggedInUser.getIdUser())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Nie możesz anulować tej prośby");
+        }
+
+        requestRepository.delete(request);
+        return ResponseEntity.ok("Prośba została anulowana");
+    }
 
     @GetMapping("/trainer/{trainerId}")
     public List<Request> getTrainerRequests(@PathVariable Long trainerId) {

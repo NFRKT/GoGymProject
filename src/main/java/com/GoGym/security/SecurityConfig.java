@@ -28,7 +28,7 @@ public class SecurityConfig  {
         http.csrf().disable()
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/Login", "/css/**", "/js/**","/AddMoney").permitAll()  // Strony dostępne bez logowania
+                        .requestMatchers("/register", "/Login", "/css/**", "/js/**").permitAll()  // Strony dostępne bez logowania
                         .anyRequest().authenticated()  // Pozostałe strony wymagają uwierzytelnienia
                 )
                 .formLogin(form -> form
