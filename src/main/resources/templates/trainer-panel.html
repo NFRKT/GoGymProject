@@ -21,6 +21,29 @@
   </tr>
 </table>
 
+<h3>Twoi klienci:</h3>
+<table>
+  <thead>
+  <tr>
+    <th>Imię</th>
+    <th>Nazwisko</th>
+    <th>Akcja</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="client : ${trainerClients}">
+    <td th:text="${client.client.firstName}"></td>
+    <td th:text="${client.client.secondName}"></td>
+    <td>
+      <form th:action="@{/trainer-clients/rejectClient}" method="post">
+        <input type="hidden" name="clientId" th:value="${client.client.idUser}" />
+        <button type="submit">Zrezygnuj ze współpracy</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
 <h3>Nowe zgłoszenia:</h3>
 <table>
   <tr>

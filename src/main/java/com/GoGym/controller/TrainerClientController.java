@@ -99,7 +99,7 @@ public class TrainerClientController {
         return "trainer-panel";
     }
 
-    @PostMapping("/reject")
+    @PostMapping("/rejectTrainer")
     public String rejectTrainer(@RequestParam Long trainerId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
@@ -113,6 +113,23 @@ public class TrainerClientController {
 
         return "redirect:/trainer-clients/client-panel";
     }
+
+    @PostMapping("/rejectClient")
+    public String rejectClient(@RequestParam Long clientId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
+
+        // Znajdź relację klient-trener
+        TrainerClient trainerClient = trainerClientRepository.findByTrainer_IdUserAndClient_IdUser(loggedInUser.getIdUser(), clientId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie masz przypisanego tego klienta"));
+
+        // Usuń relację
+        trainerClientRepository.delete(trainerClient);
+
+        return "redirect:/trainer-clients/trainer-panel";
+    }
+
+
 
 
 
