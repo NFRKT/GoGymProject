@@ -1,25 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title><!DOCTYPE html>
-      <html xmlns:th="http://www.thymeleaf.org">
-      <head>
-      <title>Panel Trenera</title>
+  <meta charset="UTF-8">
+  <title>Panel Trenera</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2, h3 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            display: inline;
+        }
+        button, a {
+            margin-right: 5px;
+        }
+    </style>
 </head>
 <body>
 <h2>Panel Trenera</h2>
-<h3>Twoi klienci:</h3>
-<table>
-  <tr>
-    <th>Klient</th>
-    <th>Email</th>
-  </tr>
-  <tr th:each="client : ${trainerClients}">
-    <td th:text="${client.client.firstName}"></td>
-    <td th:text="${client.client.email}"></td>
-  </tr>
-</table>
 
 <h3>Twoi klienci:</h3>
 <table>
@@ -39,6 +53,7 @@
         <input type="hidden" name="clientId" th:value="${client.client.idUser}" />
         <button type="submit">Zrezygnuj ze współpracy</button>
       </form>
+      <a th:href="@{/trainer-clients/{id}/create-plan(id=${client.client.idUser})}">Stwórz plan</a>
     </td>
   </tr>
   </tbody>
@@ -46,10 +61,13 @@
 
 <h3>Nowe zgłoszenia:</h3>
 <table>
+  <thead>
   <tr>
     <th>Klient</th>
     <th>Akcja</th>
   </tr>
+  </thead>
+  <tbody>
   <tr th:each="request : ${requests}">
     <td th:text="${request.client.firstName}"></td>
     <td>
@@ -63,12 +81,7 @@
       </form>
     </td>
   </tr>
+  </tbody>
 </table>
-</body>
-</html>
-</title>
-</head>
-<body>
-
 </body>
 </html>

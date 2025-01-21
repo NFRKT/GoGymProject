@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Stwórz Plan Treningowy</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h3, h4 {
+            color: #333;
+        }
+        .day-row, .exercise-row {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+  <script th:inline="javascript">
+        let exercises = /*[[${exercises}]]*/ [];
+
+        function addDayRow() {
+            const dayRow = `
+                <div class="day-row">
+                    <label>Typ dnia:</label>
+                    <select name="dayType[]" required>
+                        <option value="training">Treningowy</option>
+                        <option value="rest">Odpoczynek</option>
+                    </select>
+                    <label>Notatki (opcjonalne):</label>
+                    <input type="text" name="notes[]" />
+                    <div class="exercise-section">
+                        <h4>Ćwiczenia:</h4>
+                        <button type="button" onclick="addExerciseRow(this)">Dodaj ćwiczenie</button>
+                        <div class="exercise-list"></div>
+                    </div>
+                    <button type="button" onclick="removeDayRow(this)">Usuń dzień</button>
+                </div>`;
+            document.getElementById('day-list').insertAdjacentHTML('beforeend', dayRow);
+        }
+
+        function removeDayRow(button) {
+            button.parentElement.remove();
+        }
+
+        function addExerciseRow(daySection) {
+            const exerciseRow = `
+                <div class="exercise-row">
+                    <select name="exerciseIds[]" required>
+                        <option value="" disabled selected>Wybierz ćwiczenie</option>
+                        ${exercises.map(exercise => `<option value="${exercise.idExercise}">${exercise.name}</option>`).join('')}
+                    </select>
+                    <input type="number" name="sets[]" min="1" placeholder="Serie" required>
+                    <input type="number" name="reps[]" min="1" placeholder="Powtórzenia" required>
+                    <input type="number" name="weight[]" min="0" placeholder="Ciężar (kg)">
+                    <button type="button" onclick="removeExerciseRow(this)">Usuń</button>
+                </div>`;
+            daySection.parentElement.querySelector('.exercise-list').insertAdjacentHTML('beforeend', exerciseRow);
+        }
+
+        function removeExerciseRow(button) {
+            button.parentElement.remove();
+        }
+    </script>
+</head>
+<body>
+<form th:action="@{/trainer-clients/create-plan}" method="post">
+  <input type="hidden" name="clientId" th:value="${client.idUser}" />
+  <input type="hidden" name="trainerId" th:value="${trainerId}" />
+
+  <label>Nazwa planu:</label>
+  <input type="text" name="name" required />
+
+  <label>Opis:</label>
+  <textarea name="description" required></textarea>
+
+  <div id="day-list">
+    <h3>Dni w planie:</h3>
+    <button type="button" onclick="addDayRow()">Dodaj dzień</button>
+  </div>
+
+  <button type="submit">Zapisz Plan</button>
+</form>
+</body>
+</html>

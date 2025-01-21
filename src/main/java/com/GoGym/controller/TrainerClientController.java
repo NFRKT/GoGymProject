@@ -1,21 +1,18 @@
 package com.GoGym.controller;
 
-import com.GoGym.module.Request;
-import com.GoGym.module.TrainerClient;
-import com.GoGym.module.User;
-import com.GoGym.repository.RequestRepository;
-import com.GoGym.repository.TrainerClientRepository;
-import com.GoGym.repository.UserRepository;
+import com.GoGym.module.*;
+import com.GoGym.repository.*;
 import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.RequestService;
 import com.GoGym.service.TrainerClientService;
-import jakarta.servlet.http.HttpSession;
+import com.GoGym.service.TrainingPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -25,13 +22,22 @@ public class TrainerClientController {
     private RequestService requestService;
     private TrainerClientRepository trainerClientRepository;
     private UserRepository userRepository;
+    private final ExerciseRepository exerciseRepository;
+    private final TrainingPlanService trainingPlanService;
+    private final TrainingPlanRepository trainingPlanRepository;
+    private final PlanExerciseRepository planExerciseRepository;
+
 
     @Autowired
-    public TrainerClientController(TrainerClientService trainerClientService, RequestService requestService, UserRepository userRepository, TrainerClientRepository trainerClientRepository) {
+    public TrainerClientController(TrainerClientService trainerClientService, RequestService requestService, UserRepository userRepository, TrainerClientRepository trainerClientRepository, ExerciseRepository exerciseRepository, TrainingPlanService trainingPlanService, TrainingPlanRepository trainingPlanRepository, PlanExerciseRepository planExerciseRepository) {
         this.trainerClientService = trainerClientService;
         this.requestService = requestService;
         this.userRepository = userRepository;
         this.trainerClientRepository = trainerClientRepository;
+        this.exerciseRepository = exerciseRepository;
+        this.trainingPlanService = trainingPlanService;
+        this.trainingPlanRepository = trainingPlanRepository;
+        this.planExerciseRepository = planExerciseRepository;
     }
 
     @GetMapping("/trainer/{trainerId}")
@@ -130,8 +136,103 @@ public class TrainerClientController {
     }
 
 
+    @GetMapping("/{id}/create-plan")
+    public String createPlan(@PathVariable Long id, Model model, Authentication authentication) {
+        // Pobierz dane klienta na podstawie ID
+        User client = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o ID: " + id));
+
+        // Dodaj klienta do modelu
+        model.addAttribute("client", client);
+
+        // Dodaj listę dostępnych ćwiczeń
+        List<Exercise> exercises = exerciseRepository.findAll();
+        model.addAttribute("exercises", exercises);
+
+        // Pobierz ID zalogowanego trenera
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
+
+        Long trainerId = loggedInUser.getIdUser();
+
+        // Przekaż ID trenera do widoku
+        model.addAttribute("trainerId", trainerId);
+
+        return "create-plan"; // Wyświetlenie widoku create-plan.html
+    }
 
 
+    @PostMapping("/create-plan")
+    public String createPlan(
+            @RequestParam String name,
+            @RequestParam String description,
+            @RequestParam Long clientId,
+            @RequestParam Long trainerId,
+            @RequestParam List<String> dayType,
+            @RequestParam(required = false) List<String> notes,
+            @RequestParam List<Long> exerciseIds,
+            @RequestParam List<Integer> sets,
+            @RequestParam List<Integer> reps,
+            @RequestParam(required = false) List<Integer> weight,
+            Model model) {
+
+        // Tworzenie planu
+        TrainingPlan plan = new TrainingPlan();
+        plan.setName(name);
+        plan.setDescription(description);
+        plan.setIdClient(clientId);
+        plan.setIdTrainer(trainerId);
+        plan.setStatus("active");
+
+        List<TrainingPlanDay> days = new ArrayList<>();
+        int exerciseIndex = 0; // Indeks do iterowania po ćwiczeniach
+
+        // Tworzenie dni planu
+        for (int i = 0; i < dayType.size(); i++) {
+            TrainingPlanDay day = new TrainingPlanDay();
+            day.setTrainingPlan(plan);
+            day.setDayType(TrainingPlanDay.DayType.valueOf(dayType.get(i)));
+            day.setNotes(notes != null && notes.size() > i ? notes.get(i) : null);
+            day.setStatus(TrainingPlanDay.Status.notCompleted);
+
+            // Przypisywanie ćwiczeń do dnia
+            List<PlanExercise> exercisesForDay = new ArrayList<>();
+            while (exerciseIndex < exerciseIds.size()) {
+                // Dostosuj logikę grupowania na podstawie danych z formularza
+                Long exerciseId = exerciseIds.get(exerciseIndex);
+                Integer setCount = sets.get(exerciseIndex);
+                Integer repCount = reps.get(exerciseIndex);
+                Integer exerciseWeight = (weight != null && weight.size() > exerciseIndex) ? weight.get(exerciseIndex) : null;
+
+                // Tworzenie nowego ćwiczenia
+                PlanExercise exercise = new PlanExercise();
+                exercise.setExercise(new Exercise(exerciseId));
+                exercise.setSets(setCount);
+                exercise.setReps(repCount);
+                exercise.setWeight(exerciseWeight);
+                exercise.setStatus(PlanExercise.Status.notCompleted);
+                exercise.setTrainingPlan(plan);
+                exercise.setTrainingPlanDay(day);
+
+                exercisesForDay.add(exercise);
+
+                exerciseIndex++; // Przejdź do następnego ćwiczenia
+                // Logika zatrzymania pętli dla konkretnego dnia
+                if (exerciseIndex % dayType.size() == 0) {
+                    break; // Zatrzymaj przypisywanie ćwiczeń do bieżącego dnia
+                }
+            }
+            day.setExercises(exercisesForDay);
+            days.add(day);
+        }
+
+        plan.setExercises(new ArrayList<>()); // Pusty, bo ćwiczenia przypisywane są do dni
+        plan.setTrainingPlanDays(days);
+
+        trainingPlanService.createTrainingPlan(plan);
+
+        return "redirect:/trainer-clients/trainer-panel";
+    }
 
 
 

@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <td th:text="${trainer.trainer.firstName}"></td>
     <td th:text="${trainer.trainer.secondName}"></td>
     <td>
-      <form th:action="@{/trainer-clients/reject}" method="post">
+      <form th:action="@{/trainer-clients/rejectTrainer}" method="post">
         <input type="hidden" name="trainerId" th:value="${trainer.trainer.idUser}" />
         <button type="submit">Zrezygnuj ze współpracy</button>
       </form>

@@ -48,6 +48,9 @@ public class Exercise {
     // Konstruktor bezargumentowy
     public Exercise() {
     }
+    public Exercise(Long idExercise) {
+        this.idExercise = idExercise;
+    }
 
     // Konstruktor z argumentami
     public Exercise(Long idExercise, String name, String description, Difficulty difficulty,
