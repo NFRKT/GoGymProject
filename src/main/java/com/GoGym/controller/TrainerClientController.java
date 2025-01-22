@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -174,6 +175,8 @@ public class TrainerClientController {
             @RequestParam List<Integer> sets,
             @RequestParam List<Integer> reps,
             @RequestParam(required = false) List<Integer> weight,
+            @RequestParam List<Integer> exerciseDays, // Dni przypisane do ćwiczeń
+            @RequestParam String startDate, // Dodano datę początkową
             Model model) {
 
         // Tworzenie planu
@@ -183,56 +186,69 @@ public class TrainerClientController {
         plan.setIdClient(clientId);
         plan.setIdTrainer(trainerId);
         plan.setStatus("active");
+        LocalDate start = LocalDate.parse(startDate);
+        plan.setStartDate(start);
 
         List<TrainingPlanDay> days = new ArrayList<>();
-        int exerciseIndex = 0; // Indeks do iterowania po ćwiczeniach
 
-        // Tworzenie dni planu
+        // Tworzenie dni planu z datami
         for (int i = 0; i < dayType.size(); i++) {
             TrainingPlanDay day = new TrainingPlanDay();
             day.setTrainingPlan(plan);
             day.setDayType(TrainingPlanDay.DayType.valueOf(dayType.get(i)));
             day.setNotes(notes != null && notes.size() > i ? notes.get(i) : null);
             day.setStatus(TrainingPlanDay.Status.notCompleted);
+            day.setDate(start.plusDays(i)); // Ustawianie daty dnia
 
-            // Przypisywanie ćwiczeń do dnia
             List<PlanExercise> exercisesForDay = new ArrayList<>();
-            while (exerciseIndex < exerciseIds.size()) {
-                // Dostosuj logikę grupowania na podstawie danych z formularza
-                Long exerciseId = exerciseIds.get(exerciseIndex);
-                Integer setCount = sets.get(exerciseIndex);
-                Integer repCount = reps.get(exerciseIndex);
-                Integer exerciseWeight = (weight != null && weight.size() > exerciseIndex) ? weight.get(exerciseIndex) : null;
 
-                // Tworzenie nowego ćwiczenia
-                PlanExercise exercise = new PlanExercise();
-                exercise.setExercise(new Exercise(exerciseId));
-                exercise.setSets(setCount);
-                exercise.setReps(repCount);
-                exercise.setWeight(exerciseWeight);
-                exercise.setStatus(PlanExercise.Status.notCompleted);
-                exercise.setTrainingPlan(plan);
-                exercise.setTrainingPlanDay(day);
+            // Jeśli dzień to "training", przypisz odpowiednie ćwiczenia
+            if (day.getDayType() == TrainingPlanDay.DayType.training) {
+                for (int j = 0; j < exerciseIds.size(); j++) {
+                    // Sprawdź, czy ćwiczenie należy do tego dnia
+                    if (exerciseDays.get(j) == i) {
+                        PlanExercise exercise = new PlanExercise();
+                        exercise.setExercise(new Exercise(exerciseIds.get(j)));
+                        exercise.setSets(sets.get(j));
+                        exercise.setReps(reps.get(j));
+                        exercise.setWeight((weight != null && weight.size() > j) ? weight.get(j) : null);
+                        exercise.setStatus(PlanExercise.Status.notCompleted);
+                        exercise.setTrainingPlan(plan);
+                        exercise.setTrainingPlanDay(day);
 
-                exercisesForDay.add(exercise);
-
-                exerciseIndex++; // Przejdź do następnego ćwiczenia
-                // Logika zatrzymania pętli dla konkretnego dnia
-                if (exerciseIndex % dayType.size() == 0) {
-                    break; // Zatrzymaj przypisywanie ćwiczeń do bieżącego dnia
+                        exercisesForDay.add(exercise);
+                    }
                 }
             }
             day.setExercises(exercisesForDay);
             days.add(day);
         }
 
-        plan.setExercises(new ArrayList<>()); // Pusty, bo ćwiczenia przypisywane są do dni
+        plan.setExercises(new ArrayList<>());
         plan.setTrainingPlanDays(days);
+
+        // Obliczanie daty końcowej
+        plan.setEndDate(start.plusDays(dayType.size() - 1));
 
         trainingPlanService.createTrainingPlan(plan);
 
         return "redirect:/trainer-clients/trainer-panel";
     }
+
+
+
+    /**
+     * Sprawdza, czy kolejne ćwiczenie powinno być przypisane do bieżącego dnia na podstawie dnia tygodnia.
+     */
+    private boolean isNextExerciseForCurrentDay(List<String> dayType, int currentDayIndex, int exerciseIndex) {
+        // Sprawdza, czy kolejne ćwiczenie przypada na inny dzień treningowy
+        int remainingDays = dayType.size() - currentDayIndex - 1;
+        int remainingExercises = exerciseIndex;
+        return remainingExercises >= remainingDays;
+    }
+
+
+
 
 
 

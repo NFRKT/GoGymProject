@@ -24,9 +24,18 @@ public class ControlerGoGymHome {
     @Autowired
     private com.GoGym.repository.UserRepository UserRepository;
     @GetMapping("/home")
-    public String home(Model model) {
+    public String home(Model model, Authentication authentication) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName(); // Login zalogowanego użytkownika
+        if (auth != null && auth.isAuthenticated()) {
+            // Zakładamy, że role to "ROLE_USER" i "ROLE_TRAINER"
+            boolean isUser = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("UŻYTKOWNIK"));
+            boolean isTrainer = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("TRENER"));
+            model.addAttribute("isUser", isUser);
+            model.addAttribute("isTrainer", isTrainer);
+        }
         model.addAttribute("username", username);
         return "home";
     }

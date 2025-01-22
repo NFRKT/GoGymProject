@@ -2,6 +2,7 @@ package com.GoGym.module;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -35,18 +36,22 @@ public class TrainingPlanDay {
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes; // Opcjonalne notatki do dnia odpoczynku
 
+    @Column(name = "date", nullable = false)
+    private LocalDate date;
+
     @OneToMany(mappedBy = "trainingPlanDay", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlanExercise> exercises;
 
     public TrainingPlanDay() {
     }
 
-    public TrainingPlanDay(Long idDay, TrainingPlan trainingPlan, DayType dayType, Status status, String notes, List<PlanExercise> exercises) {
+    public TrainingPlanDay(Long idDay, TrainingPlan trainingPlan, DayType dayType, Status status, String notes, LocalDate date, List<PlanExercise> exercises) {
         this.idDay = idDay;
         this.trainingPlan = trainingPlan;
         this.dayType = dayType;
         this.status = status;
         this.notes = notes;
+        this.date = date;
         this.exercises = exercises;
     }
 
@@ -96,5 +101,12 @@ public class TrainingPlanDay {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 }
