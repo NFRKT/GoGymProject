@@ -47,6 +47,12 @@
         <li><a href="/workouts">Twoje treningi</a></li>
         <!-- Dodaj inne odnośniki tutaj -->
     </ul>
+
+    <div class="dynamic-section">
+        <a th:if="${isUser}" href="/trainer-clients/client-panel" class="w3-button w3-blue">Panel Klienta</a>
+        <a th:if="${isUser}" th:href="@{/user-plans(idUser=${idUser})}" class="w3-button w3-blue">Moje Plany Treningowe</a>
+        <a th:if="${isTrainer}" href="/trainer-clients/trainer-panel" class="w3-button w3-green">Panel Trenera</a>
+    </div>
     <p class="w3-large">Monitoruj swój budżet, realizuj cele i kontroluj wydatki. 💰📊</p>
     <p class="w3-text-grey"><i>Twój budżet, Twoje cele, Twoje możliwości.</i></p>
 </div>

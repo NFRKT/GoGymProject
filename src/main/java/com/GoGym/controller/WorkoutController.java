@@ -81,7 +81,7 @@ public class WorkoutController {
 
         List<Workout> workouts = workoutService.getWorkoutsByUser(currentUser);
         model.addAttribute("workouts", workouts);
-        return "User-workouts";
+        return "user-workouts";
     }
 
 

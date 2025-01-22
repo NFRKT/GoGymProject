@@ -27,7 +27,11 @@ public class TrainingPlan {
     private String description;
 
     @Column(name = "status", nullable = false)
-    private String status; // Może być "active" lub "completed"
+    @Enumerated(EnumType.STRING)
+    private Status status; // Może być "active" lub "completed"
+    public enum Status {
+        active, completed
+    }
 
     @Column(name = "id_trainer", nullable = false)
     private Long idTrainer;
@@ -44,7 +48,7 @@ public class TrainingPlan {
     public TrainingPlan() {
     }
 
-    public TrainingPlan(Long idPlan, String name, LocalDate startDate, LocalDate endDate, String description, String status, Long idTrainer, Long idClient, List<PlanExercise> exercises, List<TrainingPlanDay> trainingPlanDays) {
+    public TrainingPlan(Long idPlan, String name, LocalDate startDate, LocalDate endDate, String description, Status status, Long idTrainer, Long idClient, List<PlanExercise> exercises, List<TrainingPlanDay> trainingPlanDays) {
         this.idPlan = idPlan;
         this.name = name;
         this.startDate = startDate;
@@ -96,11 +100,11 @@ public class TrainingPlan {
         this.description = description;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

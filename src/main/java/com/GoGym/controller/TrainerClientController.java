@@ -185,7 +185,7 @@ public class TrainerClientController {
         plan.setDescription(description);
         plan.setIdClient(clientId);
         plan.setIdTrainer(trainerId);
-        plan.setStatus("active");
+        plan.setStatus(TrainingPlan.Status.active);
         LocalDate start = LocalDate.parse(startDate);
         plan.setStartDate(start);
 
@@ -246,6 +246,8 @@ public class TrainerClientController {
         int remainingExercises = exerciseIndex;
         return remainingExercises >= remainingDays;
     }
+
+
 
 
 

@@ -9,6 +9,8 @@ import com.GoGym.repository.TrainingPlanRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class TrainingPlanService {
@@ -38,6 +40,10 @@ public class TrainingPlanService {
         }
 
         return plan;
+    }
+
+    public List<TrainingPlan> findPlansByIdUser(Long idUser) {
+        return trainingPlanRepository.findByIdClient(idUser);
     }
 
 

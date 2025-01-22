@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Moje Plany Treningowe</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .plan {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .plan h3 {
+            color: #333;
+        }
+        .plan-details, .day {
+            margin-top: 10px;
+        }
+        .day {
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .day h4 {
+            margin: 0;
+        }
+        .day ul {
+            padding-left: 20px;
+        }
+        .day ul li {
+            list-style-type: square;
+        }
+    </style>
+</head>
+<body>
+<h2>Twoje Plany Treningowe</h2>
+<div th:if="${#lists.isEmpty(plans)}">
+  <p>Brak dostępnych planów treningowych.</p>
+</div>
+<div th:each="plan : ${plans}" class="plan">
+  <h3 th:text="${plan.name}">Nazwa Planu</h3>
+  <div class="plan-details">
+    <p><strong>Opis:</strong> <span th:text="${plan.description}">Opis planu...</span></p>
+    <p><strong>Data rozpoczęcia:</strong> <span th:text="${plan.startDate}">2025-01-01</span></p>
+    <p><strong>Data zakończenia:</strong> <span th:text="${plan.endDate}">2025-01-15</span></p>
+  </div>
+  <div th:each="day : ${plan.trainingPlanDays}" class="day">
+    <h4 th:text="'Dzień ' + ${day.date} + ' (' + ${day.dayType} + ')'">Dzień 1 (trening)</h4>
+    <p><strong>Notatki:</strong> <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span></p>
+    <p><strong>Status:</strong> <span th:text="${day.status}">Nieukończony</span></p>
+    <ul>
+      <li th:each="exercise : ${day.exercises}">
+        <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span>:
+        <span th:text="${exercise.sets}">0</span> serie,
+        <span th:text="${exercise.reps}">0</span> powtórzeń,
+        <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
+      </li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
