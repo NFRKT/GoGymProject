@@ -49,11 +49,11 @@
     <td th:text="${client.client.firstName}"></td>
     <td th:text="${client.client.secondName}"></td>
     <td>
-      <form th:action="@{/trainer-clients/rejectClient}" method="post">
+      <form th:action="@{/rejectClient}" method="post">
         <input type="hidden" name="clientId" th:value="${client.client.idUser}" />
         <button type="submit">Zrezygnuj ze współpracy</button>
       </form>
-      <a th:href="@{/trainer-clients/{id}/create-plan(id=${client.client.idUser})}">Stwórz plan</a>
+      <a th:href="@{/{id}/create-plan(id=${client.client.idUser})}">Stwórz plan</a>
     </td>
   </tr>
   </tbody>
