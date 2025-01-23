@@ -26,14 +26,16 @@ public class PlanController {
     private final ExerciseRepository exerciseRepository;
     private final TrainingPlanRepository trainingPlanRepository;
     private final PlanExerciseRepository planExerciseRepository;
+    private final TrainingPlanDayRepository trainingPlanDayRepository;
 
     @Autowired
-    public PlanController(TrainingPlanService trainingPlanService,UserRepository userRepository, ExerciseRepository exerciseRepository, TrainingPlanRepository trainingPlanRepository, PlanExerciseRepository planExerciseRepository) {
+    public PlanController(TrainingPlanService trainingPlanService,UserRepository userRepository, ExerciseRepository exerciseRepository, TrainingPlanRepository trainingPlanRepository, PlanExerciseRepository planExerciseRepository, TrainingPlanDayRepository trainingPlanDayRepository) {
         this.trainingPlanService = trainingPlanService;
         this.userRepository = userRepository;
         this.exerciseRepository = exerciseRepository;
         this.trainingPlanRepository = trainingPlanRepository;
         this.planExerciseRepository = planExerciseRepository;
+        this.trainingPlanDayRepository = trainingPlanDayRepository;
     }
 
     @GetMapping("/user-plans")
@@ -157,4 +159,34 @@ public class PlanController {
         int remainingExercises = exerciseIndex;
         return remainingExercises >= remainingDays;
     }
+
+    @PostMapping("/update-exercise-status/{exerciseId}")
+    @ResponseBody
+    public void updateExerciseStatus(@PathVariable Long exerciseId, @RequestParam boolean completed) {
+        PlanExercise.Status newStatus = completed ? PlanExercise.Status.completed : PlanExercise.Status.notCompleted;
+        trainingPlanService.updateExerciseStatus(exerciseId, newStatus);
+    }
+
+    @PostMapping("/update-day-status/{dayId}")
+    @ResponseBody
+    public void updateDayStatus(@PathVariable Long dayId) {
+        trainingPlanService.updateDayStatus(dayId);
+    }
+
+    @PostMapping("/update-plan-status/{planId}")
+    @ResponseBody
+    public void updatePlanStatus(@PathVariable Long planId) {
+        trainingPlanService.updatePlanStatus(planId);
+    }
+
+    @GetMapping("/plan-details/{idPlan}")
+    public String getPlanDetails(@PathVariable Long idPlan, Model model) {
+        TrainingPlan plan = trainingPlanRepository.findById(idPlan)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + idPlan));
+        model.addAttribute("plan", plan);
+        return "plan-details"; // Widok dla szczegółów planu
+    }
+
+
+
 }

@@ -50,4 +50,39 @@ public class TrainingPlanService {
         return trainingPlanRepository.findByIdTrainer(idUser);
     }
 
+    public void updateExerciseStatus(Long exerciseId, PlanExercise.Status newStatus) {
+        PlanExercise exercise = planExerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ćwiczenia o ID: " + exerciseId));
+        exercise.setStatus(newStatus);
+        planExerciseRepository.save(exercise);
+
+        updateDayStatus(exercise.getTrainingPlanDay().getIdDay());
+    }
+
+    public void updateDayStatus(Long dayId) {
+        TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono dnia o ID: " + dayId));
+
+        boolean allExercisesCompleted = day.getExercises().stream()
+                .allMatch(exercise -> exercise.getStatus() == PlanExercise.Status.completed);
+
+        day.setStatus(allExercisesCompleted ? TrainingPlanDay.Status.completed : TrainingPlanDay.Status.notCompleted);
+        trainingPlanDayRepository.save(day);
+
+        // Po aktualizacji statusu dnia, sprawdź status planu
+        updatePlanStatus(day.getTrainingPlan().getIdPlan());
+    }
+
+    public void updatePlanStatus(Long planId) {
+        TrainingPlan plan = trainingPlanRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + planId));
+
+        boolean allDaysCompleted = plan.getTrainingPlanDays().stream()
+                .allMatch(day -> day.getStatus() == TrainingPlanDay.Status.completed);
+
+        plan.setStatus(allDaysCompleted ? TrainingPlan.Status.completed : TrainingPlan.Status.active);
+        trainingPlanRepository.save(plan);
+    }
+
+
 }

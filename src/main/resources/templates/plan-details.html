@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+  <h4 th:text="${plan.name}">Nazwa Planu</h4>
+  <p><strong>Opis:</strong> <span th:text="${plan.description}"></span></p>
+  <p><strong>Dni treningowe:</strong></p>
+  <ul>
+    <div th:each="day : ${plan.trainingPlanDays}">
+      <h4 th:text="'Dzień ' + ${day.date} + ' (' + ${day.dayType} + ')'">Dzień</h4>
+      <p><strong>Status:</strong> <span th:text="${day.status}">Nieukończony</span></p>
+      <ul>
+        <li th:each="exercise : ${day.exercises}">
+          <span th:text="${exercise.exercise.name}">Nazwa Ćwiczenia</span>:
+          <span th:text="${exercise.sets}">0</span> serie,
+          <span th:text="${exercise.reps}">0</span> powtórzeń,
+          <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
+        </li>
+      </ul>
+    </li>
+    </div>
+  </ul>
+</div>
+</body>
+</html>

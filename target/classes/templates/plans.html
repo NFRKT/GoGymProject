@@ -3,66 +3,104 @@
 <head>
   <title>Moje Plany Treningowe</title>
   <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .plan {
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
-        .plan h3 {
-            color: #333;
-        }
-        .plan-details, .day {
-            margin-top: 10px;
-        }
-        .day {
-            padding: 10px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        .day h4 {
-            margin: 0;
-        }
-        .day ul {
-            padding-left: 20px;
-        }
-        .day ul li {
-            list-style-type: square;
-        }
-    </style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .plan-panel {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .plan-panel:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .plan-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .plan-dates {
+      color: #666;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .modal-close {
+      float: right;
+      cursor: pointer;
+      font-size: 20px;
+      color: red;
+    }
+  </style>
 </head>
 <body>
 <h2>Twoje Plany Treningowe</h2>
-<div th:if="${#lists.isEmpty(plans)}">
-  <p>Brak dostępnych planów treningowych.</p>
-</div>
-<div th:each="plan : ${plans}" class="plan">
-  <h3 th:text="${plan.name}">Nazwa Planu</h3>
-  <div class="plan-details">
-    <p><strong>Opis:</strong> <span th:text="${plan.description}">Opis planu...</span></p>
-    <p><strong>Data rozpoczęcia:</strong> <span th:text="${plan.startDate}">2025-01-01</span></p>
-    <p><strong>Data zakończenia:</strong> <span th:text="${plan.endDate}">2025-01-15</span></p>
-  </div>
-  <div th:each="day : ${plan.trainingPlanDays}" class="day">
-    <h4 th:text="'Dzień ' + ${day.date} + ' (' + ${day.dayType} + ')'">Dzień 1 (trening)</h4>
-    <p><strong>Notatki:</strong> <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span></p>
-    <p><strong>Status:</strong> <span th:text="${day.status}">Nieukończony</span></p>
-    <ul>
-      <li th:each="exercise : ${day.exercises}">
-        <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span>:
-        <span th:text="${exercise.sets}">0</span> serie,
-        <span th:text="${exercise.reps}">0</span> powtórzeń,
-        <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
-      </li>
-    </ul>
+<div class="grid-container">
+  <div th:each="plan : ${plans}" class="plan-panel" onclick="openModal(this)" th:data-id="${plan.idPlan}">
+    <div class="plan-title" th:text="${plan.name}">Nazwa Planu</div>
+    <div class="plan-dates">
+      <span th:text="${plan.startDate}">2025-01-01</span> -
+      <span th:text="${plan.endDate}">2025-01-15</span>
+    </div>
   </div>
 </div>
+
+<div class="modal" id="planModal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <h3 id="modal-title">Szczegóły Planu</h3>
+    <div id="modal-details"></div>
+  </div>
+</div>
+
+<script>
+    function openModal(element) {
+      const planId = element.getAttribute('data-id');
+      fetch(`/plan-details/${planId}`)
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('modal-details').innerHTML = data;
+          document.getElementById('planModal').style.display = 'flex';
+        });
+    }
+
+    function closeModal() {
+      document.getElementById('planModal').style.display = 'none';
+    }
+  </script>
 </body>
 </html>
