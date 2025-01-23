@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edytuj Plan Treningowy</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+<h1>Edytuj Plan Treningowy</h1>
+<form th:action="@{/trainer-plans/edit}" th:object="${trainingPlan}" method="post">
+    <input type="hidden" th:field="*{id}" />
+
+    <label for="name">Nazwa planu:</label>
+    <input type="text" id="name" th:field="*{name}" required />
+
+    <label for="description">Opis:</label>
+    <textarea id="description" th:field="*{description}" required></textarea>
+
+    <h3>Dni treningowe:</h3>
+    <div th:each="day, dayStat : *{trainingPlanDays}">
+        <div>
+            <label th:for="'day-' + ${dayStat.index}">Dzień: </label>
+            <input type="text" th:field="*{trainingPlanDays[__${dayStat.index}__].name}" />
+
+            <h4>Ćwiczenia:</h4>
+            <div th:each="exercise, exerciseStat : ${day.exercises}">
+                <label th:for="'exercise-' + ${exerciseStat.index}">Ćwiczenie:</label>
+                <input type="text" th:field="*{trainingPlanDays[__${dayStat.index}__].exercises[__${exerciseStat.index}__].name}" />
+            </div>
+        </div>
+    </div>
+
+    <button type="submit">Zapisz zmiany</button>
+</form>
+</body>
+</html>

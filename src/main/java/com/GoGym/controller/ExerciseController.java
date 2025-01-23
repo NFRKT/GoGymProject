@@ -89,10 +89,6 @@ public class ExerciseController {
         return "exercises-list";
     }
 
-
-
-
-
     @GetMapping("/exercise/{id}")
     public String getExerciseDetails(@PathVariable Integer id, Model model) {
         Exercise exercise = exerciseRepository.findById(id)
@@ -101,15 +97,6 @@ public class ExerciseController {
         model.addAttribute("exercise", exercise);
         return "exercise-details";
     }
-
-
-
-   // @GetMapping("/exercises")
-   // public String getAllExercises(Model model) {
-    //    List<Exercise> exercises = exerciseService.getAllExercises();
-   //     model.addAttribute("exercises", exercises);
-    //    return "exercises-list";
-   // }
 
     @GetMapping
     public List<Exercise> getAllExercises() {

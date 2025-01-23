@@ -76,7 +76,7 @@ function addExerciseRow(daySection, dayIndex) {
     </script>
 </head>
 <body>
-<form th:action="@{/trainer-clients/create-plan}" method="post">
+<form th:action="@{/create-plan}" method="post">
   <input type="hidden" name="clientId" th:value="${client.idUser}" />
   <input type="hidden" name="trainerId" th:value="${trainerId}" />
 

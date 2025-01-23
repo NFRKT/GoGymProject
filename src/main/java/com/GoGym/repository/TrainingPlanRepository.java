@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface TrainingPlanRepository extends JpaRepository<TrainingPlan, Long> {
     List<TrainingPlan> findByIdClient(Long idClient);
+    List<TrainingPlan> findByIdTrainer(Long idTrainer);
 
 }

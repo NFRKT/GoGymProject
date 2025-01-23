@@ -42,9 +42,12 @@ public class TrainingPlanService {
         return plan;
     }
 
-    public List<TrainingPlan> findPlansByIdUser(Long idUser) {
+    public List<TrainingPlan> findPlansByIdClient(Long idUser) {
         return trainingPlanRepository.findByIdClient(idUser);
     }
 
+    public List<TrainingPlan> findPlansByIdTrainer(Long idUser) {
+        return trainingPlanRepository.findByIdTrainer(idUser);
+    }
 
 }
