@@ -68,10 +68,9 @@ public class TrainingPlanService {
 
         day.setStatus(allExercisesCompleted ? TrainingPlanDay.Status.completed : TrainingPlanDay.Status.notCompleted);
         trainingPlanDayRepository.save(day);
-
-        // Po aktualizacji statusu dnia, sprawdź status planu
         updatePlanStatus(day.getTrainingPlan().getIdPlan());
     }
+
 
     public void updatePlanStatus(Long planId) {
         TrainingPlan plan = trainingPlanRepository.findById(planId)

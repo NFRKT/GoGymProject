@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 
@@ -169,9 +171,25 @@ public class PlanController {
 
     @PostMapping("/update-day-status/{dayId}")
     @ResponseBody
-    public void updateDayStatus(@PathVariable Long dayId) {
-        trainingPlanService.updateDayStatus(dayId);
+    public Map<String, Object> updateDayStatus(@PathVariable Long dayId) {
+        TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono dnia o ID: " + dayId));
+
+        // Sprawdzenie, czy wszystkie ćwiczenia są ukończone
+        boolean allExercisesCompleted = day.getExercises().stream()
+                .allMatch(exercise -> exercise.getStatus() == PlanExercise.Status.completed);
+
+        // Aktualizacja statusu dnia
+        day.setStatus(allExercisesCompleted ? TrainingPlanDay.Status.completed : TrainingPlanDay.Status.notCompleted);
+        trainingPlanDayRepository.save(day);
+
+        // Przygotowanie odpowiedzi
+        Map<String, Object> response = new HashMap<>();
+        response.put("dayId", day.getIdDay());
+        response.put("status", day.getStatus().name()); // Zwróć status jako string
+        return response;
     }
+
 
     @PostMapping("/update-plan-status/{planId}")
     @ResponseBody
@@ -179,13 +197,6 @@ public class PlanController {
         trainingPlanService.updatePlanStatus(planId);
     }
 
-    @GetMapping("/plan-details/{idPlan}")
-    public String getPlanDetails(@PathVariable Long idPlan, Model model) {
-        TrainingPlan plan = trainingPlanRepository.findById(idPlan)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + idPlan));
-        model.addAttribute("plan", plan);
-        return "plan-details"; // Widok dla szczegółów planu
-    }
 
 
 
