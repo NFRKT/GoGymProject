@@ -31,7 +31,7 @@ public class PlanController {
     private final TrainingPlanDayRepository trainingPlanDayRepository;
 
     @Autowired
-    public PlanController(TrainingPlanService trainingPlanService,UserRepository userRepository, ExerciseRepository exerciseRepository, TrainingPlanRepository trainingPlanRepository, PlanExerciseRepository planExerciseRepository, TrainingPlanDayRepository trainingPlanDayRepository) {
+    public PlanController(TrainingPlanService trainingPlanService, UserRepository userRepository, ExerciseRepository exerciseRepository, TrainingPlanRepository trainingPlanRepository, PlanExerciseRepository planExerciseRepository, TrainingPlanDayRepository trainingPlanDayRepository) {
         this.trainingPlanService = trainingPlanService;
         this.userRepository = userRepository;
         this.exerciseRepository = exerciseRepository;
@@ -164,10 +164,17 @@ public class PlanController {
 
     @PostMapping("/update-exercise-status/{exerciseId}")
     @ResponseBody
-    public void updateExerciseStatus(@PathVariable Long exerciseId, @RequestParam boolean completed) {
+    public Map<String, Object> updateExerciseStatus(@PathVariable Long exerciseId, @RequestParam boolean completed) {
         PlanExercise.Status newStatus = completed ? PlanExercise.Status.completed : PlanExercise.Status.notCompleted;
         trainingPlanService.updateExerciseStatus(exerciseId, newStatus);
+
+        // Przygotowanie odpowiedzi
+        Map<String, Object> response = new HashMap<>();
+        response.put("exerciseId", exerciseId);
+        response.put("status", newStatus.name());
+        return response;
     }
+
 
     @PostMapping("/update-day-status/{dayId}")
     @ResponseBody
@@ -196,8 +203,4 @@ public class PlanController {
     public void updatePlanStatus(@PathVariable Long planId) {
         trainingPlanService.updatePlanStatus(planId);
     }
-
-
-
-
 }
