@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Moje Plany Treningowe</title>
     <style>
@@ -99,31 +100,6 @@
 .status-icon.active .status-circle {
   background-color: orange; /* Kolor dla aktywnych planów */
 }
-
-<!--.plan-panel .status-container {-->
-<!--  margin-top: 10px;-->
-<!--}-->
-
-<!--.plan-panel .status-icon {-->
-<!--  display: inline-flex;-->
-<!--  align-items: center;-->
-<!--  gap: 8px;-->
-<!--}-->
-
-<!--.plan-panel .status-circle {-->
-<!--  width: 16px;-->
-<!--  height: 16px;-->
-<!--  border-radius: 50%;-->
-<!--  background-color: red; /* Domyślnie czerwony (nieukończony) */-->
-<!--}-->
-
-<!--.plan-panel .status-icon.completed .status-circle {-->
-<!--  background-color: green; /* Ukończony */-->
-<!--}-->
-
-<!--.plan-panel .status-icon.active .status-circle {-->
-<!--  background-color: orange; /* Kolor dla aktywnych planów */-->
-<!--}-->
 .plan-panel .status-container {
   margin-top: 10px;
 }
@@ -165,6 +141,7 @@
 
   </style>
 </head>
+
 <body>
 <h2>Twoje Plany Treningowe</h2>
 <div class="plans-grid" th:if="${#lists.isEmpty(plans)}">
@@ -173,8 +150,13 @@
 <div class="plans-grid" th:each="plan : ${plans}">
     <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
         <h3 th:text="${plan.name}">Nazwa Planu</h3>
-        <p><strong>Opis:</strong> <span th:text="${plan.description}">Opis planu...</span></p>
-        <p><strong>Data:</strong> <span th:text="${plan.startDate}">2025-01-01</span> -
+        <p>
+            <strong>Opis:</strong>
+            <span th:text="${plan.description}">Opis planu...</span>
+        </p>
+        <p>
+            <strong>Data:</strong>
+            <span th:text="${plan.startDate}">2025-01-01</span>-
             <span th:text="${plan.endDate}">2025-01-15</span>
         </p>
         <div class="status-container">
@@ -183,11 +165,10 @@
                 <span class="status-text"
                       th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
                       th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
-                </span>
+         </span>
             </p>
         </div>
     </div>
-
     <!-- Modal dla szczegółów planu -->
     <div class="modal" th:data-plan-id="${plan.idPlan}">
         <div class="modal-content">
@@ -198,61 +179,57 @@
             <div class="status-container">
                 <p>
                     <strong>Status planu:</strong>
-                    <span id="plan-status" class="status-icon"
-                          th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
-          <span class="status-circle"></span>
-        </span>
+                    <span id="plan-status" class="status-icon" th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
+              <span class="status-circle">
+              </span>
+            </span>
                 </p>
             </div>
-
             <div th:each="day : ${plan.trainingPlanDays}">
                 <div th:data-day-id="${day.idDay}">
-
                     <h4>
-                        <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
-                        <span> - </span>
-                        <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
+              <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}">
+              </span>
+                        <span>-</span>
+                        <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}">
+              </span>
                     </h4>
-
                     <div class="status-container">
                         <p>
                             <strong>Status dnia:</strong>
                             <span id="day-status" class="status-icon" th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
-                <span class="status-circle"></span>
-            </span>
+                  <span class="status-circle">
+                  </span>
+                </span>
                         </p>
                     </div>
-                    <p><strong>Notatki:</strong> <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span></p>
+                    <p>
+                        <strong>Notatki:</strong>
+                        <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
+                    </p>
                     <ul>
                         <li class="exercise" th:each="exercise : ${day.exercises}">
-    <span>
-        <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span> -
-        <span th:text="${exercise.sets}">0</span> serie,
-        <span th:text="${exercise.reps}">0</span> powtórzeń,
-        <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
-    </span>
+                <span>
+                  <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span>-
+                  <span th:text="${exercise.sets}"></span>serie,
+                  <span th:text="${exercise.reps}"></span>powtórzeń,
+                  <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
+                </span>
                             <div class="status-container">
-        <span id="exercise-status" class="status-icon"
-              th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
-            <span class="status-circle"></span>
-        </span>
+                  <span id="exercise-status" class="status-icon" th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
+                    <span class="status-circle">
+                    </span>
+                  </span>
                             </div>
-                            <button
-                                    class="toggle-exercise-status"
-                                    th:data-exercise-id="${exercise.id}"
-                                    th:text="${exercise.status.name() == 'completed' ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}">
+                            <button class="toggle-exercise-status" th:data-exercise-id="${exercise.id}" th:text="${exercise.status.name() == 'completed' ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}">
                             </button>
                         </li>
-
-
                     </ul>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   // Otwieranie modali
@@ -260,6 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
     panel.addEventListener('click', () => {
       const planId = panel.getAttribute('data-plan-id');
       const modal = document.querySelector(`.modal[data-plan-id="${planId}"]`);
+
       modal.style.display = 'flex';
     });
   });
@@ -312,7 +290,6 @@ document.addEventListener('click', function (event) {
           dayStatusElement.classList.toggle('completed', data.status === 'completed');
           dayStatusElement.classList.toggle('not-completed', data.status !== 'completed');
         }
-
         // Aktualizacja statusu planu po każdej zmianie statusu dnia
         const planId = event.target.closest('.modal').getAttribute('data-plan-id');
         return fetch(`/update-plan-status/${planId}`, { method: 'POST' });
@@ -326,28 +303,28 @@ document.addEventListener('click', function (event) {
         if (planStatusElement) {
           planStatusElement.classList.toggle('completed', data.status === 'completed');
           planStatusElement.classList.toggle('active', data.status !== 'completed');
-        }
-        const planId = data.planId;
-        // Aktualizacja statusu na kafelku planu
-        const planPanel = document.querySelector(`.plan-panel[data-plan-id="${planId}"] .status-text`);
-        if (planPanel) {
-            const isCompleted = data.status === 'completed';
-            planPanel.textContent = isCompleted ? 'UKOŃCZONY' : 'AKTYWNY';
 
-            // Usuń istniejące klasy i dodaj odpowiednią
-            planPanel.classList.remove('completed', 'active');
-            planPanel.classList.add(isCompleted ? 'completed' : 'active');
-            planPanel.textContent = data.status === 'completed' ? 'UKOŃCZONY' : 'AKTYWNY';
-            planPanel.style.backgroundColor = data.status === 'completed' ? 'green' : 'orange';
-        }
+                  } const planId = data.planId;
+                   // Aktualizacja statusu na kafelku planu
+                   const planPanel = document.querySelector(`.plan-panel[data-plan-id="${planId}"] .status-text`);
 
-      })
+                  if (planPanel) {
+                       const isCompleted = data.status === 'completed';
+                       planPanel.textContent = isCompleted ? 'UKOŃCZONY' : 'AKTYWNY';
+                       // Usuń istniejące klasy i dodaj odpowiednią
+                       planPanel.classList.remove('completed', 'active');
+                       planPanel.classList.add(isCompleted ? 'completed' : 'active');
+                       planPanel.textContent = data.status === 'completed' ? 'UKOŃCZONY' : 'AKTYWNY';
+                       planPanel.style.backgroundColor = data.status === 'completed' ? 'green' : 'orange';
 
-      .catch(error => console.error('Błąd:', error));
-  }
-});
-});
-</script>
+                  }
+              })
+              .catch(error => console.error('Błąd:', error));
 
+          }
+      });
+  });
+  </script>
 </body>
+
 </html>
