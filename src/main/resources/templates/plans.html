@@ -4,140 +4,141 @@
 <head>
     <title>Moje Plany Treningowe</title>
     <style>
-  body {
-  	font-family: Arial, sans-serif;
-  	margin: 20px;
-  }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
 
-  .plans-grid {
-  	display: grid;
-  	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  	gap: 20px;
-  }
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
 
-  .plan-panel {
-  	border: 1px solid #ccc;
-  	border-radius: 10px;
-  	padding: 20px;
-  	background-color: #f9f9f9;
-  	cursor: pointer;
-  	text-align: center;
-  }
+    .plan-panel {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      background-color: #f9f9f9;
+      cursor: pointer;
+      text-align: center;
+    }
 
-  .plan-panel h3 {
-  	color: #333;
-  }
+    .plan-panel h3 {
+      color: #333;
+    }
 
-  .modal {
-  	display: none;
-  	position: fixed;
-  	top: 0;
-  	left: 0;
-  	width: 100%;
-  	height: 100%;
-  	background-color: rgba(0, 0, 0, .5);
-  	justify-content: center;
-  	align-items: center;
-  }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
 
-  .modal-content {
-  	background: white;
-  	padding: 20px;
-  	border-radius: 10px;
-  	width: 80%;
-  	max-height: 80%;
-  	overflow-y: auto;
-  }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-height: 80%;
+      overflow-y: auto;
+    }
 
-  .modal-header {
-  	display: flex;
-  	justify-content: space-between;
-  	align-items: center;
-  	border-bottom: 1px solid #ddd;
-  	margin-bottom: 20px;
-  }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
 
-  .modal-header h3 {
-  	margin: 0;
-  }
+    .modal-header h3 {
+      margin: 0;
+    }
 
-  .close-modal {
-  	cursor: pointer;
-  	font-size: 20px;
-  	color: red;
-  }
+    .close-modal {
+      cursor: pointer;
+      font-size: 20px;
+      color: red;
+    }
 
-  .exercise {
-  	display: flex;
-  	justify-content: space-between;
-  	align-items: center;
-  	margin: 10px 0;
-  }
+    .exercise {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+    }
 
-  .exercise button {
-  	padding: 5px 10px;
-  	font-size: 14px;
-  }
+    .exercise button {
+      padding: 5px 10px;
+      font-size: 14px;
+    }
 
-  .status-icon {
-  	display: flex;
-  	align-items: center;
-  	gap: 8px;
-  }
+.status-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .status-circle {
-  	width: 16px;
-  	height: 16px;
-  	border-radius: 50%;
-  	background-color: red;
-  }
+.status-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: red; /* Domyślnie czerwony (nieukończony) */
+}
 
-  .status-icon.completed .status-circle {
-  	background-color: green;
-  }
+.status-icon.completed .status-circle {
+  background-color: green; /* Ukończony */
+}
 
-  .status-icon.active .status-circle {
-  	background-color: orange;
-  }
+.status-icon.active .status-circle {
+  background-color: orange; /* Kolor dla aktywnych planów */
+}
+.plan-panel .status-container {
+  margin-top: 10px;
+}
 
-  -->
-  .plan-panel .status-container {
-  	margin-top: 10px;
-  }
+.plan-panel .status-text {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: white;
+}
 
-  .plan-panel .status-text {
-  	font-weight: bold;
-  	padding: 5px 10px;
-  	border-radius: 5px;
-  	color: white;
-  }
+.plan-panel .status-text:empty {
+  display: none;
+}
 
-  .plan-panel .status-text:empty {
-  	display: none;
-  }
+.plan-panel .status-text[th\\:text="'UKOŃCZONY'"] {
+  background-color: green;
+}
 
-  .plan-panel .status-text[th\\:text="'UKOŃCZONY'"] {
-  	background-color: green;
-  }
+.plan-panel .status-text[th\\:text="'AKTYWNY'"] {
+  background-color: orange;
+}
+.status-text {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: white;
+}
 
-  .plan-panel .status-text[th\\:text="'AKTYWNY'"] {
-  	background-color: orange;
-  }
+.status-text.completed {
+  background-color: green; /* Tło dla statusu UKOŃCZONY */
+}
 
-  .status-text {
-  	font-weight: bold;
-  	padding: 5px 10px;
-  	border-radius: 5px;
-  	color: white;
-  }
+.status-text.active {
+  background-color: orange; /* Tło dla statusu AKTYWNY */
+}
 
-  .status-text.completed {
-  	background-color: green;
-  }
 
-  .status-text.active {
-  	background-color: orange;
-  }
+
   </style>
 </head>
 
@@ -161,8 +162,10 @@
         <div class="status-container">
             <p>
                 <strong>Status:</strong>
-                <span class="status-text" th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}" th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
-          </span>
+                <span class="status-text"
+                      th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
+                      th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+         </span>
             </p>
         </div>
     </div>
@@ -228,123 +231,95 @@
     </div>
 </div>
 <script>
-  document.addEventListener('DOMContentLoaded',  function () {
-       // Otwieranie modali
-       document.querySelectorAll('.plan-panel').forEach(panel = > {
-           panel.addEventListener('click',  () = > {
-               const planId =  panel.getAttribute('data-plan-id');
-               const modal =  document.querySelector(`.modal[data - plan - id = "${planId}"]`);
-               modal.style.display =  'flex';
+document.addEventListener('DOMContentLoaded', function () {
+  // Otwieranie modali
+  document.querySelectorAll('.plan-panel').forEach(panel => {
+    panel.addEventListener('click', () => {
+      const planId = panel.getAttribute('data-plan-id');
+      const modal = document.querySelector(`.modal[data-plan-id="${planId}"]`);
 
-          });
+      modal.style.display = 'flex';
+    });
+  });
 
-      });
-       // Zamykanie modali
-       document.querySelectorAll('.close-modal').forEach(button = > {
-           button.addEventListener('click',  () = > {
-               const modal =  button.closest('.modal');
-               modal.style.display =  'none';
+  // Zamykanie modali
+  document.querySelectorAll('.close-modal').forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = button.closest('.modal');
+      modal.style.display = 'none';
+    });
+  });
 
-          });
+  // Obsługa kliknięcia w przycisk ukończenia ćwiczenia
+document.addEventListener('click', function (event) {
+  if (event.target.matches('.toggle-exercise-status')) {
+    const exerciseId = event.target.getAttribute('data-exercise-id');
+    const button = event.target;
 
-      });
-       // Obsługa kliknięcia w przycisk ukończenia ćwiczenia
-      document.addEventListener('click',  function (event) {
+    const currentStatus = button.textContent.includes('Cofnij ukończenie') ? false : true;
 
-          if (event.target.matches('.toggle-exercise-status')) {
-               const exerciseId =  event.target.getAttribute('data-exercise-id');
-               const button =  event.target;
-               const currentStatus =  button.textContent.includes('Cofnij ukończenie') ?  false :  true;
-               fetch(` / update - exercise - status / $ {
-                  exerciseId
-              } ? completed = $ {
-                  currentStatus
-              }`,  {
-                   method:  'POST'
-              }) .then(response = > {
+    fetch(`/update-exercise-status/${exerciseId}?completed=${currentStatus}`, { method: 'POST' })
+      .then(response => {
+        if (!response.ok) throw new Error('Nie udało się zaktualizować statusu ćwiczenia.');
+        return response.text();
+      })
+      .then(() => {
+        button.textContent = currentStatus ? 'Cofnij ukończenie' : 'Oznacz jako wykonane';
+        const statusContainer = button.closest('.exercise').querySelector('.status-icon');
+        if (statusContainer) {
+          statusContainer.classList.toggle('completed', currentStatus);
+          statusContainer.classList.toggle('not-completed', !currentStatus);
+        }
 
-                  if (!response.ok)
-                  throw new Error('Nie udało się zaktualizować statusu ćwiczenia.');
+        const dayElement = button.closest('[data-day-id]');
+        if (!dayElement) {
+          console.error('Nie znaleziono elementu dnia.');
+          return;
+        }
 
-                  return response.text();
+        const dayId = dayElement.getAttribute('data-day-id');
+        return fetch(`/update-day-status/${dayId}`, { method: 'POST' });
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Nie udało się zaktualizować statusu dnia.');
+        return response.json();
+      })
+      .then(data => {
+        const dayStatusElement = document.querySelector(`[data-day-id="${data.dayId}"] .status-icon`);
+        if (dayStatusElement) {
+          dayStatusElement.classList.toggle('completed', data.status === 'completed');
+          dayStatusElement.classList.toggle('not-completed', data.status !== 'completed');
+        }
+        // Aktualizacja statusu planu po każdej zmianie statusu dnia
+        const planId = event.target.closest('.modal').getAttribute('data-plan-id');
+        return fetch(`/update-plan-status/${planId}`, { method: 'POST' });
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Nie udało się zaktualizować statusu planu.');
+        return response.json();
+      })
+      .then(data => {
+        const planStatusElement = document.querySelector(`.modal[data-plan-id="${data.planId}"] #plan-status`);
+        if (planStatusElement) {
+          planStatusElement.classList.toggle('completed', data.status === 'completed');
+          planStatusElement.classList.toggle('active', data.status !== 'completed');
 
-              }) .then(
-              () = > {
-                   button.textContent =  currentStatus ?  'Cofnij ukończenie' :  'Oznacz jako wykonane';
-                   const statusContainer =  button.closest('.exercise').querySelector('.status-icon');
-
-                  if (statusContainer) {
-                       statusContainer.classList.toggle('completed',  currentStatus);
-                       statusContainer.classList.toggle('not-completed',  ! currentStatus);
-
-                  } const dayElement =  button.closest('[data-day-id]');
-
-                  if (!dayElement) {
-                       console.error('Nie znaleziono elementu dnia.');
-
-                      return;
-
-                  } const dayId =  dayElement.getAttribute('data-day-id');
-
-                  return fetch(` / update - day - status / $ {
-                      dayId
-                  }`,  {
-                       method:  'POST'
-                  });
-
-              }) .then(response = > {
-
-                  if (!response.ok)
-                  throw new Error('Nie udało się zaktualizować statusu dnia.');
-
-                  return response.json();
-
-              }) .then(data = > {
-                   const dayStatusElement =  document.querySelector(` [data - day - id = "${data.dayId}"] .status - icon`);
-
-                  if (dayStatusElement) {
-                       dayStatusElement.classList.toggle('completed',  data.status ===  'completed');
-                       dayStatusElement.classList.toggle('not-completed',  data.status !==  'completed');
-
-                  } // Aktualizacja statusu planu po każdej zmianie statusu dnia
-                   const planId =  event.target.closest('.modal').getAttribute('data-plan-id');
-
-                  return fetch(` / update - plan - status / $ {
-                      planId
-                  }`,  {
-                       method:  'POST'
-                  });
-
-              }) .then(response = > {
-
-                  if (!response.ok)
-                  throw new Error('Nie udało się zaktualizować statusu planu.');
-
-                  return response.json();
-
-              }) .then(data = > {
-                   const planStatusElement =  document.querySelector(`.modal[data - plan - id = "${data.planId}"] #plan - status`);
-
-                  if (planStatusElement) {
-                       planStatusElement.classList.toggle('completed',  data.status ===  'completed');
-                       planStatusElement.classList.toggle('active',  data.status !==  'completed');
-
-                  } const planId =  data.planId;
+                  } const planId = data.planId;
                    // Aktualizacja statusu na kafelku planu
-                   const planPanel =  document.querySelector(`.plan - panel[data - plan - id = "${planId}"] .status - text`);
+                   const planPanel = document.querySelector(`.plan-panel[data-plan-id="${planId}"] .status-text`);
 
                   if (planPanel) {
-                       const isCompleted =  data.status ===  'completed';
-                       planPanel.textContent =  isCompleted ?  'UKOŃCZONY' :  'AKTYWNY';
+                       const isCompleted = data.status === 'completed';
+                       planPanel.textContent = isCompleted ? 'UKOŃCZONY' : 'AKTYWNY';
                        // Usuń istniejące klasy i dodaj odpowiednią
-                       planPanel.classList.remove('completed',  'active');
-                       planPanel.classList.add(isCompleted ?  'completed' :  'active');
-                       planPanel.textContent =  data.status ===  'completed' ?  'UKOŃCZONY' :  'AKTYWNY';
-                       planPanel.style.backgroundColor =  data.status ===  'completed' ?  'green' :  'orange';
+                       planPanel.classList.remove('completed', 'active');
+                       planPanel.classList.add(isCompleted ? 'completed' : 'active');
+                       planPanel.textContent = data.status === 'completed' ? 'UKOŃCZONY' : 'AKTYWNY';
+                       planPanel.style.backgroundColor = data.status === 'completed' ? 'green' : 'orange';
 
                   }
-              }) .
-              catch(error = > console.error('Błąd:',  error));
+              })
+              .catch(error => console.error('Błąd:', error));
 
           }
       });
