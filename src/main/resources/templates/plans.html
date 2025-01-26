@@ -1,105 +1,146 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Moje Plany Treningowe</title>
     <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
+  body {
+  	font-family: Arial, sans-serif;
+  	margin: 20px;
+  }
 
-    .plans-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-    }
+  .plans-grid {
+  	display: grid;
+  	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  	gap: 20px;
+  }
 
-    .plan-panel {
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 20px;
-      background-color: #f9f9f9;
-      cursor: pointer;
-      text-align: center;
-    }
+  .plan-panel {
+  	border: 1px solid #ccc;
+  	border-radius: 10px;
+  	padding: 20px;
+  	background-color: #f9f9f9;
+  	cursor: pointer;
+  	text-align: center;
+  }
 
-    .plan-panel h3 {
-      color: #333;
-    }
+  .plan-panel h3 {
+  	color: #333;
+  }
 
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
+  .modal {
+  	display: none;
+  	position: fixed;
+  	top: 0;
+  	left: 0;
+  	width: 100%;
+  	height: 100%;
+  	background-color: rgba(0, 0, 0, .5);
+  	justify-content: center;
+  	align-items: center;
+  }
 
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 80%;
-      max-height: 80%;
-      overflow-y: auto;
-    }
+  .modal-content {
+  	background: white;
+  	padding: 20px;
+  	border-radius: 10px;
+  	width: 80%;
+  	max-height: 80%;
+  	overflow-y: auto;
+  }
 
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ddd;
-      margin-bottom: 20px;
-    }
+  .modal-header {
+  	display: flex;
+  	justify-content: space-between;
+  	align-items: center;
+  	border-bottom: 1px solid #ddd;
+  	margin-bottom: 20px;
+  }
 
-    .modal-header h3 {
-      margin: 0;
-    }
+  .modal-header h3 {
+  	margin: 0;
+  }
 
-    .close-modal {
-      cursor: pointer;
-      font-size: 20px;
-      color: red;
-    }
+  .close-modal {
+  	cursor: pointer;
+  	font-size: 20px;
+  	color: red;
+  }
 
-    .exercise {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 10px 0;
-    }
+  .exercise {
+  	display: flex;
+  	justify-content: space-between;
+  	align-items: center;
+  	margin: 10px 0;
+  }
 
-    .exercise button {
-      padding: 5px 10px;
-      font-size: 14px;
-    }
+  .exercise button {
+  	padding: 5px 10px;
+  	font-size: 14px;
+  }
 
-.status-icon {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+  .status-icon {
+  	display: flex;
+  	align-items: center;
+  	gap: 8px;
+  }
 
-.status-circle {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: red; /* Domyślnie czerwony (nieukończony) */
-}
+  .status-circle {
+  	width: 16px;
+  	height: 16px;
+  	border-radius: 50%;
+  	background-color: red;
+  }
 
-.status-icon.completed .status-circle {
-  background-color: green; /* Ukończony */
-}
+  .status-icon.completed .status-circle {
+  	background-color: green;
+  }
 
+  .status-icon.active .status-circle {
+  	background-color: orange;
+  }
 
+  -->
+  .plan-panel .status-container {
+  	margin-top: 10px;
+  }
 
+  .plan-panel .status-text {
+  	font-weight: bold;
+  	padding: 5px 10px;
+  	border-radius: 5px;
+  	color: white;
+  }
+
+  .plan-panel .status-text:empty {
+  	display: none;
+  }
+
+  .plan-panel .status-text[th\\:text="'UKOŃCZONY'"] {
+  	background-color: green;
+  }
+
+  .plan-panel .status-text[th\\:text="'AKTYWNY'"] {
+  	background-color: orange;
+  }
+
+  .status-text {
+  	font-weight: bold;
+  	padding: 5px 10px;
+  	border-radius: 5px;
+  	color: white;
+  }
+
+  .status-text.completed {
+  	background-color: green;
+  }
+
+  .status-text.active {
+  	background-color: orange;
+  }
   </style>
 </head>
+
 <body>
 <h2>Twoje Plany Treningowe</h2>
 <div class="plans-grid" th:if="${#lists.isEmpty(plans)}">
@@ -108,12 +149,23 @@
 <div class="plans-grid" th:each="plan : ${plans}">
     <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
         <h3 th:text="${plan.name}">Nazwa Planu</h3>
-        <p><strong>Opis:</strong> <span th:text="${plan.description}">Opis planu...</span></p>
-        <p><strong>Data:</strong> <span th:text="${plan.startDate}">2025-01-01</span> -
+        <p>
+            <strong>Opis:</strong>
+            <span th:text="${plan.description}">Opis planu...</span>
+        </p>
+        <p>
+            <strong>Data:</strong>
+            <span th:text="${plan.startDate}">2025-01-01</span>-
             <span th:text="${plan.endDate}">2025-01-15</span>
         </p>
+        <div class="status-container">
+            <p>
+                <strong>Status:</strong>
+                <span class="status-text" th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}" th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+          </span>
+            </p>
+        </div>
     </div>
-
     <!-- Modal dla szczegółów planu -->
     <div class="modal" th:data-plan-id="${plan.idPlan}">
         <div class="modal-content">
@@ -121,141 +173,183 @@
                 <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
                 <span class="close-modal">&times;</span>
             </div>
+            <div class="status-container">
+                <p>
+                    <strong>Status planu:</strong>
+                    <span id="plan-status" class="status-icon" th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
+              <span class="status-circle">
+              </span>
+            </span>
+                </p>
+            </div>
             <div th:each="day : ${plan.trainingPlanDays}">
                 <div th:data-day-id="${day.idDay}">
-
                     <h4>
-                        <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
-                        <span> - </span>
-                        <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
+              <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}">
+              </span>
+                        <span>-</span>
+                        <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}">
+              </span>
                     </h4>
-
                     <div class="status-container">
                         <p>
                             <strong>Status dnia:</strong>
                             <span id="day-status" class="status-icon" th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
-                <span class="status-circle"></span>
-            </span>
+                  <span class="status-circle">
+                  </span>
+                </span>
                         </p>
                     </div>
-                    <p><strong>Notatki:</strong> <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span></p>
+                    <p>
+                        <strong>Notatki:</strong>
+                        <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
+                    </p>
                     <ul>
                         <li class="exercise" th:each="exercise : ${day.exercises}">
-    <span>
-        <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span> -
-        <span th:text="${exercise.sets}">0</span> serie,
-        <span th:text="${exercise.reps}">0</span> powtórzeń,
-        <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
-    </span>
+                <span>
+                  <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span>-
+                  <span th:text="${exercise.sets}"></span>serie,
+                  <span th:text="${exercise.reps}"></span>powtórzeń,
+                  <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
+                </span>
                             <div class="status-container">
-        <span id="exercise-status" class="status-icon"
-              th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
-            <span class="status-circle"></span>
-        </span>
+                  <span id="exercise-status" class="status-icon" th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
+                    <span class="status-circle">
+                    </span>
+                  </span>
                             </div>
-                            <button
-                                    class="toggle-exercise-status"
-                                    th:data-exercise-id="${exercise.id}"
-                                    th:text="${exercise.status.name() == 'completed' ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}">
+                            <button class="toggle-exercise-status" th:data-exercise-id="${exercise.id}" th:text="${exercise.status.name() == 'completed' ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}">
                             </button>
                         </li>
-
-
                     </ul>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  // Otwieranie modali
-  document.querySelectorAll('.plan-panel').forEach(panel => {
-    panel.addEventListener('click', () => {
-      const planId = panel.getAttribute('data-plan-id');
-      const modal = document.querySelector(.modal[data-plan-id="${planId}"]);
-      modal.style.display = 'flex';
-    });
+  document.addEventListener('DOMContentLoaded',  function () {
+       // Otwieranie modali
+       document.querySelectorAll('.plan-panel').forEach(panel = > {
+           panel.addEventListener('click',  () = > {
+               const planId =  panel.getAttribute('data-plan-id');
+               const modal =  document.querySelector(`.modal[data - plan - id = "${planId}"]`);
+               modal.style.display =  'flex';
+
+          });
+
+      });
+       // Zamykanie modali
+       document.querySelectorAll('.close-modal').forEach(button = > {
+           button.addEventListener('click',  () = > {
+               const modal =  button.closest('.modal');
+               modal.style.display =  'none';
+
+          });
+
+      });
+       // Obsługa kliknięcia w przycisk ukończenia ćwiczenia
+      document.addEventListener('click',  function (event) {
+
+          if (event.target.matches('.toggle-exercise-status')) {
+               const exerciseId =  event.target.getAttribute('data-exercise-id');
+               const button =  event.target;
+               const currentStatus =  button.textContent.includes('Cofnij ukończenie') ?  false :  true;
+               fetch(` / update - exercise - status / $ {
+                  exerciseId
+              } ? completed = $ {
+                  currentStatus
+              }`,  {
+                   method:  'POST'
+              }) .then(response = > {
+
+                  if (!response.ok)
+                  throw new Error('Nie udało się zaktualizować statusu ćwiczenia.');
+
+                  return response.text();
+
+              }) .then(
+              () = > {
+                   button.textContent =  currentStatus ?  'Cofnij ukończenie' :  'Oznacz jako wykonane';
+                   const statusContainer =  button.closest('.exercise').querySelector('.status-icon');
+
+                  if (statusContainer) {
+                       statusContainer.classList.toggle('completed',  currentStatus);
+                       statusContainer.classList.toggle('not-completed',  ! currentStatus);
+
+                  } const dayElement =  button.closest('[data-day-id]');
+
+                  if (!dayElement) {
+                       console.error('Nie znaleziono elementu dnia.');
+
+                      return;
+
+                  } const dayId =  dayElement.getAttribute('data-day-id');
+
+                  return fetch(` / update - day - status / $ {
+                      dayId
+                  }`,  {
+                       method:  'POST'
+                  });
+
+              }) .then(response = > {
+
+                  if (!response.ok)
+                  throw new Error('Nie udało się zaktualizować statusu dnia.');
+
+                  return response.json();
+
+              }) .then(data = > {
+                   const dayStatusElement =  document.querySelector(` [data - day - id = "${data.dayId}"] .status - icon`);
+
+                  if (dayStatusElement) {
+                       dayStatusElement.classList.toggle('completed',  data.status ===  'completed');
+                       dayStatusElement.classList.toggle('not-completed',  data.status !==  'completed');
+
+                  } // Aktualizacja statusu planu po każdej zmianie statusu dnia
+                   const planId =  event.target.closest('.modal').getAttribute('data-plan-id');
+
+                  return fetch(` / update - plan - status / $ {
+                      planId
+                  }`,  {
+                       method:  'POST'
+                  });
+
+              }) .then(response = > {
+
+                  if (!response.ok)
+                  throw new Error('Nie udało się zaktualizować statusu planu.');
+
+                  return response.json();
+
+              }) .then(data = > {
+                   const planStatusElement =  document.querySelector(`.modal[data - plan - id = "${data.planId}"] #plan - status`);
+
+                  if (planStatusElement) {
+                       planStatusElement.classList.toggle('completed',  data.status ===  'completed');
+                       planStatusElement.classList.toggle('active',  data.status !==  'completed');
+
+                  } const planId =  data.planId;
+                   // Aktualizacja statusu na kafelku planu
+                   const planPanel =  document.querySelector(`.plan - panel[data - plan - id = "${planId}"] .status - text`);
+
+                  if (planPanel) {
+                       const isCompleted =  data.status ===  'completed';
+                       planPanel.textContent =  isCompleted ?  'UKOŃCZONY' :  'AKTYWNY';
+                       // Usuń istniejące klasy i dodaj odpowiednią
+                       planPanel.classList.remove('completed',  'active');
+                       planPanel.classList.add(isCompleted ?  'completed' :  'active');
+                       planPanel.textContent =  data.status ===  'completed' ?  'UKOŃCZONY' :  'AKTYWNY';
+                       planPanel.style.backgroundColor =  data.status ===  'completed' ?  'green' :  'orange';
+
+                  }
+              }) .
+              catch(error = > console.error('Błąd:',  error));
+
+          }
+      });
   });
-
-  // Zamykanie modali
-  document.querySelectorAll('.close-modal').forEach(button => {
-    button.addEventListener('click', () => {
-      const modal = button.closest('.modal');
-      modal.style.display = 'none';
-    });
-  });
-
-  // Obsługa kliknięcia w przycisk ukończenia ćwiczenia
- document.addEventListener('click', function (event) {
-    if (event.target.matches('.toggle-exercise-status')) {
-      const exerciseId = event.target.getAttribute('data-exercise-id');
-      const button = event.target;
-
-      // Sprawdzenie bieżącego statusu na podstawie tekstu przycisku
-      const currentStatus = button.textContent.includes('Cofnij ukończenie') ? false : true;
-
-      // Wywołanie API do zmiany statusu ćwiczenia
-      fetch(/update-exercise-status/${exerciseId}?completed=${currentStatus}, { method: 'POST' })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Nie udało się zaktualizować statusu ćwiczenia.');
-          }
-          return response.text();
-        })
-        .then(() => {
-          // Zmiana tekstu i stanu przycisku
-          button.textContent = currentStatus ? 'Cofnij ukończenie' : 'Oznacz jako wykonane';
-                              // Znalezienie kropki statusu ćwiczenia
-                    const statusContainer = button.closest('.exercise').querySelector('.status-icon');
-                    if (statusContainer) {
-                        if (currentStatus) {
-                            statusContainer.classList.add('completed');
-                            statusContainer.classList.remove('not-completed');
-                        } else {
-                            statusContainer.classList.add('not-completed');
-                            statusContainer.classList.remove('completed');
-                        }
-                    }
-
-          // Znalezienie ID dnia i aktualizacja jego statusu
-          const dayElement = button.closest('[data-day-id]');
-          if (!dayElement) {
-            console.error('Nie znaleziono elementu dnia.');
-            return;
-          }
-
-          const dayId = dayElement.getAttribute('data-day-id');
-          return fetch(/update-day-status/${dayId}, { method: 'POST' });
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Nie udało się zaktualizować statusu dnia.');
-          }
-          return response.json();
-        })
-        .then(data => {
-          // Zaktualizowanie statusu dnia w UI
-          const dayStatusElement = document.querySelector([data-day-id="${data.dayId}"] .status-icon);
-          if (dayStatusElement) {
-            if (data.status === 'completed') {
-              dayStatusElement.classList.add('completed');
-              dayStatusElement.classList.remove('not-completed');
-            } else {
-              dayStatusElement.classList.add('not-completed');
-              dayStatusElement.classList.remove('completed');
-            }
-          } else {
-            console.error('Nie znaleziono elementu .status-icon dla danego dnia.');
-          }
-        })
-        .catch(error => console.error('Błąd:', error));
-    }
-  });
-});
-
-</script>
+  </script>
 </body>
+
 </html>

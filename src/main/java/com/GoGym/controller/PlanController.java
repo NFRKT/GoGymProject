@@ -200,7 +200,23 @@ public class PlanController {
 
     @PostMapping("/update-plan-status/{planId}")
     @ResponseBody
-    public void updatePlanStatus(@PathVariable Long planId) {
-        trainingPlanService.updatePlanStatus(planId);
+    public Map<String, Object> getPlanStatus(@PathVariable Long planId) {
+        TrainingPlan plan = trainingPlanRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + planId));
+
+        // Sprawdzenie, czy wszystkie dni są ukończone
+        boolean allDaysCompleted = plan.getTrainingPlanDays().stream()
+                .allMatch(day -> day.getStatus() == TrainingPlanDay.Status.completed);
+
+        // Aktualizacja statusu planu
+        plan.setStatus(allDaysCompleted ? TrainingPlan.Status.completed : TrainingPlan.Status.active);
+        trainingPlanRepository.save(plan);
+
+        // Przygotowanie odpowiedzi
+        Map<String, Object> response = new HashMap<>();
+        response.put("planId", plan.getIdPlan());
+        response.put("status", plan.getStatus().name()); // Zwróć status jako string
+        return response;
     }
+
 }
