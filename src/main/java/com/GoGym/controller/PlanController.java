@@ -13,10 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 
@@ -43,6 +40,8 @@ public class PlanController {
     @GetMapping("/user-plans")
     public String getUserPlans(@RequestParam Long idUser, Model model) {
         List<TrainingPlan> plans = trainingPlanService.findPlansByIdClient(idUser);
+        // Sortowanie: ukończone plany na końcu
+        plans.sort(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed));
         model.addAttribute("plans", plans);
         return "plans"; // Zwraca widok plans.html
     }
@@ -218,5 +217,46 @@ public class PlanController {
         response.put("status", plan.getStatus().name()); // Zwróć status jako string
         return response;
     }
+
+//    @PostMapping("/update-rest-day-status/{dayId}")
+//    @ResponseBody
+//    public Map<String, Object> updateRestDayStatus(@PathVariable Long dayId, @RequestParam boolean completed) {
+//        TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
+//                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono dnia odpoczynku o ID: " + dayId));
+//
+//        // Zmiana statusu dnia odpoczynku
+//        day.setStatus(completed ? TrainingPlanDay.Status.completed : TrainingPlanDay.Status.notCompleted);
+//        trainingPlanDayRepository.save(day);
+//
+//        // Przygotowanie odpowiedzi
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("dayId", day.getIdDay());
+//        response.put("status", day.getStatus().name());
+//        return response;
+//    }
+@PostMapping("/update-rest-day-status/{dayId}")
+@ResponseBody
+public Map<String, Object> updateRestDayStatus(@PathVariable Long dayId) {
+    TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
+            .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono dnia odpoczynku o ID: " + dayId));
+
+    // Przełącz status dnia odpoczynku
+    TrainingPlanDay.Status newStatus = day.getStatus() == TrainingPlanDay.Status.completed
+            ? TrainingPlanDay.Status.notCompleted
+            : TrainingPlanDay.Status.completed;
+
+    day.setStatus(newStatus);
+    trainingPlanDayRepository.save(day);
+
+    // Przygotowanie odpowiedzi
+    Map<String, Object> response = new HashMap<>();
+    response.put("dayId", day.getIdDay());
+    response.put("status", newStatus.name());
+    return response;
+}
+
+
+
+
 
 }

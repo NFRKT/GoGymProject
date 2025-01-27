@@ -66,10 +66,19 @@ public class TrainingPlanService {
         boolean allExercisesCompleted = day.getExercises().stream()
                 .allMatch(exercise -> exercise.getStatus() == PlanExercise.Status.completed);
 
-        day.setStatus(allExercisesCompleted ? TrainingPlanDay.Status.completed : TrainingPlanDay.Status.notCompleted);
+        TrainingPlanDay.Status newStatus = allExercisesCompleted
+                ? TrainingPlanDay.Status.completed
+                : TrainingPlanDay.Status.notCompleted;
+
+        day.setStatus(newStatus);
         trainingPlanDayRepository.save(day);
+
+        // Debug
+        System.out.println("Zaktualizowano status dnia: " + dayId + " na " + newStatus);
+
         updatePlanStatus(day.getTrainingPlan().getIdPlan());
     }
+
 
 
     public void updatePlanStatus(Long planId) {
