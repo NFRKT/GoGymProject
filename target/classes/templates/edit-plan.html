@@ -2,34 +2,121 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Edytuj Plan Treningowy</title>
-    <meta charset="UTF-8">
+    <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .form-group input[type="date"] {
+      width: 48%;
+      display: inline-block;
+      margin-right: 4%;
+    }
+    .form-group input[type="number"] {
+      width: 48%;
+      display: inline-block;
+    }
+    .form-actions {
+      text-align: center;
+    }
+    .form-actions button {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .form-actions button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
+
 <body>
-<h1>Edytuj Plan Treningowy</h1>
-<form th:action="@{/trainer-plans/edit}" th:object="${trainingPlan}" method="post">
-    <input type="hidden" th:field="*{id}" />
+<h2>Edytuj Plan Treningowy</h2>
 
-    <label for="name">Nazwa planu:</label>
-    <input type="text" id="name" th:field="*{name}" required />
+<div class="form-container">
+    <form th:action="@{'/trainer-plans/update/' + ${plan.idPlan}}" method="post">
+        <!-- Nazwa planu -->
+        <div class="form-group">
+            <label for="name">Nazwa planu:</label>
+            <input type="text" id="name" name="name" th:value="${plan.name}" required />
+        </div>
 
-    <label for="description">Opis:</label>
-    <textarea id="description" th:field="*{description}" required></textarea>
+        <!-- Opis planu -->
+        <div class="form-group">
+            <label for="description">Opis planu:</label>
+            <textarea id="description" name="description" rows="4" required th:text="${plan.description}"></textarea>
+        </div>
 
-    <h3>Dni treningowe:</h3>
-    <div th:each="day, dayStat : *{trainingPlanDays}">
-        <div>
-            <label th:for="'day-' + ${dayStat.index}">Dzień: </label>
-            <input type="text" th:field="*{trainingPlanDays[__${dayStat.index}__].name}" />
+        <!-- Daty planu -->
+        <div class="form-group">
+            <label for="startDate">Data rozpoczęcia:</label>
+            <input type="date" id="startDate" name="startDate" th:value="${#dates.format(plan.startDate, 'yyyy-MM-dd')}" required />
+            <label for="endDate">Data zakończenia:</label>
+            <input type="date" id="endDate" name="endDate" th:value="${#dates.format(plan.endDate, 'yyyy-MM-dd')}" required />
+        </div>
 
-            <h4>Ćwiczenia:</h4>
-            <div th:each="exercise, exerciseStat : ${day.exercises}">
-                <label th:for="'exercise-' + ${exerciseStat.index}">Ćwiczenie:</label>
-                <input type="text" th:field="*{trainingPlanDays[__${dayStat.index}__].exercises[__${exerciseStat.index}__].name}" />
+        <!-- Edycja dni -->
+        <div class="form-group">
+            <label>Wybierz dni:</label>
+            <div th:each="day : ${plan.trainingPlanDays}">
+                <div class="form-group">
+                    <label th:for="'day' + ${day.idDay}">Dzień treningowy (ID: ${day.idDay}):</label>
+                    <input type="date" th:id="'day' + ${day.idDay}" th:name="'days[' + ${day.idDay} + '].date'" th:value="${#dates.format(day.date, 'yyyy-MM-dd')}" required />
+                    <label th:for="dayType">Typ dnia:</label>
+                    <select th:name="'days[' + ${day.idDay} + '].dayType'" required>
+                        <option th:value="${T(com.GoGym.module.TrainingPlanDay.DayType).training}" th:selected="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training}">Dzień treningowy</option>
+                        <option th:value="${T(com.GoGym.module.TrainingPlanDay.DayType).regeneration}" th:selected="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).regeneration}">Dzień regeneracji</option>
+                    </select>
+                </div>
             </div>
         </div>
-    </div>
 
-    <button type="submit">Zapisz zmiany</button>
-</form>
+<!--        &lt;!&ndash; Edycja ćwiczeń &ndash;&gt;-->
+<!--        <div class="form-group">-->
+<!--            <label>Ćwiczenia:</label>-->
+<!--            <div th:each="exercise : ${plan.exercises}">-->
+<!--                <div class="form-group">-->
+<!--                    <label th:for="'exercise' + ${exercise.idExercise}">Ćwiczenie (ID: ${exercise.idExercise}):</label>-->
+<!--                    <input type="text" th:id="'exercise' + ${exercise.idExercise}" th:name="'exercises[' + ${exercise.idExercise} + '].name'" th:value="${exercise.name}" required />-->
+<!--                    <label for="sets">Serie:</label>-->
+<!--                    <input type="number" th:id="'sets' + ${exercise.idExercise}" th:name="'exercises[' + ${exercise.idExercise} + '].sets'" th:value="${exercise.sets}" required />-->
+<!--                    <label for="reps">Powtórzenia:</label>-->
+<!--                    <input type="number" th:id="'reps' + ${exercise.idExercise}" th:name="'exercises[' + ${exercise.idExercise} + '].reps'" th:value="${exercise.reps}" required />-->
+<!--                    <label for="weight">Obciążenie:</label>-->
+<!--                    <input type="number" th:id="'weight' + ${exercise.idExercise}" th:name="'exercises[' + ${exercise.idExercise} + '].weight'" th:value="${exercise.weight}" />-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="form-actions">
+            <button type="submit">Zapisz zmiany</button>
+        </div>
+    </form>
+</div>
+
 </body>
 </html>

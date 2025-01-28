@@ -45,10 +45,18 @@ public class TrainingPlan {
     @OneToMany(mappedBy = "trainingPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TrainingPlanDay> trainingPlanDays;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_client", insertable = false, updatable = false)
+    private User client;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_trainer", insertable = false, updatable = false)
+    private User trainer;
+
     public TrainingPlan() {
     }
 
-    public TrainingPlan(Long idPlan, String name, LocalDate startDate, LocalDate endDate, String description, Status status, Long idTrainer, Long idClient, List<PlanExercise> exercises, List<TrainingPlanDay> trainingPlanDays) {
+    public TrainingPlan(Long idPlan, String name, LocalDate startDate, LocalDate endDate, String description, Status status, Long idTrainer, Long idClient, List<PlanExercise> exercises, List<TrainingPlanDay> trainingPlanDays, User client, User trainer) {
         this.idPlan = idPlan;
         this.name = name;
         this.startDate = startDate;
@@ -59,6 +67,8 @@ public class TrainingPlan {
         this.idClient = idClient;
         this.exercises = exercises;
         this.trainingPlanDays = trainingPlanDays;
+        this.client = client;
+        this.trainer = trainer;
     }
 
     public Long getIdPlan() {
@@ -139,5 +149,9 @@ public class TrainingPlan {
     public void setTrainingPlanDays(List<TrainingPlanDay> trainingPlanDays) {
         this.trainingPlanDays = trainingPlanDays;
     }
+    public User getClient(){ return client;}
+    public void setClient(User client){this.client=client;}
+    public User getTrainer(){ return trainer;}
+    public void setTrainer(User trainer){this.trainer=trainer;}
 }
 

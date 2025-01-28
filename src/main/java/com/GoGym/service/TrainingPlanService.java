@@ -79,8 +79,6 @@ public class TrainingPlanService {
         updatePlanStatus(day.getTrainingPlan().getIdPlan());
     }
 
-
-
     public void updatePlanStatus(Long planId) {
         TrainingPlan plan = trainingPlanRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + planId));
@@ -91,6 +89,5 @@ public class TrainingPlanService {
         plan.setStatus(allDaysCompleted ? TrainingPlan.Status.completed : TrainingPlan.Status.active);
         trainingPlanRepository.save(plan);
     }
-
 
 }

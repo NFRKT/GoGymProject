@@ -157,6 +157,10 @@
             <span th:text="${plan.startDate}">2025-01-01</span>-
             <span th:text="${plan.endDate}">2025-01-15</span>
         </p>
+        <p>
+            <strong>Trener:</strong>
+            <span th:text="${plan.trainer.firstName + ' ' + plan.trainer.secondName}">Imię i Nazwisko</span>
+        </p>
         <div class="status-container">
             <p>
                 <strong>Status:</strong>
@@ -229,7 +233,6 @@
                     </ul>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

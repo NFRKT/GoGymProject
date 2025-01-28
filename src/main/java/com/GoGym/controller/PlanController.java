@@ -43,15 +43,18 @@ public class PlanController {
         // Sortowanie: ukończone plany na końcu
         plans.sort(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed));
         model.addAttribute("plans", plans);
-        return "plans"; // Zwraca widok plans.html
+        return "user-plans"; // Zwraca widok user-plans.html
     }
 
     @GetMapping("/trainer-plans")
     public String getTrainerPlans(@RequestParam Long idUser, Model model) {
         List<TrainingPlan> plans = trainingPlanService.findPlansByIdTrainer(idUser);
+        plans.sort(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed));
         model.addAttribute("plans", plans);
-        return "plans"; // Zwraca widok plans.html
+        model.addAttribute("idUser", idUser);
+        return "trainer-plans";
     }
+
 
     @GetMapping("/{id}/create-plan")
     public String createPlan(@PathVariable Long id, Model model, Authentication authentication) {
@@ -218,45 +221,64 @@ public class PlanController {
         return response;
     }
 
-//    @PostMapping("/update-rest-day-status/{dayId}")
-//    @ResponseBody
-//    public Map<String, Object> updateRestDayStatus(@PathVariable Long dayId, @RequestParam boolean completed) {
-//        TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
-//                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono dnia odpoczynku o ID: " + dayId));
-//
-//        // Zmiana statusu dnia odpoczynku
-//        day.setStatus(completed ? TrainingPlanDay.Status.completed : TrainingPlanDay.Status.notCompleted);
-//        trainingPlanDayRepository.save(day);
-//
-//        // Przygotowanie odpowiedzi
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("dayId", day.getIdDay());
-//        response.put("status", day.getStatus().name());
-//        return response;
-//    }
-@PostMapping("/update-rest-day-status/{dayId}")
-@ResponseBody
-public Map<String, Object> updateRestDayStatus(@PathVariable Long dayId) {
-    TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
-            .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono dnia odpoczynku o ID: " + dayId));
+    @PostMapping("/update-rest-day-status/{dayId}")
+    @ResponseBody
+    public Map<String, Object> updateRestDayStatus(@PathVariable Long dayId) {
+        TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono dnia odpoczynku o ID: " + dayId));
 
-    // Przełącz status dnia odpoczynku
-    TrainingPlanDay.Status newStatus = day.getStatus() == TrainingPlanDay.Status.completed
-            ? TrainingPlanDay.Status.notCompleted
-            : TrainingPlanDay.Status.completed;
+        // Przełącz status dnia odpoczynku
+        TrainingPlanDay.Status newStatus = day.getStatus() == TrainingPlanDay.Status.completed
+                ? TrainingPlanDay.Status.notCompleted
+                : TrainingPlanDay.Status.completed;
 
-    day.setStatus(newStatus);
-    trainingPlanDayRepository.save(day);
+        day.setStatus(newStatus);
+        trainingPlanDayRepository.save(day);
 
-    // Przygotowanie odpowiedzi
-    Map<String, Object> response = new HashMap<>();
-    response.put("dayId", day.getIdDay());
-    response.put("status", newStatus.name());
-    return response;
-}
+        // Przygotowanie odpowiedzi
+        Map<String, Object> response = new HashMap<>();
+        response.put("dayId", day.getIdDay());
+        response.put("status", newStatus.name());
+        return response;
+    }
+    @GetMapping("/trainer-plans/edit/{id}")
+    public String editPlan(@PathVariable Long id, @RequestParam Long idUser, Model model) {
+        // Pobierz plan treningowy na podstawie ID
+        TrainingPlan plan = trainingPlanRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + id));
 
+        // Dodaj plan do modelu
+        model.addAttribute("plan", plan);
 
+        // Dodaj idUser do modelu
+        model.addAttribute("idUser", idUser);
 
+        // Dodaj listę ćwiczeń do modelu
+        List<Exercise> exercises = exerciseRepository.findAll();
+        model.addAttribute("exercises", exercises);
+
+        return "edit-plan"; // Wyświetlenie widoku edit-plan.html
+    }
+
+    @PostMapping("/trainer-plans/update/{id}")
+    public String updatePlan(@PathVariable Long id,
+                             @RequestParam String name,
+                             @RequestParam String description,
+                             @RequestParam Long idUser) { // Dodaj idUser jako parametr
+        // Pobierz plan
+        TrainingPlan plan = trainingPlanRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + id));
+
+        // Zaktualizuj dane
+        plan.setName(name);
+        plan.setDescription(description);
+
+        // Zapisz zmiany
+        trainingPlanRepository.save(plan);
+
+        // Dodaj idUser do przekierowania
+        return "redirect:/trainer-plans?idUser=" + idUser;
+    }
 
 
 }

@@ -2,34 +2,49 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Edytuj Plan Treningowy</title>
-    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        .submit-button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 <h1>Edytuj Plan Treningowy</h1>
-<form th:action="@{/trainer-plans/edit}" th:object="${trainingPlan}" method="post">
-    <input type="hidden" th:field="*{id}" />
-
-    <label for="name">Nazwa planu:</label>
-    <input type="text" id="name" th:field="*{name}" required />
-
-    <label for="description">Opis:</label>
-    <textarea id="description" th:field="*{description}" required></textarea>
-
-    <h3>Dni treningowe:</h3>
-    <div th:each="day, dayStat : *{trainingPlanDays}">
-        <div>
-            <label th:for="'day-' + ${dayStat.index}">Dzień: </label>
-            <input type="text" th:field="*{trainingPlanDays[__${dayStat.index}__].name}" />
-
-            <h4>Ćwiczenia:</h4>
-            <div th:each="exercise, exerciseStat : ${day.exercises}">
-                <label th:for="'exercise-' + ${exerciseStat.index}">Ćwiczenie:</label>
-                <input type="text" th:field="*{trainingPlanDays[__${dayStat.index}__].exercises[__${exerciseStat.index}__].name}" />
-            </div>
-        </div>
+<form th:action="@{'/trainer-plans/update/' + ${plan.idPlan}}" method="post">
+    <input type="hidden" name="idUser" th:value="${idUser}">
+    <div class="form-group">
+        <label for="name">Nazwa Planu:</label>
+        <input type="text" id="name" name="name" th:value="${plan.name}" required>
     </div>
-
-    <button type="submit">Zapisz zmiany</button>
+    <div class="form-group">
+        <label for="description">Opis:</label>
+        <textarea id="description" name="description" th:text="${plan.description}" required></textarea>
+    </div>
+    <!-- Dodaj inne pola potrzebne do edycji -->
+    <button type="submit" class="submit-button">Zapisz zmiany</button>
 </form>
 </body>
 </html>
