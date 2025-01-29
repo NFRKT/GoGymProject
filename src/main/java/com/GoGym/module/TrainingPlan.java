@@ -1,5 +1,6 @@
 package com.GoGym.module;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -40,9 +41,11 @@ public class TrainingPlan {
     private Long idClient;
 
     @OneToMany(mappedBy = "trainingPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
     private List<PlanExercise> exercises;
 
     @OneToMany(mappedBy = "trainingPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
     private List<TrainingPlanDay> trainingPlanDays;
 
     @ManyToOne(fetch = FetchType.LAZY)

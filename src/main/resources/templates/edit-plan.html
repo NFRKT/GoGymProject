@@ -34,17 +34,109 @@
 <body>
 <h1>Edytuj Plan Treningowy</h1>
 <form th:action="@{'/trainer-plans/update/' + ${plan.idPlan}}" method="post">
-    <input type="hidden" name="idUser" th:value="${idUser}">
-    <div class="form-group">
-        <label for="name">Nazwa Planu:</label>
-        <input type="text" id="name" name="name" th:value="${plan.name}" required>
+
+    <div>
+        <label>Nazwa Planu:</label>
+        <input type="text" th:name="name" th:value="${plan.name}" required>
     </div>
-    <div class="form-group">
-        <label for="description">Opis:</label>
-        <textarea id="description" name="description" th:text="${plan.description}" required></textarea>
+    <div>
+        <label>Opis:</label>
+        <textarea th:name="description" th:text="${plan.description}" required></textarea>
     </div>
-    <!-- Dodaj inne pola potrzebne do edycji -->
-    <button type="submit" class="submit-button">Zapisz zmiany</button>
+    <div id="day-list">
+        <h3>Dni w Planie:</h3>
+        <div th:each="day, dayIndex : ${plan.trainingPlanDays}" class="day-row">
+            <input type="hidden" th:name="dayIds[${dayIndex}]" th:value="${day.idDay}" />
+            <label>Typ Dnia</label>
+            <select th:name="dayType[]" required>
+                <option value="training" th:selected="${day.dayType == 'training'}">Treningowy</option>
+                <option value="rest" th:selected="${day.dayType == 'rest'}">Odpoczynek</option>
+            </select>
+            <label>Notatki:</label>
+            <input type="text" th:name="notes[]" th:value="${day.notes}" />
+
+            <div class="exercise-section">
+                <h4>Ćwiczenia:</h4>
+                <div class="exercise-list">
+                    <div th:each="exercise, exIndex : ${day.exercises}" class="exercise-row">
+                        <input type="hidden" th:name="exerciseIds[${dayIndex}][${exIndex}]" th:value="${exercise.id}" />
+                        <input type="hidden" th:name="exerciseDays[${dayIndex}][${exIndex}]" th:value="${dayIndex}" />
+                        <select th:name="exerciseIds[${dayIndex}][${exIndex}]" required>
+                            <option value="" disabled>Wybierz ćwiczenie</option>
+                            <option th:each="ex : ${exercises}" th:value="${ex.idExercise}" th:selected="${exercise.exercise.idExercise == ex.idExercise}" th:text="${ex.name}"></option>
+                        </select>
+                        <input type="number" th:name="sets[${dayIndex}][${exIndex}]" th:value="${exercise.sets}" required />
+                        <input type="number" th:name="reps[${dayIndex}][${exIndex}]" th:value="${exercise.reps}" required />
+                        <input type="number" th:name="weight[${dayIndex}][${exIndex}]" th:value="${exercise.weight}" />
+                        <button type="button" onclick="removeExerciseRow(this)">Usuń</button>
+                    </div>
+                </div>
+                <button type="button" onclick="addExerciseRow(this, ${dayIndex})">Dodaj Ćwiczenie</button>
+            </div>
+            <button type="button" onclick="removeDayRow(this)">Usuń Dzień</button>
+        </div>
+
+    </div>
+    <button type="button" onclick="addDayRow()">Dodaj Dzień</button>
+    <button type="submit">Zapisz Zmiany</button>
 </form>
+
+
+<script>
+    let exercises = /*[[${exercises}]]*/ [];
+
+    function addDayRow() {
+        const dayIndex = document.querySelectorAll('.day-row').length;
+        const newDay = `
+            <div class="day-row">
+                <input type="hidden" name="dayIds[]" value="">
+                <label>Typ Dnia:</label>
+                <select name="dayType[]" required>
+                    <option value="training">Treningowy</option>
+                    <option value="rest">Odpoczynek</option>
+                </select>
+                <label>Notatki:</label>
+                <input type="text" name="notes[]">
+                <div class="exercise-section">
+                    <h4>Ćwiczenia:</h4>
+                    <div class="exercise-list"></div>
+                    <button type="button" onclick="addExerciseRow(this, ${dayIndex})">Dodaj Ćwiczenie</button>
+                </div>
+                <button type="button" onclick="removeDayRow(this)">Usuń Dzień</button>
+            </div>`;
+        document.getElementById('day-list').insertAdjacentHTML('beforeend', newDay);
+    }
+
+    function addExerciseRow(button, dayIndex) {
+        const exerciseList = button.closest('.exercise-section').querySelector('.exercise-list');
+        const newExercise = `
+            <div class="exercise-row">
+                <input type="hidden" name="exerciseIds[]" value="">
+                <input type="hidden" name="exerciseDays[]" value="${dayIndex}">
+                <label>Ćwiczenie:</label>
+                <select name="exerciseIds[]" required>
+                    <option value="" disabled selected>Wybierz ćwiczenie</option>
+                    ${exercises.map(ex => `<option value="${ex.idExercise}">${ex.name}</option>`).join('')}
+                </select>
+                <label>Serie:</label>
+                <input type="number" name="sets[]" min="1" required>
+                <label>Powtórzenia:</label>
+                <input type="number" name="reps[]" min="1" required>
+                <label>Ciężar:</label>
+                <input type="number" name="weight[]" min="0">
+                <button type="button" onclick="removeExerciseRow(this)">Usuń</button>
+            </div>`;
+        exerciseList.insertAdjacentHTML('beforeend', newExercise);
+    }
+
+    function removeDayRow(button) {
+        button.closest('.day-row').remove();
+    }
+
+    function removeExerciseRow(button) {
+        button.closest('.exercise-row').remove();
+    }
+</script>
+
 </body>
 </html>

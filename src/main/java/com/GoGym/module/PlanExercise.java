@@ -1,5 +1,6 @@
 package com.GoGym.module;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -30,6 +31,7 @@ public class PlanExercise {
 
     @ManyToOne
     @JoinColumn(name = "id_plan", nullable = false)
+    @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
     private TrainingPlan trainingPlan;
 
     @ManyToOne
@@ -38,6 +40,7 @@ public class PlanExercise {
 
     @ManyToOne
     @JoinColumn(name = "id_day", nullable = false)
+    @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
     private TrainingPlanDay trainingPlanDay;
 
 
