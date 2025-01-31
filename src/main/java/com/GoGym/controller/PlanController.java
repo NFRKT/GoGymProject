@@ -34,13 +34,18 @@ public class PlanController {
     private final PlanExerciseRepository planExerciseRepository;
     private final TrainingPlanDayRepository trainingPlanDayRepository;
     private final TrainingService trainingService;
+    private final TrainerClientService trainerClientService;
 
     @GetMapping("/user-plans")
     public String getUserPlans(@RequestParam Long idUser, Model model) {
         List<TrainingPlan> plans = trainingPlanService.findPlansByIdClient(idUser);
         // Sortowanie: ukończone plany na końcu
         plans.sort(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed));
+        List<TrainerClient> clientTrainers = trainerClientService.getClientTrainers(idUser); // Pobranie klientów trenera
+        List<User> trainers = clientTrainers.stream().map(TrainerClient::getTrainer).toList(); // Przekształcenie na listę użytkowników
+
         model.addAttribute("plans", plans);
+        model.addAttribute("trainers", trainers);  // Dodanie klientów do modelu
         return "user-plans"; // Zwraca widok user-plans.html
     }
 
@@ -48,8 +53,13 @@ public class PlanController {
     public String getTrainerPlans(@RequestParam Long idUser, Model model) {
         List<TrainingPlan> plans = trainingPlanService.findPlansByIdTrainer(idUser);
         plans.sort(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed));
+
+        List<TrainerClient> trainerClients = trainerClientService.getTrainerClients(idUser); // Pobranie klientów trenera
+        List<User> clients = trainerClients.stream().map(TrainerClient::getClient).toList(); // Przekształcenie na listę użytkowników
+
         model.addAttribute("plans", plans);
-        model.addAttribute("idUser", idUser);
+        model.addAttribute("clients", clients);  // Dodanie klientów do modelu
+
         return "trainer-plans";
     }
 

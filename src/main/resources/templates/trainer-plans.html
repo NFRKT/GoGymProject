@@ -4,7 +4,7 @@
 <head>
   <title>Moje Plany Treningowe</title>
   <style>
-    body {
+    .body {
       font-family: Arial, sans-serif;
       margin: 20px;
     }
@@ -76,166 +76,211 @@
     }
 
 
-.status-icon {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+    .status-icon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-.status-circle {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: red; /* Domyślnie czerwony (nieukończony) */
-}
+    .status-circle {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: red; /* Domyślnie czerwony (nieukończony) */
+    }
 
-.status-icon.completed .status-circle {
-  background-color: green; /* Ukończony */
-}
+    .status-icon.completed .status-circle {
+      background-color: green; /* Ukończony */
+    }
 
-.status-icon.active .status-circle {
-  background-color: orange; /* Kolor dla aktywnych planów */
-}
-.plan-panel .status-container {
-  margin-top: 10px;
-}
+    .status-icon.active .status-circle {
+      background-color: orange; /* Kolor dla aktywnych planów */
+    }
+    .plan-panel .status-container {
+      margin-top: 10px;
+    }
 
-.plan-panel .status-text {
-  font-weight: bold;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: white;
-}
+    .plan-panel .status-text {
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: white;
+    }
 
-.plan-panel .status-text:empty {
-  display: none;
-}
+    .plan-panel .status-text:empty {
+      display: none;
+    }
 
-.plan-panel .status-text[th\\:text="'UKOŃCZONY'"] {
-  background-color: green;
-}
+    .plan-panel .status-text[th\\:text="'UKOŃCZONY'"] {
+      background-color: green;
+    }
 
-.plan-panel .status-text[th\\:text="'AKTYWNY'"] {
-  background-color: orange;
-}
-.status-text {
-  font-weight: bold;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: white;
-}
+    .plan-panel .status-text[th\\:text="'AKTYWNY'"] {
+      background-color: orange;
+    }
+    .status-text {
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: white;
+    }
 
-.status-text.completed {
-  background-color: green; /* Tło dla statusu UKOŃCZONY */
-}
+    .status-text.completed {
+      background-color: green; /* Tło dla statusu UKOŃCZONY */
+    }
 
-.status-text.active {
-  background-color: orange; /* Tło dla statusu AKTYWNY */
-}
-.edit-button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    margin-top: 10px;
-}
+    .status-text.active {
+      background-color: orange; /* Tło dla statusu AKTYWNY */
+    }
+    .edit-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007BFF;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
 
-.edit-button:hover {
-    background-color: #0056b3;
-}
+    .edit-button:hover {
+        background-color: #0056b3;
+    }
+    .reset-button {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+    }
 
-
-  </style>
+    .reset-button:hover {
+      background-color: #5a6268;
+    }
+    </style>
 </head>
-
 <body>
+<div>
+  <input type="text" id="searchInput" placeholder="Szukaj nazwy planu..." onkeyup="filterPlans()">
+  <label for="dateFilter">Data rozpoczęcia:</label>
+  <input type="date" id="dateFilter" onchange="filterPlans()">
+  <label for="clientSelect">Klient:</label>
+  <select id="clientSelect" onchange="filterPlans()">
+    <option value="">Wszyscy klienci</option>
+    <option th:each="client : ${clients}"
+            th:value="${client.firstName + ' ' + client.secondName}"
+            th:text="${client.firstName + ' ' + client.secondName}">
+    </option>
+  </select>
+  <select id="sortSelect" onchange="sortPlans()">
+    <option value="default" selected>Sortuj według...</option>
+    <option value="name">Sortuj według nazwy</option>
+    <option value="startDate">Sortuj według daty rozpoczęcia</option>
+    <option value="status">Sortuj według statusu</option>
+  </select>
+  <label>
+    <input type="checkbox" id="hideCompletedPlans" onchange="filterPlans()"> Ukryj ukończone plany
+  </label>
+  <button onclick="resetFilters()" class="reset-button">Resetuj filtry</button>
+</div>
 <h2>Twoje Plany Treningowe</h2>
 <div class="plans-grid" th:if="${#lists.isEmpty(plans)}">
   <p>Brak dostępnych planów treningowych.</p>
 </div>
-<div class="plans-grid" th:each="plan : ${plans}">
-  <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
-    <h3 th:text="${plan.name}">Nazwa Planu</h3>
-    <p>
-      <strong>Opis:</strong>
-      <span th:text="${plan.description}">Opis planu...</span>
-    </p>
-    <p>
-      <strong>Data:</strong>
-      <span th:text="${plan.startDate}">2025-01-01</span>-
-      <span th:text="${plan.endDate}">2025-01-15</span>
-    </p>
-    <p>
-      <strong>Klient:</strong>
-      <span th:text="${plan.client.firstName + ' ' + plan.client.secondName}">Imię i Nazwisko</span>
-    </p>
-    <div class="status-container">
+<div class="plans-grid">
+  <div class="plan-each" th:each="plan : ${plans}">
+    <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
+      <h3 class="plan-name" th:text="${plan.name}">Nazwa Planu</h3>
       <p>
-        <strong>Status:</strong>
-        <span class="status-text"
-              th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
-              th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
-            </span>
+        <strong>Opis:</strong>
+        <span th:text="${plan.description}">Opis planu...</span>
       </p>
-    </div>
-    <!-- Nowy przycisk edycji -->
-    <div>
-      <a th:href="@{'/trainer-plans/edit/' + ${plan.idPlan}}" class="edit-button">Edytuj</a>
-    </div>
-  </div>
-
-  <!-- Modal dla szczegółów planu -->
-  <div class="modal" th:data-plan-id="${plan.idPlan}">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
-        <span class="close-modal">&times;</span>
-      </div>
+      <p>
+        <strong>Data:</strong>
+        <span class="start-date" th:text="${plan.startDate}">Data startu</span>-
+        <span th:text="${plan.endDate}">Data końca</span>
+      </p>
+      <p>
+        <strong>Klient:</strong>
+        <span class="client-name" th:text="${plan.client.firstName + ' ' + plan.client.secondName}">Imię i Nazwisko</span>
+      </p>
       <div class="status-container">
         <p>
-          <strong>Status planu:</strong>
-          <span id="plan-status" class="status-icon" th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
-              <span class="status-circle">
-              </span>
-            </span>
+          <strong>Status:</strong>
+          <span class="status-text"
+                th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
+                th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+                    </span>
         </p>
       </div>
-      <div th:each="day : ${plan.trainingPlanDays}">
-        <div th:data-day-id="${day.idDay}">
-          <h4>
-            <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
-            <span>-</span>
-            <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
-          </h4>
-          <div class="status-container">
-            <p>
-              <strong>Status dnia:</strong>
-              <span id="day-status" class="status-icon" th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
-                    <span class="status-circle"></span>
-                </span>
-            </p>
-          </div>
+      <!-- Nowy przycisk edycji -->
+      <div>
+        <a th:href="@{'/trainer-plans/edit/' + ${plan.idPlan}}" class="edit-button">Edytuj</a>
+      </div>
+      <div>
+        <form th:action="@{'/trainer-plans/delete/' + ${plan.idPlan}}" method="post"
+              onsubmit="return confirm('Czy na pewno chcesz usunąć ten plan?');">
+          <button type="submit" class="delete-button"
+                  style="background-color: #dc3545; color: white; padding: 10px 20px; border-radius: 5px;">
+            Usuń
+          </button>
+        </form>
+      </div>
+    </div>
+    <!-- Modal dla szczegółów planu -->
+    <div class="modal" th:data-plan-id="${plan.idPlan}">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="status-container">
           <p>
-            <strong>Notatki:</strong>
-            <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
+            <strong>Status planu:</strong>
+            <span id="plan-status" class="status-icon"
+                  th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
+                          <span class="status-circle"></span>
+                        </span>
           </p>
-          <ul>
-            <li class="exercise" th:each="exercise : ${day.exercises}">
-                <span>
-                    <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span>-
-                    <span th:text="${exercise.sets}"></span> serie,
-                    <span th:text="${exercise.reps}"></span> powtórzeń,
-                    <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
-                </span>
-              <div class="status-container">
-                    <span id="exercise-status" class="status-icon" th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
-                        <span class="status-circle"></span>
-                    </span>
-              </div>
-            </li>
-          </ul>
+        </div>
+        <div th:each="day : ${plan.trainingPlanDays}">
+          <div th:data-day-id="${day.idDay}">
+            <h4>
+              <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
+              <span>-</span>
+              <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
+            </h4>
+            <div class="status-container">
+              <p>
+                <strong>Status dnia:</strong>
+                <span id="day-status" class="status-icon"
+                      th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
+                                  <span class="status-circle"></span>
+                                </span>
+              </p>
+            </div>
+            <p>
+              <strong>Notatki:</strong>
+              <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
+            </p>
+            <ul>
+              <li class="exercise" th:each="exercise : ${day.exercises}">
+                                <span>
+                                    <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span>-
+                                    <span th:text="${exercise.sets}"></span> serie,
+                                    <span th:text="${exercise.reps}"></span> powtórzeń,
+                                    <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
+                                </span>
+                <div class="status-container">
+                                <span id="exercise-status" class="status-icon"
+                                      th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
+                                    <span class="status-circle"></span>
+                                </span>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -243,6 +288,7 @@
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        originalPlansOrder = Array.from(document.querySelectorAll(".plan-each"));
         // Otwieranie modali
         document.querySelectorAll('.plan-panel').forEach(panel => {
             panel.addEventListener('click', () => {
@@ -259,11 +305,77 @@
                 modal.style.display = 'none';
             });
         });
+    });
+   function filterPlans() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let selectedDate = document.getElementById("dateFilter").value;
+        let selectedClient = document.getElementById("clientSelect").value.toLowerCase();
+        let plans = document.querySelectorAll(".plan-each");
+        let hideCompleted = document.getElementById("hideCompletedPlans").checked;
+        plans.forEach(plan => {
+            let planName = plan.querySelector(".plan-name").innerText.toLowerCase();
+            let startDate = plan.querySelector(".start-date").innerText.trim();
+            let clientName = plan.querySelector(".client-name").innerText.toLowerCase();
+            let statusText = plan.querySelector(".status-text").innerText.toLowerCase();
+            let isCompleted = statusText.includes("ukończony");
+            let matchesSearch = planName.includes(input);
+            let matchesDate = selectedDate === "" || startDate === selectedDate;
+            let matchesClient = selectedClient === "" || clientName.includes(selectedClient);
+            if (matchesSearch && matchesDate && matchesClient && (!hideCompleted || !isCompleted)) {
+                plan.style.display = "block";
+            } else {
+                plan.style.display = "none";
+            }
+        });
+    }
 
+function sortPlans() {
+    let sortBy = document.getElementById("sortSelect").value;
+    let container = document.querySelector(".plans-grid");
+    let plans = Array.from(document.querySelectorAll(".plan-each"));
+
+    // Posortowanie planów
+    plans.sort((a, b) => {
+        if (sortBy === "name") {
+            let nameA = a.querySelector(".plan-name").innerText;
+            let nameB = b.querySelector(".plan-name").innerText;
+            return naturalSort(nameA, nameB);
+        } else if (sortBy === "startDate") {
+            let dateA = new Date(a.querySelector(".start-date").innerText.trim());
+            let dateB = new Date(b.querySelector(".start-date").innerText.trim());
+            return dateA - dateB;
+        } else if (sortBy === "status") {
+            return a.querySelector(".status-text").innerText.localeCompare(b.querySelector(".status-text").innerText);
+        }
     });
 
+    // Zresetowanie zawartości plans-grid
+    container.innerHTML = '';
+
+    // Dodanie posortowanych elementów z powrotem do DOM
+    plans.forEach(plan => container.appendChild(plan));
+    }
+
+
+        function naturalSort(a, b) {
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+    }
+    let originalPlansOrder = []; // Przechowuje oryginalny układ planów
+
+
+    function resetFilters() {
+        // Resetuj pole wyszukiwania
+        document.getElementById("searchInput").value = "";
+        document.getElementById("dateFilter").value = "";
+        document.getElementById("sortSelect").value = "default";
+        document.getElementById("clientSelect").value = "";
+        document.getElementById("hideCompletedPlans").checked = false;
+        let container = document.querySelector(".plans-grid");
+        container.innerHTML = ""; // Wyczyść obecne plany
+        originalPlansOrder.forEach(plan => container.appendChild(plan));
+        let plans = document.querySelectorAll(".plan-each");
+        plans.forEach(plan => plan.style.display = "block");
+    }
 </script>
-
 </body>
-
 </html>
