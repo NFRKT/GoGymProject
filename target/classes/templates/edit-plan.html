@@ -1,144 +1,229 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Edytuj Plan Treningowy</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
-        .submit-button {
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            text-decoration: none;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edycja planu treningowego</title>
 </head>
 <body>
-<h1>Edytuj Plan Treningowy</h1>
-<form th:action="@{'/trainer-plans/update/' + ${plan.idPlan}}" method="post">
+<h1>Edycja planu treningowego</h1>
 
+<form id="edit-plan-form">
     <div>
-        <label>Nazwa Planu:</label>
-        <input type="text" th:name="name" th:value="${plan.name}" required>
+        <label for="name">Nazwa planu:</label>
+        <input type="text" id="name" name="name" th:value="${plan.name}" required>
     </div>
     <div>
-        <label>Opis:</label>
-        <textarea th:name="description" th:text="${plan.description}" required></textarea>
+        <label for="description">Opis planu:</label>
+        <textarea id="description" name="description" th:text="${plan.description}"></textarea>
     </div>
-    <div id="day-list">
-        <h3>Dni w Planie:</h3>
-        <div th:each="day, dayIndex : ${plan.trainingPlanDays}" class="day-row">
-            <input type="hidden" name="dayIds[${dayIndex}]" th:value="${dayIds[dayIndex]}"/>
 
-            <label>Typ Dnia</label>
-            <select th:name="dayType[${dayIndex}]" required>
-                <option value="training" th:selected="${day.dayType == 'training'}">Treningowy</option>
-                <option value="rest" th:selected="${day.dayType == 'rest'}">Odpoczynek</option>
-            </select>
-            <label>Notatki:</label>
-            <input type="text" th:name="notes[${dayIndex}]" th:value="${day.notes}" />
+    <input type="hidden" id="planId" th:value="${plan.idPlan}" />
 
-            <div class="exercise-section">
-                <h4>Ćwiczenia:</h4>
-                <div class="exercise-list">
-                    <div th:each="exercise, exIndex : ${day.exercises}" class="exercise-row">
-                        <input type="hidden" th:name="exerciseIds[${dayIndex}][${exIndex}]" th:value="${exercise.id}" />
-                        <input type="hidden" th:name="exerciseDays[${dayIndex}][${exIndex}]" th:value="${dayIndex}" />
-                        <select th:name="exerciseIds[${dayIndex}][${exIndex}]" required>
-                            <option value="" disabled>Wybierz ćwiczenie</option>
-                            <option th:each="ex : ${exercises}" th:value="${ex.idExercise}" th:selected="${exercise.exercise.idExercise == ex.idExercise}" th:text="${ex.name}"></option>
-                        </select>
-                        <input type="number" th:name="sets[${dayIndex}][${exIndex}]" th:value="${exercise.sets}" required />
-                        <input type="number" th:name="reps[${dayIndex}][${exIndex}]" th:value="${exercise.reps}" required />
-                        <input type="number" th:name="weight[${dayIndex}][${exIndex}]" th:value="${exercise.weight}" />
-                        <button type="button" onclick="removeExerciseRow(this)">Usuń</button>
-                    </div>
+    <h2>Dni planu</h2>
+    <div id="days-container">
+        <div th:each="day, dayStat : ${plan.trainingPlanDays}">
+            <div class="day" th:data-day-id="${day.idDay}">
+                <input type="hidden" name="dayIds[]" th:value="${day.idDay}">
+
+                <div>
+                    <label for="dayType-${dayStat.index}">Typ dnia:</label>
+                    <select name="dayType[]" id="dayType-${dayStat.index}">
+                        <option value="training" th:selected="${day.dayType == 'training'}">Trening</option>
+                        <option value="rest" th:selected="${day.dayType == 'rest'}">Odpoczynek</option>
+                    </select>
                 </div>
-                <button type="button" onclick="addExerciseRow(this, ${dayIndex})">Dodaj Ćwiczenie</button>
-            </div>
-            <button type="button" onclick="removeDayRow(this)">Usuń Dzień</button>
-        </div>
 
+                <div>
+                    <label for="notes-${dayStat.index}">Notatki:</label>
+                    <textarea name="notes[]" id="notes-${dayStat.index}" th:text="${day.notes}"></textarea>
+                </div>
+
+                <div>
+                    <h3>Ćwiczenia dnia</h3>
+                    <div class="exercises">
+                        <div th:each="exercise, exerciseStat : ${day.exercises}">
+                            <div class="exercise">
+                                <input type="hidden" name="exerciseIds[${dayStat.index}][]" th:value="${exercise.idExercise}">
+                                <div>
+                                    <label>Ćwiczenie:</label>
+                                    <select name="exerciseIds[${dayStat.index}][]">
+                                        <option th:each="e : ${exercises}"
+                                                th:value="${e.idExercise}"
+                                                th:selected="${e.idExercise == exercise.idExercise}"
+                                                th:text="${e.name}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label th:for="'sets-' + ${dayStat.index} + '-' + ${exerciseStat.index}">Serie:</label>
+                                    <input type="number" name="sets[${dayStat.index}][]" th:value="${exercise.sets}" required>
+                                </div>
+
+                                <div>
+                                    <label th:for="'reps-' + ${dayStat.index} + '-' + ${exerciseStat.index}">Powtórzenia:</label>
+                                    <input type="number" name="reps[${dayStat.index}][]" th:value="${exercise.reps}" required>
+                                </div>
+
+                                <div>
+                                    <label th:for="'weight-' + ${dayStat.index} + '-' + ${exerciseStat.index}">Obciążenie (kg):</label>
+                                    <input type="number" name="weight[${dayStat.index}][]" th:value="${exercise.weight}" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" th:onclick="|addExerciseToDay(${day.idDay})|">Dodaj ćwiczenie</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <button type="button" onclick="addDayRow()">Dodaj Dzień</button>
-    <button type="submit">Zapisz Zmiany</button>
+
+    <button type="button" onclick="addNewDay()">Dodaj nowy dzień</button>
+    <br>
+
+    <button type="submit">Zapisz zmiany</button>
 </form>
 
+<script th:inline="javascript">
+    /*[[${exercises}]]*/ // This is the Thymeleaf expression placeholder
+
+    // Make sure that exercises is a valid JavaScript array
+    var exercises = /*[[${exercises}]]*/ [];
+
+    // Funkcja do dodania ćwiczenia do dnia
+    window.addExerciseToDay = function(dayId) {
+        console.log("addExerciseToDay called with dayId:", dayId);
+
+        const exercisesContainer = document.querySelector(
+            `#days-container .day[data-day-id="${dayId}"] .exercises`
+        );
+
+        if (exercisesContainer) {
+            console.log("Exercises container found:", exercisesContainer);
+
+            const exerciseOptions = exercises.map(e =>
+                `<option value="${e.idExercise}">${e.name}</option>`
+            ).join('');
+
+            const newExercise = `
+            <div class="exercise">
+                <div>
+                    <label>Ćwiczenie:</label>
+                    <select name="exerciseIds[${dayId}][]">
+                        ${exerciseOptions}
+                    </select>
+                </div>
+                <div>
+                    <label>Serie:</label>
+                    <input type="number" name="sets[${dayId}][]" required>
+                </div>
+                <div>
+                    <label>Powtórzenia:</label>
+                    <input type="number" name="reps[${dayId}][]" required>
+                </div>
+                <div>
+                    <label>Obciążenie (kg):</label>
+                    <input type="number" name="weight[${dayId}][]" required>
+                </div>
+            </div>
+        `;
+            exercisesContainer.insertAdjacentHTML('beforeend', newExercise);
+        } else {
+            console.log("Could not find exercises container for dayId:", dayId);
+        }
+    };
 
 
-<script>
-    let exercises = /*[[${exercises}]]*/ [];
 
-    function addDayRow() {
-        const dayIndex = document.querySelectorAll('.day-row').length;
+
+
+    // Funkcja do dodania nowego dnia do planu
+    function addNewDay() {
+        const daysContainer = document.getElementById('days-container');
+        const newDayIndex = daysContainer.children.length;
+
+        console.log("Adding new day with index:", newDayIndex); // Log the index
+
         const newDay = `
-            <div class="day-row">
-                <input type="hidden" name="dayIds[]" value="">
-                <label>Typ Dnia:</label>
-                <select name="dayType[]" required>
-                    <option value="training">Treningowy</option>
+        <div class="day" data-day-id="${newDayIndex}">
+            <div>
+                <label for="dayType-${newDayIndex}">Typ dnia:</label>
+                <select name="dayType[]" id="dayType-${newDayIndex}">
+                    <option value="training">Trening</option>
                     <option value="rest">Odpoczynek</option>
                 </select>
-                <label>Notatki:</label>
-                <input type="text" name="notes[]">
-                <div class="exercise-section">
-                    <h4>Ćwiczenia:</h4>
-                    <div class="exercise-list"></div>
-                    <button type="button" onclick="addExerciseRow(this, ${dayIndex})">Dodaj Ćwiczenie</button>
+            </div>
+
+            <div>
+                <label for="notes-${newDayIndex}">Notatki:</label>
+                <textarea name="notes[]" id="notes-${newDayIndex}"></textarea>
+            </div>
+
+            <div>
+                <h3>Ćwiczenia dnia</h3>
+                <div class="exercises">
+                    <!-- Dynamically add exercises for this day -->
                 </div>
-                <button type="button" onclick="removeDayRow(this)">Usuń Dzień</button>
-            </div>`;
-        document.getElementById('day-list').insertAdjacentHTML('beforeend', newDay);
+                <button type="button" onclick="addExerciseToDay(${newDayIndex})">Dodaj ćwiczenie</button>
+            </div>
+        </div>
+    `;
+        daysContainer.insertAdjacentHTML('beforeend', newDay);
     }
 
-    function addExerciseRow(button, dayIndex) {
-        const exerciseList = button.closest('.exercise-section').querySelector('.exercise-list');
-        const newExercise = `
-            <div class="exercise-row">
-                <input type="hidden" name="exerciseIds[]" value="">
-                <input type="hidden" name="exerciseDays[]" value="${dayIndex}">
-                <label>Ćwiczenie:</label>
-                <select name="exerciseIds[]" required>
-                    <option value="" disabled selected>Wybierz ćwiczenie</option>
-                    ${exercises.map(ex => `<option value="${ex.idExercise}">${ex.name}</option>`).join('')}
-                </select>
-                <label>Serie:</label>
-                <input type="number" name="sets[]" min="1" required>
-                <label>Powtórzenia:</label>
-                <input type="number" name="reps[]" min="1" required>
-                <label>Ciężar:</label>
-                <input type="number" name="weight[]" min="0">
-                <button type="button" onclick="removeExerciseRow(this)">Usuń</button>
-            </div>`;
-        exerciseList.insertAdjacentHTML('beforeend', newExercise);
-    }
 
-    function removeDayRow(button) {
-        button.closest('.day-row').remove();
-    }
 
-    function removeExerciseRow(button) {
-        button.closest('.exercise-row').remove();
+    var exercises = /*[[${exercises}]]*/ [];
+
+    document.getElementById('edit-plan-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = collectFormData();
+        const planId = document.getElementById('planId').value;
+
+        fetch(`/trainer-plans/update/${planId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.ok ? alert('Zapisano zmiany!') : alert('Wystąpił błąd'))
+            .catch(error => console.error('Error:', error));
+    });
+
+    function collectFormData() {
+        const planData = {
+            idPlan: document.getElementById('planId').value,
+            name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            trainingPlanDays: []
+        };
+
+        document.querySelectorAll('#days-container .day').forEach(dayElem => {
+            const dayData = {
+                idDay: dayElem.dataset.dayId,
+                dayType: dayElem.querySelector('select[name="dayType[]"]').value,
+                notes: dayElem.querySelector('textarea[name="notes[]"]').value,
+                exercises: []
+            };
+
+            dayElem.querySelectorAll('.exercise').forEach(exerciseElem => {
+                const exerciseData = {
+                    idExercise: exerciseElem.querySelector('select[name^="exerciseIds"]').value,
+                    sets: exerciseElem.querySelector('input[name^="sets"]').value,
+                    reps: exerciseElem.querySelector('input[name^="reps"]').value,
+                    weight: exerciseElem.querySelector('input[name^="weight"]').value
+                };
+                dayData.exercises.push(exerciseData);
+            });
+
+            planData.trainingPlanDays.push(dayData);
+        });
+
+        return planData;
     }
 </script>
-
 </body>
 </html>

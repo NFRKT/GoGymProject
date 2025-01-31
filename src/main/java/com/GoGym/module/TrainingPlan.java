@@ -1,10 +1,13 @@
 package com.GoGym.module;
 
+import com.GoGym.dto.TrainingPlanDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "training_plans")
@@ -50,10 +53,12 @@ public class TrainingPlan {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_client", insertable = false, updatable = false)
+    @JsonIgnore
     private User client;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_trainer", insertable = false, updatable = false)
+    @JsonIgnore
     private User trainer;
 
     public TrainingPlan() {
@@ -156,5 +161,17 @@ public class TrainingPlan {
     public void setClient(User client){this.client=client;}
     public User getTrainer(){ return trainer;}
     public void setTrainer(User trainer){this.trainer=trainer;}
+
+    public static TrainingPlan updateTrainingPlan(TrainingPlan trainingPlan, TrainingPlanDTO dto) {
+        trainingPlan.setDescription(Objects.nonNull(dto.getDescription()) ? dto.getDescription() : trainingPlan.getDescription());
+        trainingPlan.setStartDate(Objects.nonNull(dto.getStartDate()) ? dto.getStartDate() : trainingPlan.getStartDate());
+        trainingPlan.setEndDate(Objects.nonNull(dto.getEndDate()) ? dto.getEndDate() : trainingPlan.getEndDate());
+        trainingPlan.setEndDate(Objects.nonNull(dto.getEndDate()) ? dto.getEndDate() : trainingPlan.getEndDate());
+        trainingPlan.setName(Objects.nonNull(dto.getName()) ? dto.getName() : trainingPlan.getName());
+
+        return trainingPlan;
+    }
+
+
 }
 

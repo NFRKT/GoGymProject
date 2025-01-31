@@ -1,13 +1,17 @@
 package com.GoGym.module;
 
+import com.GoGym.dto.TrainingPlanDayDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "training_plan_days")
+@Data
 public class TrainingPlanDay {
 
     @Id
@@ -112,4 +116,26 @@ public class TrainingPlanDay {
     public void setDate(LocalDate date) {
         this.date = date;
     }
+
+    @Override
+    public String toString() {
+        return "TrainingPlanDay{" +
+                "idDay=" + idDay +
+                ", dayType=" + dayType +
+                ", status=" + status +
+                ", notes='" + notes + '\'' +
+                ", date=" + date +
+                ", exercises=" + (exercises != null ? exercises.size() + " exercises" : "none") +
+                ", trainingPlanId=" + (trainingPlan != null ? trainingPlan.getIdPlan() : "none") +
+                '}';
+    }
+
+    public static TrainingPlanDay updateTrainingPlanDay(TrainingPlanDay trainingPlanDay, TrainingPlanDayDTO dto) {
+        trainingPlanDay.setDate(Objects.nonNull(dto.getDate()) ? dto.getDate() : trainingPlanDay.getDate());
+        trainingPlanDay.setNotes(Objects.nonNull(dto.getNotes()) ? dto.getNotes() : trainingPlanDay.getNotes());
+        trainingPlanDay.setDayType(Objects.nonNull(dto.getDayType()) ? DayType.valueOf(String.valueOf(dto.getDayType())) : trainingPlanDay.getDayType());
+
+        return trainingPlanDay;
+    }
+
 }

@@ -1,10 +1,16 @@
 package com.GoGym.module;
 
+import com.GoGym.dto.ExerciseDTO;
+import com.GoGym.dto.TrainingPlanDayDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 
 @Entity
 @Table(name = "plan_exercises")
+@Data
+@Builder
 public class PlanExercise {
 
     @Id
@@ -120,5 +126,28 @@ public class PlanExercise {
 
     public void setTrainingPlanDay(TrainingPlanDay trainingPlanDay) {
         this.trainingPlanDay = trainingPlanDay;
+    }
+
+    public static PlanExercise toPlanExercise(ExerciseDTO dto, TrainingPlan trainingPlan, TrainingPlanDay trainingPlanDay, Exercise exercise) {
+        return PlanExercise.builder()
+                .reps(dto.getReps())
+                .sets(dto.getSets())
+                //todo uzupelnic status jak bedzie na formularzu
+                .status(Status.notCompleted)
+                .trainingPlan(trainingPlan)
+                .trainingPlanDay(trainingPlanDay)
+                .weight((int) dto.getWeight())
+                .exercise(exercise)
+                .build();
+
+    }
+
+    public static PlanExercise updatePlanExercise(PlanExercise planExercise, Exercise exercise, ExerciseDTO dto) {
+        planExercise.setReps(dto.getReps());
+        planExercise.setSets(dto.getSets());
+        planExercise.setStatus(Status.notCompleted);
+        planExercise.setWeight((int) dto.getWeight());
+        planExercise.setExercise(exercise);
+        return planExercise;
     }
 }
