@@ -158,7 +158,7 @@
         </option>
     </select>
     <select id="sortSelect" onchange="sortPlans()">
-        <option value="default" selected>Sortuj według...</option>
+        <option value="">Sortuj według...</option>
         <option value="name">Sortuj według nazwy</option>
         <option value="startDate">Sortuj według daty rozpoczęcia</option>
         <option value="status">Sortuj według statusu</option>
@@ -327,7 +327,7 @@ function sortPlans() {
         // Resetuj pole wyszukiwania
         document.getElementById("searchInput").value = "";
         document.getElementById("dateFilter").value = "";
-        document.getElementById("sortSelect").value = "default";
+        document.getElementById("sortSelect").value = "";
         document.getElementById("trainerSelect").value = "";
         document.getElementById("hideCompletedPlans").checked = false;
         let container = document.querySelector(".plans-grid");
@@ -341,19 +341,37 @@ function sortPlans() {
         // Otwieranie modali
         document.querySelectorAll('.plan-panel').forEach(panel => {
             panel.addEventListener('click', () => {
+                // Sprawdza, czy kliknięty element jest przyciskiem lub linkiem
+                if (event.target.closest("button") || event.target.closest("a")) {
+                    return; // Jeśli kliknięto przycisk lub link, nie otwieramy modala
+                }
                 const planId = panel.getAttribute('data-plan-id');
                 const modal = document.querySelector(`.modal[data-plan-id="${planId}"]`);
                 modal.style.display = 'flex';
             });
         });
 
-        // Zamykanie modali
-        document.querySelectorAll('.close-modal').forEach(button => {
-            button.addEventListener('click', () => {
-                const modal = button.closest('.modal');
-                modal.style.display = 'none';
-            });
+        // Obsługa zamykania modali: kliknięcie na X, kliknięcie poza modalem, ESC
+        document.addEventListener('click', (event) => {
+            const modal = event.target.closest('.modal'); // Sprawdza, czy kliknięto modal
+            if (
+                event.target.classList.contains('close-modal') || // Kliknięcie w X
+                (modal && event.target === modal) // Kliknięcie poza zawartością modala
+            ) {
+                closeModal(modal);
+            }
         });
+
+        // Zamykanie modali po naciśnięciu ESC
+        document.addEventListener('keydown', (event) => {
+            if (event.key === "Escape") {
+                document.querySelectorAll('.modal').forEach(closeModal);
+            }
+        });
+
+        function closeModal(modal) {
+            if (modal) modal.style.display = 'none';
+        }
 
 
         // Obsługa kliknięcia w przycisk zmiany statusu ćwiczenia lub dnia odpoczynku

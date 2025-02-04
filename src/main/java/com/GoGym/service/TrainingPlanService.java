@@ -90,4 +90,18 @@ public class TrainingPlanService {
         trainingPlanRepository.save(plan);
     }
 
+    public void deleteTrainingPlan(Long planId) {
+        TrainingPlan plan = trainingPlanRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + planId));
+
+        // Usuń powiązane ćwiczenia i dni
+        for (TrainingPlanDay day : plan.getTrainingPlanDays()) {
+            planExerciseRepository.deleteAll(day.getExercises());  // Usuń ćwiczenia z danego dnia
+            trainingPlanDayRepository.delete(day);  // Usuń dzień
+        }
+
+        trainingPlanRepository.delete(plan);  // Usuń plan
+    }
+
+
 }

@@ -13,6 +13,7 @@ import com.GoGym.service.TrainingService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -297,17 +298,20 @@ public class PlanController {
         }
 
     @PutMapping("/trainer-plans/update/{id}")
-    public String updatePlan(@PathVariable Long id, @RequestBody TrainingPlanDTO trainingPlanDTO) {
-        log.info(trainingPlanDTO.toString());
+    public ResponseEntity<?> updatePlan(@PathVariable Long id, @RequestBody TrainingPlanDTO trainingPlanDTO) {
+        log.info("Otrzymano żądanie edycji planu ID: " + id);
         TrainingPlan trainingPlan = trainingService.updateTrainingPlan(id, trainingPlanDTO);
 
-
-        return "redirect:/trainer-plans?idUser=" + trainingPlan.getTrainer().getIdUser();
+        return ResponseEntity.ok(trainingPlan);
     }
-
-
-
-
-
+    @PostMapping("/trainer-plans/delete/{id}")
+    public ResponseEntity<?> deletePlan(@PathVariable Long id) {
+        try {
+            trainingPlanService.deleteTrainingPlan(id);
+            return ResponseEntity.ok().body("Plan został usunięty.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Błąd podczas usuwania planu: " + e.getMessage());
+        }
+    }
 
 }

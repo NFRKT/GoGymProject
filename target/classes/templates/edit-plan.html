@@ -133,11 +133,6 @@
             console.log("Could not find exercises container for dayId:", dayId);
         }
     };
-
-
-
-
-
     // Funkcja do dodania nowego dnia do planu
     function addNewDay() {
         const daysContainer = document.getElementById('days-container');
@@ -216,11 +211,13 @@
                     reps: exerciseElem.querySelector('input[name^="reps"]').value,
                     weight: exerciseElem.querySelector('input[name^="weight"]').value
                 };
+
                 dayData.exercises.push(exerciseData);
             });
 
             planData.trainingPlanDays.push(dayData);
         });
+        console.log("Wysyłane dane:", JSON.stringify(planData, null, 2));
 
         return planData;
     }
