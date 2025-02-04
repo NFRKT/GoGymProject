@@ -1,4 +1,5 @@
 package com.GoGym.module;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
@@ -37,15 +38,19 @@ public class User {
     private UserType userType;
 
     @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<Request> receivedRequests; // Zgłoszenia do trenera
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<Request> sentRequests; // Zgłoszenia wysłane przez klienta
 
     @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<TrainerClient> clients; // Klienci przypisani do trenera
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<TrainerClient> trainers; // Trener przypisany do klienta
     public enum Gender {
         KOBIETA, MĘŻCZYZNA

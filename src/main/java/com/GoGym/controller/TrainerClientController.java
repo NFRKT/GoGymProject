@@ -6,12 +6,15 @@ import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.RequestService;
 import com.GoGym.service.TrainerClientService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class TrainerClientController {
@@ -81,32 +84,40 @@ public class TrainerClientController {
         model.addAttribute("requests", requestService.getRequestsForTrainer(trainerId));
         return "trainer-panel";
     }
-    @PostMapping("/rejectTrainer")
-    public String rejectTrainer(@RequestParam Long trainerId, Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User loggedInUser = userDetails.getUser();
-
-        // Znajdź relację klient-trener
-        TrainerClient trainerClient = trainerClientRepository.findByTrainer_IdUserAndClient_IdUser(trainerId, loggedInUser.getIdUser())
-                .orElseThrow(() -> new IllegalArgumentException("Nie masz przypisanego tego trenera"));
-
-        // Usuń relację
-        trainerClientRepository.delete(trainerClient);
-
-        return "redirect:/client-panel";
-    }
     @PostMapping("/rejectClient")
-    public String rejectClient(@RequestParam Long clientId, Authentication authentication) {
+    public ResponseEntity<Map<String, String>> rejectClient(@RequestParam Long clientId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
 
-        // Znajdź relację klient-trener
         TrainerClient trainerClient = trainerClientRepository.findByTrainer_IdUserAndClient_IdUser(loggedInUser.getIdUser(), clientId)
                 .orElseThrow(() -> new IllegalArgumentException("Nie masz przypisanego tego klienta"));
 
-        // Usuń relację
         trainerClientRepository.delete(trainerClient);
 
-        return "redirect:/trainer-panel";
+        // Zwracamy JSON zamiast pustej odpowiedzi
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Klient został usunięty");
+
+        return ResponseEntity.ok(response);
     }
+
+
+    @PostMapping("/rejectTrainer")
+    public ResponseEntity<Map<String, String>> rejectTrainer(@RequestParam Long trainerId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
+
+        TrainerClient trainerClient = trainerClientRepository.findByTrainer_IdUserAndClient_IdUser(trainerId, loggedInUser.getIdUser())
+                .orElseThrow(() -> new IllegalArgumentException("Nie masz przypisanego tego trenera"));
+
+        trainerClientRepository.delete(trainerClient);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("trainerId", String.valueOf(trainerId));
+
+        return ResponseEntity.ok(response);
+    }
+
 }

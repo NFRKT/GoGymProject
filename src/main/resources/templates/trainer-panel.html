@@ -36,7 +36,7 @@
 <h2>Panel Trenera</h2>
 <a href="/home" class="w3-button w3-light-grey">Powrót na stronę główną</a>
 <h3>Twoi klienci:</h3>
-<table>
+<table id="clients-table">
   <thead>
   <tr>
     <th>Imię</th>
@@ -49,15 +49,17 @@
     <td th:text="${client.client.firstName}"></td>
     <td th:text="${client.client.secondName}"></td>
     <td>
-      <form th:action="@{/rejectClient}" method="post">
+      <form th:action="@{/rejectClient}" method="post" class="remove-client-form">
         <input type="hidden" name="clientId" th:value="${client.client.idUser}" />
         <button type="submit">Zrezygnuj ze współpracy</button>
       </form>
       <a th:href="@{/{id}/create-plan(id=${client.client.idUser})}">Stwórz plan</a>
     </td>
   </tr>
+
   </tbody>
 </table>
+
 
 <h3>Nowe zgłoszenia:</h3>
 <table>
@@ -71,17 +73,82 @@
   <tr th:each="request : ${requests}">
     <td th:text="${request.client.firstName}"></td>
     <td>
-      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post">
+      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post" class="update-request-form">
         <input type="hidden" name="status" value="accepted">
         <button type="submit">Akceptuj</button>
       </form>
-      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post">
+      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post" class="update-request-form">
         <input type="hidden" name="status" value="rejected">
         <button type="submit">Odrzuć</button>
       </form>
     </td>
   </tr>
+
   </tbody>
 </table>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Akceptowanie/Odrzucanie prośby – działa OK
+        document.querySelectorAll(".update-request-form").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                let formData = new FormData(this);
+                let formElement = this;
+
+                fetch(this.action, {
+                    method: "POST",
+                    body: formData
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.firstName && data.secondName) {
+                        let newRow = document.createElement("tr");
+                        newRow.innerHTML = `
+                            <td>${data.firstName}</td>
+                            <td>${data.secondName}</td>
+                            <td>
+                                <form action="/rejectClient" method="post" class="remove-client-form">
+                                    <input type="hidden" name="clientId" value="${data.id}">
+                                    <button type="submit">Zrezygnuj ze współpracy</button>
+                                </form>
+                                <a href="/${data.id}/create-plan">Stwórz plan</a>
+                            </td>
+                        `;
+
+                        document.querySelector("#clients-table tbody").appendChild(newRow);
+                        attachRemoveClientListener(newRow.querySelector(".remove-client-form"));
+                    }
+                    formElement.closest("tr").remove();
+                })
+                .catch(error => console.error("Błąd:", error));
+            });
+        });
+
+        // Usuwanie klienta (AJAX)
+        function attachRemoveClientListener(form) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault(); // Zapobiegamy przeładowaniu
+                let formElement = this;
+
+                fetch(this.action, {
+                    method: "POST",
+                    body: new FormData(this)
+                }).then(response => {
+                    if (response.ok) {
+                        formElement.closest("tr").remove(); // Usuwa klienta z listy
+                    } else {
+                        alert("Błąd przy usuwaniu klienta.");
+                    }
+                }).catch(error => console.error("Błąd:", error));
+            });
+        }
+
+        // Dodajemy obsługę dla wszystkich istniejących formularzy "Zrezygnuj ze współpracy"
+        document.querySelectorAll(".remove-client-form").forEach(form => {
+            attachRemoveClientListener(form);
+        });
+
+    });
+</script>
 </body>
 </html>

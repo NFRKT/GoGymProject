@@ -46,7 +46,7 @@ public class TrainingPlanDay {
     private LocalDate date;
 
     @OneToMany(mappedBy = "trainingPlanDay", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
+    @JsonIgnore
     private List<PlanExercise> exercises;
 
     public TrainingPlanDay() {

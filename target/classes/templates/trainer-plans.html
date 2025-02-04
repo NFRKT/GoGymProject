@@ -295,7 +295,7 @@
         // Otwieranie modali
         document.querySelectorAll('.plan-panel').forEach(panel => {
             panel.addEventListener('click', () => {
-                        // Sprawdza, czy kliknięty element jest przyciskiem lub linkiem
+                // Sprawdza, czy kliknięty element jest przyciskiem lub linkiem
                 if (event.target.closest("button") || event.target.closest("a")) {
                     return; // Jeśli kliknięto przycisk lub link, nie otwieramy modala
                 }

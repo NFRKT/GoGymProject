@@ -1,5 +1,6 @@
 package com.GoGym.module;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 
@@ -16,10 +17,12 @@ public class Request {
 
     @ManyToOne
     @JoinColumn(name = "id_trainer", nullable = false)
+    @JsonIgnore
     private User trainer;
 
     @ManyToOne
     @JoinColumn(name = "id_client", nullable = false)
+    @JsonIgnore
     private User client;
 
     @Column(name = "status", nullable = true)
