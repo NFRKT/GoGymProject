@@ -13,7 +13,7 @@ public class User {
     @Column(name = "id_user")
     private Long idUser;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "password")

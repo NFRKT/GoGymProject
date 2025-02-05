@@ -1,9 +1,13 @@
 package com.GoGym.dto;
 
 import com.GoGym.module.User;
+import com.GoGym.module.TrainerDetails;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 public class UserRegistrationDTO {
     private String email;
     private String password;
@@ -11,13 +15,20 @@ public class UserRegistrationDTO {
     private String secondName;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
-    private User.Gender gender;
-    private User.UserType userType;
+    private String gender;
+    private String userType;
+
+    // Pola dla trenerów
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date startDate;
+    private String phoneNumber;
+    private String workArea;
+    private List<String> specializations = new ArrayList<>();
 
     public UserRegistrationDTO() {}
 
     public UserRegistrationDTO(String email, String password, String firstName, String secondName,
-                               Date birthDate, User.Gender gender, User.UserType userType) {
+                               Date birthDate, String gender, String userType, Date startDate, String phoneNumber, String workArea, List<String> specializations) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
@@ -25,6 +36,10 @@ public class UserRegistrationDTO {
         this.birthDate = birthDate;
         this.gender = gender;
         this.userType = userType;
+        this.startDate = startDate;
+        this.phoneNumber = phoneNumber;
+        this.workArea = workArea;
+        this.specializations = specializations;
     }
 
     public String getEmail() {return email;}
@@ -65,19 +80,47 @@ public class UserRegistrationDTO {
         this.birthDate = birthDate;
     }
 
-    public User.Gender getGender() {
+    public String getGender() {
         return gender;
     }
 
-    public void setGender(User.Gender gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 
-    public User.UserType getUserType() {
+    public String getUserType() {
         return userType;
     }
 
-    public void setUserType(User.UserType userType) {
+    public void setUserType(String userType) {
         this.userType = userType;
     }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getWorkArea() {
+        return workArea;
+    }
+
+    public void setWorkArea(String workArea) {
+        this.workArea = workArea;
+    }
+
+    public List<String> getSpecializations() { return specializations; }
+    public void setSpecializations(List<String> specializations) { this.specializations = specializations; }
+
 }

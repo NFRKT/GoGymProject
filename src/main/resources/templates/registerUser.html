@@ -54,29 +54,23 @@
       <h2>Rejestracja użytkownika</h2>
       <form id="registrationForm" th:action="@{/register}" th:object="${User}" method="post">
         <label for="Email">Email:</label>
-        <input class="w3-input w3-border" type="text" id="Email" th:field="*{email}" />
+        <input class="w3-input w3-border" type="text" id="Email" th:field="*{email}" required/>
         <div id="emailError" class="error-message"></div><br/>
 
         <label for="Password">Hasło:</label>
-        <input class="w3-input w3-border" type="password" id="Password" th:field="*{password}" />
+        <input class="w3-input w3-border" type="password" id="Password" th:field="*{password}" required/>
         <div id="passwordError" class="error-message"></div><br/>
 
         <label for="First_name">Imię:</label>
-        <input class="w3-input w3-border" type="text" id="First_name" th:field="*{firstName}" />
+        <input class="w3-input w3-border" type="text" id="First_name" th:field="*{firstName}" required/>
         <div id="firstNameError" class="error-message"></div><br/>
 
         <label for="Second_name">Nazwisko:</label>
-        <input class="w3-input w3-border" type="text" id="Second_name" th:field="*{secondName}" />
+        <input class="w3-input w3-border" type="text" id="Second_name" th:field="*{secondName}" required/>
         <div id="secondNameError" class="error-message"></div><br/>
 
         <label for="BirthDate">Data urodzenia:</label>
-        <input class="w3-input w3-border" type="date" id="BirthDate" th:field="*{birthDate}" /><br/>
-
-        <label for="UserType">Typ użytkownika:</label>
-        <select class="w3-input w3-border" id="UserType" th:field="*{userType}">
-          <option value="USER">Użytkownik</option>
-          <option value="TRAINER">Trener</option>
-        </select><br/>
+        <input class="w3-input w3-border" type="date" id="BirthDate" th:field="*{birthDate}" required/><br/>
 
         <label for="Gender">Płeć:</label>
         <select class="w3-input w3-border" id="Gender" th:field="*{gender}">
@@ -84,7 +78,33 @@
           <option value="MĘŻCZYZNA">Mężczyzna</option>
         </select><br/>
 
+        <label for="UserType">Typ użytkownika:</label>
+        <select class="w3-input w3-border" id="UserType" th:field="*{userType}">
+          <option value="UŻYTKOWNIK">Użytkownik</option>
+          <option value="TRENER">Trener</option>
+        </select><br/>
 
+        <!-- Sekcja widoczna tylko dla trenerów -->
+        <div id="trainerFields" style="display: none;">
+
+          <label for="StartDate">Data rozpoczęcia działalności:</label>
+          <input class="w3-input w3-border" type="date" id="StartDate" th:field="*{startDate}" required/><br/>
+
+          <label for="PhoneNumber">Numer kontaktowy:</label>
+          <input class="w3-input w3-border" type="text" id="PhoneNumber" th:field="*{phoneNumber}" required/><br/>
+
+          <label for="WorkArea">Obszar pracy:</label>
+          <input class="w3-input w3-border" type="text" id="WorkArea" th:field="*{workArea}"/><br/>
+
+          <label>Specjalizacje:</label>
+          <div id="specializations">
+            <!-- Pierwsze, bazowe pole bez przycisku "Usuń" -->
+            <div class="specialization-field">
+              <input class="w3-input w3-border" type="text" name="specializations" required/>
+            </div>
+          </div>
+          <button type="button" onclick="addSpecialization()">Dodaj specjalizację</button>
+        </div>
         <button class="w3-btn w3-blue-grey w3-round-xxlarge" type="submit">Zarejestruj</button>
       </form>
 
@@ -123,6 +143,41 @@ function myFunction() {
         };
 </script>
 <script>
+
+function addSpecialization() {
+    const container = document.getElementById("specializations");
+
+    // Tworzymy nowy div dla specjalizacji
+    const specDiv = document.createElement("div");
+    specDiv.classList.add("specialization-field");
+
+    // Tworzymy pole input
+    const input = document.createElement("input");
+    input.type = "text";
+    input.name = "specializations";
+    input.classList.add("w3-input", "w3-border");
+    input.required = true;
+
+    // Tworzymy przycisk "Usuń"
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "Usuń";
+    removeBtn.classList.add("remove-btn");
+    removeBtn.onclick = function () {
+        removeSpecialization(specDiv);
+    };
+
+    // Dodajemy input i przycisk do div'a
+    specDiv.appendChild(input);
+    specDiv.appendChild(removeBtn);
+
+    // Dodajemy całość do kontenera
+    container.appendChild(specDiv);
+}
+
+function removeSpecialization(specDiv) {
+    specDiv.remove();
+}
 function validateForm(event) {
     let isValid = true;
 
@@ -195,6 +250,40 @@ function validateForm(event) {
 // Podpięcie walidacji do formularza
 document.getElementById('registrationForm').addEventListener('submit', validateForm);
 
+document.addEventListener("DOMContentLoaded", function() {
+    const userTypeSelect = document.getElementById("UserType");
+    const trainerFields = document.getElementById("trainerFields");
+    const trainerInputs = trainerFields.querySelectorAll("input");
+
+    function toggleTrainerFields() {
+        const isTrainer = userTypeSelect.value === "TRENER";
+
+        // Pokaż pola dla trenerów, jeśli wybrano "TRENER"
+        trainerFields.style.display = isTrainer ? "block" : "none";
+
+        // Włącz lub wyłącz pola trenerów
+        trainerInputs.forEach(input => {
+            if (isTrainer) {
+                input.removeAttribute("disabled");
+            } else {
+                input.setAttribute("disabled", "disabled");
+            }
+        });
+    }
+
+    // Uruchom funkcję po zmianie typu użytkownika
+    userTypeSelect.addEventListener("change", toggleTrainerFields);
+
+    // Przed wysłaniem formularza włącz wszystkie pola, żeby się wysłały
+    document.getElementById("registrationForm").addEventListener("submit", function() {
+        trainerInputs.forEach(input => input.removeAttribute("disabled"));
+    });
+
+    // Uruchom funkcję przy ładowaniu strony (dla edycji)
+    toggleTrainerFields();
+
+
+});
 
 </script>
 </body>

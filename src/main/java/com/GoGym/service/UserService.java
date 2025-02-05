@@ -1,6 +1,11 @@
 package com.GoGym.service;
+import com.GoGym.module.TrainerSpecialization;
 import com.GoGym.module.User;
+import com.GoGym.module.TrainerDetails;
 import com.GoGym.dto.UserRegistrationDTO;
+import com.GoGym.repository.TrainerSpecializationRepository;
+import com.GoGym.repository.UserRepository;
+import com.GoGym.repository.TrainerDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
@@ -13,46 +18,55 @@ import java.util.Optional;
 @ComponentScan({ "com.GoGym.repository.UserRepository" })
 public class UserService {
 
-    @Autowired
-    private com.GoGym.repository.UserRepository UserRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
-    public UserService(com.GoGym.repository.UserRepository UserRepository) {
-        this.UserRepository = UserRepository;
-    }
-    public Optional<User> getFirstUser() {
-        List<User> users = UserRepository.findAll();
-        if (!users.isEmpty()) {
-            return Optional.of(users.get(0));  // Zwracamy pierwszą pielęgniarkę
-        }
-        return Optional.empty();
-    }
+    private UserRepository userRepository;
+
+    @Autowired
+    private TrainerDetailsRepository trainerDetailsRepository;
+    @Autowired
+    private TrainerSpecializationRepository specializationRepository;
+
 
     public User registerUser(UserRegistrationDTO userDTO) {
+        Optional<User> existingUser = userRepository.findByEmail(userDTO.getEmail());
+        if (existingUser.isPresent()) {
+            throw new IllegalStateException("Użytkownik z podanym adresem e-mail już istnieje.");
+        }
+
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
+        User.UserType userTypeEnum = User.UserType.valueOf(userDTO.getUserType().toUpperCase());
+        User.Gender genderEnum = User.Gender.valueOf(userDTO.getGender().toUpperCase());
 
-        User newUser = new User(
-                null,
-                userDTO.getEmail(),
-                encodedPassword,
-                userDTO.getFirstName(),
-                userDTO.getSecondName(),
-                userDTO.getBirthDate(),
-                userDTO.getGender(),
-                userDTO.getUserType()
+        User newUser = new User(null, userDTO.getEmail(), encodedPassword, userDTO.getFirstName(),
+                userDTO.getSecondName(), userDTO.getBirthDate(), genderEnum, userTypeEnum);
 
-        );
+        User savedUser = userRepository.save(newUser);
 
-        return UserRepository.save(newUser);
+        if (userTypeEnum == User.UserType.TRENER) {
+            TrainerDetails trainerDetails = new TrainerDetails();
+            trainerDetails.setIdTrainer(Math.toIntExact(savedUser.getIdUser()));
+            trainerDetails.setStartDate(userDTO.getStartDate());
+            trainerDetails.setPhoneNumber(userDTO.getPhoneNumber());
+            trainerDetails.setWorkArea(userDTO.getWorkArea());
+
+            TrainerDetails savedTrainer = trainerDetailsRepository.save(trainerDetails);
+
+            for (String specialization : userDTO.getSpecializations()) {
+                TrainerSpecialization spec = new TrainerSpecialization(specialization, savedTrainer);
+                specializationRepository.save(spec);
+            }
+        }
+
+        return savedUser;
     }
 
-   // public void saveUser(User User) {
-   //     UserRepository.save(User);
-   // }
 
-    public User findByEmail(String email) {
-        return UserRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("Nie znaleziono użytkownika o podanym adresie email: " + email));
-    }
+//    public User findByEmail(String email) {
+//        return UserRepository.findByEmail(email)
+//                .orElseThrow(() -> new IllegalStateException("Nie znaleziono użytkownika o podanym adresie email: " + email));
+//    }
 }

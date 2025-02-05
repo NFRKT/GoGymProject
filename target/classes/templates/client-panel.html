@@ -3,225 +3,275 @@
 <head>
   <title>Panel Klienta</title>
   <style>
+    /* 🔹 Globalne style */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       line-height: 1.6;
       margin: 0;
-      padding: 20px;
-      background-color: #f4f4f9;
+      padding: 0;
+      background-color: #1e1e2f;
+      color: #fff;
+      text-align: center;
     }
+
     h2, h3 {
-      color: #333;
+      color: #00bfff;
+      margin-bottom: 10px;
     }
+
+    a {
+      color: #00bfff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* 🔹 Kontener */
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+      background-color: #252540;
+      border-radius: 10px;
+      box-shadow: 0px 0px 15px rgba(0, 191, 255, 0.2);
+    }
+
+    /* 🔹 Tabela */
     table {
       width: 100%;
       border-collapse: collapse;
+      background: #33334d;
+      border-radius: 8px;
+      overflow: hidden;
       margin-bottom: 20px;
-      background-color: #fff;
     }
-    table th, table td {
-      border: 1px solid #ddd;
-      padding: 10px;
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #44445a;
       text-align: left;
     }
-    table th {
-      background-color: #f8f8f8;
-      color: #333;
+
+    th {
+      background-color: #00bfff;
+      color: #fff;
     }
-    table tbody tr:nth-child(odd) {
-      background-color: #f9f9f9;
+
+    tbody tr:nth-child(odd) {
+      background-color: #2b2b4a;
     }
+
+    tbody tr:hover {
+      background-color: #3a3a5f;
+    }
+
+    /* 🔹 Przyciski */
     button {
-      background-color: #007bff;
+      background: #00bfff;
       color: #fff;
       border: none;
-      padding: 8px 12px;
+      padding: 10px 15px;
       cursor: pointer;
-      border-radius: 4px;
+      font-size: 14px;
+      border-radius: 5px;
+      transition: 0.3s;
     }
+
     button:hover {
-      background-color: #0056b3;
+      background: #009ac8;
     }
+
     button:disabled {
-      background-color: #ccc;
+      background: #666;
       cursor: not-allowed;
     }
+
+    /* 🔹 Formularze */
     form {
       display: inline;
     }
-    select {
-      padding: 6px;
-      margin-right: 10px;
-    }
-    .info {
-      margin-bottom: 20px;
-      padding: 10px;
-      background-color: #eaf4fc;
-      border-left: 5px solid #007bff;
+
+    select, input {
+      padding: 8px;
+      margin: 5px 0;
+      background: #222;
+      color: #fff;
+      border: 1px solid #00bfff;
+      border-radius: 5px;
     }
 
-    /* Modal Styles */
+    /* 🔹 Info Box */
+    .info {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(0, 191, 255, 0.1);
+      border-left: 5px solid #00bfff;
+      font-size: 14px;
+    }
+
+    /* 🔹 Modal */
     .modal {
-      display: none; /* Hidden by default */
+      display: none;
       position: fixed;
-      z-index: 1;
+      z-index: 1000;
       left: 0;
       top: 0;
       width: 100%;
       height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-      padding-top: 60px;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
     }
 
     .modal-content {
-      background-color: #fefefe;
-      margin: 5% auto;
+      background: #252540;
       padding: 20px;
-      border: 1px solid #888;
-      width: 80%;
+      border-radius: 10px;
+      text-align: center;
+      width: 50%;
+      box-shadow: 0px 0px 10px rgba(0, 191, 255, 0.3);
     }
 
     .close {
-      color: #aaa;
       float: right;
-      font-size: 28px;
-      font-weight: bold;
-    }
-
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
+      font-size: 22px;
       cursor: pointer;
+      color: #aaa;
     }
+
+    .close:hover {
+      color: #fff;
+    }
+
+    /* 🔹 Powiadomienia */
     #notification-container {
-        position: relative;
-        cursor: pointer;
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+      margin-bottom: 10px;
     }
+
     #notification-count {
-        background: red;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 50%;
-        position: absolute;
-        top: 0;
-        right: 0;
+      background: red;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 50%;
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      font-size: 12px;
     }
+
     #notification-dropdown {
-        position: absolute;
-        top: 30px;
-        right: 0;
-        background: white;
-        border: 1px solid #ccc;
-        display: none;
-        width: 200px;
+      display: none;
+      position: absolute;
+      top: 30px;
+      right: 0;
+      background: #252540;
+      border: 1px solid #00bfff;
+      width: 220px;
+      box-shadow: 0px 0px 10px rgba(0, 191, 255, 0.2);
+      border-radius: 5px;
     }
+
     #notification-dropdown ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+      list-style: none;
+      padding: 10px;
+      margin: 0;
     }
+
     #notification-dropdown ul li {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
+      padding: 10px;
+      border-bottom: 1px solid #444;
+      color: #fff;
     }
-    #notification-dropdown.hidden {
-        display: none;
+
+    #notification-dropdown ul li:hover {
+      background: #3a3a5f;
     }
+
   </style>
-
-
 </head>
 <body>
-<h2>Panel Klienta</h2>
 
-<a href="/home" class="w3-button w3-light-grey">Powrót na stronę główną</a>
-<!-- Reszta zawartości -->
+<div class="container">
+  <h2>Panel Klienta</h2>
+  <a href="/home">🏠 Powrót na stronę główną</a>
 
-<div class="info">
-  <p>Witaj w swoim panelu klienta! Zarządzaj współpracą z trenerami oraz wysyłaj nowe zapytania.</p>
-</div>
-<div id="notification-container">
-  <span id="notification-count">0</span>
-  <div id="notification-dropdown" class="hidden">
-    <ul id="notification-list"></ul>
-    <button onclick="markNotificationsAsRead()">Oznacz jako przeczytane</button>
+  <div class="info">
+    <p>🔹 Witaj w swoim panelu klienta! Zarządzaj współpracą z trenerami oraz wysyłaj nowe zapytania.</p>
   </div>
-</div>
-<h3>Twoi trenerzy:</h3>
-<table id="trainers-table">
-  <thead>
-  <tr>
-    <th>Imię</th>
-    <th>Nazwisko</th>
-    <th>Akcja</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="trainer : ${clientTrainers}" th:attr="data-trainer-id=${trainer.trainer.idUser}">
-    <td th:text="${trainer.trainer.firstName}"></td>
-    <td th:text="${trainer.trainer.secondName}"></td>
-    <td>
-      <form th:action="@{/rejectTrainer}" method="post" class="remove-trainer-form">
-        <input type="hidden" name="trainerId" th:value="${trainer.trainer.idUser}" />
-        <button type="submit">Zrezygnuj ze współpracy</button>
-      </form>
-    </td>
-  </tr>
-  </tbody>
 
-</table>
-<h3>Wybierz nowego trenera:</h3>
-<form th:action="@{/requests/send}" method="post" id="sendRequestForm">
-  <input type="hidden" name="clientId" th:value="${clientId}" />
-  <label for="trainer">Trener:</label>
-  <select name="trainerId" id="trainer" required>
-    <option value="">Wybierz trenera</option>
-    <option th:each="trainer : ${trainers}"
-            th:value="${trainer.idUser}"
-            th:text="${trainer.firstName}"
-            th:disabled="${#lists.contains(currentTrainerIds, trainer.idUser)
-                          || #lists.contains(pendingTrainerIds, trainer.idUser)}">
-    </option>
-  </select>
-  <button type="submit" id="sendRequestButton">Wyślij prośbę</button>
-</form>
-
-<h3>Twoje oczekujące zapytania:</h3>
-<table id="pending-requests">
-  <thead>
-  <tr>
-    <th>Imię trenera</th>
-    <th>Data wysłania</th>
-    <th>Akcja</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="request : ${requests}" th:if="${request.requestStatus.name() == 'pending'}"
-      th:attr="data-request-id=${request.id}">
-    <td th:text="${request.trainer.firstName}"></td>
-    <td th:text="${#dates.format(request.requestDate, 'yyyy-MM-dd HH:mm')}"></td>
-    <td>
-      <form class="cancel-request-form" th:action="@{/requests/{id}/cancel(id=${request.id})}" method="post">
-        <input type="hidden" name="trainerId" th:value="${request.trainer.idUser}">
-        <button type="submit">Anuluj</button>
-      </form>
-    </td>
-  </tr>
-  </tbody>
-</table>
-
-
-
-<!-- Modal -->
-<div id="myModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h3>Czy na pewno chcesz anulować to zapytanie?</h3>
-    <button id="confirmCancel">Tak, anuluj</button>
-    <button onclick="document.getElementById('myModal').style.display='none'">Anuluj</button>
+  <!-- Powiadomienia -->
+  <div id="notification-container">
+    <span id="notification-count">0</span>
+    <div id="notification-dropdown" class="hidden">
+      <ul id="notification-list"></ul>
+      <button onclick="markNotificationsAsRead()">Oznacz jako przeczytane</button>
+    </div>
   </div>
+
+  <h3>Twoi trenerzy:</h3>
+  <table id="trainers-table">
+    <thead>
+    <tr>
+      <th>Imię</th>
+      <th>Nazwisko</th>
+      <th>Akcja</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="trainer : ${clientTrainers}" th:attr="data-trainer-id=${trainer.trainer.idUser}">
+      <td th:text="${trainer.trainer.firstName}"></td>
+      <td th:text="${trainer.trainer.secondName}"></td>
+      <td>
+        <form th:action="@{/rejectTrainer}" method="post" class="remove-trainer-form">
+          <input type="hidden" name="trainerId" th:value="${trainer.trainer.idUser}" />
+          <button type="submit">Zrezygnuj ze współpracy</button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h3>Wybierz nowego trenera:</h3>
+  <form th:action="@{/requests/send}" method="post" id="sendRequestForm">
+    <input type="hidden" name="clientId" th:value="${clientId}" />
+    <label for="trainer">🔹 Wybierz trenera:</label>
+    <select name="trainerId" id="trainer" required>
+      <option value="">-- Wybierz trenera --</option>
+      <option th:each="trainer : ${trainers}" th:value="${trainer.idUser}" th:text="${trainer.firstName}"
+              th:disabled="${#lists.contains(currentTrainerIds, trainer.idUser) || #lists.contains(pendingTrainerIds, trainer.idUser)}"></option>
+    </select>
+    <button type="submit" id="sendRequestButton">Wyślij prośbę</button>
+  </form>
+
+  <h3>Twoje oczekujące zapytania:</h3>
+  <table id="pending-requests">
+    <thead>
+    <tr>
+      <th>Imię trenera</th>
+      <th>Data wysłania</th>
+      <th>Akcja</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="request : ${requests}" th:if="${request.requestStatus.name() == 'pending'}"
+        th:attr="data-request-id=${request.id}">
+      <td th:text="${request.trainer.firstName}"></td>
+      <td th:text="${#dates.format(request.requestDate, 'yyyy-MM-dd HH:mm')}"></td>
+      <td>
+        <form class="cancel-request-form" th:action="@{/requests/{id}/cancel(id=${request.id})}" method="post">
+          <input type="hidden" name="trainerId" th:value="${request.trainer.idUser}">
+          <button type="submit">Anuluj</button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
