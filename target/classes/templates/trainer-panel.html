@@ -35,8 +35,9 @@
 <body>
 <h2>Panel Trenera</h2>
 <a href="/home" class="w3-button w3-light-grey">Powrót na stronę główną</a>
+
 <h3>Twoi klienci:</h3>
-<table>
+<table id="clients-table">
   <thead>
   <tr>
     <th>Imię</th>
@@ -45,11 +46,11 @@
   </tr>
   </thead>
   <tbody>
-  <tr th:each="client : ${trainerClients}">
+  <tr th:each="client : ${trainerClients}" th:attr="data-client-id=${client.client.idUser}">
     <td th:text="${client.client.firstName}"></td>
     <td th:text="${client.client.secondName}"></td>
     <td>
-      <form th:action="@{/rejectClient}" method="post">
+      <form th:action="@{/rejectClient}" method="post" class="remove-client-form">
         <input type="hidden" name="clientId" th:value="${client.client.idUser}" />
         <button type="submit">Zrezygnuj ze współpracy</button>
       </form>
@@ -60,7 +61,7 @@
 </table>
 
 <h3>Nowe zgłoszenia:</h3>
-<table>
+<table id="new-requests-table">
   <thead>
   <tr>
     <th>Klient</th>
@@ -68,14 +69,14 @@
   </tr>
   </thead>
   <tbody>
-  <tr th:each="request : ${requests}">
+  <tr th:each="request : ${requests}" th:attr="data-request-id=${request.id}">
     <td th:text="${request.client.firstName}"></td>
     <td>
-      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post">
+      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post" class="update-request-form">
         <input type="hidden" name="status" value="accepted">
         <button type="submit">Akceptuj</button>
       </form>
-      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post">
+      <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post" class="update-request-form">
         <input type="hidden" name="status" value="rejected">
         <button type="submit">Odrzuć</button>
       </form>
@@ -83,5 +84,146 @@
   </tr>
   </tbody>
 </table>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const clientsTable = document.querySelector("#clients-table tbody");
+    const requestsTable = document.querySelector("#new-requests-table tbody");
+
+    // ✅ Pobieranie nowych zgłoszeń i uniknięcie klonowania
+    function checkForNewRequests() {
+        fetch("/requests/new-requests")
+            .then(response => response.json())
+            .then(data => {
+                let existingRequestIds = new Set(
+                    Array.from(requestsTable.querySelectorAll("tr[data-request-id]"))
+                        .map(row => row.getAttribute("data-request-id"))
+                );
+
+                data.forEach(request => {
+                    if (!existingRequestIds.has(request.id.toString())) {
+                        let newRow = document.createElement("tr");
+                        newRow.setAttribute("data-request-id", request.id);
+                        newRow.innerHTML = `
+                            <td>${request.firstName}</td>
+                            <td>
+                                <form action="/requests/${request.id}/update" method="post" class="update-request-form">
+                                    <input type="hidden" name="status" value="accepted">
+                                    <button type="submit">Akceptuj</button>
+                                </form>
+                                <form action="/requests/${request.id}/update" method="post" class="update-request-form">
+                                    <input type="hidden" name="status" value="rejected">
+                                    <button type="submit">Odrzuć</button>
+                                </form>
+                            </td>
+                        `;
+                        requestsTable.appendChild(newRow);
+                        attachUpdateRequestListener(newRow.querySelectorAll(".update-request-form")[0]);
+                        attachUpdateRequestListener(newRow.querySelectorAll(".update-request-form")[1]);
+                    }
+                });
+            })
+            .catch(error => console.error("Błąd sprawdzania nowych zgłoszeń:", error));
+    }
+
+    // ✅ Sprawdzanie i usuwanie anulowanych zgłoszeń
+    function checkForRemovedRequests() {
+        fetch("/requests/new-requests")
+            .then(response => response.json())
+            .then(data => {
+                let activeRequestIds = new Set(data.map(request => request.id.toString()));
+
+                document.querySelectorAll("#new-requests-table tbody tr").forEach(row => {
+                    let requestId = row.getAttribute("data-request-id");
+                    if (!activeRequestIds.has(requestId)) {
+                        row.remove(); // 🔹 Usuwa wiersz, jeśli zgłoszenie zostało anulowane
+                    }
+                });
+            })
+            .catch(error => console.error("Błąd sprawdzania usuniętych zgłoszeń:", error));
+    }
+
+function checkForRemovedClients() {
+    fetch("/trainer/clients")
+        .then(response => response.json())
+        .then(data => {
+            // 🔹 Mapa ID klientów aktualnie dostępnych
+            let currentClientIds = new Set(data.map(client => client.client.idUser.toString()));
+
+            // 🔹 Przejrzyj aktualnie wyświetlonych klientów i usuń tych, którzy już nie istnieją
+            document.querySelectorAll("#clients-table tbody tr").forEach(row => {
+                let clientId = row.getAttribute("data-client-id");
+                if (!currentClientIds.has(clientId)) {
+                    row.remove();
+                }
+            });
+        })
+        .catch(error => console.error("Błąd sprawdzania usuniętych klientów:", error));
+}
+
+
+
+    // ✅ Dodanie eventów do istniejących formularzy
+    function attachUpdateRequestListener(form) {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            let formData = new FormData(this);
+            let status = formData.get("status");
+
+            fetch(this.action, { method: "POST", body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if (status === "accepted" && data.firstName && data.secondName) {
+                        let newRow = document.createElement("tr");
+                        newRow.setAttribute("data-client-id", data.id);
+                        newRow.innerHTML = `
+                            <td>${data.firstName}</td>
+                            <td>${data.secondName}</td>
+                            <td>
+                                <form action="/rejectClient" method="post" class="remove-client-form">
+                                    <input type="hidden" name="clientId" value="${data.id}">
+                                    <button type="submit">Zrezygnuj ze współpracy</button>
+                                </form>
+                                <a href="/${data.id}/create-plan">Stwórz plan</a>
+                            </td>
+                        `;
+                        clientsTable.appendChild(newRow);
+                        attachRemoveClientListener(newRow.querySelector(".remove-client-form"));
+                    }
+
+                    form.closest("tr").remove();
+                })
+                .catch(error => console.error("Błąd:", error));
+        });
+    }
+
+    function attachRemoveClientListener(form) {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            let clientId = form.querySelector("input[name='clientId']").value;
+
+            fetch(form.action, { method: "POST", body: new FormData(form) })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        form.closest("tr").remove();
+                    }
+                })
+                .catch(error => console.error("Błąd rezygnacji:", error));
+        });
+    }
+
+    document.querySelectorAll(".update-request-form").forEach(attachUpdateRequestListener);
+    document.querySelectorAll(".remove-client-form").forEach(attachRemoveClientListener);
+
+    // 🔄 Odświeżanie listy zgłoszeń i usuwanie anulowanych co 5 sekund
+    setInterval(() => {
+        checkForNewRequests();
+        checkForRemovedRequests();
+        checkForRemovedClients();
+    }, 5000);
+});
+</script>
 </body>
 </html>

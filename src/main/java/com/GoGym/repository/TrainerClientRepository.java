@@ -20,5 +20,8 @@ public interface TrainerClientRepository extends JpaRepository<TrainerClient, Lo
 
     Optional<TrainerClient> findByTrainer_IdUserAndClient_IdUser(Long trainerId, Long clientId);
 
+    // Usuwa relację trener-klient
+    void deleteByTrainer_IdUserAndClient_IdUser(Long trainerId, Long clientId);
+
 
 }

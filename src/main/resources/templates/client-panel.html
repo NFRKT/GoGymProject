@@ -198,17 +198,21 @@
   </tr>
   </thead>
   <tbody>
-  <tr th:each="request : ${requests}" th:if="${request.requestStatus.name() == 'pending'}">
+  <tr th:each="request : ${requests}" th:if="${request.requestStatus.name() == 'pending'}"
+      th:attr="data-request-id=${request.id}">
     <td th:text="${request.trainer.firstName}"></td>
     <td th:text="${#dates.format(request.requestDate, 'yyyy-MM-dd HH:mm')}"></td>
     <td>
       <form class="cancel-request-form" th:action="@{/requests/{id}/cancel(id=${request.id})}" method="post">
+        <input type="hidden" name="trainerId" th:value="${request.trainer.idUser}">
         <button type="submit">Anuluj</button>
       </form>
     </td>
   </tr>
   </tbody>
 </table>
+
+
 
 <!-- Modal -->
 <div id="myModal" class="modal">
@@ -224,13 +228,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const trainerSelect = document.getElementById("trainer");
     const sendButton = document.getElementById("sendRequestButton");
     const trainersTable = document.querySelector("#trainers-table tbody");
+    const pendingRequestsTable = document.querySelector("#pending-requests tbody");
 
-    // ✅ Pobieramy istniejące ID trenerów z tabeli (również tych z Thymeleaf!)
-    let existingTrainerIds = new Set(
-        Array.from(trainersTable.querySelectorAll("tr"))
-            .map(row => row.getAttribute("data-trainer-id"))
-            .filter(id => id !== null)
-    );
+    // 🟢 Usuwanie zapytań oczekujących, jeśli zostały zaakceptowane/odrzucone
+    function checkForUpdatedRequests() {
+        fetch("/requests/client/pending")
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    let existingRequestIds = Array.from(pendingRequestsTable.querySelectorAll("tr"))
+                        .map(row => row.getAttribute("data-request-id"));
+
+                    existingRequestIds.forEach(requestId => {
+                        if (!data.some(request => request.id.toString() === requestId)) {
+                            let rowToRemove = pendingRequestsTable.querySelector(`tr[data-request-id="${requestId}"]`);
+                            if (rowToRemove) rowToRemove.remove();
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error("🚨 Błąd sprawdzania zapytań klienta:", error));
+    }
 
     // 🟢 Wysyłanie prośby AJAX
     document.getElementById("sendRequestForm").addEventListener("submit", function (event) {
@@ -239,143 +257,114 @@ document.addEventListener("DOMContentLoaded", function () {
         let selectedTrainerId = trainerSelect.value;
         let selectedTrainerName = trainerSelect.options[trainerSelect.selectedIndex].text;
 
-        fetch(this.action, {
-            method: "POST",
-            body: formData
-        }).then(response => response.json())
-        .then(data => {
-            if (data.requestId) {
-                let newRow = document.createElement("tr");
-                newRow.innerHTML = `
-                    <td>${selectedTrainerName}</td>
-                    <td>${new Date(data.requestDate).toLocaleString()}</td>
-                    <td>
-                        <form class="cancel-request-form" action="/requests/${data.requestId}/cancel" method="post">
-                            <input type="hidden" name="trainerId" value="${selectedTrainerId}">
-                            <button type="submit">Anuluj</button>
-                        </form>
-                    </td>
-                `;
-                document.querySelector("#pending-requests tbody").appendChild(newRow);
-                attachCancelRequestListener(newRow.querySelector(".cancel-request-form"));
+        fetch(this.action, { method: "POST", body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if (data.requestId) {
+                    let newRow = document.createElement("tr");
+                    newRow.setAttribute("data-request-id", data.requestId);
+                    newRow.innerHTML = `
+                        <td>${selectedTrainerName}</td>
+                        <td>${new Date(data.requestDate).toLocaleString()}</td>
+                        <td>
+                            <form class="cancel-request-form" action="/requests/${data.requestId}/cancel" method="post">
+                                <input type="hidden" name="trainerId" value="${selectedTrainerId}">
+                                <button type="submit">Anuluj</button>
+                            </form>
+                        </td>
+                    `;
+                    pendingRequestsTable.appendChild(newRow);
+                    attachCancelRequestListener(newRow.querySelector(".cancel-request-form"));
 
-                // ✅ Po wysłaniu prośby blokujemy trenera w select i przycisk
-                let option = trainerSelect.querySelector(`option[value="${selectedTrainerId}"]`);
-                if (option) {
-                    option.disabled = true;
+                    let option = trainerSelect.querySelector(`option[value="${selectedTrainerId}"]`);
+                    if (option) option.disabled = true;
+                    sendButton.disabled = true;
                 }
-                sendButton.disabled = true;
-            }
-            trainerSelect.value = "";
-        })
-        .catch(error => console.error("Błąd:", error));
+                trainerSelect.value = "";
+            })
+            .catch(error => console.error("Błąd:", error));
     });
 
-    // 🟢 Funkcja do dynamicznego przypisywania obsługi anulowania zapytania
-    function attachCancelRequestListener(form) {
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-            let formElement = this;
-            let trainerId = formElement.querySelector("input[name='trainerId']").value;
+    // 🟢 Obsługa anulowania zapytań
+function attachCancelRequestListener(form) {
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-            fetch(this.action, {
-                method: "POST",
-                body: new FormData(this)
-            }).then(response => {
+        let trainerIdInput = form.querySelector("input[name='trainerId']");
+        if (!trainerIdInput || !trainerIdInput.value) {
+            console.error("🚨 Brak ukrytego pola trainerId w formularzu.");
+            return;
+        }
+
+        let trainerId = trainerIdInput.value;
+
+        fetch(form.action, { method: "POST", body: new FormData(form) })
+            .then(response => {
                 if (response.ok) {
-                    formElement.closest("tr").remove();
-
-                    // ✅ Po anulowaniu odblokowujemy trenera w select
-                    let option = trainerSelect.querySelector(`option[value="${trainerId}"]`);
-                    if (option) {
-                        option.disabled = false;
-                    }
-
-                    // ✅ Sprawdzamy, czy są jeszcze inne oczekujące zapytania – jeśli nie, odblokowujemy przycisk "Wyślij prośbę"
-                    if (document.querySelectorAll("#pending-requests tbody tr").length === 0) {
-                        sendButton.disabled = false;
-                    }
-                } else {
-                    alert("Błąd przy anulowaniu zapytania.");
+                    form.closest("tr").remove();
                 }
-            }).catch(error => console.error("Błąd:", error));
-        });
-    }
-
-    // 🟢 Przypisywanie zdarzeń do istniejących zapytań oczekujących
-    document.querySelectorAll(".cancel-request-form").forEach(form => {
-        attachCancelRequestListener(form);
+            })
+            .catch(error => console.error("Błąd anulowania:", error));
     });
+}
+    document.querySelectorAll(".cancel-request-form").forEach(attachCancelRequestListener);
 
-    // 🟢 Funkcja do dynamicznego przypisywania obsługi rezygnacji z trenera
+    // 🟢 Obsługa rezygnacji z trenera
     function attachRemoveTrainerListener(form) {
         form.addEventListener("submit", function (event) {
             event.preventDefault();
-            let formElement = this;
+            let trainerId = form.querySelector("input[name='trainerId']").value;
 
-            fetch(this.action, {
-                method: "POST",
-                body: new FormData(this)
-            }).then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
-                    formElement.closest("tr").remove();
-                } else {
-                    alert("Błąd przy rezygnacji z trenera.");
-                }
-            })
-            .catch(error => console.error("Błąd:", error));
+            fetch(form.action, { method: "POST", body: new FormData(form) })
+                .then(response => response.json())
+                .then(data => data.status === "success" && form.closest("tr").remove())
+                .catch(error => console.error("Błąd rezygnacji:", error));
         });
     }
+    document.querySelectorAll(".remove-trainer-form").forEach(attachRemoveTrainerListener);
 
-    // 🟢 Przypisywanie zdarzeń do przycisków rezygnacji z trenera
-    document.querySelectorAll(".remove-trainer-form").forEach(form => {
-        attachRemoveTrainerListener(form);
-    });
-
-    // 🟢 Oczekiwanie na akceptację prośby (WebSocket lub AJAX polling)
-    function checkForAcceptedRequests() {
-        fetch("/requests/accepted")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Brak endpointu /requests/accepted");
-                }
-                return response.json();
-            })
+// 🟢 Sprawdzenie dodanych i usuniętych trenerów
+    function checkForUpdatedTrainers() {
+        fetch("/client/trainers")
+            .then(response => response.json())
             .then(data => {
-                if (Array.isArray(data)) {
-                    data.forEach(trainer => {
-                        // ✅ Sprawdzamy, czy trener już jest w tabeli
-                        if (!existingTrainerIds.has(trainer.id.toString())) {
-                            let newRow = document.createElement("tr");
-                            newRow.setAttribute("data-trainer-id", trainer.id);
-                            newRow.innerHTML = `
-                                <td>${trainer.firstName}</td>
-                                <td>${trainer.secondName}</td>
-                                <td>
-                                    <form action="/rejectTrainer" method="post" class="remove-trainer-form">
-                                        <input type="hidden" name="trainerId" value="${trainer.id}">
-                                        <button type="submit">Zrezygnuj ze współpracy</button>
-                                    </form>
-                                </td>
-                            `;
-                            trainersTable.appendChild(newRow);
-                            attachRemoveTrainerListener(newRow.querySelector(".remove-trainer-form"));
+                let currentTrainerIds = new Set(data.map(trainer => trainer.id));
 
-                            // ✅ Dodajemy trenera do listy istniejących, by nie dodał się ponownie
-                            existingTrainerIds.add(trainer.id.toString());
-                        }
-                    });
-                } else {
-                    console.error("Błąd: /requests/accepted nie zwraca listy");
-                }
+                // Usuwanie trenerów, którzy już nie istnieją
+                document.querySelectorAll("#trainers-table tbody tr").forEach(row => {
+                    let trainerId = row.getAttribute("data-trainer-id");
+                    if (!currentTrainerIds.has(trainerId)) row.remove();
+                });
+
+                // Dodawanie nowych trenerów
+                data.forEach(trainer => {
+                    if (!document.querySelector(`#trainers-table tbody tr[data-trainer-id="${trainer.id}"]`)) {
+                        let newRow = document.createElement("tr");
+                        newRow.setAttribute("data-trainer-id", trainer.id);
+                        newRow.innerHTML = `
+                            <td>${trainer.firstName}</td>
+                            <td>${trainer.secondName}</td>
+                            <td>
+                                <form action="/rejectTrainer" method="post" class="remove-trainer-form">
+                                    <input type="hidden" name="trainerId" value="${trainer.id}">
+                                    <button type="submit">Zrezygnuj ze współpracy</button>
+                                </form>
+                            </td>
+                        `;
+                        trainersTable.appendChild(newRow);
+                        attachRemoveTrainerListener(newRow.querySelector(".remove-trainer-form"));
+                    }
+                });
             })
-            .catch(error => console.error("Błąd sprawdzania zaakceptowanych trenerów:", error));
+            .catch(error => console.error("Błąd sprawdzania trenerów klienta:", error));
     }
 
-    // ✅ Sprawdzaj zaakceptowane prośby co 5 sekund
-    setInterval(checkForAcceptedRequests, 5000);
+    setInterval(() => {
+        checkForUpdatedRequests();
+        checkForUpdatedTrainers();
+    }, 5000);
 });
+
 </script>
 </body>
 </html>

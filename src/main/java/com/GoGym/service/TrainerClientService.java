@@ -4,6 +4,7 @@ import com.GoGym.module.TrainerClient;
 import com.GoGym.module.User;
 import com.GoGym.repository.TrainerClientRepository;
 import com.GoGym.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,11 @@ public class TrainerClientService {
 
     public List<User> getAllTrainers() {
         return userRepository.findAllTrainers();
+    }
+
+    @Transactional
+    public void removeTrainerClient(Long trainerId, Long clientId) {
+        trainerClientRepository.deleteByTrainer_IdUserAndClient_IdUser(trainerId, clientId);
     }
 
 }

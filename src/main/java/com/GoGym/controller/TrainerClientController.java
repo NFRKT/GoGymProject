@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class TrainerClientController {
@@ -28,14 +29,14 @@ public class TrainerClientController {
         this.requestService = requestService;
         this.trainerClientRepository = trainerClientRepository;
     }
-    @GetMapping("/trainer/{trainerId}")
-    public List<TrainerClient> getTrainerClients(@PathVariable Long trainerId) {
-        return trainerClientService.getTrainerClients(trainerId);
-    }
-    @GetMapping("/client/{clientId}")
-    public List<TrainerClient> getClientTrainers(@PathVariable Long clientId) {
-        return trainerClientService.getClientTrainers(clientId);
-    }
+//    @GetMapping("/trainer/{trainerId}")
+//    public List<TrainerClient> getTrainerClients(@PathVariable Long trainerId) {
+//        return trainerClientService.getTrainerClients(trainerId);
+//    }
+//    @GetMapping("/client/{clientId}")
+//    public List<TrainerClient> getClientTrainers(@PathVariable Long clientId) {
+//        return trainerClientService.getClientTrainers(clientId);
+//    }
     @GetMapping("/client-panel")
     public String clientPanel(Model model, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -87,17 +88,13 @@ public class TrainerClientController {
     @PostMapping("/rejectClient")
     public ResponseEntity<Map<String, String>> rejectClient(@RequestParam Long clientId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User loggedInUser = userDetails.getUser();
+        User loggedInTrainer = userDetails.getUser();
 
-        TrainerClient trainerClient = trainerClientRepository.findByTrainer_IdUserAndClient_IdUser(loggedInUser.getIdUser(), clientId)
-                .orElseThrow(() -> new IllegalArgumentException("Nie masz przypisanego tego klienta"));
+        trainerClientService.removeTrainerClient(loggedInTrainer.getIdUser(), clientId);
 
-        trainerClientRepository.delete(trainerClient);
-
-        // Zwracamy JSON zamiast pustej odpowiedzi
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
-        response.put("message", "Klient został usunięty");
+        response.put("clientId", String.valueOf(clientId));
 
         return ResponseEntity.ok(response);
     }
@@ -106,12 +103,9 @@ public class TrainerClientController {
     @PostMapping("/rejectTrainer")
     public ResponseEntity<Map<String, String>> rejectTrainer(@RequestParam Long trainerId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User loggedInUser = userDetails.getUser();
+        User loggedInClient = userDetails.getUser();
 
-        TrainerClient trainerClient = trainerClientRepository.findByTrainer_IdUserAndClient_IdUser(trainerId, loggedInUser.getIdUser())
-                .orElseThrow(() -> new IllegalArgumentException("Nie masz przypisanego tego trenera"));
-
-        trainerClientRepository.delete(trainerClient);
+        trainerClientService.removeTrainerClient(trainerId, loggedInClient.getIdUser());
 
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
@@ -119,5 +113,40 @@ public class TrainerClientController {
 
         return ResponseEntity.ok(response);
     }
+
+    // ✅ Pobranie listy klientów trenera
+    @GetMapping("/trainer/clients")
+    public ResponseEntity<List<Map<String, String>>> getTrainerClients(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInTrainer = userDetails.getUser();
+
+        List<TrainerClient> clients = trainerClientService.getTrainerClients(loggedInTrainer.getIdUser());
+
+        List<Map<String, String>> response = clients.stream().map(client -> Map.of(
+                "id", String.valueOf(client.getClient().getIdUser()),
+                "firstName", client.getClient().getFirstName(),
+                "secondName", client.getClient().getSecondName()
+        )).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ✅ Pobranie listy trenerów klienta
+    @GetMapping("/client/trainers")
+    public ResponseEntity<List<Map<String, String>>> getClientTrainers(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInClient = userDetails.getUser();
+
+        List<TrainerClient> trainers = trainerClientService.getClientTrainers(loggedInClient.getIdUser());
+
+        List<Map<String, String>> response = trainers.stream().map(trainer -> Map.of(
+                "id", String.valueOf(trainer.getTrainer().getIdUser()),
+                "firstName", trainer.getTrainer().getFirstName(),
+                "secondName", trainer.getTrainer().getSecondName()
+        )).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
 
 }

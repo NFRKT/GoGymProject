@@ -70,7 +70,7 @@ public class RequestController {
 
 
     @PostMapping("/{requestId}/cancel")
-    public ResponseEntity<String> cancelRequest(@PathVariable Long requestId, Authentication authentication) {
+    public ResponseEntity<Map<String, String>> cancelRequest(@PathVariable Long requestId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
 
@@ -78,12 +78,18 @@ public class RequestController {
                 .orElseThrow(() -> new IllegalArgumentException("Prośba nie istnieje"));
 
         if (!request.getClient().getIdUser().equals(loggedInUser.getIdUser())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Nie możesz anulować tej prośby");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Nie możesz anulować tej prośby"));
         }
 
         requestRepository.delete(request);
-        return ResponseEntity.ok("Prośba została anulowana");
+
+        // ✅ Zwracamy JSON z ID anulowanej prośby
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("requestId", String.valueOf(requestId));
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/trainer/{trainerId}")
     public List<Request> getTrainerRequests(@PathVariable Long trainerId) {
@@ -91,24 +97,30 @@ public class RequestController {
     }
 
     @PostMapping("/{requestId}/update")
-    public ResponseEntity<?> updateRequestStatus(@PathVariable Long requestId, @RequestParam String status) {
+    public ResponseEntity<Map<String, String>> updateRequestStatus(@PathVariable Long requestId, @RequestParam String status) {
         Request.RequestStatus requestStatus = Request.RequestStatus.valueOf(status);
         Request updatedRequest = requestService.updateRequestStatus(requestId, requestStatus);
+
+        Map<String, String> response = new HashMap<>();
 
         if (requestStatus == Request.RequestStatus.accepted) {
             trainerClientService.createTrainerClient(updatedRequest.getTrainer().getIdUser(), updatedRequest.getClient().getIdUser());
 
-            // Tworzymy JSON-a z danymi klienta
-            Map<String, String> clientData = new HashMap<>();
-            clientData.put("firstName", updatedRequest.getClient().getFirstName());
-            clientData.put("secondName", updatedRequest.getClient().getSecondName());
-            clientData.put("id", String.valueOf(updatedRequest.getClient().getIdUser()));
-
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(clientData);
+            response.put("status", "accepted");
+            response.put("firstName", updatedRequest.getClient().getFirstName());
+            response.put("secondName", updatedRequest.getClient().getSecondName());
+            response.put("id", String.valueOf(updatedRequest.getClient().getIdUser()));
+        } else if (requestStatus == Request.RequestStatus.rejected) {
+            response.put("status", "rejected");
         }
 
-        return ResponseEntity.ok().build();
+        // 🔹 Usunięcie zapytania po zmianie statusu
+        requestRepository.delete(updatedRequest);
+
+        return ResponseEntity.ok(response);
     }
+
+
 
     @GetMapping("/accepted")
     public ResponseEntity<List<Map<String, String>>> getAcceptedRequests(Authentication authentication) {
@@ -127,6 +139,43 @@ public class RequestController {
 
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/new-requests")
+    public ResponseEntity<List<Map<String, String>>> getNewRequests(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInTrainer = userDetails.getUser();
 
+        // Pobierz tylko PENDING zapytania dla zalogowanego trenera
+        List<Request> pendingRequests = requestRepository.findByTrainerAndRequestStatus(
+                loggedInTrainer, Request.RequestStatus.pending);
+
+        List<Map<String, String>> response = pendingRequests.stream().map(request -> {
+            Map<String, String> requestData = new HashMap<>();
+            requestData.put("id", String.valueOf(request.getId()));
+            requestData.put("clientId", String.valueOf(request.getClient().getIdUser()));
+            requestData.put("firstName", request.getClient().getFirstName());
+            return requestData;
+        }).toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/client/pending")
+    public ResponseEntity<List<Map<String, String>>> getClientPendingRequests(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
+
+        List<Request> pendingRequests = requestRepository.findByClientAndRequestStatus(
+                loggedInUser, Request.RequestStatus.pending);
+
+        List<Map<String, String>> response = pendingRequests.stream().map(request -> {
+            Map<String, String> requestData = new HashMap<>();
+            requestData.put("id", String.valueOf(request.getId())); // 👈 Upewniamy się, że ID to string!
+            requestData.put("trainerId", String.valueOf(request.getTrainer().getIdUser()));
+            requestData.put("status", request.getRequestStatus().name());
+            return requestData;
+        }).toList();
+
+        return ResponseEntity.ok(response);
+    }
 
 }
