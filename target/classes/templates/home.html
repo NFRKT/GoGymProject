@@ -53,6 +53,10 @@
         <a th:if="${isUser}" th:href="@{/user-plans(idUser=${idUser})}" class="w3-button w3-blue">Moje Plany Treningowe</a>
         <a th:if="${isTrainer}" href="/trainer-panel" class="w3-button w3-green">Panel Trenera</a>
         <a th:if="${isTrainer}" th:href="@{/trainer-plans(idUser=${idUser})}" class="w3-button w3-blue">Plany Treningowe Twoich Podopiecznych</a>
+        <a th:if="${isTrainer}" th:href="@{/trainer/profile}" class="w3-button w3-blue w3-round">
+            Mój profil trenera
+        </a>
+
     </div>
     <p class="w3-large">Monitoruj swój budżet, realizuj cele i kontroluj wydatki. 💰📊</p>
     <p class="w3-text-grey"><i>Twój budżet, Twoje cele, Twoje możliwości.</i></p>

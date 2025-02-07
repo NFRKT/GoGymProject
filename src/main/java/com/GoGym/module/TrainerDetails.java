@@ -25,6 +25,12 @@ public class TrainerDetails {
     @Column(name = "work_area")
     private String workArea;
 
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
     @OneToOne
     @JoinColumn(name = "idTrainer", referencedColumnName = "id_user")
     private User user;
@@ -35,11 +41,13 @@ public class TrainerDetails {
     public TrainerDetails() {
     }
 
-    public TrainerDetails(Integer idTrainer, Date startDate, String phoneNumber, String workArea, User user, List<TrainerSpecialization> specializations) {
+    public TrainerDetails(Integer idTrainer, Date startDate, String phoneNumber, String workArea, String bio, String profilePicture, User user, List<TrainerSpecialization> specializations) {
         this.idTrainer = idTrainer;
         this.startDate = startDate;
         this.phoneNumber = phoneNumber;
         this.workArea = workArea;
+        this.bio=bio;
+        this.profilePicture = profilePicture;
         this.user = user;
         this.specializations = specializations;
     }
@@ -75,6 +83,13 @@ public class TrainerDetails {
     public void setWorkArea(String workArea) {
         this.workArea = workArea;
     }
+
+    public String getBio(){return bio;}
+    public void setBio(String bio) {this.bio = bio;}
+
+    public String getProfilePicture(){return profilePicture;}
+
+    public void setProfilePicture(String profilePicture) {this.profilePicture = profilePicture;}
 
     public User getUser() {
         return user;

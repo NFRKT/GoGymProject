@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mój profil trenera</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="w3-container w3-blue w3-center">
+    <h2>Mój profil trenera</h2>
+</div>
+
+<!-- Zdjęcie profilowe -->
+<div class="w3-container w3-padding-32">
+    <h3>Zdjęcie profilowe</h3>
+    <div>
+        <img th:if="${trainerDetails.profilePicture}" th:src="@{'/uploads/avatars/' + ${trainerDetails.profilePicture}}" class="profile-pic"/>
+        <img th:unless="${trainerDetails.profilePicture}" src="/static/images/default-profile.png" class="profile-pic"/>
+    </div>
+
+    <!-- Formularz do zmiany zdjęcia -->
+    <form th:action="@{/trainer/profile/upload}" method="post" enctype="multipart/form-data">
+        <input type="file" name="profilePicture" required/>
+        <button type="submit" class="w3-button w3-green">Zmień zdjęcie</button>
+    </form>
+
+    <!-- Przycisk do usunięcia zdjęcia profilowego -->
+    <form th:action="@{/trainer/profile/deleteProfilePicture}" method="post" style="display:inline;">
+        <button type="submit" class="w3-button w3-red">Usuń zdjęcie</button>
+    </form>
+</div>
+
+
+<!-- Informacje o trenerze -->
+<div class="w3-container w3-padding-32">
+    <h3>Informacje osobiste</h3>
+    <p><strong>Imię i nazwisko:</strong> <span th:text="${user.firstName + ' ' + user.secondName} ?: 'Nie podano'"></span></p>
+    <p><strong>Data urodzenia:</strong> <span th:text="${user.birthDate != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : 'Nie podano'}"></span></p>
+    <p><strong>Płeć:</strong> <span th:text="${not #strings.isEmpty(user.gender)} ? ${user.gender} : 'Nie podano'"></span></p>
+</div>
+
+<!-- Informacje zawodowe -->
+<div class="w3-container w3-padding-32">
+    <h3>Informacje zawodowe</h3>
+
+    <p><strong>Data rozpoczęcia kariery:</strong> <span th:text="${trainerDetails.startDate != null ? #dates.format(trainerDetails.startDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editStartDate')">Edytuj</button>
+    </p>
+    <form th:action="@{/trainer/profile/updateStartDate}" method="post" id="editStartDate" style="display:none;">
+        <input type="date" name="startDate" class="w3-input w3-border"/>
+        <button type="submit" class="w3-button w3-green">Zapisz</button>
+    </form>
+
+    <p><strong>Numer telefonu:</strong> <span th:text="${not #strings.isEmpty(trainerDetails.phoneNumber)} ? ${trainerDetails.phoneNumber} : 'Nie podano'"></span>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editPhoneNumber')">Edytuj</button>
+    </p>
+    <form th:action="@{/trainer/profile/updatePhoneNumber}" method="post" id="editPhoneNumber" style="display:none;">
+        <input type="text" name="phoneNumber" class="w3-input w3-border"/>
+        <button type="submit" class="w3-button w3-green">Zapisz</button>
+    </form>
+
+    <p><strong>Obszar pracy:</strong> <span th:text="${not #strings.isEmpty(trainerDetails.workArea)} ? ${trainerDetails.workArea} : 'Nie podano'"></span>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editWorkArea')">Edytuj</button>
+    </p>
+    <form th:action="@{/trainer/profile/updateWorkArea}" method="post" id="editWorkArea" style="display:none;">
+        <input type="text" name="workArea" class="w3-input w3-border"/>
+        <button type="submit" class="w3-button w3-green">Zapisz</button>
+    </form>
+</div>
+
+<!-- Bio -->
+<div class="w3-container w3-padding-32">
+    <h3>Bio</h3>
+    <p><strong>Opis:</strong> <span id="bioText" th:text="${not #strings.isEmpty(trainerDetails.bio)} ? ${trainerDetails.bio} : 'Nie podano'"></span>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editBioForm')">Edytuj</button>
+    </p>
+
+    <!-- Formularz do edycji bio (domyślnie ukryty) -->
+    <form id="editBioForm" style="display:none;">
+        <textarea id="bioInput" name="bio" class="w3-input w3-border" rows="4"></textarea>
+        <button type="submit" class="w3-button w3-green">Zapisz</button>
+    </form>
+</div>
+
+<!-- Specjalizacje -->
+<div class="w3-container w3-padding-32">
+    <h3>Specjalizacje</h3>
+    <ul>
+        <li th:each="specialization : ${specializations}">
+            <span th:text="${not #strings.isEmpty(specialization.specialization)} ? ${specialization.specialization} : 'Nie podano'"></span>
+            <form th:action="@{/trainer/profile/deleteSpecialization}" method="post" style="display:inline;">
+                <input type="hidden" name="specializationId" th:value="${specialization.id}">
+                <button type="submit" class="w3-button w3-red w3-small">Usuń</button>
+            </form>
+        </li>
+    </ul>
+    <form th:action="@{/trainer/profile/addSpecialization}" method="post">
+        <input type="text" name="specialization" placeholder="Nowa specjalizacja" required class="w3-input w3-border"/>
+        <button type="submit" class="w3-button w3-green w3-small">Dodaj</button>
+    </form>
+</div>
+
+<div class="w3-container w3-padding-32">
+    <h3>Doświadczenie i Certyfikaty</h3>
+    <ul>
+        <li th:each="experience : ${experiences}">
+            <span th:text="${not #strings.isEmpty(experience.graduationName)} ? ${experience.graduationName} : 'Nie podano'"></span>
+            (Data: <span th:text="${experience.graduationDate != null ? #dates.format(experience.graduationDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>)
+
+            <div th:if="${experience.certificationFile}">
+                <img th:src="@{'/uploads/certifications/' + ${experience.certificationFile}}" width="100" alt="Certyfikat"/>
+            </div>
+
+            <form th:action="@{/trainer/profile/deleteExperience}" method="post" style="display:inline;">
+                <input type="hidden" name="experienceId" th:value="${experience.id}">
+                <button type="submit" class="w3-button w3-red w3-small">Usuń</button>
+            </form>
+        </li>
+    </ul>
+
+    <form th:action="@{/trainer/profile/addExperience}" method="post" enctype="multipart/form-data">
+        <label>Nazwa ukończonego kursu/szkoły:</label>
+        <input type="text" name="graduationName" class="w3-input w3-border" required/>
+
+        <label>Data uzyskania certyfikatu (opcjonalnie):</label>
+        <input type="date" name="graduationDate" class="w3-input w3-border"/>
+
+        <label>Zdjęcie certyfikatu (opcjonalnie):</label>
+        <input type="file" name="certificationFile" class="w3-input w3-border"/>
+
+        <button type="submit" class="w3-button w3-green w3-small">Dodaj doświadczenie</button>
+    </form>
+</div>
+<script>
+function toggleEdit(id) {
+    var form = document.getElementById(id);
+    if (!form) {
+        console.error("Nie znaleziono elementu o id:", id);
+        return;
+    }
+
+    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+}
+
+
+function toggleEditBio() {
+    let form = document.getElementById("editBioForm");
+    let input = document.getElementById("bioInput");
+    let bioText = document.getElementById("bioText");
+
+    if (!form || !input || !bioText) {
+        console.error("Nie znaleziono elementów formularza edycji Bio.");
+        return;
+    }
+
+    form.style.display = "block";
+    input.value = bioText.innerText.trim();
+}
+
+
+    function cancelEditBio() {
+        document.getElementById("editBioForm").style.display = "none";
+    }
+
+    function saveBio(event) {
+    event.preventDefault();  // 🔥 BLOKUJEMY DOMYŚLNE PRZEŁADOWANIE STRONY
+
+    let bioText = document.getElementById("bioInput").value;
+
+    fetch('/trainer/profile/updateBio', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'  // 🔥 Wymuszamy JSON!
+        },
+        body: JSON.stringify({ bio: bioText }) // 🔥 Zamieniamy na JSON!
+    })
+    .then(response => response.json())  // 🔥 Oczekujemy JSON-a w odpowiedzi
+    .then(data => {
+        if (data.success) {
+            document.getElementById("bioText").innerText = data.bio || 'Nie podano';
+            document.getElementById("editBioForm").style.display = "none";
+        } else {
+            alert("Błąd: Nie udało się zapisać Bio!");
+        }
+    })
+    .catch(error => console.error('Błąd AJAX:', error));
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let input = document.getElementById("bioInput");
+    let bioText = document.getElementById("bioText");
+
+    if (input && bioText) {
+        input.value = bioText.innerText.trim();
+    }
+
+    let form = document.getElementById("editBioForm");
+    if (form) {
+        form.addEventListener("submit", saveBio);
+    }
+});
+
+
+
+</script>
+
+</body>
+</html>

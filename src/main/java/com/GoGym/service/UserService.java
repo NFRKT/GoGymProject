@@ -55,18 +55,21 @@ public class UserService {
 
             TrainerDetails savedTrainer = trainerDetailsRepository.save(trainerDetails);
 
-            for (String specialization : userDTO.getSpecializations()) {
-                TrainerSpecialization spec = new TrainerSpecialization(specialization, savedTrainer);
-                specializationRepository.save(spec);
+            if (userDTO.getSpecializations() != null) {
+                for (String specialization : userDTO.getSpecializations()) {
+                    TrainerSpecialization spec = new TrainerSpecialization();
+                    spec.setTrainer(savedTrainer);
+                    spec.setSpecialization(specialization);
+                    specializationRepository.save(spec);
+                }
             }
+
         }
 
         return savedUser;
     }
-
-
-//    public User findByEmail(String email) {
-//        return UserRepository.findByEmail(email)
-//                .orElseThrow(() -> new IllegalStateException("Nie znaleziono użytkownika o podanym adresie email: " + email));
-//    }
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Nie znaleziono użytkownika o podanym adresie email: " + email));
+    }
 }

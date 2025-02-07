@@ -1,8 +1,12 @@
 package com.GoGym.service;
 
 import com.GoGym.module.TrainerClient;
+import com.GoGym.module.TrainerDetails;
+import com.GoGym.module.TrainerExperience;
 import com.GoGym.module.User;
 import com.GoGym.repository.TrainerClientRepository;
+import com.GoGym.repository.TrainerDetailsRepository;
+import com.GoGym.repository.TrainerExperienceRepository;
 import com.GoGym.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +19,15 @@ public class TrainerClientService {
 
     private final TrainerClientRepository trainerClientRepository;
     private final UserRepository userRepository;
+    private final TrainerDetailsRepository trainerDetailsRepository;
+    private final TrainerExperienceRepository trainerExperienceRepository;
 
     @Autowired
-    public TrainerClientService(TrainerClientRepository trainerClientRepository, UserRepository userRepository) {
+    public TrainerClientService(TrainerClientRepository trainerClientRepository, UserRepository userRepository, TrainerDetailsRepository trainerDetailsRepository,TrainerExperienceRepository trainerExperienceRepository) {
         this.trainerClientRepository = trainerClientRepository;
         this.userRepository = userRepository;
+        this.trainerDetailsRepository = trainerDetailsRepository;
+        this.trainerExperienceRepository = trainerExperienceRepository;
     }
 
     public TrainerClient createTrainerClient(Long trainerId, Long clientId) {
@@ -44,6 +52,19 @@ public class TrainerClientService {
     @Transactional
     public void removeTrainerClient(Long trainerId, Long clientId) {
         trainerClientRepository.deleteByTrainer_IdUserAndClient_IdUser(trainerId, clientId);
+    }
+
+    public List<TrainerExperience> getTrainerExperience(Long trainerId) {
+        TrainerDetails trainerDetails = trainerDetailsRepository.findById(trainerId.intValue()).orElse(null);
+        return trainerDetails != null ? trainerExperienceRepository.findByTrainer(trainerDetails) : null;
+    }
+
+    public void addTrainerExperience(TrainerExperience experience) {
+        trainerExperienceRepository.save(experience);
+    }
+
+    public void deleteTrainerExperience(Long experienceId) {
+        trainerExperienceRepository.deleteById(experienceId);
     }
 
 }

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Czas generowania: 26 Sty 2025, 23:17
+-- Czas generowania: 06 Lut 2025, 01:36
 -- Wersja serwera: 10.4.27-MariaDB
 -- Wersja PHP: 8.2.0
 
@@ -469,6 +469,20 @@ INSERT INTO `exercise_equipment` (`id_exercise`, `id_equipment`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Struktura tabeli dla tabeli `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id_notification` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `read` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Struktura tabeli dla tabeli `plan_exercises`
 --
 
@@ -488,14 +502,9 @@ CREATE TABLE `plan_exercises` (
 --
 
 INSERT INTO `plan_exercises` (`id`, `id_plan`, `id_exercise`, `sets`, `reps`, `weight`, `id_day`, `status`) VALUES
-(26, 12, 11, 1, 1, 1, 17, 'notCompleted'),
-(27, 12, 16, 3, 3, 3, 17, 'notCompleted'),
-(28, 13, 16, 1, 1, 111, 20, 'notCompleted'),
-(29, 13, 19, 1, 1, 111, 20, 'notCompleted'),
-(30, 13, 42, 3, 3, 333, 21, 'notCompleted'),
-(31, 14, 17, 1, 1, 1, 22, 'notCompleted'),
-(32, 14, 18, 2, 2, 2, 22, 'notCompleted'),
-(33, 14, 87, 4, 4, 4, 22, 'notCompleted'),
+(28, 13, 16, 2, 1, 112, 20, 'completed'),
+(29, 13, 19, 1, 1, 111, 20, 'completed'),
+(30, 13, 42, 3, 3, 333, 21, 'completed'),
 (34, 15, 17, 1, 1, 11, 26, 'notCompleted'),
 (35, 15, 86, 1, 1, 11, 28, 'notCompleted'),
 (36, 16, 18, 11, 11, 11, 29, 'notCompleted'),
@@ -523,21 +532,22 @@ INSERT INTO `plan_exercises` (`id`, `id_plan`, `id_exercise`, `sets`, `reps`, `w
 (58, 21, 18, 3, 3, 3, 44, 'completed'),
 (59, 21, 19, 33, 33, 33, 44, 'completed'),
 (60, 21, 17, 333, 333, 333, 44, 'completed'),
-(61, 22, 19, 1, 1, 1, 45, 'completed'),
 (62, 23, 6, 1, 1, 1, 46, 'completed'),
 (63, 23, 17, 11, 11, 11, 46, 'completed'),
 (64, 23, 26, 2, 2, 2, 47, 'completed'),
 (65, 23, 49, 22, 22, 22, 47, 'completed'),
 (66, 23, 87, 222, 222, 222, 47, 'completed'),
-(67, 24, 60, 1, 1, 1, 48, 'notCompleted'),
-(68, 24, 44, 11, 11, 11, 48, 'notCompleted'),
-(69, 24, 88, 3, 3, 3, 50, 'notCompleted'),
+(67, 24, 60, 1, 1, 1, 48, 'completed'),
+(68, 24, 44, 11, 11, 11, 48, 'completed'),
+(69, 24, 88, 3, 3, 3, 50, 'completed'),
 (70, 24, 89, 33, 33, 33, 50, 'notCompleted'),
 (71, 25, 19, 1, 1, 1, 51, 'notCompleted'),
 (72, 25, 53, 11, 11, 11, 51, 'notCompleted'),
 (73, 25, 58, 3, 3, 3, 53, 'notCompleted'),
 (74, 26, 18, 2, 2, 2, 54, 'notCompleted'),
-(75, 26, 88, 3, 3, 3, 55, 'notCompleted');
+(75, 26, 88, 3, 3, 3, 55, 'notCompleted'),
+(78, 13, 1, 99, 99, 99, 20, 'completed'),
+(79, 13, 20, 2, 2, 2, 73, 'completed');
 
 -- --------------------------------------------------------
 
@@ -570,8 +580,97 @@ INSERT INTO `requests` (`id_request`, `id_trainer`, `id_client`, `status`, `requ
 (12, 3, 5, 'rejected', '2025-01-19 23:14:04'),
 (32, 3, 5, 'accepted', '2025-01-20 22:41:37'),
 (54, 3, 5, 'accepted', '2025-01-21 12:05:08'),
-(55, 4, 5, 'pending', '2025-01-22 13:12:52'),
-(56, 3, 2, 'accepted', '2025-01-23 14:18:04');
+(55, 4, 5, 'rejected', '2025-01-22 13:12:52'),
+(56, 3, 2, 'accepted', '2025-01-23 14:18:04'),
+(58, 4, 5, 'accepted', '2025-02-04 14:38:36'),
+(61, 4, 5, 'accepted', '2025-02-04 14:48:02'),
+(62, 4, 5, 'accepted', '2025-02-04 15:06:17'),
+(63, 4, 5, 'accepted', '2025-02-04 15:08:50'),
+(64, 4, 5, 'accepted', '2025-02-04 15:15:22'),
+(65, 4, 5, 'rejected', '2025-02-04 15:17:23'),
+(66, 4, 5, 'accepted', '2025-02-04 21:05:38'),
+(67, 4, 5, 'accepted', '2025-02-04 21:15:00'),
+(68, 4, 5, 'accepted', '2025-02-04 21:32:47'),
+(69, 4, 5, 'accepted', '2025-02-04 21:39:44'),
+(103, 4, 5, 'accepted', '2025-02-04 23:28:41'),
+(105, 4, 5, 'accepted', '2025-02-04 23:39:08'),
+(106, 4, 5, 'rejected', '2025-02-04 23:40:49'),
+(107, 4, 5, 'rejected', '2025-02-04 23:41:19'),
+(108, 4, 5, 'rejected', '2025-02-04 23:54:02'),
+(110, 4, 5, 'accepted', '2025-02-04 23:54:40'),
+(111, 4, 5, 'rejected', '2025-02-05 12:05:31'),
+(112, 4, 5, 'accepted', '2025-02-05 12:12:08'),
+(113, 4, 5, 'accepted', '2025-02-05 12:18:41'),
+(114, 4, 5, 'accepted', '2025-02-05 12:23:19'),
+(115, 4, 5, 'rejected', '2025-02-05 12:38:53'),
+(116, 4, 5, 'rejected', '2025-02-05 12:43:23'),
+(117, 4, 5, 'rejected', '2025-02-05 12:46:34'),
+(118, 4, 5, 'rejected', '2025-02-05 12:50:00'),
+(119, 4, 5, 'rejected', '2025-02-05 12:53:41'),
+(120, 4, 5, 'accepted', '2025-02-05 12:53:48'),
+(121, 4, 5, 'accepted', '2025-02-05 12:54:15'),
+(122, 4, 5, 'accepted', '2025-02-05 12:54:27'),
+(123, 4, 5, 'accepted', '2025-02-05 12:59:08'),
+(124, 4, 5, 'rejected', '2025-02-05 12:59:26'),
+(127, 4, 5, 'rejected', '2025-02-05 13:05:46'),
+(128, 4, 5, 'rejected', '2025-02-05 13:06:26');
+
+-- --------------------------------------------------------
+
+--
+-- Struktura tabeli dla tabeli `trainer_details`
+--
+
+CREATE TABLE `trainer_details` (
+  `id_trainer` int(11) NOT NULL,
+  `start_date` date NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `work_area` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
+
+--
+-- Zrzut danych tabeli `trainer_details`
+--
+
+INSERT INTO `trainer_details` (`id_trainer`, `start_date`, `phone_number`, `work_area`) VALUES
+(14, '1111-03-21', '123123123', 'awdawd'),
+(15, '2222-02-22', '123', ''),
+(16, '0222-02-22', '2312312', '');
+
+-- --------------------------------------------------------
+
+--
+-- Struktura tabeli dla tabeli `trainer_experience`
+--
+
+CREATE TABLE `trainer_experience` (
+  `id` int(11) NOT NULL,
+  `id_trainer` int(11) NOT NULL,
+  `graduation_name` varchar(255) NOT NULL,
+  `graduation_date` date DEFAULT NULL,
+  `certification_file` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struktura tabeli dla tabeli `trainer_specialization`
+--
+
+CREATE TABLE `trainer_specialization` (
+  `id` int(11) NOT NULL,
+  `id_trainer` int(11) NOT NULL,
+  `specialization` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
+
+--
+-- Zrzut danych tabeli `trainer_specialization`
+--
+
+INSERT INTO `trainer_specialization` (`id`, `id_trainer`, `specialization`) VALUES
+(3, 14, 'wdawd'),
+(5, 15, '123'),
+(7, 16, '1312312');
 
 -- --------------------------------------------------------
 
@@ -595,9 +694,7 @@ CREATE TABLE `training_plans` (
 --
 
 INSERT INTO `training_plans` (`id_plan`, `name`, `start_date`, `end_date`, `description`, `status`, `id_trainer`, `id_client`) VALUES
-(12, 'Plan1', '2025-01-23', '2025-01-25', 'Plan1', 'active', 3, 5),
-(13, 'Plan2', '2025-01-22', '2025-01-23', 'Plan2', 'active', 3, 5),
-(14, 'Plan3', '2025-01-29', '2025-02-01', 'Plan3', 'active', 3, 5),
+(13, 'Plan2', '2025-01-22', '2025-01-23', 'Plan2', 'completed', 3, 5),
 (15, 'Plan4', '2025-02-21', '2025-02-23', 'Plan4', 'active', 3, 5),
 (16, 'Plan5', '2025-01-23', '2025-01-24', 'Plan5', 'active', 3, 5),
 (17, 'Plan6', '2025-03-19', '2025-03-21', 'Plan6', 'active', 3, 5),
@@ -605,11 +702,10 @@ INSERT INTO `training_plans` (`id_plan`, `name`, `start_date`, `end_date`, `desc
 (19, 'Plan8', '2025-01-24', '2025-01-25', 'Plan8', 'completed', 3, 5),
 (20, 'Plan9', '2025-01-22', '2025-01-24', 'Plan9', 'completed', 3, 5),
 (21, 'plan10', '2025-01-22', '2025-01-24', 'plan10', 'completed', 3, 5),
-(22, 'Plan11', '2025-01-22', '2025-01-22', 'Plan11', 'completed', 3, 5),
 (23, 'Plan12', '2025-01-22', '2025-01-23', 'Plan12', 'completed', 3, 5),
 (24, 'Plan13', '2025-01-29', '2025-01-31', 'Plan13', 'active', 3, 5),
 (25, 'PlanDlaA', '2025-01-30', '2025-02-01', 'A', 'active', 3, 2),
-(26, 'A2', '2025-02-05', '2025-02-06', 'A2', 'active', 3, 2);
+(26, 'A2zmiana', '2025-02-05', '2025-02-06', 'A2', 'active', 3, 2);
 
 -- --------------------------------------------------------
 
@@ -631,15 +727,8 @@ CREATE TABLE `training_plan_days` (
 --
 
 INSERT INTO `training_plan_days` (`id_day`, `day_type`, `status`, `notes`, `date`, `id_plan`) VALUES
-(17, 'training', 'notCompleted', 'dzień1', '2025-01-23', 12),
-(18, 'rest', 'notCompleted', 'dzień2', '2025-01-24', 12),
-(19, 'training', 'notCompleted', 'dzień3', '2025-01-25', 12),
-(20, 'training', 'notCompleted', 'dzien1', '2025-01-22', 13),
-(21, 'training', 'notCompleted', 'dzien2', '2025-01-23', 13),
-(22, 'training', 'notCompleted', 'dzien1', '2025-01-29', 14),
-(23, 'training', 'notCompleted', 'dzien2', '2025-01-30', 14),
-(24, 'rest', 'notCompleted', 'dzien3', '2025-01-31', 14),
-(25, 'training', 'notCompleted', 'dzien4', '2025-02-01', 14),
+(20, 'training', 'completed', 'dzien1', '2025-01-22', 13),
+(21, 'training', 'completed', 'dzien2', '2025-01-23', 13),
 (26, 'training', 'notCompleted', 'dzien1', '2025-02-21', 15),
 (27, 'rest', 'notCompleted', 'dzien2', '2025-02-22', 15),
 (28, 'training', 'notCompleted', 'dzien3', '2025-02-23', 15),
@@ -659,17 +748,18 @@ INSERT INTO `training_plan_days` (`id_day`, `day_type`, `status`, `notes`, `date
 (42, 'training', 'completed', 'd1', '2025-01-22', 21),
 (43, 'training', 'completed', 'd2', '2025-01-23', 21),
 (44, 'training', 'completed', 'd3', '2025-01-24', 21),
-(45, 'training', 'completed', 'd1', '2025-01-22', 22),
 (46, 'training', 'completed', 'dzien1', '2025-01-22', 23),
 (47, 'training', 'completed', 'dzien2', '2025-01-23', 23),
-(48, 'training', 'notCompleted', 'd1', '2025-01-29', 24),
-(49, 'rest', 'notCompleted', 'd2', '2025-01-30', 24),
+(48, 'training', 'completed', 'd1', '2025-01-29', 24),
+(49, 'rest', 'completed', 'd2', '2025-01-30', 24),
 (50, 'training', 'notCompleted', 'd3', '2025-01-31', 24),
 (51, 'training', 'notCompleted', 'Dzień1A', '2025-01-30', 25),
 (52, 'rest', 'notCompleted', 'Dzień2A', '2025-01-31', 25),
 (53, 'training', 'notCompleted', 'Dzień3A', '2025-02-01', 25),
 (54, 'training', 'notCompleted', 'A2', '2025-02-05', 26),
-(55, 'training', 'notCompleted', 'A22', '2025-02-06', 26);
+(55, 'training', 'notCompleted', 'A22', '2025-02-06', 26),
+(72, 'rest', 'completed', '', '2025-01-31', 13),
+(73, 'training', 'completed', '', '2025-01-31', 13);
 
 -- --------------------------------------------------------
 
@@ -689,7 +779,8 @@ CREATE TABLE `treiners_clients` (
 
 INSERT INTO `treiners_clients` (`id`, `id_trainer`, `id_client`) VALUES
 (12, 3, 2),
-(11, 3, 5);
+(11, 3, 5),
+(73, 4, 5);
 
 -- --------------------------------------------------------
 
@@ -716,7 +807,13 @@ INSERT INTO `user` (`id_user`, `email`, `password`, `first_name`, `second_name`,
 (2, 'A', '$2a$10$fk5ZhEsdK0eCJglnxznvVeVoxrZCfIYgVs3v7.oOQo4muXGowXvjm', 'Aa', 'Aa', '2025-01-02', 'KOBIETA', 'UŻYTKOWNIK'),
 (3, 'jan@jan.pl', '$2a$10$1YRXlh0SPlA5pUMmiEhYGOfaTTvvc3RyFF8HPZuV/MYEg6pU5QD5S', 'Jan', 'Dziwok', '2001-10-02', 'MĘŻCZYZNA', 'TRENER'),
 (4, 'b', '$2a$10$eRJbNm5HNpB6IWhHp6sKD.UOMcUK3Va.dmNyzkDLUnR5AA73TVIeS', 'Bb', 'Bb', '2025-01-06', 'KOBIETA', 'TRENER'),
-(5, 'test@test.pl', '$2a$10$fOdBhiVmycq6t9yPjtey5uYQAY/5PHJaak7JQlXNCYdcEm3L7wckO', 'Test', 'Testowy', '2024-12-30', 'MĘŻCZYZNA', 'UŻYTKOWNIK');
+(5, 'test@test.pl', '$2a$10$fOdBhiVmycq6t9yPjtey5uYQAY/5PHJaak7JQlXNCYdcEm3L7wckO', 'Test', 'Testowy', '2024-12-30', 'MĘŻCZYZNA', 'UŻYTKOWNIK'),
+(10, 'trener', '$2a$10$gSw2bQ/ysuiaPIMTMM7Ilu63Fe0/.v3j7fh1JtORIpYSGYjFJiwO.', 'Leo', 'Messi', '2001-10-01', 'MĘŻCZYZNA', 'TRENER'),
+(11, 'U', '$2a$10$uVhzTjmOjTRmgbs6bRC8I.P/09Apd/W5bG97cdhHogX02kyZ2V0cm', 'Uu', 'Uu', '2002-01-01', 'KOBIETA', 'UŻYTKOWNIK'),
+(13, 'm', '$2a$10$bb5soK1gUAwfuIj/MDk6rOorR1SgtL4ryBrPdNmnuip01DeIbYi/.', 'Mm', 'Mm', '2010-01-01', 'KOBIETA', 'TRENER'),
+(14, 'adw', '$2a$10$4/7kNbpU0tAH0HS4Yatnquya9e99To.G53O9cy/.3PcFRErTXm5QK', 'Awdawd', 'Adwaadw', '1222-12-12', 'KOBIETA', 'TRENER'),
+(15, 't', '$2a$10$AmVuDAMIdnMgEMv7vBBcieb/fv4ouBec97n7YP5XjDubPLW0XyE7C', 'Tt', 'Tt', '2222-02-22', 'KOBIETA', 'TRENER'),
+(16, 'aaa', '$2a$10$z8ToxpG8XLFh0CSpWhScuOk77nF8cMdMQEPqsjnQWM1kcGpW11j7i', 'Aaaa', 'Aaaa', '0222-02-22', 'KOBIETA', 'TRENER');
 
 -- --------------------------------------------------------
 
@@ -811,6 +908,13 @@ ALTER TABLE `exercise_equipment`
   ADD KEY `id_equipment` (`id_equipment`);
 
 --
+-- Indeksy dla tabeli `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id_notification`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indeksy dla tabeli `plan_exercises`
 --
 ALTER TABLE `plan_exercises`
@@ -826,6 +930,26 @@ ALTER TABLE `requests`
   ADD PRIMARY KEY (`id_request`),
   ADD KEY `id_trainer` (`id_trainer`),
   ADD KEY `id_client` (`id_client`);
+
+--
+-- Indeksy dla tabeli `trainer_details`
+--
+ALTER TABLE `trainer_details`
+  ADD PRIMARY KEY (`id_trainer`);
+
+--
+-- Indeksy dla tabeli `trainer_experience`
+--
+ALTER TABLE `trainer_experience`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_trainer` (`id_trainer`);
+
+--
+-- Indeksy dla tabeli `trainer_specialization`
+--
+ALTER TABLE `trainer_specialization`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_trainer` (`id_trainer`);
 
 --
 -- Indeksy dla tabeli `training_plans`
@@ -894,40 +1018,58 @@ ALTER TABLE `exercise`
   MODIFY `id_exercise` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
+-- AUTO_INCREMENT dla tabeli `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id_notification` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT dla tabeli `plan_exercises`
 --
 ALTER TABLE `plan_exercises`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT dla tabeli `requests`
 --
 ALTER TABLE `requests`
-  MODIFY `id_request` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id_request` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=208;
+
+--
+-- AUTO_INCREMENT dla tabeli `trainer_experience`
+--
+ALTER TABLE `trainer_experience`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT dla tabeli `trainer_specialization`
+--
+ALTER TABLE `trainer_specialization`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT dla tabeli `training_plans`
 --
 ALTER TABLE `training_plans`
-  MODIFY `id_plan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id_plan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT dla tabeli `training_plan_days`
 --
 ALTER TABLE `training_plan_days`
-  MODIFY `id_day` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id_day` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT dla tabeli `treiners_clients`
 --
 ALTER TABLE `treiners_clients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT dla tabeli `user`
 --
 ALTER TABLE `user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT dla tabeli `workouts`
@@ -960,6 +1102,12 @@ ALTER TABLE `exercise_equipment`
   ADD CONSTRAINT `exercise_equipment_ibfk_2` FOREIGN KEY (`id_equipment`) REFERENCES `equipment` (`id_equipment`) ON DELETE CASCADE;
 
 --
+-- Ograniczenia dla tabeli `notifications`
+--
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
 -- Ograniczenia dla tabeli `plan_exercises`
 --
 ALTER TABLE `plan_exercises`
@@ -973,6 +1121,24 @@ ALTER TABLE `plan_exercises`
 ALTER TABLE `requests`
   ADD CONSTRAINT `requests_ibfk_1` FOREIGN KEY (`id_trainer`) REFERENCES `user` (`id_user`) ON DELETE CASCADE,
   ADD CONSTRAINT `requests_ibfk_2` FOREIGN KEY (`id_client`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
+-- Ograniczenia dla tabeli `trainer_details`
+--
+ALTER TABLE `trainer_details`
+  ADD CONSTRAINT `trainer_details_ibfk_1` FOREIGN KEY (`id_trainer`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
+-- Ograniczenia dla tabeli `trainer_experience`
+--
+ALTER TABLE `trainer_experience`
+  ADD CONSTRAINT `trainer_experience_ibfk_1` FOREIGN KEY (`id_trainer`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
+-- Ograniczenia dla tabeli `trainer_specialization`
+--
+ALTER TABLE `trainer_specialization`
+  ADD CONSTRAINT `trainer_specialization_ibfk_1` FOREIGN KEY (`id_trainer`) REFERENCES `trainer_details` (`id_trainer`) ON DELETE CASCADE;
 
 --
 -- Ograniczenia dla tabeli `training_plans`

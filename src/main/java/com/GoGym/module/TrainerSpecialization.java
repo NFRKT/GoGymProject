@@ -13,7 +13,7 @@ public class TrainerSpecialization {
     private String specialization;
 
     @ManyToOne
-    @JoinColumn(name = "id_trainer", nullable = false)
+    @JoinColumn(name = "id_trainer", referencedColumnName = "id_trainer")
     private TrainerDetails trainer;
 
     public TrainerSpecialization() {}
