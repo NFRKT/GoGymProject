@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
@@ -125,42 +126,105 @@ public class TrainerProfileController {
 
         return response; // Zwracamy JSON-a
     }
+    @PostMapping("/deleteBio")
+    @ResponseBody
+    public Map<String, Object> deleteBio(Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
+        User user = userService.findByEmail(principal.getName());
+        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
+
+        if (trainerDetails != null) {
+            trainerDetails.setBio(null);  // Usunięcie wartości Bio
+            trainerDetailsRepository.save(trainerDetails);
+
+            response.put("success", true);
+        } else {
+            response.put("success", false);
+        }
+
+        return response;
+    }
 
 
     @PostMapping("/deleteSpecialization")
-    public String deleteSpecialization(@RequestParam("specializationId") Long specializationId) {
-        trainerSpecializationRepository.deleteById(specializationId);
-        return "redirect:/trainer/profile";
+    @ResponseBody
+    public Map<String, Object> deleteSpecialization(@RequestParam("specializationId") Long specializationId) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            trainerSpecializationRepository.deleteById(specializationId);
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+        }
+
+        return response;
     }
 
+    @PostMapping("/updateSpecialization")
+    @ResponseBody
+    public Map<String, Object> updateSpecialization(@RequestParam("specializationId") Long specializationId,
+                                                    @RequestParam("specialization") String specialization) {
+        Map<String, Object> response = new HashMap<>();
+
+        Optional<TrainerSpecialization> specializationOpt = trainerSpecializationRepository.findById(specializationId);
+        if (specializationOpt.isPresent()) {
+            TrainerSpecialization existingSpecialization = specializationOpt.get();
+            existingSpecialization.setSpecialization(specialization);
+            trainerSpecializationRepository.save(existingSpecialization);
+
+            response.put("success", true);
+            response.put("specializationId", existingSpecialization.getId());
+            response.put("specialization", existingSpecialization.getSpecialization());
+        } else {
+            response.put("success", false);
+        }
+
+        return response;
+    }
+
+
     @PostMapping("/addSpecialization")
-    public String addSpecialization(@RequestParam("specialization") String specialization, Principal principal) {
+    @ResponseBody
+    public Map<String, Object> addSpecialization(@RequestParam("specialization") String specialization, Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
         User user = userService.findByEmail(principal.getName());
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
 
         if (trainerDetails != null && specialization != null && !specialization.trim().isEmpty()) {
             TrainerSpecialization newSpecialization = new TrainerSpecialization(specialization, trainerDetails);
             trainerSpecializationRepository.save(newSpecialization);
+            response.put("success", true);
+            response.put("specializationId", newSpecialization.getId());
+            response.put("specialization", newSpecialization.getSpecialization());
+        } else {
+            response.put("success", false);
         }
 
-        return "redirect:/trainer/profile";
+        return response;
     }
+
     @PostMapping("/addExperience")
-    public String addExperience(@RequestParam("graduationName") String graduationName,
-                                @RequestParam(value = "graduationDate", required = false)
-                                @DateTimeFormat(pattern = "yyyy-MM-dd") Date graduationDate,
-                                @RequestParam(value = "certificationFile", required = false) MultipartFile certificationFile,
-                                Principal principal) {
+    @ResponseBody
+    public Map<String, Object> addExperience(
+            @RequestParam("graduationName") String graduationName,
+            @RequestParam(value = "graduationDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date graduationDate,
+            @RequestParam(value = "certificationFile", required = false) MultipartFile certificationFile,
+            Principal principal) {
+
+        Map<String, Object> response = new HashMap<>();
         User user = userService.findByEmail(principal.getName());
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
 
-        if (trainerDetails != null) {
+        if (trainerDetails != null && !graduationName.trim().isEmpty()) {
             String fileName = null;
-            if (!certificationFile.isEmpty()) {
+            if (certificationFile != null && !certificationFile.isEmpty()) {
                 try {
                     fileName = UUID.randomUUID() + "_" + certificationFile.getOriginalFilename();
                     Path filePath = Paths.get("uploads/certifications/", fileName);
-                    Files.createDirectories(filePath.getParent()); // Tworzenie folderu, jeśli nie istnieje
+                    Files.createDirectories(filePath.getParent());
                     Files.copy(certificationFile.getInputStream(), filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -169,54 +233,143 @@ public class TrainerProfileController {
 
             TrainerExperience experience = new TrainerExperience(trainerDetails, graduationName, graduationDate, fileName);
             trainerClientService.addTrainerExperience(experience);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String formattedDate = (graduationDate != null) ? dateFormat.format(graduationDate) : "Nie podano";
+
+            response.put("success", true);
+            response.put("experienceId", experience.getId());
+            response.put("graduationName", experience.getGraduationName());
+            response.put("graduationDate", formattedDate);
+            response.put("certificationFile", fileName);
+        } else {
+            response.put("success", false);
         }
 
-        return "redirect:/trainer/profile";
+        return response;
+    }
+    @PostMapping("/updateExperience")
+    @ResponseBody
+    public Map<String, Object> updateExperience(
+            @RequestParam("experienceId") Long experienceId,
+            @RequestParam("graduationName") String graduationName,
+            @RequestParam(value = "graduationDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date graduationDate,
+            @RequestParam(value = "certificationFile", required = false) MultipartFile certificationFile) {
+
+        Map<String, Object> response = new HashMap<>();
+        Optional<TrainerExperience> experienceOpt = trainerClientService.findTrainerExperienceById(experienceId);
+
+        if (experienceOpt.isPresent()) {
+            TrainerExperience experience = experienceOpt.get();
+
+            experience.setGraduationName(graduationName);
+            experience.setGraduationDate(graduationDate);
+
+            String fileName = experience.getCertificationFile(); // Zachowanie starego pliku, jeśli nowy nie został przesłany
+
+            if (certificationFile != null && !certificationFile.isEmpty()) {
+                try {
+                    fileName = UUID.randomUUID() + "_" + certificationFile.getOriginalFilename();
+                    Path filePath = Paths.get("uploads/certifications/", fileName);
+                    Files.createDirectories(filePath.getParent());
+                    Files.copy(certificationFile.getInputStream(), filePath);
+                    experience.setCertificationFile(fileName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            trainerClientService.updateTrainerExperience(experience);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String formattedDate = (graduationDate != null) ? dateFormat.format(graduationDate) : "Nie podano";
+
+            response.put("success", true);
+            response.put("experienceId", experience.getId());
+            response.put("graduationName", experience.getGraduationName());
+            response.put("graduationDate", formattedDate);
+            response.put("certificationFile", fileName);
+        } else {
+            response.put("success", false);
+        }
+
+        return response;
     }
 
     @PostMapping("/deleteExperience")
-    public String deleteExperience(@RequestParam("experienceId") Long experienceId) {
-        trainerClientService.deleteTrainerExperience(experienceId);
-        return "redirect:/trainer/profile";
+    @ResponseBody
+    public Map<String, Object> deleteExperience(@RequestParam("experienceId") Long experienceId) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            trainerClientService.deleteTrainerExperience(experienceId);
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+        }
+
+        return response;
     }
+
     @PostMapping("/updateStartDate")
-    public String updateStartDate(@RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, Principal principal) {
+    @ResponseBody
+    public Map<String, Object> updateStartDate(@RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, Principal principal) {
+        Map<String, Object> response = new HashMap<>();
         User user = userService.findByEmail(principal.getName());
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
 
         if (trainerDetails != null) {
             trainerDetails.setStartDate(startDate);
             trainerDetailsRepository.save(trainerDetails);
-        }
 
-        return "redirect:/trainer/profile";
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            response.put("success", true);
+            response.put("startDate", dateFormat.format(startDate));
+        } else {
+            response.put("success", false);
+        }
+        return response;
     }
 
     @PostMapping("/updatePhoneNumber")
-    public String updatePhoneNumber(@RequestParam("phoneNumber") String phoneNumber, Principal principal) {
+    @ResponseBody
+    public Map<String, Object> updatePhoneNumber(@RequestParam("phoneNumber") String phoneNumber, Principal principal) {
+        Map<String, Object> response = new HashMap<>();
         User user = userService.findByEmail(principal.getName());
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
 
         if (trainerDetails != null) {
             trainerDetails.setPhoneNumber(phoneNumber);
             trainerDetailsRepository.save(trainerDetails);
-        }
 
-        return "redirect:/trainer/profile";
+            response.put("success", true);
+            response.put("phoneNumber", trainerDetails.getPhoneNumber());
+        } else {
+            response.put("success", false);
+        }
+        return response;
     }
 
     @PostMapping("/updateWorkArea")
-    public String updateWorkArea(@RequestParam("workArea") String workArea, Principal principal) {
+    @ResponseBody
+    public Map<String, Object> updateWorkArea(@RequestParam("workArea") String workArea, Principal principal) {
+        Map<String, Object> response = new HashMap<>();
         User user = userService.findByEmail(principal.getName());
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
 
         if (trainerDetails != null) {
             trainerDetails.setWorkArea(workArea);
             trainerDetailsRepository.save(trainerDetails);
-        }
 
-        return "redirect:/trainer/profile";
+            response.put("success", true);
+            response.put("workArea", trainerDetails.getWorkArea());
+        } else {
+            response.put("success", false);
+        }
+        return response;
     }
+
+
 
 
 }

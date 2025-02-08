@@ -13,13 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 //@ComponentScan(basePackages = {"com.GoGym", "com.GoGym.security", "com.GoGym.service"})
 
 public class ContentGoGymApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(ContentGoGymApplication.class, args);
 	}
-	@GetMapping
-	public String hello(){
-		return "Hello World";
-	}
-
 }
