@@ -26,14 +26,14 @@ public class WorkoutService {
     }
 
     @Transactional
-    public Workout addWorkoutWithExercises(Workout workout, List<Long> exerciseIds, List<Integer> sets, List<Integer> reps, List<Integer> weight) {
+    public Workout addWorkoutWithExercises(Workout workout, List<Long> exerciseIds, List<Integer> sets, List<Integer> reps, List<Double> weight) {
         Workout savedWorkout = workoutRepository.save(workout);
 
         for (int i = 0; i < exerciseIds.size(); i++) {
             Long exerciseId = exerciseIds.get(i);
             int setCount = sets.get(i);
             int repCount = reps.get(i);
-            int weightValue = weight.get(i);
+            double weightValue = weight.get(i);
 
             Exercise exercise = exerciseRepository.findById(exerciseId.intValue())
                     .orElseThrow(() -> new RuntimeException("Ćwiczenie nie istnieje"));

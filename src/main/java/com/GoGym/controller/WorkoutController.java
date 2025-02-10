@@ -43,7 +43,7 @@ public class WorkoutController {
                                 @RequestParam List<Long> exerciseIds,
                                 @RequestParam List<Integer> sets,
                                 @RequestParam List<Integer> reps,
-                                @RequestParam List<Integer> weight,
+                                @RequestParam List<Double> weight,
                                 Model model) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

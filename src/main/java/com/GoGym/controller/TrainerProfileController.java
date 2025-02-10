@@ -1,13 +1,11 @@
 package com.GoGym.controller;
 
-import com.GoGym.module.TrainerDetails;
-import com.GoGym.module.TrainerExperience;
-import com.GoGym.module.TrainerSpecialization;
-import com.GoGym.module.User;
+import com.GoGym.module.*;
 import com.GoGym.repository.TrainerDetailsRepository;
 import com.GoGym.repository.TrainerExperienceRepository;
 import com.GoGym.repository.TrainerSpecializationRepository;
 import com.GoGym.service.TrainerClientService;
+import com.GoGym.service.TrainerDetailsService;
 import com.GoGym.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -34,6 +32,8 @@ public class TrainerProfileController {
 
     @Autowired
     private TrainerDetailsRepository trainerDetailsRepository;
+    @Autowired
+    private TrainerDetailsService trainerDetailsService;
 
     @Autowired
     private TrainerSpecializationRepository trainerSpecializationRepository;
@@ -45,9 +45,9 @@ public class TrainerProfileController {
     @GetMapping
     public String trainerProfile(Model model, Principal principal) {
         User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
+        TrainerDetails trainerDetails = trainerDetailsRepository.findById(user.getIdUser()).orElse(null);
         List<TrainerSpecialization> specializations = trainerSpecializationRepository.findByTrainer(trainerDetails);
-        List<TrainerExperience> experiences = trainerClientService.getTrainerExperience(user.getIdUser());
+        List<TrainerExperience> experiences = trainerDetailsService.getTrainerExperience(user.getIdUser());
 
         model.addAttribute("user", user);
         model.addAttribute("trainerDetails", trainerDetails);
@@ -56,89 +56,50 @@ public class TrainerProfileController {
         return "trainer-profile";
     }
 
-
-
     @PostMapping("/upload")
-    public String uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file,
-                                       Principal principal) {
+    @ResponseBody
+    public Map<String, Object> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file, Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
         if (!file.isEmpty()) {
             try {
                 User user = userService.findByEmail(principal.getName());
-                TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
+                TrainerDetails trainerDetails = trainerDetailsService.getTrainerDetails(user);
 
-                if (trainerDetails != null) {
-                    // Sprawdzenie i utworzenie katalogu jeśli nie istnieje
-                    Path uploadDir = Paths.get("uploads/avatars/");
-                    if (!Files.exists(uploadDir)) {
-                        Files.createDirectories(uploadDir);
-                    }
-
-                    // Generowanie unikalnej nazwy pliku
-                    String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-                    Path filePath = uploadDir.resolve(fileName);
-
-                    // Zapisywanie pliku
-                    Files.copy(file.getInputStream(), filePath);
-
-                    // Aktualizacja w bazie danych
-                    trainerDetails.setProfilePicture(fileName);
-                    trainerDetailsRepository.save(trainerDetails);
+                if (trainerDetails == null) {
+                    trainerDetails = new TrainerDetails();
+                    trainerDetails.setUser(user);
                 }
+
+                // 🔥 Ścieżka do katalogu
+                Path uploadDir = Paths.get("uploads/avatars/");
+                if (!Files.exists(uploadDir)) {
+                    Files.createDirectories(uploadDir);
+                }
+
+                // 🔥 Usunięcie starego zdjęcia (jeśli istnieje)
+                if (trainerDetails.getProfilePicture() != null) {
+                    Path oldFilePath = uploadDir.resolve(trainerDetails.getProfilePicture());
+                    Files.deleteIfExists(oldFilePath);
+                }
+
+                // 🔥 Zapis nowego pliku
+                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                Path filePath = uploadDir.resolve(fileName);
+                Files.copy(file.getInputStream(), filePath);
+
+                // 🔥 Aktualizacja w bazie danych
+                trainerDetails.setProfilePicture(fileName);
+                trainerDetailsService.saveTrainerDetails(trainerDetails);
+
+                // 🔥 Odpowiedź JSON
+                response.put("success", true);
+                response.put("profilePictureUrl", "/uploads/avatars/" + fileName);
 
             } catch (IOException e) {
                 e.printStackTrace();
+                response.put("success", false);
             }
-        }
-        return "redirect:/trainer/profile";
-    }
-    @PostMapping("/deleteProfilePicture")
-    public String deleteProfilePicture(Principal principal) {
-        User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
-
-        if (trainerDetails != null) {
-            trainerDetails.setProfilePicture(null);
-            trainerDetailsRepository.save(trainerDetails);
-        }
-
-        return "redirect:/trainer/profile";
-    }
-
-    @PostMapping("/updateBio")
-    @ResponseBody
-    public Map<String, Object> updateBio(@RequestBody Map<String, String> requestBody, Principal principal) {
-        Map<String, Object> response = new HashMap<>();
-
-        String bio = requestBody.get("bio"); // Pobranie wartości z JSON-a
-
-        User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
-
-        if (trainerDetails != null) {
-            trainerDetails.setBio(bio);
-            trainerDetailsRepository.save(trainerDetails);
-
-            response.put("success", true);
-            response.put("bio", trainerDetails.getBio());
-        } else {
-            response.put("success", false);
-        }
-
-        return response; // Zwracamy JSON-a
-    }
-    @PostMapping("/deleteBio")
-    @ResponseBody
-    public Map<String, Object> deleteBio(Principal principal) {
-        Map<String, Object> response = new HashMap<>();
-
-        User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
-
-        if (trainerDetails != null) {
-            trainerDetails.setBio(null);  // Usunięcie wartości Bio
-            trainerDetailsRepository.save(trainerDetails);
-
-            response.put("success", true);
         } else {
             response.put("success", false);
         }
@@ -146,6 +107,71 @@ public class TrainerProfileController {
         return response;
     }
 
+    @PostMapping("/deleteProfilePicture")
+    @ResponseBody
+    public Map<String, Object> deleteProfilePicture(Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        User user = userService.findByEmail(principal.getName());
+        TrainerDetails trainerDetails = trainerDetailsService.getTrainerDetails(user);
+
+        if (trainerDetails != null && trainerDetails.getProfilePicture() != null) {
+            try {
+                // Ścieżka do katalogu
+                Path filePath = Paths.get("uploads/avatars/").resolve(trainerDetails.getProfilePicture());
+
+                // 🔥 Usunięcie pliku z serwera
+                Files.deleteIfExists(filePath);
+
+                // Usunięcie informacji o zdjęciu z bazy danych
+                trainerDetails.setProfilePicture(null);
+                trainerDetailsService.saveTrainerDetails(trainerDetails);
+
+                response.put("success", true);
+                response.put("defaultProfilePicture", "/images/default-profile.png");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                response.put("success", false);
+            }
+        } else {
+            response.put("success", false);
+        }
+
+        return response;
+    }
+
+    @PostMapping("/updateField")
+    @ResponseBody
+    public Map<String, Object> updateField(@RequestParam String field, @RequestParam String value, Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        User user = userService.findByEmail(principal.getName());
+        TrainerDetails trainerDetails = trainerDetailsService.getTrainerDetails(user);
+
+        if (trainerDetails == null) {
+            trainerDetails = new TrainerDetails();
+            trainerDetails.setUser(user);
+        }
+
+        switch (field) {
+            case "bio":
+                trainerDetails.setBio(value);
+                break;
+            case "phoneNumber":
+                trainerDetails.setPhoneNumber(value);
+                break;
+            case "workArea":
+                trainerDetails.setWorkArea(value);
+                break;
+            default:
+                response.put("success", false);
+                return response;
+        }
+
+        trainerDetailsService.saveTrainerDetails(trainerDetails);
+        response.put("success", true);
+        response.put(field, value);
+        return response;
+    }
 
     @PostMapping("/deleteSpecialization")
     @ResponseBody
@@ -191,7 +217,7 @@ public class TrainerProfileController {
         Map<String, Object> response = new HashMap<>();
 
         User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
+        TrainerDetails trainerDetails = trainerDetailsRepository.findById(user.getIdUser()).orElse(null);
 
         if (trainerDetails != null && specialization != null && !specialization.trim().isEmpty()) {
             TrainerSpecialization newSpecialization = new TrainerSpecialization(specialization, trainerDetails);
@@ -216,7 +242,7 @@ public class TrainerProfileController {
 
         Map<String, Object> response = new HashMap<>();
         User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
+        TrainerDetails trainerDetails = trainerDetailsRepository.findById(user.getIdUser()).orElse(null);
 
         if (trainerDetails != null && !graduationName.trim().isEmpty()) {
             String fileName = null;
@@ -232,7 +258,7 @@ public class TrainerProfileController {
             }
 
             TrainerExperience experience = new TrainerExperience(trainerDetails, graduationName, graduationDate, fileName);
-            trainerClientService.addTrainerExperience(experience);
+            trainerDetailsService.addTrainerExperience(experience);
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             String formattedDate = (graduationDate != null) ? dateFormat.format(graduationDate) : "Nie podano";
@@ -257,7 +283,7 @@ public class TrainerProfileController {
             @RequestParam(value = "certificationFile", required = false) MultipartFile certificationFile) {
 
         Map<String, Object> response = new HashMap<>();
-        Optional<TrainerExperience> experienceOpt = trainerClientService.findTrainerExperienceById(experienceId);
+        Optional<TrainerExperience> experienceOpt = trainerDetailsService.findTrainerExperienceById(experienceId);
 
         if (experienceOpt.isPresent()) {
             TrainerExperience experience = experienceOpt.get();
@@ -279,7 +305,7 @@ public class TrainerProfileController {
                 }
             }
 
-            trainerClientService.updateTrainerExperience(experience);
+            trainerDetailsService.updateTrainerExperience(experience);
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             String formattedDate = (graduationDate != null) ? dateFormat.format(graduationDate) : "Nie podano";
@@ -302,21 +328,39 @@ public class TrainerProfileController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            trainerClientService.deleteTrainerExperience(experienceId);
-            response.put("success", true);
-        } catch (Exception e) {
+            Optional<TrainerExperience> experienceOpt = trainerDetailsService.findTrainerExperienceById(experienceId);
+
+            if (experienceOpt.isPresent()) {
+                TrainerExperience experience = experienceOpt.get();
+
+                // 🔥 Jeśli istnieje plik certyfikatu, usuń go z serwera
+                if (experience.getCertificationFile() != null) {
+                    Path filePath = Paths.get("uploads/certifications/", experience.getCertificationFile());
+                    Files.deleteIfExists(filePath);
+                }
+
+                // 🔥 Usuń doświadczenie z bazy danych
+                trainerDetailsService.deleteTrainerExperience(experienceId);
+
+                response.put("success", true);
+            } else {
+                response.put("success", false);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
             response.put("success", false);
         }
 
         return response;
     }
 
+
     @PostMapping("/updateStartDate")
     @ResponseBody
     public Map<String, Object> updateStartDate(@RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, Principal principal) {
         Map<String, Object> response = new HashMap<>();
         User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
+        TrainerDetails trainerDetails = trainerDetailsRepository.findById(user.getIdUser()).orElse(null);
 
         if (trainerDetails != null) {
             trainerDetails.setStartDate(startDate);
@@ -330,46 +374,5 @@ public class TrainerProfileController {
         }
         return response;
     }
-
-    @PostMapping("/updatePhoneNumber")
-    @ResponseBody
-    public Map<String, Object> updatePhoneNumber(@RequestParam("phoneNumber") String phoneNumber, Principal principal) {
-        Map<String, Object> response = new HashMap<>();
-        User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
-
-        if (trainerDetails != null) {
-            trainerDetails.setPhoneNumber(phoneNumber);
-            trainerDetailsRepository.save(trainerDetails);
-
-            response.put("success", true);
-            response.put("phoneNumber", trainerDetails.getPhoneNumber());
-        } else {
-            response.put("success", false);
-        }
-        return response;
-    }
-
-    @PostMapping("/updateWorkArea")
-    @ResponseBody
-    public Map<String, Object> updateWorkArea(@RequestParam("workArea") String workArea, Principal principal) {
-        Map<String, Object> response = new HashMap<>();
-        User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(Math.toIntExact(user.getIdUser())).orElse(null);
-
-        if (trainerDetails != null) {
-            trainerDetails.setWorkArea(workArea);
-            trainerDetailsRepository.save(trainerDetails);
-
-            response.put("success", true);
-            response.put("workArea", trainerDetails.getWorkArea());
-        } else {
-            response.put("success", false);
-        }
-        return response;
-    }
-
-
-
 
 }

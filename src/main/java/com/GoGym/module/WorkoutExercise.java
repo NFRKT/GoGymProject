@@ -18,7 +18,7 @@ public class WorkoutExercise {
     private Integer reps;
 
     @Column(name = "weight")
-    private Integer weight;
+    private Double weight;
 
     @ManyToOne
     @JoinColumn(name = "id_workout", nullable = false)
@@ -32,7 +32,7 @@ public class WorkoutExercise {
     public WorkoutExercise() {}
 
     // Konstruktor z argumentami
-    public WorkoutExercise(Long id, Integer sets, Integer reps, Integer weight, Workout workout, Exercise exercise) {
+    public WorkoutExercise(Long id, Integer sets, Integer reps, Double weight, Workout workout, Exercise exercise) {
         this.id = id;
         this.sets = sets;
         this.reps = reps;
@@ -66,11 +66,11 @@ public class WorkoutExercise {
         this.reps = reps;
     }
 
-    public Integer getWeight() {
+    public Double getWeight() {
         return weight;
     }
 
-    public void setWeight(Integer weight) {
+    public void setWeight(Double weight) {
         this.weight = weight;
     }
 

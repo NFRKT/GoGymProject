@@ -20,15 +20,11 @@ public class TrainerClientService {
 
     private final TrainerClientRepository trainerClientRepository;
     private final UserRepository userRepository;
-    private final TrainerDetailsRepository trainerDetailsRepository;
-    private final TrainerExperienceRepository trainerExperienceRepository;
 
     @Autowired
-    public TrainerClientService(TrainerClientRepository trainerClientRepository, UserRepository userRepository, TrainerDetailsRepository trainerDetailsRepository,TrainerExperienceRepository trainerExperienceRepository) {
+    public TrainerClientService(TrainerClientRepository trainerClientRepository, UserRepository userRepository) {
         this.trainerClientRepository = trainerClientRepository;
         this.userRepository = userRepository;
-        this.trainerDetailsRepository = trainerDetailsRepository;
-        this.trainerExperienceRepository = trainerExperienceRepository;
     }
 
     public TrainerClient createTrainerClient(Long trainerId, Long clientId) {
@@ -55,24 +51,5 @@ public class TrainerClientService {
         trainerClientRepository.deleteByTrainer_IdUserAndClient_IdUser(trainerId, clientId);
     }
 
-    public List<TrainerExperience> getTrainerExperience(Long trainerId) {
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(trainerId.intValue()).orElse(null);
-        return trainerDetails != null ? trainerExperienceRepository.findByTrainer(trainerDetails) : null;
-    }
 
-    public void addTrainerExperience(TrainerExperience experience) {
-        trainerExperienceRepository.save(experience);
-    }
-
-    public void deleteTrainerExperience(Long experienceId) {
-        trainerExperienceRepository.deleteById(experienceId);
-    }
-
-    public Optional<TrainerExperience> findTrainerExperienceById(Long experienceId) {
-        return trainerExperienceRepository.findById(experienceId);
-    }
-
-    public void updateTrainerExperience(TrainerExperience experience) {
-        trainerExperienceRepository.save(experience);
-    }
 }

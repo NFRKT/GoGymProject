@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Profil klienta</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <style>
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="w3-container w3-blue w3-center">
+  <h2>Mój profil</h2>
+</div>
+
+<!-- Zdjęcie profilowe -->
+<div class="w3-container w3-padding-32">
+  <h3>Zdjęcie profilowe</h3>
+  <div>
+    <img th:if="${clientDetails?.profilePicture != null}" th:src="@{'/uploads/avatars/' + ${clientDetails.profilePicture}}" class="profile-pic"/>
+    <img th:if="${clientDetails?.profilePicture == null}" th:src="@{'/images/default-profile.png'}" class="profile-pic"/>
+  </div>
+
+  <!-- Formularz do zmiany zdjęcia -->
+  <form id="uploadProfilePictureForm" enctype="multipart/form-data">
+    <input type="file" name="profilePicture" required/>
+    <button type="button" onclick="uploadProfilePicture()" class="w3-button w3-green">Zmień zdjęcie</button>
+  </form>
+
+  <!-- Przycisk do usunięcia zdjęcia profilowego -->
+  <button onclick="deleteProfilePicture()" class="w3-button w3-red">Usuń zdjęcie</button>
+</div>
+
+
+<!-- Informacje osobiste -->
+<div class="w3-container w3-padding-32">
+  <h3>Informacje osobiste</h3>
+  <p><strong>Imię i nazwisko:</strong>
+    <span th:text="${user.firstName + ' ' + user.secondName} ?: 'Nie podano'"></span>
+  </p>
+  <p><strong>Data urodzenia:</strong>
+    <span th:text="${user.birthDate != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>
+  </p>
+  <p><strong>Płeć:</strong>
+    <span th:text="${not #strings.isEmpty(user.gender)} ? ${user.gender} : 'Nie podano'"></span>
+  </p>
+
+  <p><strong>Numer telefonu:</strong>
+    <span id="phoneNumberText" th:text="${clientDetails?.phoneNumber != null ? clientDetails.phoneNumber : 'Nie podano'}"></span>
+    <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editPhoneNumber', 'phoneNumberInput', 'phoneNumberText')">Edytuj</button>
+  </p>
+  <form id="editPhoneNumber" style="display:none;" onsubmit="event.preventDefault(); updateField('phoneNumberText', 'phoneNumberInput', 'phoneNumber');">
+    <input type="text" id="phoneNumberInput" class="w3-input w3-border"/>
+    <button type="submit" class="w3-button w3-green">Zapisz</button>
+  </form>
+
+  <p><strong>Miasto:</strong>
+    <span id="cityText" th:text="${clientDetails?.city != null ? clientDetails.city : 'Nie podano'}"></span>
+    <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editCity', 'cityInput', 'cityText')">Edytuj</button>
+  </p>
+  <form id="editCity" style="display:none;" onsubmit="event.preventDefault(); updateField('cityText', 'cityInput', 'city');">
+    <input type="text" id="cityInput" class="w3-input w3-border"/>
+    <button type="submit" class="w3-button w3-green">Zapisz</button>
+  </form>
+</div>
+
+<!-- Dane klienta -->
+<div class="w3-container w3-padding-32">
+  <h3>Moje dane</h3>
+
+  <p><strong>Waga (kg):</strong>
+    <span id="weightText" th:text="${clientDetails?.weight != null ? clientDetails.weight : 'Nie podano'}"></span>
+    <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editWeight', 'weightInput', 'weightText')">Edytuj</button>
+  </p>
+  <form id="editWeight" style="display:none;" onsubmit="event.preventDefault(); updateField('weightText', 'weightInput', 'weight');">
+    <input type="number" id="weightInput" class="w3-input w3-border" step="0.1"/>
+    <button type="submit" class="w3-button w3-green">Zapisz</button>
+  </form>
+
+  <p><strong>Wzrost (cm):</strong>
+    <span id="heightText" th:text="${clientDetails?.height != null ? clientDetails.height : 'Nie podano'}"></span>
+    <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editHeight', 'heightInput', 'heightText')">Edytuj</button>
+  </p>
+  <form id="editHeight" style="display:none;" onsubmit="event.preventDefault(); updateField('heightText', 'heightInput', 'height');">
+    <input type="number" id="heightInput" class="w3-input w3-border" step="0.1"/>
+    <button type="submit" class="w3-button w3-green">Zapisz</button>
+  </form>
+
+  <p><strong>Talia (cm):</strong>
+    <span id="waistText" th:text="${clientDetails?.waist != null ? clientDetails.waist : 'Nie podano'}"></span>
+    <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editWaist', 'waistInput', 'waistText')">Edytuj</button>
+  </p>
+  <form id="editWaist" style="display:none;" onsubmit="event.preventDefault(); updateField('waistText', 'waistInput', 'waist');">
+    <input type="number" id="waistInput" class="w3-input w3-border" step="0.1"/>
+    <button type="submit" class="w3-button w3-green">Zapisz</button>
+  </form>
+
+  <p><strong>Biodra (cm):</strong>
+    <span id="hipsText" th:text="${clientDetails?.hips != null ? clientDetails.hips : 'Nie podano'}"></span>
+    <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editHips', 'hipsInput', 'hipsText')">Edytuj</button>
+  </p>
+  <form id="editHips" style="display:none;" onsubmit="event.preventDefault(); updateField('hipsText', 'hipsInput', 'hips');">
+    <input type="number" id="hipsInput" class="w3-input w3-border" step="0.1"/>
+    <button type="submit" class="w3-button w3-green">Zapisz</button>
+  </form>
+
+  <p><strong>Klatka (cm):</strong>
+    <span id="chestText" th:text="${clientDetails?.chest != null ? clientDetails.chest : 'Nie podano'}"></span>
+    <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editChest', 'chestInput', 'chestText')">Edytuj</button>
+  </p>
+  <form id="editChest" style="display:none;" onsubmit="event.preventDefault(); updateField('chestText', 'chestInput', 'chest');">
+    <input type="number" id="chestInput" class="w3-input w3-border" step="0.1"/>
+    <button type="submit" class="w3-button w3-green">Zapisz</button>
+  </form>
+
+
+</div>
+
+<script>
+function toggleEdit(formId, inputId, textId) {
+    var form = document.getElementById(formId);
+    var input = document.getElementById(inputId);
+    var text = document.getElementById(textId);
+
+    if (!form || !input || !text) {
+        console.error("Nie znaleziono elementów formularza edycji.");
+        return;
+    }
+
+    if (form.style.display === "none" || form.style.display === "") {
+        form.style.display = "block";
+        input.value = text.innerText.trim() !== "Nie podano" ? text.innerText.trim() : "";
+    } else {
+        form.style.display = "none";
+    }
+}
+
+function updateField(fieldId, inputId, urlField) {
+    let value = document.getElementById(inputId).value;
+
+    fetch('/client/profile/updateField', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `field=${urlField}&value=${encodeURIComponent(value)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(fieldId).innerText = value !== "" ? value : "Nie podano";
+            document.getElementById(inputId).parentElement.style.display = "none"; // 🔥 Ukrywamy formularz po edycji
+        } else {
+            alert("Błąd zapisu!");
+        }
+    })
+    .catch(error => console.error("Błąd AJAX:", error));
+}
+
+function uploadProfilePicture() {
+    let formData = new FormData(document.getElementById("uploadProfilePictureForm"));
+
+    fetch('/client/profile/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 🔥 Podmiana zdjęcia profilowego bez przeładowania
+            document.querySelector(".profile-pic").src = data.profilePictureUrl;
+        } else {
+            alert("Błąd podczas przesyłania zdjęcia!");
+        }
+    })
+    .catch(error => console.error("Błąd AJAX:", error));
+}
+
+function deleteProfilePicture() {
+    fetch('/client/profile/deleteProfilePicture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelector(".profile-pic").src = "/images/default-profile.png";
+        } else {
+            alert("Błąd podczas usuwania zdjęcia!");
+        }
+    })
+    .catch(error => console.error("Błąd AJAX:", error));
+}
+
+
+</script>
+
+</body>
+</html>

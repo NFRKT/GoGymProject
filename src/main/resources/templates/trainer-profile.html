@@ -23,20 +23,18 @@
 <div class="w3-container w3-padding-32">
     <h3>Zdjęcie profilowe</h3>
     <div>
-        <img th:if="${trainerDetails.profilePicture}" th:src="@{'/uploads/avatars/' + ${trainerDetails.profilePicture}}" class="profile-pic"/>
-        <img th:unless="${trainerDetails.profilePicture}" src="/static/images/default-profile.png" class="profile-pic"/>
+        <img th:if="${trainerDetails?.profilePicture != null}" th:src="@{'/uploads/avatars/' + ${trainerDetails.profilePicture}}" class="profile-pic"/>
+        <img th:if="${trainerDetails?.profilePicture == null}" th:src="@{'/images/default-profile.png'}" class="profile-pic"/>
     </div>
 
     <!-- Formularz do zmiany zdjęcia -->
-    <form th:action="@{/trainer/profile/upload}" method="post" enctype="multipart/form-data">
+    <form id="uploadProfilePictureForm" enctype="multipart/form-data">
         <input type="file" name="profilePicture" required/>
-        <button type="submit" class="w3-button w3-green">Zmień zdjęcie</button>
+        <button type="button" onclick="uploadProfilePicture()" class="w3-button w3-green">Zmień zdjęcie</button>
     </form>
 
     <!-- Przycisk do usunięcia zdjęcia profilowego -->
-    <form th:action="@{/trainer/profile/deleteProfilePicture}" method="post" style="display:inline;">
-        <button type="submit" class="w3-button w3-red">Usuń zdjęcie</button>
-    </form>
+    <button onclick="deleteProfilePicture()" class="w3-button w3-red">Usuń zdjęcie</button>
 </div>
 
 
@@ -53,46 +51,43 @@
     <h3>Informacje zawodowe</h3>
 
     <p><strong>Data rozpoczęcia kariery:</strong>
-        <span id="startDateText" th:text="${trainerDetails.startDate != null ? #dates.format(trainerDetails.startDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>
+        <span id="startDateText" th:text="${trainerDetails?.startDate != null ? #dates.format(trainerDetails.startDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>
         <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editStartDate', 'startDateInput', 'startDateText')">Edytuj</button>
     </p>
-    <form id="editStartDate" class="edit-form" style="display:none;">
+
+    <form id="editStartDate" style="display:none;" onsubmit="event.preventDefault(); updateField('startDateText', 'startDateInput', 'startDate');">
         <input type="date" id="startDateInput" class="w3-input w3-border"/>
         <button type="submit" class="w3-button w3-green">Zapisz</button>
     </form>
 
+
     <p><strong>Numer telefonu:</strong>
-        <span id="phoneNumberText" th:text="${not #strings.isEmpty(trainerDetails.phoneNumber) ? trainerDetails.phoneNumber : 'Nie podano'}"></span>
+        <span id="phoneNumberText" th:text="${trainerDetails?.phoneNumber != null ? trainerDetails.phoneNumber : 'Nie podano'}"></span>
         <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editPhoneNumber', 'phoneNumberInput', 'phoneNumberText')">Edytuj</button>
     </p>
-    <form id="editPhoneNumber" class="edit-form" style="display:none;">
+    <form id="editPhoneNumber" style="display:none;" onsubmit="event.preventDefault(); updateField('phoneNumberText', 'phoneNumberInput', 'phoneNumber');">
         <input type="text" id="phoneNumberInput" class="w3-input w3-border"/>
         <button type="submit" class="w3-button w3-green">Zapisz</button>
     </form>
 
     <p><strong>Obszar pracy:</strong>
-        <span id="workAreaText" th:text="${not #strings.isEmpty(trainerDetails.workArea) ? trainerDetails.workArea : 'Nie podano'}"></span>
+        <span id="workAreaText" th:text="${trainerDetails?.workArea != null ? trainerDetails.workArea : 'Nie podano'}"></span>
         <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editWorkArea', 'workAreaInput', 'workAreaText')">Edytuj</button>
     </p>
-    <form id="editWorkArea" class="edit-form" style="display:none;">
+    <form id="editWorkArea" style="display:none;" onsubmit="event.preventDefault(); updateField('workAreaText', 'workAreaInput', 'workArea');">
         <input type="text" id="workAreaInput" class="w3-input w3-border"/>
         <button type="submit" class="w3-button w3-green">Zapisz</button>
     </form>
 </div>
 
-
-
-
-<!-- Bio -->
+<!-- 🔥 Bio -->
 <div class="w3-container w3-padding-32">
     <h3>Bio</h3>
-    <p><strong>Opis:</strong> <span id="bioText" th:text="${not #strings.isEmpty(trainerDetails.bio)} ? ${trainerDetails.bio} : 'Nie podano'"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editBioForm')">Edytuj</button>
-        <button class="w3-button w3-small w3-red" onclick="deleteBio()">Usuń</button>
+    <p><strong>Opis:</strong> <span id="bioText" th:text="${trainerDetails?.bio != null ? trainerDetails.bio : 'Nie podano'}"></span>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editBioForm', 'bioInput', 'bioText')">Edytuj</button>
     </p>
 
-    <!-- Formularz edycji Bio (domyślnie ukryty) -->
-    <form id="editBioForm" style="display:none;">
+    <form id="editBioForm" style="display:none;" onsubmit="event.preventDefault(); updateField('bioText', 'bioInput', 'bio');">
         <textarea id="bioInput" name="bio" class="w3-input w3-border" rows="4"></textarea>
         <button type="submit" class="w3-button w3-green">Zapisz</button>
     </form>
@@ -138,7 +133,7 @@
             </div>
 
             <button onclick="toggleEditExperience(this)" class="w3-button w3-blue w3-small">Edytuj</button>
-            <button onclick="deleteExperience(${experience.id}, this)" class="w3-button w3-red w3-small">Usuń</button>
+            <button th:attr="onclick='deleteExperience(' + ${experience.id} + ', this)'" class="w3-button w3-red w3-small">Usuń</button>
 
             <!-- Formularz edycji (ukryty domyślnie) -->
             <form class="edit-experience-form w3-padding-16" style="display:none;">
@@ -177,150 +172,65 @@
 
 
 <script>
-function toggleEdit(id) {
-    var form = document.getElementById(id);
-    if (!form) {
-        console.error("Nie znaleziono elementu o id:", id);
-        return;
-    }
-    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-}
+function toggleEdit(formId, inputId, textId) {
+    let form = document.getElementById(formId);
+    let input = document.getElementById(inputId);
+    let text = document.getElementById(textId);
 
-
-// Obsługa edycji daty rozpoczęcia kariery
-document.getElementById("editStartDate").addEventListener("submit", function(event) {
-    event.preventDefault();
-    let startDate = document.getElementById("startDateInput").value;
-
-    fetch('/trainer/profile/updateStartDate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `startDate=${startDate}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById("startDateText").innerText = data.startDate;
-            toggleEdit("editStartDate");
-        } else {
-            alert("Błąd: Nie udało się zaktualizować daty!");
-        }
-    });
-});
-
-// Obsługa edycji numeru telefonu
-document.getElementById("editPhoneNumber").addEventListener("submit", function(event) {
-    event.preventDefault();
-    let phoneNumber = document.getElementById("phoneNumberInput").value;
-
-    fetch('/trainer/profile/updatePhoneNumber', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `phoneNumber=${phoneNumber}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById("phoneNumberText").innerText = data.phoneNumber;
-            toggleEdit("editPhoneNumber");
-        } else {
-            alert("Błąd: Nie udało się zaktualizować numeru telefonu!");
-        }
-    });
-});
-
-// Obsługa edycji obszaru pracy
-document.getElementById("editWorkArea").addEventListener("submit", function(event) {
-    event.preventDefault();
-    let workArea = document.getElementById("workAreaInput").value;
-
-    fetch('/trainer/profile/updateWorkArea', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `workArea=${workArea}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById("workAreaText").innerText = data.workArea;
-            toggleEdit("editWorkArea");
-        } else {
-            alert("Błąd: Nie udało się zaktualizować obszaru pracy!");
-        }
-    });
-});
-
-function toggleEditBio() {
-    let form = document.getElementById("editBioForm");
-    let input = document.getElementById("bioInput");
-    let bioText = document.getElementById("bioText");
-
-    if (!form || !input || !bioText) {
-        console.error("Nie znaleziono elementów formularza edycji Bio.");
+    if (!form || !input || !text) {
+        console.error("Nie znaleziono elementów formularza edycji.");
         return;
     }
 
-    form.style.display = "block";
-    input.value = bioText.innerText.trim();
-}
-
-
-    function cancelEditBio() {
-        document.getElementById("editBioForm").style.display = "none";
+    if (form.style.display === "none" || form.style.display === "") {
+        form.style.display = "block";
+        input.value = text.innerText.trim() !== "Nie podano" ? text.innerText.trim() : "";
+    } else {
+        form.style.display = "none";
     }
-
-    function saveBio(event) {
-    event.preventDefault();  // 🔥 BLOKUJEMY DOMYŚLNE PRZEŁADOWANIE STRONY
-
-    let bioText = document.getElementById("bioInput").value;
-
-    fetch('/trainer/profile/updateBio', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'  // 🔥 Wymuszamy JSON!
-        },
-        body: JSON.stringify({ bio: bioText }) // 🔥 Zamieniamy na JSON!
-    })
-    .then(response => response.json())  // 🔥 Oczekujemy JSON-a w odpowiedzi
-    .then(data => {
-        if (data.success) {
-            document.getElementById("bioText").innerText = data.bio || 'Nie podano';
-            document.getElementById("editBioForm").style.display = "none";
-        } else {
-            alert("Błąd: Nie udało się zapisać Bio!");
-        }
-    })
-    .catch(error => console.error('Błąd AJAX:', error));
 }
-function deleteBio() {
-    fetch('/trainer/profile/deleteBio', {
+
+<!--// Obsługa edycji daty rozpoczęcia kariery-->
+<!--document.getElementById("editStartDate").addEventListener("submit", function(event) {-->
+<!--    event.preventDefault();-->
+<!--    let startDate = document.getElementById("startDateInput").value;-->
+
+<!--    fetch('/trainer/profile/updateStartDate', {-->
+<!--        method: 'POST',-->
+<!--        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },-->
+<!--        body: `startDate=${startDate}`-->
+<!--    })-->
+<!--    .then(response => response.json())-->
+<!--    .then(data => {-->
+<!--        if (data.success) {-->
+<!--            document.getElementById("startDateText").innerText = data.startDate;-->
+<!--            toggleEdit("editStartDate");-->
+<!--        } else {-->
+<!--            alert("Błąd: Nie udało się zaktualizować daty!");-->
+<!--        }-->
+<!--    });-->
+<!--});-->
+
+function updateField(fieldId, inputId, urlField) {
+    let value = document.getElementById(inputId).value;
+
+    fetch(`/trainer/profile/update${urlField.charAt(0).toUpperCase() + urlField.slice(1)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `${urlField}=${encodeURIComponent(value)}`
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById("bioText").innerText = "Nie podano";  // Aktualizacja UI
+            document.getElementById(fieldId).innerText = value !== "" ? value : "Nie podano";
+            document.getElementById(inputId).parentElement.style.display = "none"; // 🔥 Ukrywamy formularz po edycji
         } else {
-            alert("Błąd: Nie udało się usunąć Bio!");
+            alert("Błąd zapisu!");
         }
     })
     .catch(error => console.error("Błąd AJAX:", error));
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    let input = document.getElementById("bioInput");
-    let bioText = document.getElementById("bioText");
-
-    if (input && bioText) {
-        input.value = bioText.innerText.trim();
-    }
-
-    let form = document.getElementById("editBioForm");
-    if (form) {
-        form.addEventListener("submit", saveBio);
-    }
-});
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -396,6 +306,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Obsługa usuwania specjalizacji
     window.deleteSpecialization = function (specializationId, button) {
+        if (!confirm("Czy na pewno chcesz usunąć tą specjalizacje?")) {
+        return;
+    }
         fetch('/trainer/profile/deleteSpecialization', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -504,26 +417,68 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     // Obsługa usuwania doświadczenia
-    window.deleteExperience = function (experienceId, button) {
-        fetch('/trainer/profile/deleteExperience', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `experienceId=${experienceId}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                button.closest("li").remove();
-            } else {
-                alert("Błąd: Nie udało się usunąć doświadczenia!");
+window.deleteExperience = function (experienceId, button) {
+    if (!confirm("Czy na pewno chcesz usunąć to doświadczenie?")) {
+        return;
+    }
+
+    fetch('/trainer/profile/deleteExperience', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `experienceId=${experienceId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const listItem = button.closest("li");
+            if (listItem) {
+                listItem.remove();
             }
-        })
-        .catch(error => console.error("Błąd AJAX:", error));
-    };
+        } else {
+            alert("Błąd: Nie udało się usunąć doświadczenia!");
+        }
+    })
+    .catch(error => console.error("Błąd AJAX:", error));
+};
+
 });
+
+function uploadProfilePicture() {
+    let formData = new FormData(document.getElementById("uploadProfilePictureForm"));
+
+    fetch('/trainer/profile/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 🔥 Podmiana zdjęcia profilowego bez przeładowania
+            document.querySelector(".profile-pic").src = data.profilePictureUrl;
+        } else {
+            alert("Błąd podczas przesyłania zdjęcia!");
+        }
+    })
+    .catch(error => console.error("Błąd AJAX:", error));
+}
+
+function deleteProfilePicture() {
+    fetch('/trainer/profile/deleteProfilePicture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelector(".profile-pic").src = "/images/default-profile.png";
+        } else {
+            alert("Błąd podczas usuwania zdjęcia!");
+        }
+    })
+    .catch(error => console.error("Błąd AJAX:", error));
+}
 </script>
 
-</script>
 
 </body>
 </html>

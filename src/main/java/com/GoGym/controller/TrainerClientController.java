@@ -29,14 +29,7 @@ public class TrainerClientController {
         this.requestService = requestService;
         this.trainerClientRepository = trainerClientRepository;
     }
-//    @GetMapping("/trainer/{trainerId}")
-//    public List<TrainerClient> getTrainerClients(@PathVariable Long trainerId) {
-//        return trainerClientService.getTrainerClients(trainerId);
-//    }
-//    @GetMapping("/client/{clientId}")
-//    public List<TrainerClient> getClientTrainers(@PathVariable Long clientId) {
-//        return trainerClientService.getClientTrainers(clientId);
-//    }
+
     @GetMapping("/client-panel")
     public String clientPanel(Model model, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

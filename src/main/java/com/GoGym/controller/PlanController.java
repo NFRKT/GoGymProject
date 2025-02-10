@@ -102,7 +102,7 @@ public class PlanController {
             @RequestParam List<Long> exerciseIds,
             @RequestParam List<Integer> sets,
             @RequestParam List<Integer> reps,
-            @RequestParam(required = false) List<Integer> weight,
+            @RequestParam(required = false) List<Double> weight,
             @RequestParam List<Integer> exerciseDays, // Dni przypisane do ćwiczeń
             @RequestParam String startDate, // Dodano datę początkową
             Model model) {

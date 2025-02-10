@@ -25,7 +25,7 @@ public class PlanExercise {
     private int reps;
 
     @Column(name = "weight")
-    private Integer weight; // Może być null
+    private Double weight;
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -53,7 +53,7 @@ public class PlanExercise {
     public PlanExercise() {
     }
 
-    public PlanExercise(Long id, int sets, int reps, Integer weight, Status status, TrainingPlan trainingPlan, Exercise exercise, TrainingPlanDay trainingPlanDay) {
+    public PlanExercise(Long id, int sets, int reps, Double weight, Status status, TrainingPlan trainingPlan, Exercise exercise, TrainingPlanDay trainingPlanDay) {
         this.id = id;
         this.sets = sets;
         this.reps = reps;
@@ -88,11 +88,11 @@ public class PlanExercise {
         this.reps = reps;
     }
 
-    public Integer getWeight() {
+    public Double getWeight() {
         return weight;
     }
 
-    public void setWeight(Integer weight) {
+    public void setWeight(Double weight) {
         this.weight = weight;
     }
 
@@ -136,7 +136,7 @@ public class PlanExercise {
                 .status(Status.notCompleted)
                 .trainingPlan(trainingPlan)
                 .trainingPlanDay(trainingPlanDay)
-                .weight((int) dto.getWeight())
+                .weight(dto.getWeight())
                 .exercise(exercise)
                 .build();
 
@@ -146,7 +146,7 @@ public class PlanExercise {
         planExercise.setReps(dto.getReps());
         planExercise.setSets(dto.getSets());
         planExercise.setStatus(Status.notCompleted);
-        planExercise.setWeight((int) dto.getWeight());
+        planExercise.setWeight(dto.getWeight());
         planExercise.setExercise(exercise);
         return planExercise;
     }
