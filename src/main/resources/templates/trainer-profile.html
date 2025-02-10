@@ -28,13 +28,13 @@
     </div>
 
     <!-- Formularz do zmiany zdjęcia -->
-    <form id="uploadProfilePictureForm" enctype="multipart/form-data">
+    <form id="uploadProfilePictureForm" enctype="multipart/form-data" th:if="${isOwnProfile}">
         <input type="file" name="profilePicture" required/>
         <button type="button" onclick="uploadProfilePicture()" class="w3-button w3-green">Zmień zdjęcie</button>
     </form>
 
     <!-- Przycisk do usunięcia zdjęcia profilowego -->
-    <button onclick="deleteProfilePicture()" class="w3-button w3-red">Usuń zdjęcie</button>
+    <button onclick="deleteProfilePicture()" class="w3-button w3-red" th:if="${isOwnProfile}">Usuń zdjęcie</button>
 </div>
 
 
@@ -52,7 +52,7 @@
 
     <p><strong>Data rozpoczęcia kariery:</strong>
         <span id="startDateText" th:text="${trainerDetails?.startDate != null ? #dates.format(trainerDetails.startDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editStartDate', 'startDateInput', 'startDateText')">Edytuj</button>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editStartDate', 'startDateInput', 'startDateText')" th:if="${isOwnProfile}">Edytuj</button>
     </p>
 
     <form id="editStartDate" style="display:none;" onsubmit="event.preventDefault(); updateField('startDateText', 'startDateInput', 'startDate');">
@@ -63,7 +63,7 @@
 
     <p><strong>Numer telefonu:</strong>
         <span id="phoneNumberText" th:text="${trainerDetails?.phoneNumber != null ? trainerDetails.phoneNumber : 'Nie podano'}"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editPhoneNumber', 'phoneNumberInput', 'phoneNumberText')">Edytuj</button>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editPhoneNumber', 'phoneNumberInput', 'phoneNumberText')" th:if="${isOwnProfile}">Edytuj</button>
     </p>
     <form id="editPhoneNumber" style="display:none;" onsubmit="event.preventDefault(); updateField('phoneNumberText', 'phoneNumberInput', 'phoneNumber');">
         <input type="text" id="phoneNumberInput" class="w3-input w3-border"/>
@@ -72,7 +72,7 @@
 
     <p><strong>Obszar pracy:</strong>
         <span id="workAreaText" th:text="${trainerDetails?.workArea != null ? trainerDetails.workArea : 'Nie podano'}"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editWorkArea', 'workAreaInput', 'workAreaText')">Edytuj</button>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editWorkArea', 'workAreaInput', 'workAreaText')" th:if="${isOwnProfile}">Edytuj</button>
     </p>
     <form id="editWorkArea" style="display:none;" onsubmit="event.preventDefault(); updateField('workAreaText', 'workAreaInput', 'workArea');">
         <input type="text" id="workAreaInput" class="w3-input w3-border"/>
@@ -84,10 +84,10 @@
 <div class="w3-container w3-padding-32">
     <h3>Bio</h3>
     <p><strong>Opis:</strong> <span id="bioText" th:text="${trainerDetails?.bio != null ? trainerDetails.bio : 'Nie podano'}"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editBioForm', 'bioInput', 'bioText')">Edytuj</button>
+        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editBioForm', 'bioInput', 'bioText')" th:if="${isOwnProfile}">Edytuj</button>
     </p>
 
-    <form id="editBioForm" style="display:none;" onsubmit="event.preventDefault(); updateField('bioText', 'bioInput', 'bio');">
+    <form id="editBioForm" style="display:none;" onsubmit="event.preventDefault(); updateField('bioText', 'bioInput', 'bio');" >
         <textarea id="bioInput" name="bio" class="w3-input w3-border" rows="4"></textarea>
         <button type="submit" class="w3-button w3-green">Zapisz</button>
     </form>
@@ -100,8 +100,8 @@
     <ul id="specializationList">
         <li th:each="specialization : ${specializations}" th:attr="data-specialization-id=${specialization.id}">
             <span class="specialization-name" th:text="${specialization.specialization}"></span>
-            <button onclick="toggleEditSpecialization(this)" class="w3-button w3-blue w3-small">Edytuj</button>
-            <button th:attr="onclick='deleteSpecialization(' + ${specialization.id} + ', this)'" class="w3-button w3-red w3-small">Usuń</button>
+            <button onclick="toggleEditSpecialization(this)" class="w3-button w3-blue w3-small" th:if="${isOwnProfile}">Edytuj</button>
+            <button th:attr="onclick='deleteSpecialization(' + ${specialization.id} + ', this)'" class="w3-button w3-red w3-small" th:if="${isOwnProfile}">Usuń</button>
 
             <!-- Formularz edycji (ukryty domyślnie) -->
             <form class="edit-specialization-form w3-padding-16" style="display:none;">
@@ -114,7 +114,7 @@
     </ul>
 
     <!-- Formularz dodawania nowej specjalizacji -->
-    <form id="specializationForm">
+    <form id="specializationForm" th:if="${isOwnProfile}">
         <h4>Dodaj nową specjalizację</h4>
         <input type="text" name="specialization" placeholder="Nowa specjalizacja" required class="w3-input w3-border"/>
         <button type="submit" class="w3-button w3-green w3-small">Dodaj</button>
@@ -132,8 +132,8 @@
                 <img th:src="@{'/uploads/certifications/' + ${experience.certificationFile}}" width="100" alt="Certyfikat" class="experience-cert"/>
             </div>
 
-            <button onclick="toggleEditExperience(this)" class="w3-button w3-blue w3-small">Edytuj</button>
-            <button th:attr="onclick='deleteExperience(' + ${experience.id} + ', this)'" class="w3-button w3-red w3-small">Usuń</button>
+            <button onclick="toggleEditExperience(this)" class="w3-button w3-blue w3-small" th:if="${isOwnProfile}">Edytuj</button>
+            <button th:attr="onclick='deleteExperience(' + ${experience.id} + ', this)'" class="w3-button w3-red w3-small" th:if="${isOwnProfile}">Usuń</button>
 
             <!-- Formularz edycji (ukryty domyślnie) -->
             <form class="edit-experience-form w3-padding-16" style="display:none;">
@@ -155,7 +155,7 @@
     </ul>
 
     <!-- Formularz dodawania nowego doświadczenia -->
-    <form id="experienceForm" enctype="multipart/form-data">
+    <form id="experienceForm" enctype="multipart/form-data" th:if="${isOwnProfile}">
         <h4>Dodaj nowe doświadczenie</h4>
         <label>Nazwa ukończonego kursu/szkoły:</label>
         <input type="text" name="graduationName" class="w3-input w3-border" required/>
@@ -190,34 +190,13 @@ function toggleEdit(formId, inputId, textId) {
     }
 }
 
-<!--// Obsługa edycji daty rozpoczęcia kariery-->
-<!--document.getElementById("editStartDate").addEventListener("submit", function(event) {-->
-<!--    event.preventDefault();-->
-<!--    let startDate = document.getElementById("startDateInput").value;-->
-
-<!--    fetch('/trainer/profile/updateStartDate', {-->
-<!--        method: 'POST',-->
-<!--        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },-->
-<!--        body: `startDate=${startDate}`-->
-<!--    })-->
-<!--    .then(response => response.json())-->
-<!--    .then(data => {-->
-<!--        if (data.success) {-->
-<!--            document.getElementById("startDateText").innerText = data.startDate;-->
-<!--            toggleEdit("editStartDate");-->
-<!--        } else {-->
-<!--            alert("Błąd: Nie udało się zaktualizować daty!");-->
-<!--        }-->
-<!--    });-->
-<!--});-->
-
 function updateField(fieldId, inputId, urlField) {
     let value = document.getElementById(inputId).value;
 
-    fetch(`/trainer/profile/update${urlField.charAt(0).toUpperCase() + urlField.slice(1)}`, {
+    fetch('/trainer/profile/updateField', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `${urlField}=${encodeURIComponent(value)}`
+        body: `field=${urlField}&value=${encodeURIComponent(value)}`
     })
     .then(response => response.json())
     .then(data => {
@@ -230,6 +209,7 @@ function updateField(fieldId, inputId, urlField) {
     })
     .catch(error => console.error("Błąd AJAX:", error));
 }
+
 
 
 

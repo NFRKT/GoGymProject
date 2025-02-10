@@ -5,6 +5,7 @@ import com.GoGym.repository.*;
 import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.RequestService;
 import com.GoGym.service.TrainerClientService;
+import com.GoGym.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,8 @@ public class TrainerClientController {
     private TrainerClientService trainerClientService;
     private RequestService requestService;
     private TrainerClientRepository trainerClientRepository;
+
+    private UserService userService;
 
     @Autowired
     public TrainerClientController(TrainerClientService trainerClientService, RequestService requestService, TrainerClientRepository trainerClientRepository) {
@@ -48,7 +51,7 @@ public class TrainerClientController {
                 .toList();
 
         // Pobierz listę wszystkich dostępnych trenerów i odfiltruj obecnych
-        List<User> availableTrainers = trainerClientService.getAllTrainers().stream()
+        List<User> availableTrainers = trainerClientService.findAllTrainers().stream()
                 .filter(trainer -> !currentTrainerIds.contains(trainer.getIdUser()))
                 .toList();
 
@@ -140,6 +143,14 @@ public class TrainerClientController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/listTrainers")
+    public String listTrainers(Model model) {
+        List<User> trainers = trainerClientService.findAllTrainers();
+        model.addAttribute("trainers", trainers);
+        return "trainer-list";
+    }
+
 
 
 }

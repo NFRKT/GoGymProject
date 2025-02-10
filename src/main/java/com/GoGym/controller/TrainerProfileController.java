@@ -40,8 +40,6 @@ public class TrainerProfileController {
     @Autowired
     private TrainerExperienceRepository trainerExperienceRepository;
 
-    private static final String UPLOAD_DIR = "uploads/";
-
     @GetMapping
     public String trainerProfile(Model model, Principal principal) {
         User user = userService.findByEmail(principal.getName());
@@ -53,6 +51,27 @@ public class TrainerProfileController {
         model.addAttribute("trainerDetails", trainerDetails);
         model.addAttribute("specializations", specializations);
         model.addAttribute("experiences", experiences);
+        model.addAttribute("isOwnProfile", true);  // 🔥 Dodajemy flagę do rozróżnienia
+        return "trainer-profile";
+    }
+
+
+    @GetMapping("/{trainerId}")
+    public String viewTrainerProfile(@PathVariable Long trainerId, Model model, Principal principal) {
+        User loggedUser = userService.findByEmail(principal.getName());
+        User trainer = userService.findById(trainerId);
+        TrainerDetails trainerDetails = trainerDetailsRepository.findById(trainerId).orElse(null);
+        List<TrainerSpecialization> specializations = trainerSpecializationRepository.findByTrainer(trainerDetails);
+        List<TrainerExperience> experiences = trainerDetailsService.getTrainerExperience(trainerId);
+
+        model.addAttribute("user", trainer);
+        model.addAttribute("trainerDetails", trainerDetails);
+        model.addAttribute("specializations", specializations);
+        model.addAttribute("experiences", experiences);
+
+        // 🔥 Sprawdzamy, czy użytkownik ogląda swój profil
+        model.addAttribute("isOwnProfile", loggedUser.getIdUser().equals(trainerId));
+
         return "trainer-profile";
     }
 
@@ -161,6 +180,14 @@ public class TrainerProfileController {
                 break;
             case "workArea":
                 trainerDetails.setWorkArea(value);
+                break;
+            case "startDate":
+                try {
+                    trainerDetails.setStartDate(java.sql.Date.valueOf(value));
+                } catch (IllegalArgumentException e) {
+                    response.put("success", false);
+                    return response;
+                }
                 break;
             default:
                 response.put("success", false);
@@ -351,27 +378,6 @@ public class TrainerProfileController {
             response.put("success", false);
         }
 
-        return response;
-    }
-
-
-    @PostMapping("/updateStartDate")
-    @ResponseBody
-    public Map<String, Object> updateStartDate(@RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, Principal principal) {
-        Map<String, Object> response = new HashMap<>();
-        User user = userService.findByEmail(principal.getName());
-        TrainerDetails trainerDetails = trainerDetailsRepository.findById(user.getIdUser()).orElse(null);
-
-        if (trainerDetails != null) {
-            trainerDetails.setStartDate(startDate);
-            trainerDetailsRepository.save(trainerDetails);
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            response.put("success", true);
-            response.put("startDate", dateFormat.format(startDate));
-        } else {
-            response.put("success", false);
-        }
         return response;
     }
 

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Lista Trenerów</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+
+<div class="w3-container w3-blue w3-center">
+  <h2>Lista Trenerów</h2>
+</div>
+
+<div class="w3-container">
+  <table class="w3-table w3-bordered w3-striped">
+    <thead>
+    <tr>
+      <th>Imię i nazwisko</th>
+      <th>Email</th>
+      <th>Akcja</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="trainer : ${trainers}">
+      <td th:text="${trainer.firstName + ' ' + trainer.secondName}"></td>
+      <td th:text="${trainer.email}"></td>
+      <td>
+        <a th:href="@{'/trainer/profile/' + ${trainer.idUser}}" class="w3-button w3-blue">Zobacz profil</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

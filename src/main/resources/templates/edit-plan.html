@@ -68,7 +68,7 @@
 
                                 <div>
                                     <label th:for="'weight-' + ${dayStat.index} + '-' + ${exerciseStat.index}">Obciążenie (kg):</label>
-                                    <input type="number" name="weight[${dayStat.index}][]" th:value="${exercise.weight}" required>
+                                    <input type="number" step="0.1" name="weight[${dayStat.index}][]" th:value="${exercise.weight}" required>
                                 </div>
                             </div>
                         </div>
@@ -124,7 +124,7 @@
                 </div>
                 <div>
                     <label>Obciążenie (kg):</label>
-                    <input type="number" name="weight[${dayId}][]" required>
+                    <input type="number" step="0.1" name="weight[${dayId}][]" required>
                 </div>
             </div>
         `;

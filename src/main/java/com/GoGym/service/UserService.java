@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -72,4 +73,11 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Nie znaleziono użytkownika o podanym adresie email: " + email));
     }
+
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Nie znaleziono użytkownika"));
+    }
+
+
+
 }

@@ -45,6 +45,9 @@ public class TrainerClientService {
     public List<User> getAllTrainers() {
         return userRepository.findAllTrainers();
     }
+    public List<User> findAllTrainers() {
+        return userRepository.findAllByUserType(User.UserType.TRENER);
+    }
 
     @Transactional
     public void removeTrainerClient(Long trainerId, Long clientId) {
