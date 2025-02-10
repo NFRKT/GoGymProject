@@ -90,7 +90,7 @@ public class ExerciseController {
     }
 
     @GetMapping("/exercise/{id}")
-    public String getExerciseDetails(@PathVariable Integer id, Model model) {
+    public String getExerciseDetails(@PathVariable Long id, Model model) {
         Exercise exercise = exerciseRepository.findById(id)
               .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ćwiczenia o ID: " + id));
 
@@ -104,7 +104,7 @@ public class ExerciseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Exercise> getExerciseById(@PathVariable Integer id) {
+    public ResponseEntity<Exercise> getExerciseById(@PathVariable Long id) {
         return exerciseService.getExerciseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -116,7 +116,7 @@ public class ExerciseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Exercise> updateExercise(@PathVariable Integer id, @RequestBody Exercise updatedExercise) {
+    public ResponseEntity<Exercise> updateExercise(@PathVariable Long id, @RequestBody Exercise updatedExercise) {
         try {
             return ResponseEntity.ok(exerciseService.updateExercise(id, updatedExercise));
         } catch (IllegalArgumentException e) {
@@ -125,7 +125,7 @@ public class ExerciseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExercise(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteExercise(@PathVariable Long id) {
         exerciseService.deleteExercise(id);
         return ResponseEntity.noContent().build();
     }

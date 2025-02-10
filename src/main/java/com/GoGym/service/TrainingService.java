@@ -80,14 +80,14 @@ public class TrainingService {
                     Set<ExerciseDTO> exerciseDTO = x.getExercises().stream().filter(z -> newExercisesIds.contains(z.getIdExercise())).collect(Collectors.toSet());
                     exerciseDTO.forEach(z -> {
                         //todo dodac deydkowany wyjatek
-                        Exercise exercise = exerciseRepository.findById(Integer.valueOf(z.getIdExercise().toString())).orElseThrow(RuntimeException::new);
+                        Exercise exercise = exerciseRepository.findById(Long.valueOf(z.getIdExercise().toString())).orElseThrow(RuntimeException::new);
                         planExerciseRepository.save(PlanExercise.toPlanExercise(z, trainingPlan, currentPlanDay, exercise));
                     });
                 } else {
                     Set<ExerciseDTO> exerciseDTO = x.getExercises().stream().filter(z -> !newExercisesIds.contains(z.getIdExercise())).collect(Collectors.toSet());
                     exerciseDTO.forEach(z -> {
                         PlanExercise currentPlanExercise = planExerciseRepository.findByExerciseIdExerciseAndTrainingPlanAndTrainingPlanDay(z.getIdExercise(), trainingPlan, currentPlanDay).orElseThrow(RuntimeException::new);
-                        Exercise exercise = exerciseRepository.findById(Integer.valueOf(z.getIdExercise().toString())).orElseThrow(RuntimeException::new);
+                        Exercise exercise = exerciseRepository.findById(Long.valueOf(z.getIdExercise().toString())).orElseThrow(RuntimeException::new);
                         planExerciseRepository.save(PlanExercise.updatePlanExercise(currentPlanExercise, exercise, z));
                     });
                 }

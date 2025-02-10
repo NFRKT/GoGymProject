@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ExerciseRepository extends JpaRepository<Exercise, Integer> {
+public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 
     @Query("SELECT DISTINCT e FROM Exercise e " +
             "LEFT JOIN e.bodyParts bp " +
@@ -28,5 +28,5 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Integer> {
             Pageable pageable);
 
 
-    Optional<Exercise> findById(Integer idExercise);
+    Optional<Exercise> findById(Long idExercise);
 }

@@ -22,7 +22,7 @@ public class ExerciseService {
         return exerciseRepository.findAll();
     }
 
-    public Optional<Exercise> getExerciseById(Integer id) {
+    public Optional<Exercise> getExerciseById(Long id) {
         return exerciseRepository.findById(id);
     }
 
@@ -30,7 +30,7 @@ public class ExerciseService {
         return exerciseRepository.save(exercise);
     }
 
-    public Exercise updateExercise(Integer id, Exercise updatedExercise) {
+    public Exercise updateExercise(Long id, Exercise updatedExercise) {
         return exerciseRepository.findById(id)
                 .map(exercise -> {
                     exercise.setName(updatedExercise.getName());
@@ -41,7 +41,7 @@ public class ExerciseService {
                 .orElseThrow(() -> new IllegalArgumentException("Exercise not found"));
     }
 
-    public void deleteExercise(Integer id) {
+    public void deleteExercise(Long id) {
         exerciseRepository.deleteById(id);
     }
 

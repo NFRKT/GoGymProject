@@ -22,6 +22,10 @@ public class Exercise {
     @Enumerated(EnumType.STRING) // Dodajemy to, aby upewnić się, że enum jest zapisany jako tekst
     private Difficulty difficulty;
 
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING) // Dodajemy to, aby upewnić się, że enum jest zapisany jako tekst
+    private ExerciseType type;
+
     @Column(name = "jpg")
     private String jpg;
     @ManyToMany
@@ -44,6 +48,9 @@ public class Exercise {
     public enum Difficulty {
         beginner, intermediate, advanced
     }
+    public enum ExerciseType {
+        STRENGTH, CARDIO
+    }
 
     // Konstruktor bezargumentowy
     public Exercise() {
@@ -53,12 +60,13 @@ public class Exercise {
     }
 
     // Konstruktor z argumentami
-    public Exercise(Long idExercise, String name, String description, Difficulty difficulty,
+    public Exercise(Long idExercise, String name, String description, Difficulty difficulty, ExerciseType type,
                     Set<BodyPart> bodyParts, Set<Equipment> equipment, String jpg) {
         this.idExercise = idExercise;
         this.name = name;
         this.description = description;
         this.difficulty = difficulty;
+        this.type = type;
         this.bodyParts = bodyParts;
         this.equipment = equipment;
         this.jpg = jpg;
@@ -95,6 +103,15 @@ public class Exercise {
     public void setDifficulty(Difficulty difficulty) {
         this.difficulty = difficulty;
     }
+
+    public ExerciseType getType() {
+        return type;
+    }
+
+    public void setType(ExerciseType type) {
+        this.type = type;
+    }
+
     @JsonIgnore
     public Set<BodyPart> getBodyParts() {
         return bodyParts;
