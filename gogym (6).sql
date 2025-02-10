@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Czas generowania: 06 Lut 2025, 01:36
+-- Czas generowania: 10 Lut 2025, 02:59
 -- Wersja serwera: 10.4.27-MariaDB
 -- Wersja PHP: 8.2.0
 
@@ -51,6 +51,33 @@ INSERT INTO `body_part` (`id_bodypart`, `name`) VALUES
 (12, 'Neck'),
 (13, 'Full Body'),
 (14, 'Cardio');
+
+-- --------------------------------------------------------
+
+--
+-- Struktura tabeli dla tabeli `client_details`
+--
+
+CREATE TABLE `client_details` (
+  `id` bigint(20) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `weight` double DEFAULT NULL,
+  `height` double DEFAULT NULL,
+  `waist` double DEFAULT NULL,
+  `hips` double DEFAULT NULL,
+  `chest` double DEFAULT NULL,
+  `profile_picture` varchar(255) DEFAULT '/images/default-profile.png',
+  `phone_number` varchar(20) NOT NULL,
+  `city` varchar(50) NOT NULL,
+  `update_date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
+
+--
+-- Zrzut danych tabeli `client_details`
+--
+
+INSERT INTO `client_details` (`id`, `id_user`, `weight`, `height`, `waist`, `hips`, `chest`, `profile_picture`, `phone_number`, `city`, `update_date`) VALUES
+(1, 5, 91.6, 191, 80.5, 80.3, 80.5, NULL, '000000003', 'Rybnik', '2025-02-10');
 
 -- --------------------------------------------------------
 
@@ -492,7 +519,7 @@ CREATE TABLE `plan_exercises` (
   `id_exercise` int(11) NOT NULL,
   `sets` int(11) NOT NULL,
   `reps` int(11) NOT NULL,
-  `weight` int(11) DEFAULT NULL,
+  `weight` double NOT NULL,
   `id_day` int(11) NOT NULL,
   `status` enum('notCompleted','completed') DEFAULT 'notCompleted'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
@@ -625,17 +652,19 @@ CREATE TABLE `trainer_details` (
   `id_trainer` int(11) NOT NULL,
   `start_date` date NOT NULL,
   `phone_number` varchar(20) NOT NULL,
-  `work_area` varchar(255) DEFAULT NULL
+  `work_area` varchar(255) DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
 
 --
 -- Zrzut danych tabeli `trainer_details`
 --
 
-INSERT INTO `trainer_details` (`id_trainer`, `start_date`, `phone_number`, `work_area`) VALUES
-(14, '1111-03-21', '123123123', 'awdawd'),
-(15, '2222-02-22', '123', ''),
-(16, '0222-02-22', '2312312', '');
+INSERT INTO `trainer_details` (`id_trainer`, `start_date`, `phone_number`, `work_area`, `bio`, `profile_picture`) VALUES
+(14, '1111-03-21', '123123123', 'awdawd', NULL, NULL),
+(15, '2025-02-10', '999888776', 'Rybnikk', 'Testy', 'a44fd281-cfa9-4aa1-9da0-04f4071b793f_DALL·E 2025-02-08 01.45.23 - A modern and minimalistic favicon for a fitness web application named \'GoGym\'. The design should be simple, clean, and recognizable at small sizes. It.webp'),
+(16, '0222-02-22', '2312312', '', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -650,6 +679,14 @@ CREATE TABLE `trainer_experience` (
   `graduation_date` date DEFAULT NULL,
   `certification_file` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
+
+--
+-- Zrzut danych tabeli `trainer_experience`
+--
+
+INSERT INTO `trainer_experience` (`id`, `id_trainer`, `graduation_name`, `graduation_date`, `certification_file`) VALUES
+(3, 15, 'TESTY', '2025-02-08', '304b2d2d-b7a1-4eb5-ac2b-8aefd3b77f39_image_white_background.png'),
+(9, 15, 'DCDC', '2025-02-10', '51a59867-dabd-48ff-960c-4c803b0fe04a_DALL·E 2025-02-08 01.45.23 - A modern and minimalistic favicon for a fitness web application named \'GoGym\'. The design should be simple, clean, and recognizable at small sizes. It.webp');
 
 -- --------------------------------------------------------
 
@@ -669,8 +706,9 @@ CREATE TABLE `trainer_specialization` (
 
 INSERT INTO `trainer_specialization` (`id`, `id_trainer`, `specialization`) VALUES
 (3, 14, 'wdawd'),
-(5, 15, '123'),
-(7, 16, '1312312');
+(7, 16, '1312312'),
+(9, 15, 'Specjalizacja dla Ta'),
+(20, 15, 'A');
 
 -- --------------------------------------------------------
 
@@ -836,11 +874,7 @@ CREATE TABLE `workouts` (
 --
 
 INSERT INTO `workouts` (`id_workout`, `workout_date`, `intensity`, `notes`, `start_time`, `end_time`, `id_user`) VALUES
-(8, '2025-01-10', 'low', 'test', '17:43:00', '18:43:00', 5),
-(9, '2025-01-03', 'low', 'test2', '17:45:00', '21:45:00', 5),
-(10, '2025-01-17', 'high', 'aaaa', '01:21:00', '05:21:00', 5),
-(11, '2025-01-18', 'medium', 'bbb', '00:26:00', '00:27:00', 5),
-(12, '2025-01-18', 'low', 'ccciduser', '23:29:00', '02:28:00', 5);
+(13, '2025-02-10', 'low', 'Tren', '05:15:00', '06:15:00', 5);
 
 -- --------------------------------------------------------
 
@@ -852,7 +886,7 @@ CREATE TABLE `workout_exercises` (
   `id` int(11) NOT NULL,
   `sets` int(11) NOT NULL,
   `reps` int(11) NOT NULL,
-  `weight` int(3) DEFAULT NULL,
+  `weight` double NOT NULL,
   `id_workout` int(11) NOT NULL,
   `id_exercise` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
@@ -862,14 +896,7 @@ CREATE TABLE `workout_exercises` (
 --
 
 INSERT INTO `workout_exercises` (`id`, `sets`, `reps`, `weight`, `id_workout`, `id_exercise`) VALUES
-(1, 2, 2, 2, 8, 1),
-(2, 5, 8, 30, 9, 2),
-(3, 5, 10, 40, 9, 11),
-(4, 5, 12, 50, 9, 9),
-(5, 2, 10, 100, 10, 2),
-(6, 4, 8, 65, 10, 81),
-(7, 2, 10, 15, 11, 17),
-(8, 2, 2, 2, 12, 14);
+(9, 2, 2, 0.5, 13, 18);
 
 --
 -- Indeksy dla zrzutów tabel
@@ -880,6 +907,13 @@ INSERT INTO `workout_exercises` (`id`, `sets`, `reps`, `weight`, `id_workout`, `
 --
 ALTER TABLE `body_part`
   ADD PRIMARY KEY (`id_bodypart`);
+
+--
+-- Indeksy dla tabeli `client_details`
+--
+ALTER TABLE `client_details`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_user` (`id_user`);
 
 --
 -- Indeksy dla tabeli `equipment`
@@ -1006,6 +1040,12 @@ ALTER TABLE `body_part`
   MODIFY `id_bodypart` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
+-- AUTO_INCREMENT dla tabeli `client_details`
+--
+ALTER TABLE `client_details`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT dla tabeli `equipment`
 --
 ALTER TABLE `equipment`
@@ -1039,13 +1079,13 @@ ALTER TABLE `requests`
 -- AUTO_INCREMENT dla tabeli `trainer_experience`
 --
 ALTER TABLE `trainer_experience`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT dla tabeli `trainer_specialization`
 --
 ALTER TABLE `trainer_specialization`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT dla tabeli `training_plans`
@@ -1075,17 +1115,23 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT dla tabeli `workouts`
 --
 ALTER TABLE `workouts`
-  MODIFY `id_workout` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_workout` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT dla tabeli `workout_exercises`
 --
 ALTER TABLE `workout_exercises`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Ograniczenia dla zrzutów tabel
 --
+
+--
+-- Ograniczenia dla tabeli `client_details`
+--
+ALTER TABLE `client_details`
+  ADD CONSTRAINT `client_details_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
 -- Ograniczenia dla tabeli `exercise_bodypart`
