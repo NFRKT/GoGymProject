@@ -281,10 +281,12 @@
         </span>
 
       <!-- Obsługa ćwiczeń cardio -->
-        <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
-            - <span th:text="${exercise.duration != null ? exercise.duration + ' min' : 'Brak danych'}"></span>,
-            <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
-        </span>
+<span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+    - <span class="exercise-duration"
+            th:data-seconds="${exercise.duration}"
+            th:text="${exercise.duration}"></span>,
+    <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
+</span>
     </span>
 
                 <!-- Status ćwiczenia -->
@@ -433,6 +435,29 @@ function sortPlans() {
         let plans = document.querySelectorAll(".plan-each");
         plans.forEach(plan => plan.style.display = "block");
     }
+
+    function formatDuration(seconds) {
+    if (isNaN(seconds) || seconds === null) return "Brak danych";
+
+    let hours = Math.floor(seconds / 3600);
+    let minutes = Math.floor((seconds % 3600) / 60);
+    let remainingSeconds = seconds % 60;
+
+    let formattedTime = hours > 0
+        ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
+        : `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+
+    return formattedTime;
+}
+
+// Automatyczna konwersja wszystkich wartości `duration` na czytelny format
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".exercise-duration").forEach(el => {
+        let seconds = parseInt(el.getAttribute("data-seconds"), 10);
+        el.textContent = formatDuration(seconds);
+    });
+});
+
 </script>
 </body>
 </html>

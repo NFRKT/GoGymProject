@@ -44,7 +44,7 @@ public class WorkoutService {
                 workoutExercise.setReps(reps.get(i));
                 workoutExercise.setWeight(weight.get(i));
             } else if (exercise.getType() == Exercise.ExerciseType.CARDIO) {
-                workoutExercise.setDuration(parseDurationToSeconds(durations.get(i)));
+                workoutExercise.setDuration(durations.get(i) != null ? parseDuration(durations.get(i)) : null);
                 workoutExercise.setDistance(distances.get(i));
             }
 
@@ -54,13 +54,28 @@ public class WorkoutService {
         return savedWorkout;
     }
 
-    // 🚀 Konwersja czasu "mm:ss" na sekundy
-    private int parseDurationToSeconds(String duration) {
+    // 🚀 Konwersja formatu "hh:mm:ss" / "mm:ss" na sekundy
+    private Integer parseDuration(String duration) {
+        if (duration == null || duration.isEmpty()) return null;
+
+        // Jeśli przekazana wartość jest już liczbą (sekundy), zwróć ją jako integer
+        try {
+            return Integer.parseInt(duration);
+        } catch (NumberFormatException e) {
+            // Kontynuuj parsowanie, jeśli nie jest liczbą
+        }
+
+        // Jeśli format jest "hh:mm:ss" lub "mm:ss", dokonaj konwersji
         String[] parts = duration.split(":");
-        int minutes = Integer.parseInt(parts[0]);
-        int seconds = Integer.parseInt(parts[1]);
-        return (minutes * 60) + seconds;
+        if (parts.length == 2) { // Format mm:ss
+            return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+        } else if (parts.length == 3) { // Format hh:mm:ss
+            return Integer.parseInt(parts[0]) * 3600 + Integer.parseInt(parts[1]) * 60 + Integer.parseInt(parts[2]);
+        }
+
+        throw new IllegalArgumentException("Niepoprawny format czasu: " + duration);
     }
+
 
 
     public Workout getWorkoutById(Long id) {

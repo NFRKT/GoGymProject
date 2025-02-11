@@ -80,8 +80,12 @@
                                 <!-- Cardio -->
                                 <div class="cardio-fields" th:style="${exercise.type == 'CARDIO'} ? 'display:block;' : 'display:none;'">
                                     <div>
-                                        <label>Czas trwania (minuty):</label>
-                                        <input type="number" name="duration[${dayStat.index}][]" th:value="${exercise.duration != null ? exercise.duration : ''}">
+                                        <label>Czas trwania (mm:ss):</label>
+                                        <th:block th:with="formattedDuration=${exercise.duration != null ? (exercise.duration ge 3600 ? #numbers.formatInteger(exercise.duration / 3600, 2) + ':' + #numbers.formatInteger((exercise.duration % 3600) / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2) : #numbers.formatInteger(exercise.duration / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2)) : ''}">
+                                            <input type="text" name="duration[${dayStat.index}][]" pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]" placeholder="hh:mm:ss lub mm:ss" th:value="${formattedDuration}">
+                                        </th:block>
+
+
                                     </div>
                                     <div>
                                         <label>Dystans (km):</label>
@@ -184,8 +188,8 @@ window.addExerciseToDay = function(dayId) {
         <!-- Cardio (CARDIO) -->
         <div class="cardio-fields" style="display: none;">
             <div>
-                <label>Czas trwania (minuty):</label>
-                <input type="number" name="duration[${dayId}][]" min="1">
+                <label>Czas trwania (mm:ss):</label>
+                <input type="text" name="duration[${dayId}][]" pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]" placeholder="hh:mm:ss lub mm:ss"  class="duration-input">
             </div>
             <div>
                 <label>Dystans (km):</label>
@@ -203,6 +207,7 @@ window.addExerciseToDay = function(dayId) {
     const selectElement = newExercise.querySelector(".exercise-select");
     if (selectElement) toggleExerciseFields(selectElement);
 };
+
 
 
 
@@ -271,6 +276,24 @@ fetch(`/trainer-plans/update/${planId}`, {
 
     });
 
+
+// 🔥 Konwersja "hh:mm:ss" lub "mm:ss" na sekundy
+function convertDurationToSeconds(duration) {
+    if (!duration || duration.trim() === "") return null;
+
+    let parts = duration.split(":").map(Number);
+
+    if (parts.length === 3) {
+        // Format "hh:mm:ss"
+        return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+    } else if (parts.length === 2) {
+        // Format "mm:ss"
+        return (parts[0] * 60) + parts[1];
+    }
+
+    return null; // Niepoprawny format
+}
+
 // Pobranie danych do zapisu
 function collectFormData() {
     const planData = {
@@ -283,10 +306,9 @@ function collectFormData() {
     document.querySelectorAll('#days-container .day').forEach(dayElem => {
         const dayIdInput = dayElem.querySelector('input[name^="dayIds"]');
 
-        // 🔥 Jeśli dzień ma flagę do usunięcia, dodajemy go do danych z odpowiednią flagą
         if (dayIdInput && dayIdInput.dataset.toDelete === "true") {
             planData.trainingPlanDays.push({ idDay: dayIdInput.value, delete: true });
-            return; // Pomijamy dalsze przetwarzanie usuniętych dni
+            return;
         }
 
         const dayId = dayElem.dataset.dayId;
@@ -305,11 +327,10 @@ function collectFormData() {
 
             const idPlanExerciseInput = exerciseElem.querySelector('input[name^="planExerciseIds"]');
 
-            // 🔥 Jeśli ćwiczenie oznaczone do usunięcia, przesyłamy je z `idPlanExercise`
             if (idPlanExerciseInput && idPlanExerciseInput.dataset.toDelete === "true") {
                 dayData.exercises.push({
-                    idPlanExercise: idPlanExerciseInput.value, // ID ćwiczenia do usunięcia
-                    delete: true // 🔥 Oznaczenie do usunięcia
+                    idPlanExercise: idPlanExerciseInput.value,
+                    delete: true
                 });
                 return;
             }
@@ -324,7 +345,8 @@ function collectFormData() {
                 exerciseData.reps = exerciseElem.querySelector('input[name^="reps"]').value;
                 exerciseData.weight = exerciseElem.querySelector('input[name^="weight"]').value;
             } else if (exerciseType === "CARDIO") {
-                exerciseData.duration = exerciseElem.querySelector('input[name^="duration"]').value;
+                let durationInput = exerciseElem.querySelector('input[name^="duration"]');
+                exerciseData.duration = convertDurationToSeconds(durationInput.value); // 🔥 Konwersja mm:ss → sekundy
                 exerciseData.distance = exerciseElem.querySelector('input[name^="distance"]').value;
             }
 
@@ -333,8 +355,6 @@ function collectFormData() {
 
         planData.trainingPlanDays.push(dayData);
     });
-
-    console.log("Wysyłane dane:", JSON.stringify(planData, null, 2));
 
     return planData;
 }
@@ -398,14 +418,31 @@ function removeDay(button) {
     const inputDayId = dayDiv.querySelector('input[name^="dayIds"]');
 
     if (inputDayId && inputDayId.value && !inputDayId.value.startsWith("new-")) {
-        // 🔥 Jeśli dzień ma ID (czyli istnieje w bazie), oznaczamy go do usunięcia
+        // 🔥 Jeśli dzień istnieje w bazie, oznaczamy go do usunięcia
         inputDayId.dataset.toDelete = "true";
         dayDiv.style.display = "none"; // Ukrywamy zamiast usuwać
     } else {
         // 🔥 Jeśli dzień jest nowo dodany, usuwamy go całkowicie z DOM
         dayDiv.remove();
     }
+
+    updateDayDates(); // 🔥 Przeliczamy daty pozostałych dni
 }
+
+// 🛠 Funkcja do aktualizacji dat dni
+function updateDayDates() {
+    const days = document.querySelectorAll('#days-container .day:not([style*="display: none"])');
+    let startDate = new Date(document.querySelector("#days-container .day input[name^='dayIds']").dataset.startDate); // Pobierz pierwszą datę
+
+    days.forEach((day, index) => {
+        const dateInput = day.querySelector('.day-date'); // Pobierz pole daty
+        const newDate = new Date(startDate);
+        newDate.setDate(startDate.getDate() + index); // 🔥 Ustaw nową datę w kolejności
+
+        dateInput.value = newDate.toISOString().split('T')[0]; // Aktualizujemy pole daty
+    });
+}
+
 
 
 

@@ -73,18 +73,26 @@
     }
   </style>
   <script>
-    function formatDuration(durationInSeconds) {
-        if (!durationInSeconds || durationInSeconds === '-') return '-';
-        let minutes = Math.floor(durationInSeconds / 60);
-        let seconds = durationInSeconds % 60;
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
+function formatDuration(durationInSeconds) {
+    if (!durationInSeconds || durationInSeconds === "-") return "-";
 
-    document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll(".duration").forEach(el => {
-            el.innerText = formatDuration(parseInt(el.innerText));
-        });
+    let hours = Math.floor(durationInSeconds / 3600);
+    let minutes = Math.floor((durationInSeconds % 3600) / 60);
+    let seconds = durationInSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    } else {
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".duration").forEach(el => {
+        let seconds = parseInt(el.textContent, 10);
+        el.textContent = formatDuration(seconds);
     });
+});
   </script>
 </head>
 <body>

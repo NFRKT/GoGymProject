@@ -245,12 +245,21 @@
 
                         <ul>
                             <li class="exercise" th:each="exercise : ${day.exercises}">
-                <span>
-                    <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span>-
-                    <span th:text="${exercise.sets}"></span> serie,
-                    <span th:text="${exercise.reps}"></span> powtórzeń,
-                    <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
-                </span>
+                                <span>
+                                    <strong th:text="${exercise.exercise.name}"></strong>
+                                    <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
+                                        - <span th:text="${exercise.sets}"></span> serie,
+                                        <span th:text="${exercise.reps}"></span> powtórzeń,
+                                        <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}"></span>
+                                    </span>
+                                    <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+                                        - <span class="exercise-duration"
+                                                th:data-seconds="${exercise.duration}"
+                                                th:text="${exercise.duration}"></span>,
+                                        <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
+                                    </span>
+                                </span>
+
                                 <div class="status-container">
                     <span id="exercise-status" class="status-icon" th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
                         <span class="status-circle"></span>
@@ -503,6 +512,22 @@ if (event.target.matches('.toggle-rest-day-status')) {
         .catch(error => console.error('Błąd:', error));
 }
 
+        });
+    });
+        function formatDuration(seconds) {
+        if (isNaN(seconds) || seconds === null) return "Brak danych";
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor((seconds % 3600) / 60);
+        let remainingSeconds = seconds % 60;
+        return hours > 0
+            ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
+            : `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".exercise-duration").forEach(el => {
+            let seconds = parseInt(el.getAttribute("data-seconds"), 10);
+            el.textContent = formatDuration(seconds);
         });
     });
 

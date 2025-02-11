@@ -47,14 +47,14 @@ public class WorkoutController {
                                 @RequestParam(required = false) List<Integer> sets,
                                 @RequestParam(required = false) List<Integer> reps,
                                 @RequestParam(required = false) List<Double> weight,
-                                @RequestParam(required = false) List<String> durations, // 🚀 Format "mm:ss"
+                                @RequestParam(required = false) List<String> durations, // 🚀 Format "hh:mm:ss" lub "mm:ss"
                                 @RequestParam(required = false) List<Double> distances,
                                 Model model) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-
             User currentUser = customUserDetails.getUser();
+
             if (currentUser == null) {
                 throw new RuntimeException("Brak zalogowanego użytkownika");
             }
@@ -67,6 +67,7 @@ public class WorkoutController {
             return "create-workout";
         }
     }
+
 
 
     @GetMapping("/{id}")

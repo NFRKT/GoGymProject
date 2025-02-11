@@ -103,9 +103,9 @@ public class PlanController {
             @RequestParam(required = false) List<Integer> sets,
             @RequestParam(required = false) List<Integer> reps,
             @RequestParam(required = false) List<Double> weight,
-            @RequestParam(required = false) List<Integer> duration,
+            @RequestParam(required = false) List<String> duration,  // 🔥 Przyjmujemy jako String (hh:mm:ss lub mm:ss)
             @RequestParam(required = false) List<Double> distance,
-            @RequestParam List<Integer> exerciseDays, // Dni przypisane do ćwiczeń
+            @RequestParam List<Integer> exerciseDays,
             @RequestParam String startDate,
             Model model) {
 
@@ -138,18 +138,15 @@ public class PlanController {
                         exercise.setExercise(currentExercise);
 
                         if (currentExercise.getType() == Exercise.ExerciseType.CARDIO) {
-                            // Jeśli ćwiczenie to CARDIO, sets i reps ustawiamy na null
                             exercise.setSets(null);
                             exercise.setReps(null);
                             exercise.setWeight(null);
-                            exercise.setDuration((duration != null && duration.size() > j) ? duration.get(j) : null);
+                            exercise.setDuration((duration != null && duration.size() > j) ? parseDuration(duration.get(j)) : null);
                             exercise.setDistance((distance != null && distance.size() > j) ? distance.get(j) : null);
                         } else {
-                            // Ćwiczenia siłowe (STRENGTH) - normalnie zapisujemy sets, reps i weight
                             exercise.setSets((sets != null && sets.size() > j) ? sets.get(j) : null);
                             exercise.setReps((reps != null && reps.size() > j) ? reps.get(j) : null);
                             exercise.setWeight((weight != null && weight.size() > j) ? weight.get(j) : null);
-                            // Dla siłowych `duration` i `distance` ustawiamy na null
                             exercise.setDuration(null);
                             exercise.setDistance(null);
                         }
@@ -174,17 +171,27 @@ public class PlanController {
         return "redirect:/trainer-panel";
     }
 
-
-
     /**
-     * Sprawdza, czy kolejne ćwiczenie powinno być przypisane do bieżącego dnia na podstawie dnia tygodnia.
+     * Parsuje czas trwania z formatu "hh:mm:ss" lub "mm:ss" na liczbę sekund.
      */
-    private boolean isNextExerciseForCurrentDay(List<String> dayType, int currentDayIndex, int exerciseIndex) {
-        // Sprawdza, czy kolejne ćwiczenie przypada na inny dzień treningowy
-        int remainingDays = dayType.size() - currentDayIndex - 1;
-        int remainingExercises = exerciseIndex;
-        return remainingExercises >= remainingDays;
+    private Integer parseDuration(String duration) {
+        if (duration == null || duration.isEmpty()) return null;
+
+        String[] parts = duration.split(":");
+        if (parts.length == 2) {
+            return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+        } else if (parts.length == 3) {
+            return Integer.parseInt(parts[0]) * 3600 + Integer.parseInt(parts[1]) * 60 + Integer.parseInt(parts[2]);
+        }
+        throw new IllegalArgumentException("Niepoprawny format czasu: " + duration);
     }
+
+//    private boolean isNextExerciseForCurrentDay(List<String> dayType, int currentDayIndex, int exerciseIndex) {
+//        // Sprawdza, czy kolejne ćwiczenie przypada na inny dzień treningowy
+//        int remainingDays = dayType.size() - currentDayIndex - 1;
+//        int remainingExercises = exerciseIndex;
+//        return remainingExercises >= remainingDays;
+//    }
 
     @PostMapping("/update-exercise-status/{exerciseId}")
     @ResponseBody
