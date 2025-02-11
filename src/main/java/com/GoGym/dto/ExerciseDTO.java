@@ -14,4 +14,16 @@ public class ExerciseDTO {
     private Double distance;
     private String status;
     private String type; // Dodaj pole dla typu ćwiczenia
+
+    private boolean delete;
+
+    public boolean isDelete() {
+        return delete;
+    }
+
+    public void setDelete(boolean delete) {
+        this.delete = delete;
+    }
+
 }
+

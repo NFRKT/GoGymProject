@@ -14,4 +14,14 @@ public class TrainingPlanDayDTO {
     private String notes;
     private List<ExerciseDTO> exercises;
     private LocalDate date;
+
+    private boolean delete;
+
+    public boolean isDelete() {
+        return delete;
+    }
+
+    public void setDelete(boolean delete) {
+        this.delete = delete;
+    }
 }

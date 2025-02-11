@@ -12,6 +12,7 @@ import com.GoGym.repository.ExerciseRepository;
 import com.GoGym.repository.PlanExerciseRepository;
 import com.GoGym.repository.TrainingPlanDayRepository;
 import com.GoGym.repository.TrainingPlanRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional
 public class TrainingService {
 
     private final TrainingPlanDayRepository trainingPlanDayRepository;
@@ -37,10 +39,6 @@ public class TrainingService {
         TrainingPlan trainingPlan = trainingPlanRepository.findById(trainingId)
                 .orElseThrow(TrainingNotFoundException::new);
 
-        TrainingPlan updatedTrainingPlan = trainingPlanRepository.save(
-                TrainingPlan.updateTrainingPlan(trainingPlan, dto)
-        );
-
         List<TrainingPlanDay> existingDays = trainingPlan.getTrainingPlanDays();
         LocalDate lastDate = existingDays.isEmpty() ? LocalDate.now() :
                 existingDays.stream()
@@ -49,8 +47,25 @@ public class TrainingService {
                         .orElse(LocalDate.now()); // 🔥 Pobranie ostatniego dnia z planu
 
         for (TrainingPlanDayDTO dayDTO : dto.getTrainingPlanDays()) {
-            TrainingPlanDay day;
+            if (dayDTO.getIdDay() != null && dayDTO.isDelete()) {
+                log.info("🔴 Usuwanie dnia treningowego ID: " + dayDTO.getIdDay());
 
+                // Najpierw usuń powiązane ćwiczenia
+                planExerciseRepository.deleteByDayId(dayDTO.getIdDay());
+
+                // Usuń dzień z listy dni w planie
+                trainingPlan.getTrainingPlanDays().removeIf(d -> d.getIdDay().equals(dayDTO.getIdDay()));
+
+                // Teraz faktyczne usunięcie dnia
+                trainingPlanDayRepository.deleteById(dayDTO.getIdDay());
+
+                log.info("✅ Dzień treningowy ID: " + dayDTO.getIdDay() + " usunięty");
+                continue;
+            }
+
+
+
+            TrainingPlanDay day;
             if (dayDTO.getIdDay() != null) {
                 // 🔹 Aktualizacja istniejącego dnia
                 day = trainingPlanDayRepository.findById(dayDTO.getIdDay())
@@ -59,23 +74,26 @@ public class TrainingService {
                 // 🔥 Tworzenie nowego dnia
                 day = new TrainingPlanDay();
                 day.setTrainingPlan(trainingPlan);
-                day.setDate(lastDate.plusDays(1)); // 🔥 Ustawienie nowej daty jako kolejnego dnia
+                day.setDate(lastDate.plusDays(1));
                 day.setStatus(TrainingPlanDay.Status.notCompleted);
-                lastDate = day.getDate(); // Aktualizacja ostatniej daty
+                lastDate = day.getDate();
             }
 
             day.setNotes(dayDTO.getNotes());
             day.setDayType(dayDTO.getDayType());
 
-            // 🔥 Zapewnienie, że lista ćwiczeń nie jest `null`
             if (day.getExercises() == null) {
-                day.setExercises(new ArrayList<>()); // Ustawienie pustej listy
+                day.setExercises(new ArrayList<>());
             }
 
-            trainingPlanDayRepository.save(day); // 🔥 Zapis nowego dnia
+            trainingPlanDayRepository.save(day);
 
-            // 🔹 Aktualizacja ćwiczeń
             for (ExerciseDTO exerciseDTO : dayDTO.getExercises()) {
+                if (exerciseDTO.getIdPlanExercise() != null && exerciseDTO.isDelete()) {
+                    planExerciseRepository.deleteById(exerciseDTO.getIdPlanExercise());
+                    continue;
+                }
+
                 PlanExercise existingExercise = (exerciseDTO.getIdPlanExercise() != null)
                         ? planExerciseRepository.findById(exerciseDTO.getIdPlanExercise()).orElse(null)
                         : null;
@@ -91,7 +109,6 @@ public class TrainingService {
                     existingExercise.setDistance(exerciseDTO.getDistance());
                     planExerciseRepository.save(existingExercise);
                 } else {
-                    // 🔥 Tworzenie nowego ćwiczenia, jeśli idPlanExercise == null
                     Exercise exercise = exerciseRepository.findById(exerciseDTO.getIdExercise())
                             .orElseThrow(() -> new RuntimeException("Ćwiczenie nie istnieje"));
 
@@ -101,8 +118,9 @@ public class TrainingService {
             }
         }
 
-        return updatedTrainingPlan;
+        return trainingPlan;
     }
+
 
 
 

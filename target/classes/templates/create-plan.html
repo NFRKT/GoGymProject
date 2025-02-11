@@ -57,18 +57,42 @@ function addDayRow() {
 function addExerciseRow(daySection, dayIndex) {
     const exerciseRow = `
         <div class="exercise-row">
-            <select name="exerciseIds[]" required>
+            <select name="exerciseIds[]" class="exercise-select" required onchange="toggleExerciseInputs(this)">
                 <option value="" disabled selected>Wybierz ćwiczenie</option>
-                ${exercises.map(exercise => `<option value="${exercise.idExercise}">${exercise.name}</option>`).join('')}
+                ${exercises.map(exercise => `<option value="${exercise.idExercise}" data-type="${exercise.type}">${exercise.name}</option>`).join('')}
             </select>
-            <input type="number" name="sets[]" min="1" placeholder="Serie" required>
-            <input type="number" name="reps[]" min="1" placeholder="Powtórzenia" required>
-            <input type="number" step="0.1" name="weight[]" min="0" placeholder="Ciężar (kg)">
+
+            <div class="strength-fields">
+                <input type="number" name="sets[]" min="1" placeholder="Serie">
+                <input type="number" name="reps[]" min="1" placeholder="Powtórzenia">
+                <input type="number" step="0.1" name="weight[]" min="0" placeholder="Ciężar (kg)">
+            </div>
+
+            <div class="cardio-fields" style="display: none;">
+                <input type="number" name="duration[]" min="1" placeholder="Czas (sekundy)">
+                <input type="number" step="0.1" name="distance[]" min="0" placeholder="Dystans (km)">
+            </div>
+
             <input type="hidden" name="exerciseDays[]" value="${dayIndex}">
             <button type="button" onclick="removeExerciseRow(this)">Usuń</button>
         </div>`;
     daySection.parentElement.querySelector('.exercise-list').insertAdjacentHTML('beforeend', exerciseRow);
 }
+
+function toggleExerciseInputs(selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const type = selectedOption.getAttribute("data-type");
+    const row = selectElement.closest(".exercise-row");
+
+    if (type === "CARDIO") {
+        row.querySelector(".strength-fields").style.display = "none";
+        row.querySelector(".cardio-fields").style.display = "block";
+    } else {
+        row.querySelector(".strength-fields").style.display = "block";
+        row.querySelector(".cardio-fields").style.display = "none";
+    }
+}
+
 
         function removeExerciseRow(button) {
             button.parentElement.remove();

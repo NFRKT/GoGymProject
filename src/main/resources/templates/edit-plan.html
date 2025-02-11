@@ -46,14 +46,12 @@
                             <!-- Sprawdzenie czy `exercise.exercise` nie jest null -->
                             <div class="exercise">
                                 <input type="hidden" name="planExerciseIds[${dayStat.index}][]" th:value="${exercise.idPlanExercise}">
-
                                 <input type="hidden" name="exerciseIds[${dayStat.index}][]" th:value="${exercise.idExercise}">
 
                                 <div>
                                     <label>Ćwiczenie:</label>
                                     <select name="exerciseIds[${dayStat.index}][]" class="exercise-select"
                                             th:data-type="${exercise.type}" onchange="toggleExerciseFields(this)">
-
                                         <option th:each="e : ${exercises}"
                                                 th:value="${e.idExercise}"
                                                 th:selected="${e.idExercise == exercise.idExercise}"
@@ -63,10 +61,9 @@
                                     </select>
                                 </div>
 
-                                <!-- Jeśli ćwiczenie jest siłowe -->
+                                <!-- Siłowe -->
                                 <div class="strength-fields" th:style="${exercise.type == 'STRENGTH'} ? 'display:block;' : 'display:none;'">
-
-                                <div>
+                                    <div>
                                         <label>Serie:</label>
                                         <input type="number" name="sets[${dayStat.index}][]" th:value="${exercise.sets != null ? exercise.sets : ''}">
                                     </div>
@@ -80,9 +77,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Jeśli ćwiczenie jest cardio -->
+                                <!-- Cardio -->
                                 <div class="cardio-fields" th:style="${exercise.type == 'CARDIO'} ? 'display:block;' : 'display:none;'">
-
                                     <div>
                                         <label>Czas trwania (minuty):</label>
                                         <input type="number" name="duration[${dayStat.index}][]" th:value="${exercise.duration != null ? exercise.duration : ''}">
@@ -92,13 +88,18 @@
                                         <input type="number" step="0.1" name="distance[${dayStat.index}][]" th:value="${exercise.distance != null ? exercise.distance : ''}">
                                     </div>
                                 </div>
+
+                                <!-- 🔥 Nowy przycisk do usuwania ćwiczenia -->
+                                <button type="button" class="remove-exercise" onclick="removeExercise(this)">Usuń ćwiczenie</button>
                             </div>
+
 
 
                         </div>
                     </div>
                     <button type="button" th:onclick="|addExerciseToDay(${day.idDay})|">Dodaj ćwiczenie</button>
                 </div>
+                <button type="button" class="remove-day" onclick="removeDay(this)">Usuń dzień</button>
             </div>
         </div>
     </div>
@@ -191,6 +192,9 @@ window.addExerciseToDay = function(dayId) {
                 <input type="number" step="0.1" name="distance[${dayId}][]" min="0">
             </div>
         </div>
+
+        <!-- 🔥 Przycisk usunięcia ćwiczenia -->
+        <button type="button" class="remove-exercise" onclick="removeExercise(this)">Usuń ćwiczenie</button>
     `;
 
     exercisesContainer.appendChild(newExercise);
@@ -202,14 +206,15 @@ window.addExerciseToDay = function(dayId) {
 
 
 
+
     // Dodanie nowego dnia do planu
 window.addNewDay = function () {
     const daysContainer = document.getElementById('days-container');
-    const newDayIndex = daysContainer.children.length + 1; // 🔥 Zmiana -> zapewnia unikalne ID
+    const newDayIndex = daysContainer.children.length + 1; // Unikalne ID
 
     const newDay = document.createElement("div");
     newDay.classList.add("day");
-    newDay.setAttribute("data-day-id", `new-${newDayIndex}`); // 🔥 Ustawienie unikalnego ID
+    newDay.setAttribute("data-day-id", `new-${newDayIndex}`); // Unikalne ID
 
     newDay.innerHTML = `
         <input type="hidden" name="dayIds[]" value="new-${newDayIndex}">
@@ -232,10 +237,14 @@ window.addNewDay = function () {
             <div class="exercises"></div>
             <button type="button" onclick="addExerciseToDay('new-${newDayIndex}')">Dodaj ćwiczenie</button>
         </div>
+
+        <!-- 🔥 Przycisk usuwania nowego dnia -->
+        <button type="button" class="remove-day" onclick="removeDay(this)">Usuń dzień</button>
     `;
 
     daysContainer.appendChild(newDay);
 };
+
 
 
     // Obsługa zapisu formularza
@@ -262,7 +271,7 @@ fetch(`/trainer-plans/update/${planId}`, {
 
     });
 
-    // Pobranie danych do zapisu
+// Pobranie danych do zapisu
 function collectFormData() {
     const planData = {
         idPlan: document.getElementById('planId').value,
@@ -272,11 +281,19 @@ function collectFormData() {
     };
 
     document.querySelectorAll('#days-container .day').forEach(dayElem => {
+        const dayIdInput = dayElem.querySelector('input[name^="dayIds"]');
+
+        // 🔥 Jeśli dzień ma flagę do usunięcia, dodajemy go do danych z odpowiednią flagą
+        if (dayIdInput && dayIdInput.dataset.toDelete === "true") {
+            planData.trainingPlanDays.push({ idDay: dayIdInput.value, delete: true });
+            return; // Pomijamy dalsze przetwarzanie usuniętych dni
+        }
+
         const dayId = dayElem.dataset.dayId;
-        const isNewDay = dayId.startsWith('new-'); // 🔥 Nowe dni mają `idDay = null`
+        const isNewDay = dayId.startsWith('new-');
 
         const dayData = {
-            idDay: isNewDay ? null : parseInt(dayId), // Backend dostanie null dla nowych dni
+            idDay: isNewDay ? null : parseInt(dayId),
             dayType: dayElem.querySelector('select[name="dayType[]"]').value,
             notes: dayElem.querySelector('textarea[name="notes[]"]').value,
             exercises: []
@@ -287,6 +304,16 @@ function collectFormData() {
             const exerciseType = exerciseSelect.options[exerciseSelect.selectedIndex].getAttribute("data-type");
 
             const idPlanExerciseInput = exerciseElem.querySelector('input[name^="planExerciseIds"]');
+
+            // 🔥 Jeśli ćwiczenie oznaczone do usunięcia, przesyłamy je z `idPlanExercise`
+            if (idPlanExerciseInput && idPlanExerciseInput.dataset.toDelete === "true") {
+                dayData.exercises.push({
+                    idPlanExercise: idPlanExerciseInput.value, // ID ćwiczenia do usunięcia
+                    delete: true // 🔥 Oznaczenie do usunięcia
+                });
+                return;
+            }
+
             const exerciseData = {
                 idPlanExercise: idPlanExerciseInput ? idPlanExerciseInput.value : null,
                 idExercise: exerciseSelect.value,
@@ -311,6 +338,9 @@ function collectFormData() {
 
     return planData;
 }
+
+
+
 
 
 
@@ -344,6 +374,39 @@ function updateExerciseIdsFromResponse(response) {
         });
     });
 }
+// 🛠 Funkcja do usuwania ćwiczenia
+function removeExercise(button) {
+    const exerciseDiv = button.closest(".exercise"); // Znajdź kontener ćwiczenia
+    if (!exerciseDiv) return;
+
+    const inputExerciseId = exerciseDiv.querySelector('input[name^="planExerciseIds"]');
+
+    if (inputExerciseId && inputExerciseId.value) {
+        // 🔥 Jeśli ćwiczenie ma ID (czyli istnieje w bazie), oznaczamy je do usunięcia
+        inputExerciseId.dataset.toDelete = "true";
+        exerciseDiv.style.display = "none"; // Ukrywamy zamiast usuwać
+    } else {
+        // 🔥 Jeśli ćwiczenie jest nowo dodane, usuwamy z DOM
+        exerciseDiv.remove();
+    }
+}
+
+function removeDay(button) {
+    const dayDiv = button.closest(".day"); // Znajdź kontener dnia
+    if (!dayDiv) return;
+
+    const inputDayId = dayDiv.querySelector('input[name^="dayIds"]');
+
+    if (inputDayId && inputDayId.value && !inputDayId.value.startsWith("new-")) {
+        // 🔥 Jeśli dzień ma ID (czyli istnieje w bazie), oznaczamy go do usunięcia
+        inputDayId.dataset.toDelete = "true";
+        dayDiv.style.display = "none"; // Ukrywamy zamiast usuwać
+    } else {
+        // 🔥 Jeśli dzień jest nowo dodany, usuwamy go całkowicie z DOM
+        dayDiv.remove();
+    }
+}
+
 
 
 // 🛠 Obsługa zmiany ćwiczenia w formularzu (dla istniejących i nowych ćwiczeń)
