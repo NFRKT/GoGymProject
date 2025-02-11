@@ -22,11 +22,10 @@ public class WorkoutExercise {
     @Column(name = "weight")
     private Double weight;
 
-    // Cardio
-    @Column(name = "duration")  // Czas w minutach
+    @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "distance")  // Dystans w km
+    @Column(name = "distance")
     private Double distance;
 
     @ManyToOne

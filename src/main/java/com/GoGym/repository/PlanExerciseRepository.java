@@ -17,4 +17,8 @@ public interface PlanExerciseRepository extends JpaRepository<PlanExercise, Long
     List<PlanExercise> findExercisesByDayId(@Param("idDay") Long idDay);
 
     Optional<PlanExercise> findByExerciseIdExerciseAndTrainingPlanAndTrainingPlanDay(Long exerciseId, TrainingPlan trainingPlan, TrainingPlanDay trainingPlanDay);
+
+
+
+
 }

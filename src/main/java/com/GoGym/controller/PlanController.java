@@ -100,14 +100,15 @@ public class PlanController {
             @RequestParam List<String> dayType,
             @RequestParam(required = false) List<String> notes,
             @RequestParam List<Long> exerciseIds,
-            @RequestParam List<Integer> sets,
-            @RequestParam List<Integer> reps,
+            @RequestParam(required = false) List<Integer> sets,
+            @RequestParam(required = false) List<Integer> reps,
             @RequestParam(required = false) List<Double> weight,
+            @RequestParam(required = false) List<Integer> duration,
+            @RequestParam(required = false) List<Double> distance,
             @RequestParam List<Integer> exerciseDays, // Dni przypisane do ćwiczeń
-            @RequestParam String startDate, // Dodano datę początkową
+            @RequestParam String startDate,
             Model model) {
 
-        // Tworzenie planu
         TrainingPlan plan = new TrainingPlan();
         plan.setName(name);
         plan.setDescription(description);
@@ -119,27 +120,40 @@ public class PlanController {
 
         List<TrainingPlanDay> days = new ArrayList<>();
 
-        // Tworzenie dni planu z datami
         for (int i = 0; i < dayType.size(); i++) {
             TrainingPlanDay day = new TrainingPlanDay();
             day.setTrainingPlan(plan);
             day.setDayType(TrainingPlanDay.DayType.valueOf(dayType.get(i)));
             day.setNotes(notes != null && notes.size() > i ? notes.get(i) : null);
             day.setStatus(TrainingPlanDay.Status.notCompleted);
-            day.setDate(start.plusDays(i)); // Ustawianie daty dnia
+            day.setDate(start.plusDays(i));
 
             List<PlanExercise> exercisesForDay = new ArrayList<>();
 
-            // Jeśli dzień to "training", przypisz odpowiednie ćwiczenia
             if (day.getDayType() == TrainingPlanDay.DayType.training) {
                 for (int j = 0; j < exerciseIds.size(); j++) {
-                    // Sprawdź, czy ćwiczenie należy do tego dnia
                     if (exerciseDays.get(j) == i) {
                         PlanExercise exercise = new PlanExercise();
-                        exercise.setExercise(new Exercise(exerciseIds.get(j)));
-                        exercise.setSets(sets.get(j));
-                        exercise.setReps(reps.get(j));
-                        exercise.setWeight((weight != null && weight.size() > j) ? weight.get(j) : null);
+                        Exercise currentExercise = exerciseRepository.findById(exerciseIds.get(j)).orElseThrow(RuntimeException::new);
+                        exercise.setExercise(currentExercise);
+
+                        if (currentExercise.getType() == Exercise.ExerciseType.CARDIO) {
+                            // Jeśli ćwiczenie to CARDIO, sets i reps ustawiamy na null
+                            exercise.setSets(null);
+                            exercise.setReps(null);
+                            exercise.setWeight(null);
+                            exercise.setDuration((duration != null && duration.size() > j) ? duration.get(j) : null);
+                            exercise.setDistance((distance != null && distance.size() > j) ? distance.get(j) : null);
+                        } else {
+                            // Ćwiczenia siłowe (STRENGTH) - normalnie zapisujemy sets, reps i weight
+                            exercise.setSets((sets != null && sets.size() > j) ? sets.get(j) : null);
+                            exercise.setReps((reps != null && reps.size() > j) ? reps.get(j) : null);
+                            exercise.setWeight((weight != null && weight.size() > j) ? weight.get(j) : null);
+                            // Dla siłowych `duration` i `distance` ustawiamy na null
+                            exercise.setDuration(null);
+                            exercise.setDistance(null);
+                        }
+
                         exercise.setStatus(PlanExercise.Status.notCompleted);
                         exercise.setTrainingPlan(plan);
                         exercise.setTrainingPlanDay(day);
@@ -152,16 +166,15 @@ public class PlanController {
             days.add(day);
         }
 
-        plan.setExercises(new ArrayList<>());
         plan.setTrainingPlanDays(days);
-
-        // Obliczanie daty końcowej
         plan.setEndDate(start.plusDays(dayType.size() - 1));
 
         trainingPlanService.createTrainingPlan(plan);
 
-        return "redirect:/trainer-clients/trainer-panel";
+        return "redirect:/trainer-panel";
     }
+
+
 
     /**
      * Sprawdza, czy kolejne ćwiczenie powinno być przypisane do bieżącego dnia na podstawie dnia tygodnia.
@@ -274,12 +287,17 @@ public class PlanController {
                 List<ExerciseDTO> exercises = day.getExercises().stream().map(exercise -> {
                     ExerciseDTO exerciseDTO = new ExerciseDTO();
                     exerciseDTO.setIdExercise(exercise.getExercise().getIdExercise());
+                    exerciseDTO.setIdPlanExercise(exercise.getId());
                     exerciseDTO.setName(exercise.getExercise().getName());
                     exerciseDTO.setSets(exercise.getSets());
                     exerciseDTO.setReps(exercise.getReps());
                     exerciseDTO.setWeight(exercise.getWeight());
+                    exerciseDTO.setDuration(exercise.getDuration());
+                    exerciseDTO.setDistance(exercise.getDistance());
+                    exerciseDTO.setType(exercise.getExercise().getType().name()); // 🔥 Dodaj typ ćwiczenia
                     return exerciseDTO;
                 }).toList();
+
 
                 dayDTO.setExercises(exercises);
                 return dayDTO;
@@ -298,12 +316,38 @@ public class PlanController {
         }
 
     @PutMapping("/trainer-plans/update/{id}")
-    public ResponseEntity<?> updatePlan(@PathVariable Long id, @RequestBody TrainingPlanDTO trainingPlanDTO) {
+    public ResponseEntity<TrainingPlanDTO> updatePlan(@PathVariable Long id, @RequestBody TrainingPlanDTO trainingPlanDTO) {
         log.info("Otrzymano żądanie edycji planu ID: " + id);
-        TrainingPlan trainingPlan = trainingService.updateTrainingPlan(id, trainingPlanDTO);
+        TrainingPlan updatedTrainingPlan = trainingService.updateTrainingPlan(id, trainingPlanDTO);
 
-        return ResponseEntity.ok(trainingPlan);
+        // 🔥 Konwersja `updatedTrainingPlan` na `TrainingPlanDTO`
+        TrainingPlanDTO responseDTO = new TrainingPlanDTO();
+        responseDTO.setIdPlan(updatedTrainingPlan.getIdPlan());
+        responseDTO.setName(updatedTrainingPlan.getName());
+        responseDTO.setDescription(updatedTrainingPlan.getDescription());
+
+        List<TrainingPlanDayDTO> trainingPlanDays = updatedTrainingPlan.getTrainingPlanDays().stream().map(day -> {
+            TrainingPlanDayDTO dayDTO = new TrainingPlanDayDTO();
+            dayDTO.setIdDay(day.getIdDay());
+            dayDTO.setDayType(day.getDayType());
+            dayDTO.setNotes(day.getNotes());
+
+            List<ExerciseDTO> exercises = day.getExercises().stream().map(exercise -> {
+                ExerciseDTO exerciseDTO = new ExerciseDTO();
+                exerciseDTO.setIdPlanExercise(exercise.getId()); // Ustawiamy poprawne ID!
+                exerciseDTO.setIdExercise(exercise.getExercise().getIdExercise());
+                return exerciseDTO;
+            }).toList();
+
+            dayDTO.setExercises(exercises);
+            return dayDTO;
+        }).toList();
+
+        responseDTO.setTrainingPlanDays(trainingPlanDays);
+
+        return ResponseEntity.ok(responseDTO); // 🔥 Zwrot nowo zapisanych ID!
     }
+
     @PostMapping("/trainer-plans/delete/{id}")
     public ResponseEntity<?> deletePlan(@PathVariable Long id) {
         try {

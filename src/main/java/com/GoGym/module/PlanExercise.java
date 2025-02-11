@@ -18,15 +18,20 @@ public class PlanExercise {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "sets", nullable = false)
-    private int sets;
+    @Column(name = "sets")
+    private Integer sets;
 
-    @Column(name = "reps", nullable = false)
-    private int reps;
+    @Column(name = "reps")
+    private Integer reps;
 
     @Column(name = "weight")
     private Double weight;
 
+    @Column(name = "duration")  // Czas w minutach
+    private Integer duration;
+
+    @Column(name = "distance")  // Dystans w km
+    private Double distance;
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status; // "notCompleted" lub "completed"
@@ -53,11 +58,13 @@ public class PlanExercise {
     public PlanExercise() {
     }
 
-    public PlanExercise(Long id, int sets, int reps, Double weight, Status status, TrainingPlan trainingPlan, Exercise exercise, TrainingPlanDay trainingPlanDay) {
+    public PlanExercise(Long id, Integer sets, Integer reps, Double weight,  Integer duration, Double distance, Status status, TrainingPlan trainingPlan, Exercise exercise, TrainingPlanDay trainingPlanDay) {
         this.id = id;
         this.sets = sets;
         this.reps = reps;
         this.weight = weight;
+        this.duration = duration;
+        this.distance = distance;
         this.status = status;
         this.trainingPlan = trainingPlan;
         this.exercise = exercise;
@@ -72,19 +79,19 @@ public class PlanExercise {
         this.id = id;
     }
 
-    public int getSets() {
+    public Integer getSets() {
         return sets;
     }
 
-    public void setSets(int sets) {
+    public void setSets(Integer sets) {
         this.sets = sets;
     }
 
-    public int getReps() {
+    public Integer getReps() {
         return reps;
     }
 
-    public void setReps(int reps) {
+    public void setReps(Integer reps) {
         this.reps = reps;
     }
 
@@ -94,6 +101,22 @@ public class PlanExercise {
 
     public void setWeight(Double weight) {
         this.weight = weight;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
     }
 
     public TrainingPlan getTrainingPlan() {
@@ -137,17 +160,31 @@ public class PlanExercise {
                 .trainingPlan(trainingPlan)
                 .trainingPlanDay(trainingPlanDay)
                 .weight(dto.getWeight())
+                .duration(dto.getDuration())
+                .distance(dto.getDistance())
                 .exercise(exercise)
                 .build();
 
     }
 
     public static PlanExercise updatePlanExercise(PlanExercise planExercise, Exercise exercise, ExerciseDTO dto) {
-        planExercise.setReps(dto.getReps());
-        planExercise.setSets(dto.getSets());
-        planExercise.setStatus(Status.notCompleted);
-        planExercise.setWeight(dto.getWeight());
+        if (exercise.getType() == Exercise.ExerciseType.CARDIO) {
+            planExercise.setDuration(dto.getDuration());
+            planExercise.setDistance(dto.getDistance());
+            planExercise.setSets(0);
+            planExercise.setReps(0);
+            planExercise.setWeight(null);
+        } else {
+            planExercise.setSets(dto.getSets());
+            planExercise.setReps(dto.getReps());
+            planExercise.setWeight(dto.getWeight());
+            planExercise.setDuration(null);
+            planExercise.setDistance(null);
+        }
+
         planExercise.setExercise(exercise);
+        planExercise.setStatus(Status.notCompleted);
         return planExercise;
     }
+
 }

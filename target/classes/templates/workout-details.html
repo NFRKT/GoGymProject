@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Workout Details</title>
+  <title>Szczegóły Treningu</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -30,7 +30,7 @@
       margin-bottom: 20px;
     }
 
-    .workout-info p, .exercise-list p {
+    .workout-info p {
       margin: 5px 0;
     }
 
@@ -54,22 +54,56 @@
     td {
       background-color: #495057;
     }
+
+    .nav-links {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .nav-links a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 10px;
+      display: inline-block;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
   </style>
+  <script>
+    function formatDuration(durationInSeconds) {
+        if (!durationInSeconds || durationInSeconds === '-') return '-';
+        let minutes = Math.floor(durationInSeconds / 60);
+        let seconds = durationInSeconds % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".duration").forEach(el => {
+            el.innerText = formatDuration(parseInt(el.innerText));
+        });
+    });
+  </script>
 </head>
 <body>
 <div class="container">
   <h1>Szczegóły Treningu</h1>
+
+  <!-- 🏋️‍♂️ Sekcja informacji o treningu -->
   <div class="workout-info">
     <h2>Informacje ogólne</h2>
     <p><strong>Data:</strong> <span th:text="${workout.workoutDate}"></span></p>
     <p><strong>Intensywność:</strong> <span th:text="${workout.intensity}"></span></p>
-    <p><strong>Godzina rozpoczęcia:</strong> <span th:text="${workout.startTime}"></span></p>
-    <p><strong>Godzina zakończenia:</strong> <span th:text="${workout.endTime}"></span></p>
-    <p><strong>Notatki:</strong> <span th:text="${workout.notes}"></span></p>
+    <p><strong>Godzina rozpoczęcia:</strong> <span th:text="${workout.startTime} ?: '-'"></span></p>
+    <p><strong>Godzina zakończenia:</strong> <span th:text="${workout.endTime} ?: '-'"></span></p>
+    <p><strong>Notatki:</strong> <span th:text="${workout.notes} ?: '-'"></span></p>
   </div>
 
-  <div class="exercise-list">
-    <h2>Ćwiczenia</h2>
+  <!-- 💪 Tabela z ćwiczeniami siłowymi -->
+  <div class="exercise-list" th:if="${workout.workoutExercises.?[exercise.type.name() == 'STRENGTH']}">
+    <h2>Ćwiczenia Siłowe</h2>
     <table>
       <thead>
       <tr>
@@ -80,16 +114,41 @@
       </tr>
       </thead>
       <tbody>
-      <tr th:each="exercise : ${workout.workoutExercises}">
+      <tr th:each="exercise : ${workout.workoutExercises}" th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
         <td th:text="${exercise.exercise.name}"></td>
-        <td th:text="${exercise.sets}"></td>
-        <td th:text="${exercise.reps}"></td>
-        <td th:text="${exercise.weight}"></td>
+        <td th:text="${exercise.sets} ?: '-'"></td>
+        <td th:text="${exercise.reps} ?: '-'"></td>
+        <td th:text="${exercise.weight} ?: '-'"></td>
       </tr>
       </tbody>
     </table>
-    <li><a href="/home">Home</a></li>
-    <li><a href="/workouts">Workouts</a></li>
+  </div>
+
+  <!-- 🏃‍♂️ Tabela z ćwiczeniami cardio -->
+  <div class="exercise-list" th:if="${workout.workoutExercises.?[exercise.type.name() == 'CARDIO']}">
+    <h2>Ćwiczenia Cardio</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>Ćwiczenie</th>
+        <th>Czas</th>
+        <th>Dystans (km)</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="exercise : ${workout.workoutExercises}" th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+        <td th:text="${exercise.exercise.name}"></td>
+        <td class="duration" th:text="${exercise.duration} ?: '-'"></td>
+        <td th:text="${exercise.distance} ?: '-'"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 🔗 Nawigacja -->
+  <div class="nav-links">
+    <a href="/home">🏠 Strona Główna</a>
+    <a href="/workouts">📋 Lista Treningów</a>
   </div>
 </div>
 </body>

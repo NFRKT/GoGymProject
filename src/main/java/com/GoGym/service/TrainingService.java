@@ -34,70 +34,78 @@ public class TrainingService {
     public TrainingPlan updateTrainingPlan(Long trainingId, TrainingPlanDTO dto) {
         validateTrainingData(dto);
 
-        TrainingPlan trainingPlan = trainingPlanRepository.findById(trainingId).orElseThrow(TrainingNotFoundException::new);
-        List<TrainingPlanDay> planDay = trainingPlan.getTrainingPlanDays();
-        Set<PlanExercise> exerciseList = new HashSet<>();
-        trainingPlan.getTrainingPlanDays().forEach(x -> {
-            exerciseList.addAll(x.getExercises());
-        });
+        TrainingPlan trainingPlan = trainingPlanRepository.findById(trainingId)
+                .orElseThrow(TrainingNotFoundException::new);
 
-        //update tylko planu treningowego
-        TrainingPlan updatedTrainingPlan = trainingPlanRepository.save(TrainingPlan.updateTrainingPlan(trainingPlan, dto));
+        TrainingPlan updatedTrainingPlan = trainingPlanRepository.save(
+                TrainingPlan.updateTrainingPlan(trainingPlan, dto)
+        );
 
-        planDay.forEach(x -> {
-            TrainingPlanDayDTO trainingPlanDayDTODTO = dto.getTrainingPlanDays().stream().filter(z -> z.getIdDay().equals(x.getIdDay())).findFirst().orElse(null);
-            if (Objects.isNull(trainingPlanDayDTODTO))
-                return;
-            TrainingPlanDay updatedTraininPlanDay = trainingPlanDayRepository.save(TrainingPlanDay.updateTrainingPlanDay(x, trainingPlanDayDTODTO));
-        });
-        //jeśli jest róznica w ilosci to wchodzi w edycje dodawania
-        if (dto.getTrainingPlanDays().size() != planDay.size()) {
-            Set<Long> currentPlanDaysIds = planDay.stream().map(TrainingPlanDay::getIdDay).collect(Collectors.toSet());
-            Set<TrainingPlanDayDTO> newPlanDays = dto.getTrainingPlanDays().stream().filter(x -> !currentPlanDaysIds.contains(x.getIdDay())).collect(Collectors.toSet());
-            newPlanDays.forEach(x -> {
-               TrainingPlanDay trainingPlanDay = new TrainingPlanDay();
-               //todo zmienic date na ta z formularza jak będzie juz dostepna
-               trainingPlanDay.setDate(LocalDate.now());
-               trainingPlanDay.setNotes(x.getNotes());
-               trainingPlanDay.setDayType(x.getDayType());
-               //todo zmienic status na ten z formularza jka bedzie dostepny
-               trainingPlanDay.setStatus(TrainingPlanDay.Status.notCompleted);
-               trainingPlanDay.setTrainingPlan(trainingPlan);
-               TrainingPlanDay updatedTrainingPlanDay = trainingPlanDayRepository.save(trainingPlanDay);
-            });
+        List<TrainingPlanDay> existingDays = trainingPlan.getTrainingPlanDays();
+        LocalDate lastDate = existingDays.isEmpty() ? LocalDate.now() :
+                existingDays.stream()
+                        .map(TrainingPlanDay::getDate)
+                        .max(LocalDate::compareTo)
+                        .orElse(LocalDate.now()); // 🔥 Pobranie ostatniego dnia z planu
 
-        } else {
-            dto.getTrainingPlanDays().forEach(x -> {
-                //sprawdzenie czy doszlo jakies nowe cwiczenie
-                TrainingPlanDay currentPlanDay = planDay.stream().filter(z -> z.getIdDay().equals(x.getIdDay())).findFirst().orElse(null);
-                Set<Long> newExercisesIds = x.getExercises().stream().map(ExerciseDTO::getIdExercise).collect(Collectors.toSet());
-                newExercisesIds.removeAll(currentPlanDay.getExercises().stream().map(z -> z.getExercise().getIdExercise()).collect(Collectors.toSet()));
+        for (TrainingPlanDayDTO dayDTO : dto.getTrainingPlanDays()) {
+            TrainingPlanDay day;
 
-                if (Objects.isNull(currentPlanDay))
-                    return;
+            if (dayDTO.getIdDay() != null) {
+                // 🔹 Aktualizacja istniejącego dnia
+                day = trainingPlanDayRepository.findById(dayDTO.getIdDay())
+                        .orElseThrow(() -> new RuntimeException("Nie znaleziono dnia treningowego"));
+            } else {
+                // 🔥 Tworzenie nowego dnia
+                day = new TrainingPlanDay();
+                day.setTrainingPlan(trainingPlan);
+                day.setDate(lastDate.plusDays(1)); // 🔥 Ustawienie nowej daty jako kolejnego dnia
+                day.setStatus(TrainingPlanDay.Status.notCompleted);
+                lastDate = day.getDate(); // Aktualizacja ostatniej daty
+            }
 
-                if (currentPlanDay.getExercises().size() != x.getExercises().size()) {
-                    Set<ExerciseDTO> exerciseDTO = x.getExercises().stream().filter(z -> newExercisesIds.contains(z.getIdExercise())).collect(Collectors.toSet());
-                    exerciseDTO.forEach(z -> {
-                        //todo dodac deydkowany wyjatek
-                        Exercise exercise = exerciseRepository.findById(Long.valueOf(z.getIdExercise().toString())).orElseThrow(RuntimeException::new);
-                        planExerciseRepository.save(PlanExercise.toPlanExercise(z, trainingPlan, currentPlanDay, exercise));
-                    });
+            day.setNotes(dayDTO.getNotes());
+            day.setDayType(dayDTO.getDayType());
+
+            // 🔥 Zapewnienie, że lista ćwiczeń nie jest `null`
+            if (day.getExercises() == null) {
+                day.setExercises(new ArrayList<>()); // Ustawienie pustej listy
+            }
+
+            trainingPlanDayRepository.save(day); // 🔥 Zapis nowego dnia
+
+            // 🔹 Aktualizacja ćwiczeń
+            for (ExerciseDTO exerciseDTO : dayDTO.getExercises()) {
+                PlanExercise existingExercise = (exerciseDTO.getIdPlanExercise() != null)
+                        ? planExerciseRepository.findById(exerciseDTO.getIdPlanExercise()).orElse(null)
+                        : null;
+
+                if (existingExercise != null) {
+                    Exercise newExercise = exerciseRepository.findById(exerciseDTO.getIdExercise())
+                            .orElseThrow(() -> new RuntimeException("Ćwiczenie nie istnieje"));
+                    existingExercise.setExercise(newExercise);
+                    existingExercise.setSets(exerciseDTO.getSets());
+                    existingExercise.setReps(exerciseDTO.getReps());
+                    existingExercise.setWeight(exerciseDTO.getWeight());
+                    existingExercise.setDuration(exerciseDTO.getDuration());
+                    existingExercise.setDistance(exerciseDTO.getDistance());
+                    planExerciseRepository.save(existingExercise);
                 } else {
-                    Set<ExerciseDTO> exerciseDTO = x.getExercises().stream().filter(z -> !newExercisesIds.contains(z.getIdExercise())).collect(Collectors.toSet());
-                    exerciseDTO.forEach(z -> {
-                        PlanExercise currentPlanExercise = planExerciseRepository.findByExerciseIdExerciseAndTrainingPlanAndTrainingPlanDay(z.getIdExercise(), trainingPlan, currentPlanDay).orElseThrow(RuntimeException::new);
-                        Exercise exercise = exerciseRepository.findById(Long.valueOf(z.getIdExercise().toString())).orElseThrow(RuntimeException::new);
-                        planExerciseRepository.save(PlanExercise.updatePlanExercise(currentPlanExercise, exercise, z));
-                    });
+                    // 🔥 Tworzenie nowego ćwiczenia, jeśli idPlanExercise == null
+                    Exercise exercise = exerciseRepository.findById(exerciseDTO.getIdExercise())
+                            .orElseThrow(() -> new RuntimeException("Ćwiczenie nie istnieje"));
+
+                    PlanExercise newExercise = PlanExercise.toPlanExercise(exerciseDTO, trainingPlan, day, exercise);
+                    planExerciseRepository.save(newExercise);
                 }
-
-            });
-
-
+            }
         }
-        return trainingPlan;
+
+        return updatedTrainingPlan;
     }
+
+
+
 
     public void validateTrainingData(TrainingPlanDTO dto) {
         //todo tutaj mozesz sobie zrobic jakas walidacje na dane wejsciowe, lub w DTO mozesz sobie zrobic adnotacje

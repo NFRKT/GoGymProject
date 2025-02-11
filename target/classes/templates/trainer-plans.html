@@ -68,12 +68,13 @@
       color: red;
     }
 
-    .exercise {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 10px 0;
-    }
+.exercise {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+}
 
 
     .status-icon {
@@ -269,19 +270,32 @@
             </p>
             <ul>
               <li class="exercise" th:each="exercise : ${day.exercises}">
-                                <span>
-                                    <span th:text="${exercise.exercise.name}">Nazwa ćwiczenia</span>-
-                                    <span th:text="${exercise.sets}"></span> serie,
-                                    <span th:text="${exercise.reps}"></span> powtórzeń,
-                                    <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
-                                </span>
+    <span>
+        <strong th:text="${exercise.exercise.name}">Nazwa ćwiczenia</strong>
+
+      <!-- Obsługa ćwiczeń siłowych -->
+        <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
+            - <span th:text="${exercise.sets}"></span> serie,
+            <span th:text="${exercise.reps}"></span> powtórzeń,
+            <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
+        </span>
+
+      <!-- Obsługa ćwiczeń cardio -->
+        <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+            - <span th:text="${exercise.duration != null ? exercise.duration + ' min' : 'Brak danych'}"></span>,
+            <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
+        </span>
+    </span>
+
+                <!-- Status ćwiczenia -->
                 <div class="status-container">
-                                <span id="exercise-status" class="status-icon"
-                                      th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
-                                    <span class="status-circle"></span>
-                                </span>
+        <span id="exercise-status" class="status-icon"
+              th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
+            <span class="status-circle"></span>
+        </span>
                 </div>
               </li>
+
             </ul>
           </div>
         </div>
