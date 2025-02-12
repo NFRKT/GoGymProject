@@ -296,6 +296,19 @@
             <span class="status-circle"></span>
         </span>
                 </div>
+                  <!-- 🔥 Sekcja podglądu nagrania -->
+                  <div class="video-preview" th:if="${exercise.videoUrl != null}">
+                      <!-- Jeśli nagranie jest na Cloudinary – pokazujemy osadzone wideo -->
+                      <video th:if="${exercise.videoUrl.contains('cloudinary.com')}"
+                             th:src="${exercise.videoUrl}" controls width="300">
+                          Twoja przeglądarka nie obsługuje odtwarzacza wideo.
+                      </video>
+
+                      <!-- Jeśli to link YouTube lub inne źródło – pokazujemy tylko link -->
+                      <p th:if="!${exercise.videoUrl.contains('cloudinary.com')}">
+                          <a th:href="${exercise.videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a>
+                      </p>
+                  </div>
               </li>
 
             </ul>

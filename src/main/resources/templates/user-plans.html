@@ -288,11 +288,17 @@
                                         <input type="text" class="video-link-input" th:data-exercise-id="${exercise.id}" placeholder="Lub wklej link do filmu">
                                         <button type="button" class="add-link-btn">Dodaj link</button>
                                     </div>
+                                    <!-- 🔥 Sekcja podglądu nagrania -->
+                                    <div class="video-preview" th:if="${exercise.videoUrl != null}">
+                                        <!-- Jeśli nagranie pochodzi z Cloudinary – pokazujemy osadzone wideo -->
+                                        <video th:if="${exercise.videoUrl.contains('cloudinary.com')}"
+                                               th:src="${exercise.videoUrl}" controls width="300">
+                                            Twoja przeglądarka nie obsługuje odtwarzacza wideo.
+                                        </video>
 
-
-                                    <div class="video-status" th:if="${exercise.videoUrl != null}">
-                                        <p>
-                                            <a th:href="${exercise.videoUrl}" target="_blank" th:text="${exercise.videoUrl.contains('cloudinary.com') ? '📹 Obejrzyj nagranie' : '🔗 Obejrzyj nagranie'}"></a>
+                                        <!-- Jeśli to link YouTube lub inne źródło – pokazujemy tylko link -->
+                                        <p th:if="!${exercise.videoUrl.contains('cloudinary.com')}">
+                                            <a th:href="${exercise.videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a>
                                         </p>
                                         <button type="button" class="delete-video-btn" th:data-exercise-id="${exercise.id}">Usuń nagranie</button>
                                     </div>
@@ -649,17 +655,28 @@ document.addEventListener("DOMContentLoaded", function () {
             videoSection.remove();
         }
 
-        let oldVideoStatus = exerciseElement.querySelector(".video-status");
+        let oldVideoStatus = exerciseElement.querySelector(".video-preview");
         if (oldVideoStatus) {
             oldVideoStatus.remove();
         }
 
         let videoStatusDiv = document.createElement("div");
-        videoStatusDiv.classList.add("video-status");
-        videoStatusDiv.innerHTML = `
-            <p><a href="${videoUrl}" target="_blank">${type === "cloudinary" ? "📹 Obejrzyj nagranie" : "🔗 Obejrzyj na YouTube"}</a></p>
-            <button type="button" class="delete-video-btn" data-exercise-id="${exerciseId}">Usuń nagranie</button>
-        `;
+        videoStatusDiv.classList.add("video-preview");
+        if (type === "cloudinary") {
+            // **Dla nagrania Cloudinary – osadzamy wideo**
+            videoStatusDiv.innerHTML = `
+                <video src="${videoUrl}" controls width="300">
+                    Twoja przeglądarka nie obsługuje odtwarzacza wideo.
+                </video>
+                <button type="button" class="delete-video-btn" data-exercise-id="${exerciseId}">Usuń nagranie</button>
+            `;
+        } else {
+            // **Dla linków YouTube – tylko klikalny link**
+            videoStatusDiv.innerHTML = `
+                <p><a href="${videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a></p>
+                <button type="button" class="delete-video-btn" data-exercise-id="${exerciseId}">Usuń nagranie</button>
+            `;
+        }
         exerciseElement.appendChild(videoStatusDiv);
 
         attachDeleteEvents();
@@ -668,7 +685,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function restoreUploadSection(exerciseId) {
         let exerciseElement = document.querySelector(`.exercise [data-exercise-id="${exerciseId}"]`).closest(".exercise");
 
-        let oldVideoStatus = exerciseElement.querySelector(".video-status");
+        let oldVideoStatus = exerciseElement.querySelector(".video-preview");
         if (oldVideoStatus) {
             oldVideoStatus.remove();
         }
