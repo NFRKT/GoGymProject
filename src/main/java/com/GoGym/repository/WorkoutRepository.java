@@ -12,6 +12,10 @@ import java.util.Optional;
 @Repository
 public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     List<Workout> findByUserOrderByWorkoutDateDesc(User user);
+    Optional<Workout> findByUserAndTrainingPlanDay(User user, TrainingPlanDay trainingPlanDay);
+    boolean existsByTrainingPlanDay_IdDay(Long trainingPlanDayId);
+
+
 
 }
 

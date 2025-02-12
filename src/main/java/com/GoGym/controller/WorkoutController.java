@@ -150,7 +150,28 @@ public class WorkoutController {
 
         return ResponseEntity.ok("Workout został zapisany!");
     }
+    @GetMapping("/check-workout-exists/{dayId}")
+    public ResponseEntity<Boolean> checkWorkoutExists(@PathVariable Long dayId) {
+        boolean exists = workoutRepository.existsByTrainingPlanDay_IdDay(dayId);
+        return ResponseEntity.ok(exists);
+    }
 
+    @PostMapping("/remove-workout-from-day")
+    public ResponseEntity<?> removeWorkoutFromDay(@RequestParam Long dayId, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+
+        Workout workout = workoutRepository.findByUserAndTrainingPlanDay(user, trainingPlanDayRepository.findById(dayId)
+                        .orElseThrow(() -> new RuntimeException("Nie znaleziono dnia treningowego")))
+                .orElse(null);
+
+        if (workout == null) {
+            return ResponseEntity.badRequest().body("Workout nie istnieje dla tego dnia.");
+        }
+
+        workoutRepository.delete(workout);
+        return ResponseEntity.ok("Workout został usunięty!");
+    }
 
 
 

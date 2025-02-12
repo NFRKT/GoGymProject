@@ -244,10 +244,11 @@
                         <span class="status-circle"></span>
 
                     </span>
-                                    <button class="add-to-workout-btn" th:data-day-id="${day.idDay}"
-                                            th:if="${#lists.size(day.exercises) > 0}">
-                                        Dodaj dzień do workoutów
+                                    <button class="add-to-workout-btn"
+                                            th:data-day-id="${day.idDay}">
+                                        Sprawdzanie...
                                     </button>
+
                                 </p>
                             </div>
                             <p>
@@ -767,105 +768,126 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-document.querySelectorAll(".add-to-workout-btn").forEach(button => {
-    button.addEventListener("click", function () {
-        const dayId = this.getAttribute("data-day-id");
+    document.querySelectorAll(".add-to-workout-btn").forEach(button => {
+        const dayId = button.getAttribute("data-day-id");
 
-        fetch(`/get-training-day/${dayId}`)
+        // Sprawdzenie, czy workout istnieje dla tego dnia i ustawienie tekstu przycisku
+        fetch(`/workouts/check-workout-exists/${dayId}`)
             .then(response => response.json())
-            .then(day => {
-                document.getElementById("workoutModal").setAttribute("data-day-id", dayId);
-                document.getElementById("workoutDate").value = day.date;
-                document.getElementById("exerciseList").innerHTML = "";
-
-                // Filtrowanie ćwiczeń, aby dodać tylko ukończone
-                const completedExercises = day.exercises.filter(exercise => exercise.status === "completed");
-
-                if (completedExercises.length === 0) {
-                    alert("Nie masz ukończonych ćwiczeń w tym dniu!");
-                    return;
-                }
-
-                completedExercises.forEach(exercise => {
-                    let exerciseRow = document.createElement("div");
-                    exerciseRow.innerHTML = `
-                        <p><strong>${exercise.exercise?.name || "Nieznane ćwiczenie"}</strong> -
-                        ${exercise.sets ? `${exercise.sets}x${exercise.reps}, ${exercise.weight ?? "bez obciążenia"} kg` :
-                        `${exercise.duration} min, ${exercise.distance ?? "Brak dystansu"} km`}</p>`;
-                    document.getElementById("exerciseList").appendChild(exerciseRow);
-                });
-
-                document.getElementById("workoutModal").style.display = "flex";
+            .then(exists => {
+                button.textContent = exists ? "Usuń dzień z workoutów" : "Dodaj dzień do workoutów";
             })
-            .catch(error => console.error("Błąd podczas pobierania dnia treningowego:", error));
+            .catch(error => {
+                console.error("Błąd sprawdzania workoutu:", error);
+                button.textContent = "Dodaj dzień do workoutów"; // Domyślna wartość
+            });
+
+        // Obsługa kliknięcia w przycisk "Dodaj/Usuń dzień do workoutów"
+        button.addEventListener("click", function () {
+            const isRemoving = this.textContent.includes("Usuń");
+
+            if (isRemoving) {
+                // Usuwanie workoutu
+                fetch(`/workouts/remove-workout-from-day?dayId=${dayId}`, { method: "POST" })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Błąd usuwania workoutu");
+                        return response.text();
+                    })
+                    .then(() => {
+                        alert("Workout został usunięty!");
+                        this.textContent = "Dodaj dzień do workoutów";
+                    })
+                    .catch(error => console.error("Błąd:", error));
+            } else {
+                // Pobranie danych treningowego dnia i otwarcie modala
+                fetch(`/get-training-day/${dayId}`)
+                    .then(response => response.json())
+                    .then(day => {
+                        document.getElementById("workoutModal").setAttribute("data-day-id", dayId);
+                        document.getElementById("workoutDate").value = day.date;
+                        document.getElementById("exerciseList").innerHTML = "";
+
+                        // Filtrowanie ćwiczeń, aby dodać tylko ukończone
+                        const completedExercises = day.exercises.filter(exercise => exercise.status === "completed");
+
+                        if (completedExercises.length === 0) {
+                            alert("Nie masz ukończonych ćwiczeń w tym dniu!");
+                            return;
+                        }
+
+                        completedExercises.forEach(exercise => {
+                            let exerciseRow = document.createElement("div");
+                            exerciseRow.innerHTML = `
+                                <p><strong>${exercise.exercise?.name || "Nieznane ćwiczenie"}</strong> -
+                                ${exercise.sets ? `${exercise.sets}x${exercise.reps}, ${exercise.weight ?? "bez obciążenia"} kg` :
+                                `${exercise.duration} min, ${exercise.distance ?? "Brak dystansu"} km`}</p>`;
+                            document.getElementById("exerciseList").appendChild(exerciseRow);
+                        });
+
+                        document.getElementById("workoutModal").style.display = "flex";
+                    })
+                    .catch(error => console.error("Błąd podczas pobierania dnia treningowego:", error));
+            }
+        });
     });
-});
 
+    // Obsługa zapisu workoutu z modala
+    document.getElementById("saveWorkout").addEventListener("click", function () {
+        const startTime = document.getElementById("startTime").value;
+        const endTime = document.getElementById("endTime").value;
+        const intensity = document.getElementById("intensity").value;
+        const notes = document.getElementById("notes").value;
+        const dayId = document.getElementById("workoutModal").getAttribute("data-day-id");
 
-
-
-    // Obsługa zamknięcia modala
-    document.getElementById("closeWorkoutModal").addEventListener("click", resetWorkoutModal, function () {
-        document.getElementById("workoutModal").style.display = "none";
-    });
-
-    // Obsługa zapisu treningu
-document.getElementById("saveWorkout").addEventListener("click", function () {
-    const startTime = document.getElementById("startTime").value;
-    const endTime = document.getElementById("endTime").value;
-    const intensity = document.getElementById("intensity").value;
-    const notes = document.getElementById("notes").value;
-
-    if (!startTime || !endTime) {
-        alert("Musisz podać godzinę rozpoczęcia i zakończenia treningu!");
-        return;
-    }
-
-    const workoutData = {
-        dayId: document.getElementById("workoutModal").getAttribute("data-day-id"),
-        startTime: startTime,
-        endTime: endTime,
-        intensity: intensity,
-        notes: notes
-    };
-
-    fetch("/workouts/add-workout-from-day", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(workoutData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Błąd: ${response.status}`);
+        if (!startTime || !endTime) {
+            alert("Musisz podać godzinę rozpoczęcia i zakończenia treningu!");
+            return;
         }
-        return response.text();
-    })
-    .then(result => {
-        alert("Trening został dodany!");
+
+        const workoutData = {
+            dayId: dayId,
+            startTime: startTime,
+            endTime: endTime,
+            intensity: intensity,
+            notes: notes
+        };
+
+        fetch("/workouts/add-workout-from-day", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(workoutData)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Błąd dodawania workoutu");
+            return response.text();
+        })
+        .then(() => {
+            alert("Workout został dodany!");
+            document.getElementById("workoutModal").style.display = "none";
+
+            // Zmiana przycisku na "Usuń dzień z workoutów"
+            document.querySelector(`.add-to-workout-btn[data-day-id="${dayId}"]`).textContent = "Usuń dzień z workoutów";
+        })
+        .catch(error => console.error("Błąd:", error));
+
+        resetWorkoutModal();
+    });
+
+    function resetWorkoutModal() {
+        document.getElementById("workoutModal").removeAttribute("data-day-id");
+        document.getElementById("workoutDate").value = "";
+        document.getElementById("startTime").value = "";
+        document.getElementById("endTime").value = "";
+        document.getElementById("intensity").value = "medium";
+        document.getElementById("notes").value = "";
+        document.getElementById("exerciseList").innerHTML = "";
         document.getElementById("workoutModal").style.display = "none";
-    })
-    .catch(error => console.error("Błąd:", error));
-    resetWorkoutModal();
+    }
 });
-
-
-});
-function resetWorkoutModal() {
-    document.getElementById("workoutModal").removeAttribute("data-day-id");
-    document.getElementById("workoutDate").value = "";
-    document.getElementById("startTime").value = "";
-    document.getElementById("endTime").value = "";
-    document.getElementById("intensity").value = "medium";
-    document.getElementById("notes").value = "";
-    document.getElementById("exerciseList").innerHTML = ""; // Czyścimy listę ćwiczeń
-    document.getElementById("workoutModal").style.display = "none";
-}
-
 
 
 
     </script>
 
     </body>
-
     </html>
