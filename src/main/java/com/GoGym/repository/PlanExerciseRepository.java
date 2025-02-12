@@ -24,7 +24,10 @@ public interface PlanExerciseRepository extends JpaRepository<PlanExercise, Long
     @Transactional
     @Query("DELETE FROM PlanExercise pe WHERE pe.trainingPlanDay.idDay = :dayId")
     void deleteByDayId(@Param("dayId") Long dayId);
-
+    @Modifying
+    @Transactional
+    @Query("UPDATE PlanExercise pe SET pe.videoUrl = :videoUrl WHERE pe.id = :exerciseId")
+    void updateVideoUrl(@Param("exerciseId") Long exerciseId, @Param("videoUrl") String videoUrl);
 
 
 

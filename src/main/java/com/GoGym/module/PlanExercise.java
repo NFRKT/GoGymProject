@@ -54,11 +54,13 @@ public class PlanExercise {
     @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
     private TrainingPlanDay trainingPlanDay;
 
+    @Column(name = "video_url")
+    private String videoUrl;
 
     public PlanExercise() {
     }
 
-    public PlanExercise(Long id, Integer sets, Integer reps, Double weight,  Integer duration, Double distance, Status status, TrainingPlan trainingPlan, Exercise exercise, TrainingPlanDay trainingPlanDay) {
+    public PlanExercise(Long id, Integer sets, Integer reps, Double weight,  Integer duration, Double distance, Status status, TrainingPlan trainingPlan, Exercise exercise, TrainingPlanDay trainingPlanDay, String videoUrl) {
         this.id = id;
         this.sets = sets;
         this.reps = reps;
@@ -69,6 +71,7 @@ public class PlanExercise {
         this.trainingPlan = trainingPlan;
         this.exercise = exercise;
         this.trainingPlanDay = trainingPlanDay;
+        this.videoUrl = videoUrl;
     }
 
     public Long getId() {
@@ -151,6 +154,14 @@ public class PlanExercise {
         this.trainingPlanDay = trainingPlanDay;
     }
 
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
     public static PlanExercise toPlanExercise(ExerciseDTO dto, TrainingPlan trainingPlan, TrainingPlanDay trainingPlanDay, Exercise exercise) {
         return PlanExercise.builder()
                 .reps(dto.getReps())
@@ -185,6 +196,10 @@ public class PlanExercise {
         planExercise.setExercise(exercise);
         planExercise.setStatus(Status.notCompleted);
         return planExercise;
+    }
+
+    public boolean isCloudinaryVideo() {
+        return videoUrl != null && videoUrl.contains("cloudinary.com");
     }
 
 }
