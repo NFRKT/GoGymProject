@@ -1,19 +1,29 @@
 package com.GoGym.controller;
 
-import com.GoGym.module.Exercise;
-import com.GoGym.module.Workout;
-import com.GoGym.module.User;
+import com.GoGym.dto.WorkoutDTO;
+import com.GoGym.module.*;
+import com.GoGym.repository.TrainingPlanDayRepository;
+import com.GoGym.repository.UserRepository;
+import com.GoGym.repository.WorkoutRepository;
 import com.GoGym.service.ExerciseService;
 import com.GoGym.service.WorkoutService;
 import com.GoGym.security.CustomUserDetails;
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/workouts")
@@ -21,12 +31,18 @@ public class WorkoutController {
 
     private final WorkoutService workoutService;
     private final ExerciseService exerciseService;
+    private final UserRepository userRepository;
+    private final TrainingPlanDayRepository trainingPlanDayRepository;
+    private final WorkoutRepository workoutRepository;
 
 
     @Autowired
-    public WorkoutController(WorkoutService workoutService, ExerciseService exerciseService) {
+    public WorkoutController(WorkoutService workoutService, ExerciseService exerciseService, UserRepository userRepository, TrainingPlanDayRepository trainingPlanDayRepository, WorkoutRepository workoutRepository) {
         this.workoutService = workoutService;
         this.exerciseService = exerciseService;
+        this.userRepository = userRepository;
+        this.trainingPlanDayRepository = trainingPlanDayRepository;
+        this.workoutRepository = workoutRepository;
     }
 
     @GetMapping("/create")
@@ -87,6 +103,56 @@ public class WorkoutController {
         model.addAttribute("workouts", workouts);
         return "user-workouts";
     }
+
+    @PostMapping("/add-workout-from-day")
+    public ResponseEntity<?> addWorkoutFromDay(@RequestBody WorkoutDTO workoutDTO, Principal principal) {
+        System.out.println("Otrzymane żądanie: " + workoutDTO);
+
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+
+        TrainingPlanDay day = trainingPlanDayRepository.findById(workoutDTO.getDayId())
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono dnia treningowego"));
+
+        Workout workout = new Workout();
+        workout.setWorkoutDate(day.getDate());
+        workout.setStartTime(workoutDTO.getStartTime());
+        workout.setEndTime(workoutDTO.getEndTime());
+        workout.setIntensity(Workout.Intensity.valueOf(workoutDTO.getIntensity()));
+        workout.setNotes(workoutDTO.getNotes());
+        workout.setUser(user);
+        workout.setTrainingPlanDay(day);
+
+        // 🔥 Filtrujemy tylko ćwiczenia z status == completed
+        Set<WorkoutExercise> workoutExercises = day.getExercises().stream()
+                .filter(planExercise -> planExercise.getStatus() == PlanExercise.Status.completed) // 👈 Filtrowanie
+                .map(planExercise -> {
+                    WorkoutExercise we = new WorkoutExercise();
+                    we.setExercise(planExercise.getExercise());
+                    we.setWorkout(workout);
+                    if (planExercise.getExercise().getType() == Exercise.ExerciseType.STRENGTH) {
+                        we.setSets(planExercise.getSets());
+                        we.setReps(planExercise.getReps());
+                        we.setWeight(planExercise.getWeight());
+                    } else {
+                        we.setDuration(planExercise.getDuration());
+                        we.setDistance(planExercise.getDistance());
+                    }
+                    return we;
+                }).collect(Collectors.toSet());
+
+        if (workoutExercises.isEmpty()) {
+            return ResponseEntity.badRequest().body("Brak ukończonych ćwiczeń do dodania!");
+        }
+
+        workout.setWorkoutExercises(workoutExercises);
+        workoutRepository.save(workout);
+
+        return ResponseEntity.ok("Workout został zapisany!");
+    }
+
+
+
 
 
 }

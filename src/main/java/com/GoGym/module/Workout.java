@@ -40,6 +40,10 @@ public class Workout {
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkoutExercise> workoutExercises;
 
+    @ManyToOne
+    @JoinColumn(name = "id_day", nullable = true) // 🆕 Nowe pole – powiązanie z dniem planu
+    private TrainingPlanDay trainingPlanDay;
+
     public enum Intensity {
         low, medium, high
     }
@@ -49,7 +53,7 @@ public class Workout {
 
     // Konstruktor z argumentami
     public Workout(Long idWorkout, LocalDate workoutDate, Intensity intensity, String notes,
-                   LocalTime startTime, LocalTime endTime, User user, Set<WorkoutExercise> workoutExercises) {
+                   LocalTime startTime, LocalTime endTime, User user, Set<WorkoutExercise> workoutExercises, TrainingPlanDay trainingPlanDay) {
         this.idWorkout = idWorkout;
         this.workoutDate = workoutDate;
         this.intensity = intensity;
@@ -58,6 +62,7 @@ public class Workout {
         this.endTime = endTime;
         this.user = user;
         this.workoutExercises = workoutExercises;
+        this.trainingPlanDay = trainingPlanDay;
     }
 
     // Gettery i Settery
@@ -123,5 +128,13 @@ public class Workout {
 
     public void setWorkoutExercises(Set<WorkoutExercise> workoutExercises) {
         this.workoutExercises = workoutExercises;
+    }
+
+    public TrainingPlanDay getTrainingPlanDay() {
+        return trainingPlanDay;
+    }
+
+    public void setTrainingPlanDay(TrainingPlanDay trainingPlanDay) {
+        this.trainingPlanDay = trainingPlanDay;
     }
 }

@@ -10,8 +10,10 @@ import com.GoGym.service.RequestService;
 import com.GoGym.service.TrainerClientService;
 import com.GoGym.service.TrainingPlanService;
 import com.GoGym.service.TrainingService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -364,5 +366,30 @@ public class PlanController {
             return ResponseEntity.status(500).body("Błąd podczas usuwania planu: " + e.getMessage());
         }
     }
+    @GetMapping("/get-training-day/{dayId}")
+    @ResponseBody
+    @Transactional
+    public ResponseEntity<?> getTrainingDay(@PathVariable Long dayId) {
+        Optional<TrainingPlanDay> dayOpt = trainingPlanDayRepository.findById(dayId);
+        if (dayOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        TrainingPlanDay day = dayOpt.get();
+
+        // Wymuszenie załadowania ćwiczeń
+        Hibernate.initialize(day.getExercises());
+
+        // Debugging: Sprawdź, czy ćwiczenia się ładują
+        if (day.getExercises() == null || day.getExercises().isEmpty()) {
+            System.out.println("Brak ćwiczeń dla dnia: " + dayId);
+        } else {
+            System.out.println("Ćwiczenia dla dnia " + dayId + ": " + day.getExercises().size());
+        }
+
+        return ResponseEntity.ok(day);
+    }
+
+
+
 
 }

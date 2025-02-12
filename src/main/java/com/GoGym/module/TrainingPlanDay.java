@@ -2,6 +2,7 @@ package com.GoGym.module;
 
 import com.GoGym.dto.TrainingPlanDayDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,7 +22,7 @@ public class TrainingPlanDay {
 
     @ManyToOne
     @JoinColumn(name = "id_plan", nullable = false)
-    @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
+
     private TrainingPlan trainingPlan;
 
     @Column(name = "day_type", nullable = false)
@@ -45,8 +46,8 @@ public class TrainingPlanDay {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @OneToMany(mappedBy = "trainingPlanDay", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    @OneToMany(mappedBy = "trainingPlanDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<PlanExercise> exercises;
 
     public TrainingPlanDay() {

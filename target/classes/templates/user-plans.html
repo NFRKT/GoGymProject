@@ -242,7 +242,12 @@
                                     <strong>Status dnia:</strong>
                                     <span id="day-status" class="status-icon" th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
                         <span class="status-circle"></span>
+
                     </span>
+                                    <button class="add-to-workout-btn" th:data-day-id="${day.idDay}"
+                                            th:if="${#lists.size(day.exercises) > 0}">
+                                        Dodaj dzień do workoutów
+                                    </button>
                                 </p>
                             </div>
                             <p>
@@ -310,6 +315,37 @@
             </div>
         </div>
     </div>
+    <div id="workoutModal" class="modal" data-day-id="">
+        <div class="modal-content">
+            <h3>Dodaj trening</h3>
+            <label>Data treningu:</label>
+            <input type="date" id="workoutDate" readonly>
+
+            <label>Godzina rozpoczęcia:</label>
+            <input type="time" id="startTime">
+
+            <label>Godzina zakończenia:</label>
+            <input type="time" id="endTime">
+
+            <label>Intensywność:</label>
+            <select id="intensity">
+                <option value="low">Niska</option>
+                <option value="medium">Średnia</option>
+                <option value="high">Wysoka</option>
+            </select>
+
+            <label>Notatki:</label>
+            <textarea id="notes"></textarea>
+
+            <h4>Ćwiczenia:</h4>
+            <div id="exerciseList"></div>
+
+            <button id="saveWorkout">Zapisz trening</button>
+            <button id="closeWorkoutModal">Anuluj</button>
+        </div>
+    </div>
+
+
     <script>
         function filterPlans() {
             let input = document.getElementById("searchInput").value.toLowerCase();
@@ -729,6 +765,102 @@ document.addEventListener("DOMContentLoaded", function () {
     attachUploadEvents();
     attachDeleteEvents();
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+document.querySelectorAll(".add-to-workout-btn").forEach(button => {
+    button.addEventListener("click", function () {
+        const dayId = this.getAttribute("data-day-id");
+
+        fetch(`/get-training-day/${dayId}`)
+            .then(response => response.json())
+            .then(day => {
+                document.getElementById("workoutModal").setAttribute("data-day-id", dayId);
+                document.getElementById("workoutDate").value = day.date;
+                document.getElementById("exerciseList").innerHTML = "";
+
+                // Filtrowanie ćwiczeń, aby dodać tylko ukończone
+                const completedExercises = day.exercises.filter(exercise => exercise.status === "completed");
+
+                if (completedExercises.length === 0) {
+                    alert("Nie masz ukończonych ćwiczeń w tym dniu!");
+                    return;
+                }
+
+                completedExercises.forEach(exercise => {
+                    let exerciseRow = document.createElement("div");
+                    exerciseRow.innerHTML = `
+                        <p><strong>${exercise.exercise?.name || "Nieznane ćwiczenie"}</strong> -
+                        ${exercise.sets ? `${exercise.sets}x${exercise.reps}, ${exercise.weight ?? "bez obciążenia"} kg` :
+                        `${exercise.duration} min, ${exercise.distance ?? "Brak dystansu"} km`}</p>`;
+                    document.getElementById("exerciseList").appendChild(exerciseRow);
+                });
+
+                document.getElementById("workoutModal").style.display = "flex";
+            })
+            .catch(error => console.error("Błąd podczas pobierania dnia treningowego:", error));
+    });
+});
+
+
+
+
+    // Obsługa zamknięcia modala
+    document.getElementById("closeWorkoutModal").addEventListener("click", resetWorkoutModal, function () {
+        document.getElementById("workoutModal").style.display = "none";
+    });
+
+    // Obsługa zapisu treningu
+document.getElementById("saveWorkout").addEventListener("click", function () {
+    const startTime = document.getElementById("startTime").value;
+    const endTime = document.getElementById("endTime").value;
+    const intensity = document.getElementById("intensity").value;
+    const notes = document.getElementById("notes").value;
+
+    if (!startTime || !endTime) {
+        alert("Musisz podać godzinę rozpoczęcia i zakończenia treningu!");
+        return;
+    }
+
+    const workoutData = {
+        dayId: document.getElementById("workoutModal").getAttribute("data-day-id"),
+        startTime: startTime,
+        endTime: endTime,
+        intensity: intensity,
+        notes: notes
+    };
+
+    fetch("/workouts/add-workout-from-day", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(workoutData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Błąd: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(result => {
+        alert("Trening został dodany!");
+        document.getElementById("workoutModal").style.display = "none";
+    })
+    .catch(error => console.error("Błąd:", error));
+    resetWorkoutModal();
+});
+
+
+});
+function resetWorkoutModal() {
+    document.getElementById("workoutModal").removeAttribute("data-day-id");
+    document.getElementById("workoutDate").value = "";
+    document.getElementById("startTime").value = "";
+    document.getElementById("endTime").value = "";
+    document.getElementById("intensity").value = "medium";
+    document.getElementById("notes").value = "";
+    document.getElementById("exerciseList").innerHTML = ""; // Czyścimy listę ćwiczeń
+    document.getElementById("workoutModal").style.display = "none";
+}
+
 
 
 

@@ -2,8 +2,6 @@ package com.GoGym.module;
 
 import jakarta.persistence.*;
 
-import java.sql.Time;
-
 @Entity
 @Table(name = "workout_exercises")
 public class WorkoutExercise {

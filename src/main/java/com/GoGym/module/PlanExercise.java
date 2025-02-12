@@ -2,6 +2,7 @@ package com.GoGym.module;
 
 import com.GoGym.dto.ExerciseDTO;
 import com.GoGym.dto.TrainingPlanDayDTO;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -42,7 +43,7 @@ public class PlanExercise {
 
     @ManyToOne
     @JoinColumn(name = "id_plan", nullable = false)
-    @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
+  // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
     private TrainingPlan trainingPlan;
 
     @ManyToOne
@@ -51,7 +52,7 @@ public class PlanExercise {
 
     @ManyToOne
     @JoinColumn(name = "id_day", nullable = false)
-    @JsonIgnore // Zapobiega rekurencyjnym odwołaniom w serializacji JSON
+    @JsonBackReference
     private TrainingPlanDay trainingPlanDay;
 
     @Column(name = "video_url")
@@ -175,9 +176,7 @@ public class PlanExercise {
                 .distance(dto.getDistance())
                 .exercise(exercise)
                 .build();
-
     }
-
     public static PlanExercise updatePlanExercise(PlanExercise planExercise, Exercise exercise, ExerciseDTO dto) {
         if (exercise.getType() == Exercise.ExerciseType.CARDIO) {
             planExercise.setDuration(dto.getDuration());
