@@ -2,12 +2,11 @@ package com.GoGym.controller;
 
 import com.GoGym.dto.WorkoutDTO;
 import com.GoGym.module.*;
-import com.GoGym.repository.TrainingPlanDayRepository;
-import com.GoGym.repository.UserRepository;
-import com.GoGym.repository.WorkoutRepository;
+import com.GoGym.repository.*;
 import com.GoGym.service.ExerciseService;
 import com.GoGym.service.WorkoutService;
 import com.GoGym.security.CustomUserDetails;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +33,19 @@ public class WorkoutController {
     private final UserRepository userRepository;
     private final TrainingPlanDayRepository trainingPlanDayRepository;
     private final WorkoutRepository workoutRepository;
+    private final WorkoutExerciseRepository workoutExerciseRepository;
+    private final ExerciseRepository exerciseRepository;
 
 
     @Autowired
-    public WorkoutController(WorkoutService workoutService, ExerciseService exerciseService, UserRepository userRepository, TrainingPlanDayRepository trainingPlanDayRepository, WorkoutRepository workoutRepository) {
+    public WorkoutController(WorkoutService workoutService, ExerciseService exerciseService, UserRepository userRepository, TrainingPlanDayRepository trainingPlanDayRepository, WorkoutRepository workoutRepository, WorkoutExerciseRepository workoutExerciseRepository, ExerciseRepository exerciseRepository) {
         this.workoutService = workoutService;
         this.exerciseService = exerciseService;
         this.userRepository = userRepository;
         this.trainingPlanDayRepository = trainingPlanDayRepository;
         this.workoutRepository = workoutRepository;
+        this.workoutExerciseRepository = workoutExerciseRepository;
+        this.exerciseRepository = exerciseRepository;
     }
 
     @GetMapping("/create")
@@ -173,7 +176,146 @@ public class WorkoutController {
         return ResponseEntity.ok("Workout został usunięty!");
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteWorkout(@PathVariable Long id, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+
+        Workout workout = workoutRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono treningu o ID: " + id));
+
+        if (!workout.getUser().equals(user)) {
+            return ResponseEntity.status(403).body("Nie masz uprawnień do usunięcia tego treningu.");
+        }
+
+        workoutRepository.delete(workout);
+        return ResponseEntity.ok("Trening został usunięty.");
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editWorkoutForm(@PathVariable Long id, Model model, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+
+        Workout workout = workoutRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono treningu o ID: " + id));
+
+        if (!workout.getUser().equals(user)) {
+            throw new RuntimeException("Nie masz uprawnień do edycji tego treningu.");
+        }
+
+        List<Exercise> allExercises = exerciseRepository.findAll();
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String allExercisesJson = objectMapper.writeValueAsString(allExercises); // ✅ Konwersja na JSON
+            model.addAttribute("allExercisesJson", allExercisesJson);
+        } catch (Exception e) {
+            throw new RuntimeException("Błąd serializacji ćwiczeń do JSON", e);
+        }
+
+        model.addAttribute("workout", workout);
+        model.addAttribute("allExercises", allExercises);
+        return "edit-workout";
+    }
 
 
+    @PostMapping("/update")
+    public String updateWorkout(@ModelAttribute Workout workout,
+                                @RequestParam(required = false) List<Long> existingExerciseIds,
+                                @RequestParam(required = false) List<Long> deletedExerciseIds,
+                                @RequestParam(required = false) List<Long> exerciseIds,
+                                @RequestParam(required = false) List<Integer> sets,
+                                @RequestParam(required = false) List<Integer> reps,
+                                @RequestParam(required = false) List<Double> weight,
+                                @RequestParam(required = false) List<String> durations,
+                                @RequestParam(required = false) List<Double> distances,
+                                Principal principal) {
+
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+
+        Workout existingWorkout = workoutRepository.findById(workout.getIdWorkout())
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono treningu o ID: " + workout.getIdWorkout()));
+
+        if (!existingWorkout.getUser().equals(user)) {
+            throw new RuntimeException("Nie masz uprawnień do edycji tego treningu.");
+        }
+
+        // ✅ 1. AKTUALIZACJA PODSTAWOWYCH DANYCH TRENINGU
+        existingWorkout.setWorkoutDate(workout.getWorkoutDate());
+        existingWorkout.setIntensity(workout.getIntensity());
+        existingWorkout.setStartTime(workout.getStartTime());
+        existingWorkout.setEndTime(workout.getEndTime());
+        existingWorkout.setNotes(workout.getNotes());
+
+        // ✅ 2. USUNIĘCIE ĆWICZEŃ, KTÓRE UŻYTKOWNIK USUNĄŁ
+        if (deletedExerciseIds != null) {
+            workoutExerciseRepository.deleteAllById(deletedExerciseIds);
+        }
+
+        // ✅ 3. AKTUALIZACJA ISTNIEJĄCYCH ĆWICZEŃ
+        if (existingExerciseIds != null) {
+            for (int i = 0; i < existingExerciseIds.size(); i++) {
+                WorkoutExercise workoutExercise = workoutExerciseRepository.findById(existingExerciseIds.get(i))
+                        .orElseThrow(() -> new RuntimeException("Nie znaleziono ćwiczenia"));
+
+                Exercise exercise = exerciseRepository.findById(exerciseIds.get(i))
+                        .orElseThrow(() -> new RuntimeException("Nie znaleziono ćwiczenia"));
+
+                workoutExercise.setExercise(exercise); // ✅ ZAMIANA ĆWICZENIA NA NOWE
+
+                if (exercise.getType() == Exercise.ExerciseType.STRENGTH) {
+                    workoutExercise.setSets(sets.get(i));
+                    workoutExercise.setReps(reps.get(i));
+                    workoutExercise.setWeight(weight.get(i));
+                    workoutExercise.setDuration(null);
+                    workoutExercise.setDistance(null);
+                } else if (exercise.getType() == Exercise.ExerciseType.CARDIO) {
+                    workoutExercise.setDuration(workoutService.parseDuration(durations.get(i)));
+                    workoutExercise.setDistance(distances.get(i));
+                    workoutExercise.setSets(null);
+                    workoutExercise.setReps(null);
+                    workoutExercise.setWeight(null);
+                }
+
+                workoutExerciseRepository.save(workoutExercise);
+            }
+        }
+
+        // ✅ 4. DODANIE NOWYCH ĆWICZEŃ
+        if (exerciseIds != null) {
+            int existingSize = (existingExerciseIds != null) ? existingExerciseIds.size() : 0;
+            for (int i = 0; i < exerciseIds.size(); i++) {
+                if (i < existingSize) continue; // Pomijamy już istniejące ćwiczenia
+
+                Exercise exercise = exerciseRepository.findById(exerciseIds.get(i))
+                        .orElseThrow(() -> new RuntimeException("Nie znaleziono ćwiczenia"));
+
+                WorkoutExercise newExercise = new WorkoutExercise();
+                newExercise.setWorkout(existingWorkout);
+                newExercise.setExercise(exercise);
+
+                if (exercise.getType() == Exercise.ExerciseType.STRENGTH) {
+                    newExercise.setSets(sets.get(i));
+                    newExercise.setReps(reps.get(i));
+                    newExercise.setWeight(weight.get(i));
+                    newExercise.setDuration(null);
+                    newExercise.setDistance(null);
+                } else if (exercise.getType() == Exercise.ExerciseType.CARDIO) {
+                    newExercise.setDuration(workoutService.parseDuration(durations.get(i)));
+                    newExercise.setDistance(distances.get(i));
+                    newExercise.setSets(null);
+                    newExercise.setReps(null);
+                    newExercise.setWeight(null);
+                }
+
+                workoutExerciseRepository.save(newExercise);
+            }
+        }
+
+        workoutRepository.save(existingWorkout);
+        return "redirect:/workouts/" + workout.getIdWorkout();
+    }
 
 }

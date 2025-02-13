@@ -55,7 +55,7 @@ public class WorkoutService {
     }
 
     // 🚀 Konwersja formatu "hh:mm:ss" / "mm:ss" na sekundy
-    private Integer parseDuration(String duration) {
+    public Integer parseDuration(String duration) {
         if (duration == null || duration.isEmpty()) return null;
 
         // Jeśli przekazana wartość jest już liczbą (sekundy), zwróć ją jako integer
@@ -77,15 +77,29 @@ public class WorkoutService {
     }
 
 
+    public List<Workout> getWorkoutsByUser(User user) {
+        return workoutRepository.findByUserOrderByWorkoutDateDesc(user);
+    }
 
     public Workout getWorkoutById(Long id) {
         return workoutRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trening o ID " + id + " nie istnieje."));
     }
 
-    public List<Workout> getWorkoutsByUser(User user) {
-        return workoutRepository.findByUserOrderByWorkoutDateDesc(user);
+    // ✅ Pomocnicza metoda do konwersji sekundy → "mm:ss" lub "hh:mm:ss"
+    private String formatDuration(Integer seconds) {
+        if (seconds == null) return "";
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+        int remainingSeconds = seconds % 60;
+
+        if (hours > 0) {
+            return String.format("%d:%02d:%02d", hours, minutes, remainingSeconds);
+        } else {
+            return String.format("%d:%02d", minutes, remainingSeconds);
+        }
     }
+
 
 
 

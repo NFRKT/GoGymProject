@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Edytuj Trening</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+  <h2>Edytuj Trening</h2>
+  <form th:action="@{/workouts/update}" method="post">
+    <input type="hidden" name="idWorkout" th:value="${workout.idWorkout}">
+
+    <label>Data treningu:</label>
+    <input type="date" name="workoutDate" th:value="${workout.workoutDate}" required>
+
+    <label>Intensywność:</label>
+    <select name="intensity">
+      <option value="low" th:selected="${workout.intensity == 'low'}">Niska</option>
+      <option value="medium" th:selected="${workout.intensity == 'medium'}">Średnia</option>
+      <option value="high" th:selected="${workout.intensity == 'high'}">Wysoka</option>
+    </select>
+
+    <label>Godzina rozpoczęcia:</label>
+    <input type="time" name="startTime" th:value="${workout.startTime}">
+
+    <label>Godzina zakończenia:</label>
+    <input type="time" name="endTime" th:value="${workout.endTime}">
+
+    <label>Notatki:</label>
+    <textarea name="notes" th:text="${workout.notes}"></textarea>
+
+    <!-- ✅ Ukryte pole przechowujące JSON -->
+    <input type="hidden" id="exercisesJson" th:value="${allExercisesJson}" />
+
+    <h3>Ćwiczenia</h3>
+    <input type="hidden" name="deletedExerciseIds" id="deletedExerciseIds" value="">
+
+    <div id="exercises-container">
+      <div th:each="exercise : ${workout.workoutExercises}" class="exercise-row">
+        <input type="hidden" name="existingExerciseIds" th:value="${exercise.id}" class="existing-exercise-id">
+
+        <!-- ✅ Rozwijana lista z typem ćwiczenia -->
+        <select name="exerciseIds" class="exercise-select" onchange="toggleExerciseFields(this)">
+          <option th:each="ex : ${allExercises}"
+                  th:value="${ex.idExercise}"
+                  th:text="${ex.name}"
+                  th:selected="${ex.idExercise == exercise.exercise.idExercise}"
+                  th:attr="data-type=${ex.type}">
+          </option>
+        </select>
+
+        <!-- ✅ Sekcja dla ćwiczeń siłowych -->
+        <div class="strength-fields" th:style="${exercise.exercise.type.name() == 'STRENGTH' ? 'display: block;' : 'display: none;'}">
+          <input type="number" name="sets" th:value="${exercise.sets}" placeholder="Serie">
+          <input type="number" name="reps" th:value="${exercise.reps}" placeholder="Powtórzenia">
+          <input type="number" name="weight" th:value="${exercise.weight}" placeholder="Ciężar (kg)">
+        </div>
+
+        <!-- 🏃‍♂️ Sekcja dla ćwiczeń Cardio -->
+        <div class="cardio-fields" th:style="${exercise.exercise.type.name() == 'CARDIO' ? 'display: block;' : 'display: none;'}">
+          <input type="text" name="durations" class="duration-input"
+                 th:value="${exercise.duration != null ? exercise.duration : ''}"
+                 placeholder="Czas (hh:mm:ss lub mm:ss)">
+
+          <input type="number" name="distances" th:value="${exercise.distance}" placeholder="Dystans (km)">
+        </div>
+        <button type="button" class="delete-btn" onclick="removeRow(this)">🗑 Usuń</button>
+      </div>
+    </div>
+
+    <button type="button" id="addExerciseBtn">➕ Dodaj ćwiczenie</button>
+    <button type="submit">Zapisz zmiany</button>
+
+  </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let exercisesJson = document.getElementById("exercisesJson").value;
+        let exercises = JSON.parse(exercisesJson);
+
+        document.getElementById("addExerciseBtn").addEventListener("click", function() {
+            addExerciseRow(exercises);
+        });
+
+        document.querySelectorAll(".exercise-select").forEach(select => {
+            select.addEventListener("change", function() {
+                toggleExerciseFields(this);
+            });
+        });
+    });
+
+    function addExerciseRow(exercises) {
+        let container = document.getElementById("exercises-container");
+        let newRow = document.createElement("div");
+        newRow.classList.add("exercise-row");
+
+        let select = document.createElement("select");
+        select.name = "exerciseIds";
+        select.classList.add("exercise-select");
+        select.setAttribute("onchange", "toggleExerciseFields(this)");
+
+        if (exercises.length === 0) {
+            alert("Brak dostępnych ćwiczeń!");
+            return;
+        }
+
+        exercises.forEach(ex => {
+            let option = document.createElement("option");
+            option.value = ex.idExercise;
+            option.textContent = ex.name;
+            option.setAttribute("data-type", ex.type);
+            select.appendChild(option);
+        });
+
+        newRow.appendChild(select);
+
+        // ✅ Pola dla ćwiczeń siłowych
+        let strengthFields = document.createElement("div");
+        strengthFields.classList.add("strength-fields");
+        strengthFields.innerHTML = `
+            <input type="number" name="sets" placeholder="Serie">
+            <input type="number" name="reps" placeholder="Powtórzenia">
+            <input type="number" name="weight" placeholder="Ciężar (kg)">
+        `;
+
+        // ✅ Pola dla ćwiczeń cardio
+        let cardioFields = document.createElement("div");
+        cardioFields.classList.add("cardio-fields");
+        cardioFields.style.display = "none";
+        cardioFields.innerHTML = `
+            <input type="text" name="durations" placeholder="Czas (hh:mm:ss lub mm:ss)">
+            <input type="number" name="distances" placeholder="Dystans (km)">
+        `;
+
+        newRow.appendChild(strengthFields);
+        newRow.appendChild(cardioFields);
+        newRow.innerHTML += `<button type="button" class="delete-btn" onclick="removeRow(this)">🗑 Usuń</button>`;
+
+        container.appendChild(newRow);
+    }
+
+    function toggleExerciseFields(select) {
+        let selectedOption = select.options[select.selectedIndex];
+        let type = selectedOption.getAttribute("data-type");
+        let parent = select.closest(".exercise-row");
+
+        if (type === "CARDIO") {
+            parent.querySelector(".strength-fields").style.display = "none";
+            parent.querySelector(".cardio-fields").style.display = "block";
+        } else {
+            parent.querySelector(".strength-fields").style.display = "block";
+            parent.querySelector(".cardio-fields").style.display = "none";
+        }
+    }
+
+    function removeRow(button) {
+        let row = button.parentNode;
+        let exerciseIdInput = row.querySelector(".existing-exercise-id");
+
+        if (exerciseIdInput) {
+            let deletedExercises = document.getElementById("deletedExerciseIds").value;
+            deletedExercises += (deletedExercises ? "," : "") + exerciseIdInput.value;
+            document.getElementById("deletedExerciseIds").value = deletedExercises;
+        }
+
+        row.remove();
+    }
+
+document.addEventListener("DOMContentLoaded", function() {
+    function formatDuration(seconds) {
+        if (!seconds || isNaN(seconds)) return "";
+
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor((seconds % 3600) / 60);
+        let remainingSeconds = seconds % 60;
+
+        if (hours > 0) {
+            return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        } else {
+            return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+    }
+
+    document.querySelectorAll(".duration-input").forEach(input => {
+        if (input.value) {
+            input.value = formatDuration(parseInt(input.value, 10));
+        }
+    });
+});
+</script>
+
+</body>
+</html>

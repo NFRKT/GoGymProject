@@ -56,6 +56,13 @@
     a:hover {
       color: #0056b3;
     }
+
+    td.planowy {
+  background-color: #ffca28; /* Jasno żółty */
+  font-weight: bold;
+  color: #212529;
+}
+
   </style>
 </head>
 <body>
@@ -68,6 +75,7 @@
       <th>Intensywność</th>
       <th>Godzina Rozpoczęcia</th>
       <th>Godzina Zakończenia</th>
+      <th>Plan Treningowy</th> <!-- Nowa kolumna -->
       <th>Szczegóły</th>
     </tr>
     </thead>
@@ -77,9 +85,11 @@
       <td th:text="${workout.intensity}"></td>
       <td th:text="${workout.startTime}"></td>
       <td th:text="${workout.endTime}"></td>
+      <td th:classappend="${workout.trainingPlanDay != null} ? 'planowy'" th:text="${workout.trainingPlanDay != null ? workout.trainingPlanDay.trainingPlan.name : 'Brak'}"></td>
       <td><a th:href="@{/workouts/{id}(id=${workout.idWorkout})}">Zobacz</a></td>
     </tr>
     </tbody>
+
   </table>
   <li><a href="/home">Home</a></li>
 </div>

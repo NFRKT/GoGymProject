@@ -71,29 +71,29 @@
     .nav-links a:hover {
       text-decoration: underline;
     }
-  </style>
-  <script>
-function formatDuration(durationInSeconds) {
-    if (!durationInSeconds || durationInSeconds === "-") return "-";
-
-    let hours = Math.floor(durationInSeconds / 3600);
-    let minutes = Math.floor((durationInSeconds % 3600) / 60);
-    let seconds = durationInSeconds % 60;
-
-    if (hours > 0) {
-        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    } else {
-        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+        .edit-btn, .delete-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        margin: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 5px;
     }
-}
 
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".duration").forEach(el => {
-        let seconds = parseInt(el.textContent, 10);
-        el.textContent = formatDuration(seconds);
-    });
-});
-  </script>
+    .delete-btn {
+        background-color: #dc3545;
+    }
+
+    .edit-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
@@ -110,7 +110,8 @@ document.addEventListener("DOMContentLoaded", function () {
   </div>
 
   <!-- 💪 Tabela z ćwiczeniami siłowymi -->
-  <div class="exercise-list" th:if="${workout.workoutExercises.?[exercise.type.name() == 'STRENGTH']}">
+  <div class="exercise-list"
+       th:if="${workout.workoutExercises.?[exercise.type.name() == 'STRENGTH'].size() > 0}">
     <h2>Ćwiczenia Siłowe</h2>
     <table>
       <thead>
@@ -133,7 +134,8 @@ document.addEventListener("DOMContentLoaded", function () {
   </div>
 
   <!-- 🏃‍♂️ Tabela z ćwiczeniami cardio -->
-  <div class="exercise-list" th:if="${workout.workoutExercises.?[exercise.type.name() == 'CARDIO']}">
+  <div class="exercise-list"
+       th:if="${workout.workoutExercises.?[exercise.type.name() == 'CARDIO'].size() > 0}">
     <h2>Ćwiczenia Cardio</h2>
     <table>
       <thead>
@@ -153,11 +155,60 @@ document.addEventListener("DOMContentLoaded", function () {
     </table>
   </div>
 
+
   <!-- 🔗 Nawigacja -->
   <div class="nav-links">
     <a href="/home">🏠 Strona Główna</a>
     <a href="/workouts">📋 Lista Treningów</a>
+
+    <!-- Przyciski Edytuj i Usuń -->
+    <button onclick="editWorkout()" class="edit-btn">✏️ Edytuj</button>
+    <button onclick="deleteWorkout()" class="delete-btn">🗑 Usuń</button>
   </div>
 </div>
+<script>
+function formatDuration(durationInSeconds) {
+    if (!durationInSeconds || durationInSeconds === "-") return "-";
+
+    let hours = Math.floor(durationInSeconds / 3600);
+    let minutes = Math.floor((durationInSeconds % 3600) / 60);
+    let seconds = durationInSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    } else {
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".duration").forEach(el => {
+        let seconds = parseInt(el.textContent, 10);
+        el.textContent = formatDuration(seconds);
+    });
+});
+
+function editWorkout() {
+        const workoutId = [[${workout.idWorkout}]];
+        window.location.href = `/workouts/edit/${workoutId}`;
+    }
+
+    function deleteWorkout() {
+        if (confirm("Czy na pewno chcesz usunąć ten trening?")) {
+            const workoutId = [[${workout.idWorkout}]];
+
+            fetch(`/workouts/delete/${workoutId}`, {
+                method: "DELETE"
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Błąd usuwania treningu.");
+                alert("Trening został usunięty.");
+                window.location.href = "/workouts";
+            })
+            .catch(error => console.error("Błąd:", error));
+        }
+    }
+
+  </script>
 </body>
 </html>
