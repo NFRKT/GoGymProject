@@ -1,118 +1,308 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stwórz Plan Treningowy</title>
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
   <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .day-row, .exercise-row {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        label {
-            display: block;
-            margin: 5px 0;
-        }
-        button {
-            margin-top: 10px;
-        }
-    </style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2, h3, h4 {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .btn-remove {
+      background-color: #dc3545;
+      color: white;
+    }
+    .btn-remove:hover {
+      background-color: #c82333;
+    }
+    .day-row, .exercise-row {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    .select-wrapper {
+      display: block;
+      width: 100%;
+    }
+    /* Select2 customizations */
+    .select2-container .select2-selection--single {
+      height: 40px !important;
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .select2-container .select2-selection__rendered {
+      font-size: 16px;
+      padding-left: 12px;
+      line-height: 40px !important;
+    }
+    .select2-container .select2-selection__arrow {
+      height: 100% !important;
+      top: 50% !important;
+      transform: translateY(-50%);
+    }
+    .error input,
+    .error .select2-container .select2-selection {
+      border: 2px solid red !important;
+    }
+    .error-message {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
   <script th:inline="javascript">
-        let exercises = /*[[${exercises}]]*/ [];
+    // Pobieramy listę ćwiczeń z backendu (np. w formie JSON)
+    let exercises = /*[[${exercises}]]*/ [];
 
-        function addDayRow() {
-            const dayIndex = document.querySelectorAll('.day-row').length;
-            const dayRow = `
-                <div class="day-row">
-                    <label>Typ dnia:</label>
-                    <select name="dayType[]" required>
-                        <option value="training">Treningowy</option>
-                        <option value="rest">Odpoczynek</option>
-                    </select>
-                    <label>Notatki (opcjonalne):</label>
-                    <input type="text" name="notes[]" />
-                    <div class="exercise-section">
-                        <h4>Ćwiczenia:</h4>
-                        <button type="button" onclick="addExerciseRow(this, ${dayIndex})">Dodaj ćwiczenie</button>
-                        <div class="exercise-list"></div>
-                    </div>
-                    <button type="button" onclick="removeDayRow(this)">Usuń dzień</button>
-                </div>`;
-            document.getElementById('day-list').insertAdjacentHTML('beforeend', dayRow);
-        }
+    // Funkcja dodająca nowy wiersz dnia do planu
+    function addDayRow() {
+      const dayIndex = document.querySelectorAll('.day-row').length;
+      const dayRow = `
+        <div class="day-row">
+          <label>Typ dnia:</label>
+          <select name="dayType[]" required>
+            <option value="training">Treningowy</option>
+            <option value="rest">Odpoczynek</option>
+          </select>
+          <label>Notatki (opcjonalne):</label>
+          <input type="text" name="notes[]" />
+          <div class="exercise-section">
+            <h4>Ćwiczenia:</h4>
+            <div class="exercise-list"></div>
+            <button type="button" class="addExerciseBtn" data-day-index="${dayIndex}">Dodaj ćwiczenie</button>
+          </div>
+          <button type="button" class="btn-remove" onclick="removeDayRow(this)">Usuń dzień</button>
+        </div>`;
+      document.getElementById('day-list').insertAdjacentHTML('beforeend', dayRow);
+    }
 
-        function removeDayRow(button) {
-            button.parentElement.remove();
-        }
+    // Usunięcie wiersza dnia
+    function removeDayRow(button) {
+      button.parentElement.remove();
+    }
 
-        function addExerciseRow(daySection, dayIndex) {
-            const exerciseRow = `
-                <div class="exercise-row">
-                    <select name="exerciseIds[]" class="exercise-select" required onchange="toggleExerciseInputs(this)">
-                        <option value="" disabled selected>Wybierz ćwiczenie</option>
-                        ${exercises.map(exercise => `<option value="${exercise.idExercise}" data-type="${exercise.type}">${exercise.name}</option>`).join('')}
-                    </select>
+    // Funkcja dodająca nowy wiersz ćwiczenia do dnia
+    function addExerciseRow(button, dayRow) {
+      // Obliczamy indeks dnia, dla którego dodajemy ćwiczenie
+      const dayIndex = Array.from(document.querySelectorAll('.day-row')).indexOf(dayRow);
+      const exerciseRow = `
+        <div class="exercise-row">
+          <div class="select-wrapper">
+            <select name="exerciseIds[]" class="exercise-select" required onchange="toggleExerciseInputs(this)">
+              <option value="" disabled selected>Wybierz ćwiczenie</option>
+              ${exercises.map(exercise => `<option value="${exercise.idExercise}" data-type="${exercise.type}">${exercise.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="strength-fields">
+            <input type="number" name="sets[]" min="1" placeholder="Serie">
+            <input type="number" name="reps[]" min="1" placeholder="Powtórzenia">
+            <input type="number" step="0.1" name="weight[]" min="0" placeholder="Ciężar (kg)">
+          </div>
+          <div class="cardio-fields" style="display: none;">
+            <input type="text" name="duration[]" pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]" placeholder="hh:mm:ss lub mm:ss">
+            <input type="number" step="0.1" name="distance[]" min="0" placeholder="Dystans (km)">
+          </div>
+          <input type="hidden" name="exerciseDays[]" value="${dayIndex}">
+          <button type="button" class="btn-remove" onclick="removeExerciseRow(this)">Usuń</button>
+        </div>`;
+      dayRow.querySelector('.exercise-list').insertAdjacentHTML('beforeend', exerciseRow);
 
-                    <div class="strength-fields">
-                        <input type="number" name="sets[]" min="1" placeholder="Serie">
-                        <input type="number" name="reps[]" min="1" placeholder="Powtórzenia">
-                        <input type="number" step="0.1" name="weight[]" min="0" placeholder="Ciężar (kg)">
-                    </div>
+      // Inicjalizujemy Select2 na nowo dodanym elemencie
+      $(dayRow).find('.exercise-select').last().select2({
+          placeholder: "Wybierz ćwiczenie...",
+          allowClear: true,
+          width: '100%'
+      });
+    }
 
-                    <div class="cardio-fields" style="display: none;">
-                        <input type="text" name="duration[]" pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]" placeholder="hh:mm:ss lub mm:ss">
-                        <input type="number" step="0.1" name="distance[]" min="0" placeholder="Dystans (km)">
-                    </div>
+    // Usunięcie wiersza ćwiczenia
+    function removeExerciseRow(button) {
+      button.parentElement.remove();
+    }
 
-                    <input type="hidden" name="exerciseDays[]" value="${dayIndex}">
-                    <button type="button" onclick="removeExerciseRow(this)">Usuń</button>
-                </div>`;
-            daySection.parentElement.querySelector('.exercise-list').insertAdjacentHTML('beforeend', exerciseRow);
-        }
-
-        function toggleExerciseInputs(selectElement) {
-            const type = selectElement.options[selectElement.selectedIndex].getAttribute("data-type");
-            const row = selectElement.closest(".exercise-row");
-
-            if (type === "CARDIO") {
-                row.querySelector(".strength-fields").style.display = "none";
-                row.querySelector(".cardio-fields").style.display = "block";
-            } else {
-                row.querySelector(".strength-fields").style.display = "block";
-                row.querySelector(".cardio-fields").style.display = "none";
-            }
-        }
-
-        function removeExerciseRow(button) {
-            button.parentElement.remove();
-        }
-    </script>
+    // Funkcja przełączająca widoczność pól w zależności od typu ćwiczenia
+    function toggleExerciseInputs(selectElement) {
+      const type = selectElement.options[selectElement.selectedIndex].getAttribute("data-type");
+      const row = selectElement.closest(".exercise-row");
+      if (type === "CARDIO") {
+        row.querySelector(".strength-fields").style.display = "none";
+        row.querySelector(".cardio-fields").style.display = "block";
+      } else {
+        row.querySelector(".strength-fields").style.display = "block";
+        row.querySelector(".cardio-fields").style.display = "none";
+      }
+    }
+  </script>
 </head>
 <body>
-<form th:action="@{/create-plan}" method="post">
-  <input type="hidden" name="clientId" th:value="${client.idUser}" />
-  <input type="hidden" name="trainerId" th:value="${trainerId}" />
+<div class="container">
+  <h2>Stwórz Plan Treningowy</h2>
+  <form th:action="@{/create-plan}" method="post" id="planForm">
+    <input type="hidden" name="clientId" th:value="${client.idUser}" />
+    <input type="hidden" name="trainerId" th:value="${trainerId}" />
 
-  <label>Nazwa planu:</label>
-  <input type="text" name="name" required />
+    <label>Nazwa planu:</label>
+    <input type="text" name="name" required />
 
-  <label>Data początkowa:</label>
-  <input type="date" name="startDate" required />
+    <label>Data początkowa:</label>
+    <input type="date" name="startDate" required />
 
-  <label>Opis:</label>
-  <textarea name="description" required></textarea>
+    <label>Opis:</label>
+    <textarea name="description" required></textarea>
 
-  <div id="day-list">
-    <h3>Dni w planie:</h3>
-    <button type="button" onclick="addDayRow()">Dodaj dzień</button>
-  </div>
+    <div id="day-list">
+      <h3>Dni w planie:</h3>
+      <!-- Wiersze dni będą dodawane tutaj -->
+    </div>
+    <!-- Przycisk "Dodaj dzień" umieszczony poniżej listy dni -->
+    <button type="button" id="addDayBtn">Dodaj dzień</button>
 
-  <button type="submit">Zapisz Plan</button>
-</form>
+    <button type="submit">Zapisz Plan</button>
+  </form>
+  <div id="formError" class="error-message" style="display:none;"></div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      // Inicjalizacja istniejących Select2 (jeśli jakieś są)
+      function initializeSelect2() {
+          $('.exercise-select').each(function () {
+              if (!$(this).hasClass("select2-hidden-accessible")) {
+                  $(this).select2({
+                      placeholder: "Wybierz ćwiczenie...",
+                      allowClear: true,
+                      width: '100%'
+                  });
+              }
+          });
+      }
+      initializeSelect2();
+
+      // Obsługa kliknięcia "Dodaj dzień"
+      const addDayBtn = document.getElementById("addDayBtn");
+      addDayBtn.addEventListener("click", addDayRow);
+
+      // Delegacja zdarzeń – dla przycisków dodających ćwiczenia (dynamicznie dodawane elementy)
+      document.getElementById('day-list').addEventListener('click', function(e) {
+          if (e.target && e.target.classList.contains('addExerciseBtn')) {
+              const dayRow = e.target.closest('.day-row');
+              addExerciseRow(e.target, dayRow);
+          }
+      });
+
+      // Walidacja formularza przed wysłaniem
+      const planForm = document.getElementById("planForm");
+      planForm.addEventListener("submit", function(e) {
+          let isValid = true;
+
+          // Sprawdzamy, czy plan zawiera przynajmniej jeden dzień
+          const dayRows = document.querySelectorAll('.day-row');
+          if (dayRows.length === 0) {
+              isValid = false;
+              document.getElementById("formError").style.display = "block";
+              document.getElementById("formError").textContent = "Musisz dodać przynajmniej jeden dzień w planie.";
+          } else {
+              // Dla każdego dnia, jeśli jest treningowy, sprawdzamy, czy dodano przynajmniej jedno ćwiczenie
+              dayRows.forEach(function(dayRow) {
+                  const dayType = dayRow.querySelector('select[name="dayType[]"]').value;
+                  if (dayType === "training") {
+                      const exercisesInDay = dayRow.querySelectorAll('.exercise-row');
+                      if (exercisesInDay.length === 0) {
+                          isValid = false;
+                          dayRow.classList.add('error');
+                          document.getElementById("formError").style.display = "block";
+                          document.getElementById("formError").textContent = "Dla dni treningowych musi być dodane przynajmniej jedno ćwiczenie.";
+                      } else {
+                          dayRow.classList.remove('error');
+                      }
+                  }
+              });
+          }
+
+          // Nowa walidacja: plan musi zawierać przynajmniej jedno ćwiczenie (niezależnie od typu dnia)
+          const allExercises = document.querySelectorAll('.exercise-row');
+          if (allExercises.length === 0) {
+              isValid = false;
+              document.getElementById("formError").style.display = "block";
+              document.getElementById("formError").textContent = "Plan musi zawierać przynajmniej jedno ćwiczenie.";
+          }
+
+          // Walidacja pól w każdej linii ćwiczenia (siłowych lub cardio)
+          document.querySelectorAll('.exercise-row').forEach(function(row) {
+              const select = row.querySelector('.exercise-select');
+              const selectedOption = select.options[select.selectedIndex];
+              const type = selectedOption ? selectedOption.getAttribute('data-type') : null;
+              if (type === "CARDIO") {
+                  const durationInput = row.querySelector('input[name="duration[]"]');
+                  const distanceInput = row.querySelector('input[name="distance[]"]');
+                  if (!durationInput.value.trim() || !distanceInput.value.trim()) {
+                      isValid = false;
+                      row.classList.add('error');
+                  } else {
+                      row.classList.remove('error');
+                  }
+              } else { // Ćwiczenie siłowe
+                  const setsInput = row.querySelector('input[name="sets[]"]');
+                  const repsInput = row.querySelector('input[name="reps[]"]');
+                  if (!setsInput.value.trim() || !repsInput.value.trim()) {
+                      isValid = false;
+                      row.classList.add('error');
+                  } else {
+                      row.classList.remove('error');
+                  }
+              }
+          });
+
+          if (!isValid) {
+              e.preventDefault();
+          }
+      });
+    });
+  </script>
 </body>
 </html>

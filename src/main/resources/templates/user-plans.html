@@ -256,12 +256,12 @@
                                 <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
                             </p>
 
-                            <!-- Przyciski zmiany statusu dla dni odpoczynku -->
-                            <div th:if="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).rest}">
+                            <!-- Przyciski zmiany statusu dla dni odpoczynku, tylko gdy nie ma żadnych ćwiczeń -->
+                            <div th:if="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).rest and #lists.isEmpty(day.exercises)}">
                                 <button class="toggle-rest-day-status" th:data-day-id="${day.idDay}"
-                                        th:text="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed
-                ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}"></button>
+                                        th:text="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}"></button>
                             </div>
+
 
 
                             <ul>
@@ -884,10 +884,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("workoutModal").style.display = "none";
     }
 });
-
-
-
     </script>
-
     </body>
     </html>
