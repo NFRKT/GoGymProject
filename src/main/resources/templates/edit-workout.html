@@ -42,7 +42,49 @@
         .delete-btn:hover {
             background-color: #c82333;
         }
+
+/* Naprawia wysokość pola wyboru */
+.select2-container .select2-selection--single {
+    height: 40px !important; /* Dopasowuje wysokość */
+    display: flex;
+    align-items: center; /* Wyrównuje tekst */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Zapewnia odpowiednie wyświetlanie tekstu */
+.select2-container .select2-selection__rendered {
+    font-size: 16px; /* Dopasowuje rozmiar tekstu */
+    padding-left: 12px; /* Zapobiega przycinaniu */
+    line-height: 40px !important; /* Ustawia wysokość linii */
+}
+
+/* Strzałka rozwijania listy */
+.select2-container .select2-selection__arrow {
+    height: 100% !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+}
+
+/* Poprawia szerokość i wysokość listy rozwijanej */
+.select2-dropdown {
+    font-size: 16px; /* Dopasowuje wielkość tekstu */
+    border-radius: 5px;
+}
+.error .select2-container .select2-selection {
+    border: 2px solid red !important;
+}
+
+.error input {
+    border: 2px solid red !important;
+}
+
+
+
     </style>
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
+
 </head>
 <body>
 <div class="container">
@@ -61,10 +103,10 @@
     </select>
 
     <label>Godzina rozpoczęcia:</label>
-    <input type="time" name="startTime" th:value="${workout.startTime}">
+    <input type="time" name="startTime" th:value="${workout.startTime}" required>
 
     <label>Godzina zakończenia:</label>
-    <input type="time" name="endTime" th:value="${workout.endTime}">
+    <input type="time" name="endTime" th:value="${workout.endTime}" required>
 
     <label>Notatki:</label>
     <textarea name="notes" th:text="${workout.notes}"></textarea>
@@ -79,15 +121,18 @@
       <div th:each="exercise : ${workout.workoutExercises}" class="exercise-row">
         <input type="hidden" name="existingExerciseIds" th:value="${exercise.id}" class="existing-exercise-id">
 
-        <!-- ✅ Rozwijana lista z typem ćwiczenia -->
-        <select name="exerciseIds" class="exercise-select" onchange="toggleExerciseFields(this)">
-          <option th:each="ex : ${allExercises}"
-                  th:value="${ex.idExercise}"
-                  th:text="${ex.name}"
-                  th:selected="${ex.idExercise == exercise.exercise.idExercise}"
-                  th:attr="data-type=${ex.type}">
-          </option>
-        </select>
+        <div class="exercise-search-container">
+
+          <select name="exerciseIds" class="exercise-select" onchange="toggleExerciseFields(this)">
+            <option th:each="ex : ${allExercises}"
+                    th:value="${ex.idExercise}"
+                    th:text="${ex.name}"
+                    th:selected="${ex.idExercise == exercise.exercise.idExercise}"
+                    th:attr="data-type=${ex.type}">
+            </option>
+          </select>
+
+        </div>
 
         <!-- ✅ Sekcja dla ćwiczeń siłowych -->
         <div class="strength-fields" th:style="${exercise.exercise.type.name() == 'STRENGTH' ? 'display: block;' : 'display: none;'}">
@@ -113,100 +158,64 @@
 
   </form>
 </div>
+<!-- jQuery (wymagany przez Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let exercisesJson = document.getElementById("exercisesJson").value;
-        let exercises = JSON.parse(exercisesJson);
+document.addEventListener("DOMContentLoaded", function() {
+    // ✅ Sprawdź, czy jQuery działa
+    if (typeof jQuery === "undefined") {
+        console.error("jQuery nie jest załadowany! Sprawdź kolejność skryptów.");
+        return;
+    }
 
-        document.getElementById("addExerciseBtn").addEventListener("click", function() {
-            addExerciseRow(exercises);
-        });
-
-        document.querySelectorAll(".exercise-select").forEach(select => {
-            select.addEventListener("change", function() {
-                toggleExerciseFields(this);
-            });
-        });
+    // ✅ Inicjalizacja Select2 dla istniejących <select>
+    $('.exercise-select').select2({
+        placeholder: "Wybierz ćwiczenie...",
+        allowClear: true
     });
 
-    function addExerciseRow(exercises) {
-        let container = document.getElementById("exercises-container");
-        let newRow = document.createElement("div");
-        newRow.classList.add("exercise-row");
 
-        let select = document.createElement("select");
-        select.name = "exerciseIds";
-        select.classList.add("exercise-select");
-        select.setAttribute("onchange", "toggleExerciseFields(this)");
 
-        if (exercises.length === 0) {
-            alert("Brak dostępnych ćwiczeń!");
-            return;
-        }
+    // ✅ Obsługa zmiany ćwiczenia (przełączanie między cardio i siłowymi)
+    $(document).on("change", ".exercise-select", function() {
+        toggleExerciseFields(this);
+    });
+});
 
-        exercises.forEach(ex => {
-            let option = document.createElement("option");
-            option.value = ex.idExercise;
-            option.textContent = ex.name;
-            option.setAttribute("data-type", ex.type);
-            select.appendChild(option);
-        });
+// ✅ Przełączanie widoczności pól (siłowe/cardio)
+function toggleExerciseFields(select) {
+    let selectedOption = select.options[select.selectedIndex];
+    let type = selectedOption.getAttribute("data-type");
+    let parent = select.closest(".exercise-row");
 
-        newRow.appendChild(select);
+    if (type === "CARDIO") {
+        parent.querySelector(".strength-fields").style.display = "none";
+        parent.querySelector(".cardio-fields").style.display = "block";
+    } else {
+        parent.querySelector(".strength-fields").style.display = "block";
+        parent.querySelector(".cardio-fields").style.display = "none";
+    }
+}
 
-        // ✅ Pola dla ćwiczeń siłowych
-        let strengthFields = document.createElement("div");
-        strengthFields.classList.add("strength-fields");
-        strengthFields.innerHTML = `
-            <input type="number" name="sets" placeholder="Serie">
-            <input type="number" name="reps" placeholder="Powtórzenia">
-            <input type="number" name="weight" placeholder="Ciężar (kg)">
-        `;
+// ✅ Usuwanie ćwiczenia
+function removeRow(button) {
+    let row = button.parentNode;
+    let exerciseIdInput = row.querySelector(".existing-exercise-id");
 
-        // ✅ Pola dla ćwiczeń cardio
-        let cardioFields = document.createElement("div");
-        cardioFields.classList.add("cardio-fields");
-        cardioFields.style.display = "none";
-        cardioFields.innerHTML = `
-            <input type="text" name="durations" placeholder="Czas (hh:mm:ss lub mm:ss)">
-            <input type="number" name="distances" placeholder="Dystans (km)">
-        `;
-
-        newRow.appendChild(strengthFields);
-        newRow.appendChild(cardioFields);
-        newRow.innerHTML += `<button type="button" class="delete-btn" onclick="removeRow(this)">🗑 Usuń</button>`;
-
-        container.appendChild(newRow);
+    if (exerciseIdInput) {
+        let deletedExercises = document.getElementById("deletedExerciseIds").value;
+        deletedExercises += (deletedExercises ? "," : "") + exerciseIdInput.value;
+        document.getElementById("deletedExerciseIds").value = deletedExercises;
     }
 
-    function toggleExerciseFields(select) {
-        let selectedOption = select.options[select.selectedIndex];
-        let type = selectedOption.getAttribute("data-type");
-        let parent = select.closest(".exercise-row");
+    row.remove();
+}
 
-        if (type === "CARDIO") {
-            parent.querySelector(".strength-fields").style.display = "none";
-            parent.querySelector(".cardio-fields").style.display = "block";
-        } else {
-            parent.querySelector(".strength-fields").style.display = "block";
-            parent.querySelector(".cardio-fields").style.display = "none";
-        }
-    }
-
-    function removeRow(button) {
-        let row = button.parentNode;
-        let exerciseIdInput = row.querySelector(".existing-exercise-id");
-
-        if (exerciseIdInput) {
-            let deletedExercises = document.getElementById("deletedExerciseIds").value;
-            deletedExercises += (deletedExercises ? "," : "") + exerciseIdInput.value;
-            document.getElementById("deletedExerciseIds").value = deletedExercises;
-        }
-
-        row.remove();
-    }
-
+// ✅ Formatowanie czasu dla ćwiczeń cardio
 document.addEventListener("DOMContentLoaded", function() {
     function formatDuration(seconds) {
         if (!seconds || isNaN(seconds)) return "";
@@ -228,7 +237,103 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
-</script>
+document.addEventListener("DOMContentLoaded", function() {
+    // ✅ Inicjalizacja Select2 dla istniejących pól
+    $('.exercise-select').select2({
+        placeholder: "Wybierz ćwiczenie...",
+        allowClear: true
+    });
 
+    // ✅ Upewniamy się, że event listener dla przycisku "Dodaj ćwiczenie" jest dodany tylko raz
+    let addExerciseButton = document.getElementById("addExerciseBtn");
+    if (!addExerciseButton.dataset.listenerAdded) {
+        addExerciseButton.addEventListener("click", function() {
+            addExerciseRow();
+        });
+        addExerciseButton.dataset.listenerAdded = "true"; // Zapobiega wielokrotnemu dodaniu eventu
+    }
+
+    // ✅ Obsługa zmiany ćwiczenia (przełączanie między cardio i siłowymi)
+    $(document).on("change", ".exercise-select", function() {
+        toggleExerciseFields(this);
+    });
+});
+
+// ✅ Dodawanie nowego wiersza ćwiczenia
+function addExerciseRow() {
+    let container = document.getElementById("exercises-container");
+    let newRow = document.createElement("div");
+    newRow.classList.add("exercise-row");
+
+    // Tworzymy nową listę rozwijaną
+    let select = document.createElement("select");
+    select.name = "exerciseIds";
+    select.classList.add("exercise-select");
+    select.setAttribute("onchange", "toggleExerciseFields(this)");
+
+    // Dodajemy opcję domyślną "Wybierz ćwiczenie"
+    let defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Wybierz ćwiczenie...";
+    defaultOption.setAttribute("selected", "selected");
+    defaultOption.setAttribute("disabled", "disabled");
+    select.appendChild(defaultOption);
+
+    // Pobieramy listę dostępnych ćwiczeń z pierwszego istniejącego selecta
+    let existingSelect = document.querySelector(".exercise-select");
+    if (existingSelect) {
+        existingSelect.querySelectorAll("option").forEach(option => {
+            let newOption = document.createElement("option");
+            newOption.value = option.value;
+            newOption.textContent = option.textContent;
+            newOption.setAttribute("data-type", option.getAttribute("data-type"));
+            select.appendChild(newOption);
+        });
+    }
+
+    // Tworzymy resztę formularza
+    newRow.innerHTML = `
+        <div class="exercise-search-container"></div>
+        <div class="strength-fields" style="display:none;">
+            <input type="number" name="sets" placeholder="Serie">
+            <input type="number" name="reps" placeholder="Powtórzenia">
+            <input type="number" name="weight" placeholder="Ciężar (kg)">
+        </div>
+        <div class="cardio-fields" style="display:none;">
+            <input type="text" name="durations" placeholder="Czas (hh:mm:ss lub mm:ss)">
+            <input type="number" name="distances" placeholder="Dystans (km)">
+        </div>
+        <button type="button" class="delete-btn" onclick="removeRow(this)">🗑 Usuń</button>
+    `;
+
+    // Wstawiamy nowy select na początek exercise-search-container
+    newRow.querySelector(".exercise-search-container").appendChild(select);
+
+    // Dodajemy wiersz do kontenera
+    container.appendChild(newRow);
+
+    // ✅ Aktywacja Select2 dla nowego elementu
+    $(select).select2({
+        placeholder: "Wybierz ćwiczenie...",
+        allowClear: true
+    });
+}
+
+
+// ✅ Funkcja dodająca komunikaty błędów
+function showError(element, message) {
+    let parent = element.closest(".exercise-row") || element.parentElement;
+    parent.classList.add("error");
+
+    let errorMessage = document.createElement("div");
+    errorMessage.classList.add("error-message");
+    errorMessage.style.color = "red";
+    errorMessage.style.marginTop = "5px";
+    errorMessage.innerText = message;
+
+    parent.appendChild(errorMessage);
+}
+
+</script>
 </body>
 </html>
