@@ -52,9 +52,13 @@ public class TrainingService {
         TrainingPlan trainingPlan = trainingPlanRepository.findById(trainingId)
                 .orElseThrow(TrainingNotFoundException::new);
 
-        boolean planWasCompleted = trainingPlan.getStatus() == TrainingPlan.Status.completed; // 🔥 Czy plan był ukończony?
+        // Dodaj aktualizację nazwy i opisu planu
+        trainingPlan.setName(dto.getName());
+        trainingPlan.setDescription(dto.getDescription());
 
-        // 🔴 1. Usuwanie dni oznaczonych do usunięcia
+        boolean planWasCompleted = trainingPlan.getStatus() == TrainingPlan.Status.completed; // Czy plan był ukończony?
+
+        // 1. Usuwanie dni oznaczonych do usunięcia
         List<Long> daysToDelete = dto.getTrainingPlanDays().stream()
                 .filter(TrainingPlanDayDTO::isDelete)
                 .map(TrainingPlanDayDTO::getIdDay)
@@ -67,18 +71,18 @@ public class TrainingService {
             log.info("✅ Dzień treningowy ID: " + dayId + " usunięty");
         }
 
-        // 🔄 2. Pobranie i aktualizacja pozostałych dni
+        // 2. Pobranie i aktualizacja pozostałych dni
         List<TrainingPlanDay> updatedDays = trainingPlanDayRepository.findByTrainingPlanOrderByDate(trainingPlan);
 
         LocalDate startDate = updatedDays.isEmpty() ? LocalDate.now() : updatedDays.get(0).getDate();
         for (int i = 0; i < updatedDays.size(); i++) {
-            updatedDays.get(i).setDate(startDate.plusDays(i)); // 🔥 Aktualizacja daty na podstawie kolejności
+            updatedDays.get(i).setDate(startDate.plusDays(i)); // Aktualizacja daty na podstawie kolejności
         }
-        trainingPlanDayRepository.saveAll(updatedDays); // Zapis aktualizacji dat
+        trainingPlanDayRepository.saveAll(updatedDays);
 
-        boolean addedNewDay = false; // 🔥 Czy dodaliśmy nowy dzień?
+        boolean addedNewDay = false;
 
-        // 🔹 3. Przetwarzanie dni planu (nowe + istniejące)
+        // 3. Przetwarzanie dni planu (nowe + istniejące)
         for (TrainingPlanDayDTO dayDTO : dto.getTrainingPlanDays()) {
             if (dayDTO.isDelete()) continue; // Pomiń usunięte dni
 
@@ -86,17 +90,17 @@ public class TrainingService {
             boolean isNewDay = false;
 
             if (dayDTO.getIdDay() != null) {
-                // 🔹 Aktualizacja istniejącego dnia
+                // Aktualizacja istniejącego dnia
                 day = trainingPlanDayRepository.findById(dayDTO.getIdDay())
                         .orElseThrow(() -> new RuntimeException("Nie znaleziono dnia treningowego"));
             } else {
-                // 🔥 Tworzenie nowego dnia
-                LocalDate newDayDate = startDate.plusDays(updatedDays.size()); // Kolejna dostępna data
+                // Tworzenie nowego dnia
+                LocalDate newDayDate = startDate.plusDays(updatedDays.size());
                 day = new TrainingPlanDay();
                 day.setTrainingPlan(trainingPlan);
                 day.setDate(newDayDate);
                 day.setStatus(TrainingPlanDay.Status.notCompleted);
-                day.setExercises(new ArrayList<>()); // ✅ Ustawienie pustej listy ćwiczeń
+                day.setExercises(new ArrayList<>());
                 updatedDays.add(day);
                 addedNewDay = true;
                 isNewDay = true;
@@ -107,10 +111,10 @@ public class TrainingService {
 
             trainingPlanDayRepository.save(day);
 
-            boolean addedNewExercise = false; // 🔥 Czy dodano nowe ćwiczenie?
+            boolean addedNewExercise = false;
 
-            // 🔹 4. Aktualizacja ćwiczeń dla dnia
-            if (dayDTO.getExercises() != null) { // ✅ Sprawdzamy, czy lista ćwiczeń istnieje
+            // 4. Aktualizacja ćwiczeń dla dnia
+            if (dayDTO.getExercises() != null) {
                 for (ExerciseDTO exerciseDTO : dayDTO.getExercises()) {
                     if (exerciseDTO.getIdPlanExercise() != null && exerciseDTO.isDelete()) {
                         planExerciseRepository.deleteById(exerciseDTO.getIdPlanExercise());
@@ -122,7 +126,7 @@ public class TrainingService {
                             : null;
 
                     if (existingExercise != null) {
-                        // 🔹 Aktualizacja ćwiczenia
+                        // Aktualizacja ćwiczenia
                         Exercise newExercise = exerciseRepository.findById(exerciseDTO.getIdExercise())
                                 .orElseThrow(() -> new RuntimeException("Ćwiczenie nie istnieje"));
                         existingExercise.setExercise(newExercise);
@@ -133,7 +137,7 @@ public class TrainingService {
                         existingExercise.setDistance(exerciseDTO.getDistance());
                         planExerciseRepository.save(existingExercise);
                     } else {
-                        // 🔥 Dodanie nowego ćwiczenia
+                        // Dodanie nowego ćwiczenia
                         Exercise exercise = exerciseRepository.findById(exerciseDTO.getIdExercise())
                                 .orElseThrow(() -> new RuntimeException("Ćwiczenie nie istnieje"));
                         PlanExercise newExercise = PlanExercise.toPlanExercise(exerciseDTO, trainingPlan, day, exercise);
@@ -144,7 +148,7 @@ public class TrainingService {
                 }
             }
 
-            // 🔥 Jeśli dodano nowe ćwiczenie do istniejącego dnia → ustaw status na `notCompleted`
+            // Jeśli dodano nowe ćwiczenie do istniejącego dnia → ustaw status na `notCompleted`
             if (addedNewExercise && !isNewDay) {
                 day.setStatus(TrainingPlanDay.Status.notCompleted);
                 trainingPlanDayRepository.save(day);
@@ -153,7 +157,7 @@ public class TrainingService {
 
         updatePlanEndDate(trainingPlan);
 
-        // 🔥 Jeśli plan był ukończony, ale dodano nowy dzień lub ćwiczenie → ustaw status na `active`
+        // Jeśli plan był ukończony, ale dodano nowy dzień lub ćwiczenie → ustaw status na `active`
         if (planWasCompleted && (addedNewDay || updatedDays.stream().anyMatch(day -> day.getStatus() == TrainingPlanDay.Status.notCompleted))) {
             trainingPlan.setStatus(TrainingPlan.Status.active);
             trainingPlanRepository.save(trainingPlan);
@@ -161,6 +165,7 @@ public class TrainingService {
 
         return trainingPlan;
     }
+
 
 
 

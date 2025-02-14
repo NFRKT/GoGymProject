@@ -1,233 +1,299 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stwórz Workout</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(to bottom, #007bff, #6610f2);
-      margin: 0;
-      color: #fff;
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
       padding: 20px;
     }
-
-    h1 {
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
       text-align: center;
-      color: #fff;
-      font-weight: 700;
       margin-bottom: 20px;
-      text-transform: uppercase;
     }
-
-    form {
-      background: #fff;
-      color: #333;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      max-width: 700px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    label {
-      font-weight: 500;
-      margin-bottom: 5px;
-    }
-
     input, select, textarea {
-      padding: 10px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
       width: 100%;
-      transition: border-color 0.3s;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: #007bff;
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-    }
-
     button {
-      background-color: #007bff;
-      color: #fff;
-      padding: 12px 20px;
+      background-color: #28a745;
+      color: white;
+      padding: 10px 15px;
       border: none;
-      border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
-      transition: background-color 0.3s;
-      align-self: center;
-      text-transform: uppercase;
+      font-weight: bold;
+      border-radius: 5px;
     }
-
     button:hover {
-      background-color: #0056b3;
+      background-color: #218838;
     }
-
     .btn-remove {
       background-color: #dc3545;
       margin-top: 10px;
     }
-
     .btn-remove:hover {
       background-color: #c82333;
     }
-
-    #exercise-list {
-      margin-top: 15px;
+    /* Wrapper, aby select wypełniał szerokość formularza */
+    .select-wrapper {
+      display: block;
+      width: 100%;
     }
-
+    /* Opcjonalny odstęp między wierszami ćwiczeń */
     .exercise-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr auto;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
-
+    /* Select2 customizations */
+    .select2-container .select2-selection--single {
+      height: 40px !important;
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .select2-container .select2-selection__rendered {
+      font-size: 16px;
+      padding-left: 12px;
+      line-height: 40px !important;
+    }
+    .select2-container .select2-selection__arrow {
+      height: 100% !important;
+      top: 50% !important;
+      transform: translateY(-50%);
+    }
+    .select2-dropdown {
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    .error .select2-container .select2-selection,
+    .error input {
+      border: 2px solid red !important;
+    }
+    /* Styl dla komunikatów błędów */
     .error-message {
       color: red;
-      font-weight: bold;
       text-align: center;
       margin-top: 10px;
-    }
-
-    @media (max-width: 768px) {
-      .exercise-row {
-        grid-template-columns: 1fr;
-      }
-
-      form {
-        padding: 15px;
-      }
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .header img {
-      width: 60px;
-      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-<div class="header">
-  <img src="logo.png" alt="Logo">
-  <h1>Stwórz Workout</h1>
+<div class="container">
+  <h2>Stwórz Workout</h2>
+  <form th:action="@{/workouts/create}" th:object="${workout}" method="post">
+    <label for="workoutDate">Data:</label>
+    <input type="date" id="workoutDate" th:field="*{workoutDate}" required>
+
+    <label for="intensity">Intensywność:</label>
+    <select id="intensity" th:field="*{intensity}" required>
+      <option value="low">Niska</option>
+      <option value="medium">Średnia</option>
+      <option value="high">Wysoka</option>
+    </select>
+
+    <label for="notes">Notatki:</label>
+    <textarea id="notes" th:field="*{notes}" placeholder="Dodaj notatki..."></textarea>
+
+    <label for="start_time">Godzina rozpoczęcia:</label>
+    <input type="time" id="start_time" th:field="*{startTime}" required>
+
+    <label for="end_time">Godzina zakończenia:</label>
+    <input type="time" id="end_time" th:field="*{endTime}" required>
+
+    <h3>Dodaj ćwiczenia do treningu:</h3>
+    <button type="button" id="addExerciseBtn">➕ Dodaj ćwiczenie</button>
+    <div id="exercise-list"></div>
+
+    <button type="submit">Stwórz trening</button>
+  </form>
+
+  <div th:if="${error}" class="error-message">
+    <p th:text="${error}"></p>
+  </div>
 </div>
-<form th:action="@{/workouts/create}" th:object="${workout}" method="post">
-  <label for="workoutDate">Data:</label>
-  <input type="date" id="workoutDate" th:field="*{workoutDate}" required>
 
-  <label for="intensity">Intensywność:</label>
-  <select id="intensity" th:field="*{intensity}" required>
-    <option value="low">Niska</option>
-    <option value="medium">Średnia</option>
-    <option value="high">Wysoka</option>
-  </select>
-
-  <label for="notes">Notatki:</label>
-  <textarea id="notes" th:field="*{notes}" placeholder="Dodaj notatki..."></textarea>
-
-  <label for="start_time">Godzina rozpoczęcia:</label>
-  <input type="time" id="start_time" th:field="*{startTime}">
-
-  <label for="end_time">Godzina zakończenia:</label>
-  <input type="time" id="end_time" th:field="*{endTime}">
-
-  <h3>Dodaj ćwiczenia do treningu:</h3>
-  <button type="button" onclick="addExerciseRow()">Dodaj ćwiczenie</button>
-  <div id="exercise-list"></div>
-
-  <button type="submit">Stwórz trening</button>
-</form>
-
-<div th:if="${error}" class="error-message">
-  <p th:text="${error}"></p>
-</div>
-
+<!-- jQuery (wymagany przez Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script th:inline="javascript">
-document.addEventListener("DOMContentLoaded", function () {
-    var exercises = /*[[${exercises}]]*/ [];
+    document.addEventListener("DOMContentLoaded", function () {
+      const exercises = /*[[${exercises}]]*/ [];
 
-    function addExerciseRow() {
-        const exerciseRow = document.createElement("div");
-        exerciseRow.classList.add("exercise-row");
+      const addExerciseButton = document.getElementById("addExerciseBtn");
+      if (addExerciseButton) {
+          addExerciseButton.addEventListener("click", addExerciseRow);
+      }
 
-        let selectHtml = `
-            <select name="exerciseIds[]" class="exercise-select" required>
-                <option value="" disabled selected>Wybierz ćwiczenie</option>
-                ${exercises.map(ex =>
-                    `<option value="${ex.idExercise}" data-type="${ex.type ? ex.type : 'STRENGTH'}">${ex.name}</option>`
-                ).join('')}
-            </select>`;
+      function addExerciseRow() {
+          const container = document.getElementById("exercise-list");
+          if (!container) {
+              console.error("Błąd: Nie znaleziono kontenera exercise-list");
+              return;
+          }
 
+          const newRow = document.createElement("div");
+          newRow.classList.add("exercise-row");
 
-        let strengthFields = `
-            <div class="strength-fields">
-                <input type="number" name="sets[]" min="1" placeholder="Serie">
-                <input type="number" name="reps[]" min="1" placeholder="Powtórzenia">
-                <input type="number" step="0.1" name="weight[]" min="0" placeholder="Ciężar (kg)">
-            </div>`;
+          const selectWrapper = document.createElement("div");
+          selectWrapper.classList.add("select-wrapper");
 
-        let cardioFields = `
-<div class="cardio-fields" style="display: none;">
-    <input type="text" name="durations[]" pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]" placeholder="Czas (hh:mm:ss lub mm:ss)">
-    <input type="number" name="distances[]" step="0.1" min="0" placeholder="Dystans (km)">
-</div>
-`;
+          const select = document.createElement("select");
+          select.name = "exerciseIds[]";
+          select.classList.add("exercise-select");
+          select.required = true;
+          select.style.display = "none"; // Ukrycie domyślnego selecta – Select2 wygeneruje własny
 
-        let removeButton = `<button type="button" class="btn-remove" onclick="removeExerciseRow(this)">Usuń</button>`;
+          const defaultOption = document.createElement("option");
+          defaultOption.value = "";
+          defaultOption.textContent = "Wybierz ćwiczenie...";
+          defaultOption.selected = true;
+          defaultOption.disabled = true;
+          select.appendChild(defaultOption);
 
-        exerciseRow.innerHTML = selectHtml + strengthFields + cardioFields + removeButton;
-        document.getElementById('exercise-list').appendChild(exerciseRow);
+          exercises.forEach(ex => {
+              const option = document.createElement("option");
+              option.value = ex.idExercise;
+              option.textContent = ex.name;
+              option.setAttribute("data-type", ex.type);
+              select.appendChild(option);
+          });
 
-        // Obsługa zmiany typu ćwiczenia
-        exerciseRow.querySelector(".exercise-select").addEventListener("change", function () {
-            const type = this.options[this.selectedIndex].getAttribute("data-type");
-            const parent = this.closest(".exercise-row");
+          const strengthFields = document.createElement("div");
+          strengthFields.classList.add("strength-fields");
+          strengthFields.innerHTML = `
+              <input type="number" name="sets[]" min="1" placeholder="Serie">
+              <input type="number" name="reps[]" min="1" placeholder="Powtórzenia">
+              <input type="number" step="0.1" name="weight[]" min="0" placeholder="Ciężar (kg)">
+          `;
 
-            if (type === "CARDIO") {
-                parent.querySelector(".strength-fields").style.display = "none";
-                parent.querySelector(".cardio-fields").style.display = "block";
-            } else {
-                parent.querySelector(".strength-fields").style.display = "block";
-                parent.querySelector(".cardio-fields").style.display = "none";
-            }
-        });
-    }
+          const cardioFields = document.createElement("div");
+          cardioFields.classList.add("cardio-fields");
+          cardioFields.style.display = "none";
+          cardioFields.innerHTML = `
+              <input type="text" name="durations[]" placeholder="Czas (hh:mm:ss)">
+              <input type="number" name="distances[]" step="0.1" min="0" placeholder="Dystans (km)">
+          `;
+
+          const removeButton = document.createElement("button");
+          removeButton.type = "button";
+          removeButton.classList.add("btn-remove");
+          removeButton.textContent = "Usuń";
+          removeButton.addEventListener("click", function () {
+              removeExerciseRow(removeButton);
+          });
+
+          selectWrapper.appendChild(select);
+          newRow.appendChild(selectWrapper);
+          newRow.appendChild(strengthFields);
+          newRow.appendChild(cardioFields);
+          newRow.appendChild(removeButton);
+          container.appendChild(newRow);
+
+          // Jeśli instancja Select2 już istnieje, usuń ją przed ponowną inicjalizacją
+          if ($(select).hasClass("select2-hidden-accessible")) {
+              $(select).select2('destroy');
+          }
+
+          $(select).select2({
+              placeholder: "Wybierz ćwiczenie...",
+              allowClear: true,
+              width: '100%'
+          });
+      }
+
+      $(document).on("change", ".exercise-select", function () {
+          const selectedOption = $(this).find(":selected");
+          const type = selectedOption.attr("data-type");
+          const parent = $(this).closest(".exercise-row");
+
+          if (type === "CARDIO") {
+              parent.find(".strength-fields").hide();
+              parent.find(".cardio-fields").show();
+          } else {
+              parent.find(".strength-fields").show();
+              parent.find(".cardio-fields").hide();
+          }
+      });
+
+      function initializeSelect2() {
+          $(".exercise-select").each(function () {
+              if (!$(this).hasClass("select2-hidden-accessible")) {
+                  $(this).select2({
+                      placeholder: "Wybierz ćwiczenie...",
+                      allowClear: true,
+                      width: '100%'
+                  });
+              }
+          });
+      }
+
+      // Inicjalizacja istniejących selectów
+      initializeSelect2();
+
+      // Walidacja formularza przy wysyłce
+      const form = document.querySelector('form');
+      if (form) {
+          form.addEventListener('submit', function(e) {
+              let isValid = true;
+              document.querySelectorAll('.exercise-row').forEach(function(row) {
+                  const select = row.querySelector('.exercise-select');
+                  const selectedOption = select.options[select.selectedIndex];
+                  const type = selectedOption ? selectedOption.getAttribute('data-type') : null;
+
+                  if (type === "CARDIO") {
+                      const durationInput = row.querySelector('input[name="durations[]"]');
+                      const distanceInput = row.querySelector('input[name="distances[]"]');
+                      if (!durationInput.value.trim() || !distanceInput.value.trim()) {
+                          isValid = false;
+                          row.classList.add('error');
+                      } else {
+                          row.classList.remove('error');
+                      }
+                  } else { // Ćwiczenie siłowe
+                      const setsInput = row.querySelector('input[name="sets[]"]');
+                      const repsInput = row.querySelector('input[name="reps[]"]');
+                      if (!setsInput.value.trim() || !repsInput.value.trim()) {
+                          isValid = false;
+                          row.classList.add('error');
+                      } else {
+                          row.classList.remove('error');
+                      }
+                  }
+              });
+              if (!isValid) {
+                  e.preventDefault();
+                  alert("Proszę uzupełnić wszystkie wymagane pola: dla ćwiczeń siłowych (serie, powtórzenia) oraz cardio (czas, dystans).");
+              }
+          });
+      }
+    });
 
     function removeExerciseRow(button) {
-        button.parentElement.remove();
+      const row = button.closest(".exercise-row");
+      if (row) {
+          row.remove();
+      } else {
+          console.error("Błąd: Nie znaleziono wiersza ćwiczenia do usunięcia");
+      }
     }
-
-    window.addExerciseRow = addExerciseRow;
-    window.removeExerciseRow = removeExerciseRow;
-});
-
-function convertDurationToSeconds(duration) {
-    let parts = duration.split(":").map(n => parseInt(n, 10));
-    if (parts.length === 2) {
-        return (parts[0] * 60 + parts[1]).toString();
-    } else if (parts.length === 3) {
-        return (parts[0] * 3600 + parts[1] * 60 + parts[2]).toString();
-    }
-    return "0";
-}
-
-</script>
+  </script>
 </body>
 </html>
