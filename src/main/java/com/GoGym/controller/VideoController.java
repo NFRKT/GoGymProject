@@ -54,7 +54,8 @@ public class VideoController {
         exercise.setVideoUrl(link);
         planExerciseRepository.save(exercise);
 
-        return ResponseEntity.ok("Link do wideo został dodany.");
+        // Zwracamy sam link, dzięki czemu front-end może go użyć jako adres URL
+        return ResponseEntity.ok(link);
     }
 
     @DeleteMapping("/delete/{exerciseId}")
