@@ -7,21 +7,17 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Configuration
-@EnableWebSocketMessageBroker
+@EnableWebSocketMessageBroker  // ✅ Aktywacja WebSocket STOMP
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Broker wysyła wiadomości do /topic i /queue, a wiadomości od klienta mają prefiks /app
-        config.enableSimpleBroker("/topic", "/queue");
-        config.setApplicationDestinationPrefixes("/app");
-        // Używane do wysyłania wiadomości do konkretnego użytkownika
-        config.setUserDestinationPrefix("/user");
+        config.enableSimpleBroker("/topic");  // ✅ Wiadomości będą na "/topic/chat/{chatRoomId}"
+        config.setApplicationDestinationPrefixes("/app");  // ✅ Klient wysyła na "/app/chat/{chatRoomId}"
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Endpoint dla połączenia, z fallbackiem SockJS
-        registry.addEndpoint("/ws").withSockJS();
+        registry.addEndpoint("/ws").withSockJS();  // ✅ Punkt WebSocket dla klientów
     }
 }

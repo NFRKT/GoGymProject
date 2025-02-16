@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chat Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h2 th:text="'Czat z ' + ${chatRoom.trainer.firstName}"></h2>
+
+<div id="messages">
+    <p th:each="msg : ${messages}" th:text="${msg.sender.firstName + ': ' + msg.message}"></p>
+</div>
+
+<input type="text" id="messageInput" placeholder="Wpisz wiadomość...">
+<button onclick="sendMessage()">Wyślij</button>
+
+<script th:inline="javascript">
+    var chatRoomId = /*[[${chatRoom.id}]]*/ 1;
+    var socket = new SockJS('/ws');
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('Połączono: ' + frame);
+
+        // 🔥 Subskrypcja na wiadomości w czasie rzeczywistym
+        stompClient.subscribe('/topic/chat/' + chatRoomId, function (message) {
+            let parsedMessage = JSON.parse(message.body);
+            console.log("Nowa wiadomość:", parsedMessage);
+            showMessage(parsedMessage);
+        });
+    });
+
+    function sendMessage() {
+        var messageContent = document.getElementById('messageInput').value;
+        if (!messageContent.trim()) return;
+
+        var message = {
+            senderId: null, // 🚀 Nie wysyłamy senderId, backend sam go znajdzie
+            message: messageContent
+        };
+
+        stompClient.send("/app/chat/" + chatRoomId, {}, JSON.stringify(message));
+
+        document.getElementById('messageInput').value = ''; // 🔥 Wyczyść pole po wysłaniu
+    }
+
+    function showMessage(message) {
+        var messagesDiv = document.getElementById('messages');
+        var messageElement = document.createElement('p');
+        messageElement.innerHTML = `<strong>${message.senderName}:</strong> ${message.message}`;
+        messagesDiv.appendChild(messageElement);
+
+        messagesDiv.scrollTop = messagesDiv.scrollHeight; // 🔥 Automatyczne przewijanie na dół
+    }
+</script>
+
+
+
+</body>
+</html>

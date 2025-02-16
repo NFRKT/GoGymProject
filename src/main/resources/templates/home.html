@@ -45,9 +45,10 @@
         <li><a href="/exercises">Zobacz ćwiczenia</a></li>
         <li><a href="/workouts/create">Stwórz trening</a></li>
         <li><a href="/workouts">Twoje treningi</a></li>
+        <a href="/chat">Przejdź do chatu</a>
+
         <!-- Dodaj inne odnośniki tutaj -->
     </ul>
-
     <div class="dynamic-section">
         <a th:if="${isUser}" href="/client-panel" class="w3-button w3-blue">Panel Klienta</a>
         <a th:if="${isUser}" th:href="@{/user-plans(idUser=${idUser})}" class="w3-button w3-blue">Moje Plany Treningowe</a>
@@ -108,7 +109,6 @@
 
 <!-- Footer -->
 <div th:replace="~{footer :: footer}"></div>
-
 <script>
     // Used to toggle the menu on small screens when clicking on the menu button
     function myFunction() {
