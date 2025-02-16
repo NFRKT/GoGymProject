@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script>
+        let stompClient = null;
+
+        function connect() {
+            let socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/messages', function(messageOutput) {
+                    showMessage(JSON.parse(messageOutput.body));
+                });
+            });
+        }
+
+        function sendMessage() {
+    let sender = document.getElementById("sender").value;
+    let receiver = document.getElementById("receiver").value;
+    let content = document.getElementById("message").value;
+
+    let senderId = parseInt(sender, 10);
+    let receiverId = parseInt(receiver, 10);
+
+    if (isNaN(senderId) || isNaN(receiverId)) {
+        console.error("Invalid sender or receiver ID");
+        return;
+    }
+
+    stompClient.send("/app/chat", {}, JSON.stringify({
+        sender: { idUser: senderId },
+        receiver: { idUser: receiverId },
+        content: content
+    }));
+}
+
+
+        function showMessage(message) {
+            let messages = document.getElementById("messages");
+            let messageElement = document.createElement("li");
+            messageElement.appendChild(document.createTextNode(message.sender.id + ": " + message.content));
+            messages.appendChild(messageElement);
+        }
+    </script>
+</head>
+<body onload="connect()">
+<h2>Chat</h2>
+<label>Sender ID:</label> <input type="text" id="sender" />
+<label>Receiver ID:</label> <input type="text" id="receiver" />
+<input type="text" id="message" placeholder="Enter message" />
+<button onclick="sendMessage()">Send</button>
+<ul id="messages"></ul>
+</body>
+</html>
