@@ -1,57 +1,188 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="pl" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 1rem;
-    /* Footer zawsze na dole */
-    }
-    * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    }
-
-    /* Ustawienie pełnej wysokości strony */
-    html, body {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    }
-
-    /* Główna zawartość zajmuje całą dostępną przestrzeń */
-    .content {
-    flex: 1;
+    <meta charset="UTF-8">
+    <title>GoGym</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script defer src="/js/chat.js"></script>
 
 </head>
 <body th:fragment="header">
-<div class="w3-top" >
-    <div class="w3-bar w3-orange w3-card w3-left-align w3-large" >
-        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-red" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu">
-            <i class="fa fa-bars"></i>
-        </a>
+
+<div class="w3-top">
+    <div class="w3-bar w3-orange w3-card w3-left-align w3-large">
         <a href="#" th:href="@{/home}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Home</a>
         <a href="#" th:href="@{/budget}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Budżet</a>
         <a href="#" th:href="@{/addIncome}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Przychody</a>
         <a href="#" th:href="@{/addExpense}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Wydatki</a>
-        <!-- Przycisk "Loguj" wyrównany do prawej -->
+
+        <!-- 🔥 Przycisk Chatu -->
+        <button id="chat-toggle" class="chat-button" onclick="toggleChat()">💬 Chat</button>
+
         <a href="/logout" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Wyloguj się</a>
     </div>
+</div>
 
-    <!-- Navbar on small screens -->
-    <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
-        <a href="#" th:href="@{/home}" class="w3-bar-item w3-button w3-padding-large">Home</a>
-        <a href="#" th:href="@{/budget}" class="w3-bar-item w3-button w3-padding-large">Budżet</a>
-        <a href="#" th:href="@{/addIncome}" class="w3-bar-item w3-button w3-padding-large">Przychody</a>
-        <a href="#" th:href="@{/addExpense}" class="w3-bar-item w3-button w3-padding-large">Wydatki</a>
-        <a href="/logout" class="w3-bar-item w3-button w3-padding-large">Wyloguj się</a>
+<div id="chat-container">
+    <div id="chat-header">
+        <h3>Chat</h3>
+        <button onclick="toggleChat()">❌</button>
+    </div>
+
+    <div id="chat-rooms">
+        <p>Ładowanie rozmów...</p>
+    </div>
+
+    <!-- 🔥 Przycisk "Nowa rozmowa" będzie zawsze widoczny -->
+    <div id="new-chat" onclick="openNewChatModal()">
+        Nowa rozmowa ➕
     </div>
 </div>
-<!-- Header -->
-<header class="w3-container w3-orange w3-center" style="padding:128px 16px">
-    <h1 class="w3-margin w3-jumbo" th:text="${message}"></h1>
-</header>
+
+
+
+
+<!-- 🔥 Poprawiony wygląd chatu -->
+<style>
+    /* Styl dla przycisku otwierania chatu */
+    .chat-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Stylizacja okienka chatu */
+#chat-container {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    width: 300px;
+    max-height: 400px; /* 🔥 Ograniczenie wysokości */
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+    overflow: hidden; /* 🔥 Zapobiega rozciąganiu */
+}
+
+    /* Nagłówek chatu */
+#chat-header {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .close-chat-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    /* Lista pokoi rozmów */
+#chat-rooms {
+    padding: 10px;
+    height: 250px; /* 🔥 Ustaw wysokość na stałą */
+    overflow-y: auto; /* 🔥 Dodaj przewijanie jeśli wiadomości jest dużo */
+}
+
+    .chat-room-link {
+        display: block;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        cursor: pointer;
+    }
+
+    .chat-room-link:hover {
+        background: #f5f5f5;
+    }
+
+    /* Okno wiadomości */
+    #chat-messages {
+        height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        background: #f9f9f9;
+        border-bottom: 1px solid #ddd;
+    }
+
+    /* Pole wpisywania wiadomości */
+    #messageInput {
+        width: 80%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    /* Styl dla wiadomości */
+    .message {
+        padding: 8px;
+        margin: 5px 0;
+        border-radius: 10px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+
+    /* Wiadomości użytkownika */
+    .message.user {
+        background-color: #007bff;
+        color: white;
+        text-align: right;
+        margin-left: auto;
+    }
+
+    /* Wiadomości trenera */
+    .message.trainer {
+        background-color: #ddd;
+        text-align: left;
+        margin-right: auto;
+    }
+
+    /* Styl dla buttona wyślij */
+    .send-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .send-btn:hover {
+        background-color: #0056b3;
+    }
+    #new-chat {
+    background-color: #28a745; /* Zielony kolor */
+    color: white;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+#new-chat:hover {
+    background-color: #218838;
+}
+</style>
+
 </body>
 </html>

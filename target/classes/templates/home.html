@@ -113,11 +113,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script defer src="/js/chat.js"></script>
 
-<script th:inline="javascript">
-    var currentUserId = /*[[${#authentication.principal.user.idUser}]]*/ null;
-    console.log("Zalogowany użytkownik ID:", currentUserId); // 🔥 Debugowanie
-</script>
-
 <script>
     // Used to toggle the menu on small screens when clicking on the menu button
     function myFunction() {

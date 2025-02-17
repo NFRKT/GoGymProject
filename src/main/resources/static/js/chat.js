@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Chat.js załadowany");
     loadChatRooms();
+    loadTrainers();
 });
 
 function toggleChat() {
@@ -96,6 +97,42 @@ function showMessage(message) {
     messageElement.innerHTML = `<strong>${message.senderName}:</strong> ${message.message}`;
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// 🔥 Pobieranie dostępnych trenerów, z którymi klient ma powiązanie
+function loadTrainers() {
+    fetch("/client/trainers")  // 🔥 Pobiera trenerów klienta
+        .then(response => response.json())
+        .then(trainers => {
+            let trainerSelect = document.getElementById("trainerSelect");
+            trainerSelect.innerHTML = '<option value="">-- Wybierz trenera --</option>'; // 🔄 Reset
+
+            trainers.forEach(trainer => {
+                let option = document.createElement("option");
+                option.value = trainer.id;
+                option.innerText = trainer.firstName + " " + trainer.secondName;
+                trainerSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Błąd ładowania trenerów:", error));
+}
+
+
+// 🔥 Funkcja do rozpoczęcia nowej konwersacji
+function startNewChat() {
+    let trainerId = document.getElementById("trainerSelect").value;
+    if (!trainerId) {
+        alert("Wybierz trenera!");
+        return;
+    }
+
+    fetch(`/chat/start?trainerId=${trainerId}`, { method: "POST" })
+        .then(response => response.json())
+        .then(chatRoom => {
+            openChatRoom(chatRoom.id); // 🔥 Otwórz nową rozmowę po jej utworzeniu
+            loadChatRooms(); // 🔄 Odśwież listę rozmów
+        })
+        .catch(error => console.error("Błąd podczas tworzenia chatu:", error));
 }
 
 window.toggleChat = toggleChat;

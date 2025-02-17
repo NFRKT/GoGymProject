@@ -6,10 +6,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script defer src="/js/chat.js"></script>
-    <script th:inline="javascript">
-    var currentUserId = /*[[${#authentication.principal.user.idUser}]]*/ null;
-    console.log("Zalogowany użytkownik ID:", currentUserId); // 🔥 Debugowanie
-</script>
 
 </head>
 <body th:fragment="header">
@@ -31,14 +27,24 @@
 <!-- 🔥 Okienko chatu -->
 <div id="chat-container" class="chat-hidden">
     <div id="chat-header">
-        <h3>💬 Chat</h3>
-        <button class="close-chat-btn" onclick="toggleChat()">❌</button>
+        <h3>Chat</h3>
+        <button onclick="toggleChat()">❌</button>
+    </div>
+    <div id="new-chat">
+        <h4>Nowa rozmowa:</h4>
+        <select id="trainerSelect">
+            <option value="">-- Wybierz trenera --</option>
+        </select>
+        <button onclick="startNewChat()">Rozpocznij</button>
     </div>
     <div id="chat-rooms">
         <p>Ładowanie rozmów...</p>
     </div>
 
+    <!-- 🔥 Formularz do rozpoczęcia nowej konwersacji -->
+
 </div>
+
 
 
 <!-- 🔥 Poprawiony wygląd chatu -->
