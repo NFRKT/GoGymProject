@@ -58,15 +58,18 @@ public class RequestController {
 
         requestRepository.save(newRequest);
 
-        // Tworzymy JSON z danymi zapytania
+        // 🔥 Powiadomienie dla trenera
+        notificationService.createNotification(trainer, loggedInUser, "new_request");
+
         Map<String, String> response = new HashMap<>();
-        response.put("requestId", String.valueOf(newRequest.getId())); // Dodajemy ID zapytania
+        response.put("requestId", String.valueOf(newRequest.getId()));
         response.put("trainerId", String.valueOf(trainer.getIdUser()));
         response.put("trainerName", trainer.getFirstName());
         response.put("requestDate", newRequest.getRequestDate().toString());
 
         return ResponseEntity.ok(response);
     }
+
 
 
     @PostMapping("/{requestId}/cancel")

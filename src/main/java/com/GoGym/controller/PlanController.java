@@ -6,10 +6,7 @@ import com.GoGym.dto.TrainingPlanDayDTO;
 import com.GoGym.module.*;
 import com.GoGym.repository.*;
 import com.GoGym.security.CustomUserDetails;
-import com.GoGym.service.RequestService;
-import com.GoGym.service.TrainerClientService;
-import com.GoGym.service.TrainingPlanService;
-import com.GoGym.service.TrainingService;
+import com.GoGym.service.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +35,7 @@ public class PlanController {
     private final TrainingPlanDayRepository trainingPlanDayRepository;
     private final TrainingService trainingService;
     private final TrainerClientService trainerClientService;
+    private final NotificationService notificationService;
 
     @GetMapping("/user-plans")
     public String getUserPlans(@RequestParam Long idUser, Model model) {
@@ -258,7 +256,7 @@ public class PlanController {
     public Map<String, Object> updateRestDayStatus(@PathVariable Long dayId) {
         TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono dnia odpoczynku o ID: " + dayId));
-
+        TrainingPlanDay.Status previousStatus = day.getStatus(); // Pobranie starego statusu przed zmianą
         // Przełącz status dnia odpoczynku
         TrainingPlanDay.Status newStatus = day.getStatus() == TrainingPlanDay.Status.completed
                 ? TrainingPlanDay.Status.notCompleted
@@ -267,6 +265,20 @@ public class PlanController {
         day.setStatus(newStatus);
         trainingPlanDayRepository.save(day);
 
+        // 🔥 Wysyłanie powiadomienia TYLKO jeśli dzień regeneracyjny został ukończony po raz pierwszy
+        if (previousStatus != TrainingPlanDay.Status.completed && newStatus == TrainingPlanDay.Status.completed) {
+            TrainingPlan plan = day.getTrainingPlan();
+            User trainer = userRepository.findById(plan.getIdTrainer())
+                    .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o ID: " + plan.getIdTrainer()));
+
+            User client = userRepository.findById(plan.getIdClient())
+                    .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o ID: " + plan.getIdClient()));
+
+            int dayNumber = plan.getTrainingPlanDays().indexOf(day) + 1;
+
+            // 🔥 Powiadomienie dla trenera
+            notificationService.createNotification(trainer, client, "rest_day_completed", "Dzień " + dayNumber + " (Regeneracja) w planie: " + plan.getName());
+        }
         // Przygotowanie odpowiedzi
         Map<String, Object> response = new HashMap<>();
         response.put("dayId", day.getIdDay());
