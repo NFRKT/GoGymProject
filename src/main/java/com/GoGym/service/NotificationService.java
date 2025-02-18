@@ -14,12 +14,26 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     public void createNotification(User client, User trainer, String status) {
-        String message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getSecondName() +
-                " została " + (status.equals("accepted") ? "zaakceptowana!" : "odrzucona.");
+        String message;
+
+        switch (status) {
+            case "accepted":
+                message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getSecondName() + " została zaakceptowana!";
+                break;
+            case "rejected":
+                message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getSecondName() + " została odrzucona.";
+                break;
+            case "trainer_resigned":
+                message = "Trener " + trainer.getFirstName() + " " + trainer.getSecondName() + " zakończył z Tobą współpracę.";
+                break;
+            default:
+                throw new IllegalArgumentException("Nieznany status powiadomienia: " + status);
+        }
 
         Notification notification = new Notification(client, message);
         notificationRepository.save(notification);
     }
+
 
     public List<Notification> getAllNotifications(User user) {
         return notificationRepository.findByUserOrderByCreatedAtDesc(user);

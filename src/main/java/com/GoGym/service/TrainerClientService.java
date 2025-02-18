@@ -20,11 +20,13 @@ public class TrainerClientService {
 
     private final TrainerClientRepository trainerClientRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public TrainerClientService(TrainerClientRepository trainerClientRepository, UserRepository userRepository) {
+    public TrainerClientService(TrainerClientRepository trainerClientRepository, UserRepository userRepository, NotificationService notificationService) {
         this.trainerClientRepository = trainerClientRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     public TrainerClient createTrainerClient(Long trainerId, Long clientId) {
@@ -51,8 +53,19 @@ public class TrainerClientService {
 
     @Transactional
     public void removeTrainerClient(Long trainerId, Long clientId) {
-        trainerClientRepository.deleteByTrainer_IdUserAndClient_IdUser(trainerId, clientId);
+        TrainerClient trainerClient = trainerClientRepository.findByTrainer_IdUserAndClient_IdUser(trainerId, clientId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono relacji trener-klient"));
+
+        User trainer = trainerClient.getTrainer();
+        User client = trainerClient.getClient();
+
+        // Usunięcie relacji
+        trainerClientRepository.delete(trainerClient);
+
+        // Dodanie powiadomienia dla klienta
+        notificationService.createNotification(client, trainer, "trainer_resigned");
     }
+
 
 
 }

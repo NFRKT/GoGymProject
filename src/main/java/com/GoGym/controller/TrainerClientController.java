@@ -96,6 +96,7 @@ public class TrainerClientController {
     }
 
 
+
     @PostMapping("/rejectTrainer")
     public ResponseEntity<Map<String, String>> rejectTrainer(@RequestParam Long trainerId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
