@@ -21,22 +21,28 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    @GetMapping("/unread")
-    public ResponseEntity<List<Map<String, String>>> getUnreadNotifications(Authentication authentication) {
+    @GetMapping("/all")
+    public ResponseEntity<List<Map<String, String>>> getAllNotifications(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
 
-        List<Map<String, String>> notifications = notificationService.getUnreadNotifications(loggedInUser)
+        List<Map<String, String>> notifications = notificationService.getAllNotifications(loggedInUser)
                 .stream()
                 .map(notification -> Map.of(
                         "id", String.valueOf(notification.getId()),
-                        "message", notification.getMessage()
+                        "message", notification.getMessage(),
+                        "status", notification.getStatus().name() // Dodajemy status (READ / UNREAD)
                 ))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(notifications);
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
+        notificationService.deleteNotification(id);
+        return ResponseEntity.ok().build();
+    }
 
 
     @PostMapping("/mark-read/{id}")

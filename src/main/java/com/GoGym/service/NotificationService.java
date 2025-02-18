@@ -21,10 +21,10 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-
-    public List<Notification> getUnreadNotifications(User user) {
-        return notificationRepository.findByUserAndStatus(user, Notification.NotificationStatus.UNREAD);
+    public List<Notification> getAllNotifications(User user) {
+        return notificationRepository.findByUserOrderByCreatedAtDesc(user);
     }
+
 
     public void markAsRead(Long id) {
         Notification notification = notificationRepository.findById(id)
@@ -33,11 +33,9 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public void markAsReadByMessage(String message) {
-        Notification notification = notificationRepository.findByMessage(message)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono powiadomienia"));
-        notification.setStatus(Notification.NotificationStatus.READ);
-        notificationRepository.save(notification);
+    public void deleteNotification(Long id) {
+        notificationRepository.deleteById(id);
     }
+
 
 }

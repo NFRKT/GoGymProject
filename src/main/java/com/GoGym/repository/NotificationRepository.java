@@ -9,5 +9,7 @@ import java.util.Optional;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findByUserAndStatus(User user, Notification.NotificationStatus status);
     Optional<Notification> findByMessage(String message);
+    List<Notification> findByUserOrderByCreatedAtDesc(User user);
+
 
 }

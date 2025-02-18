@@ -9,46 +9,84 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 function fetchNotifications() {
-    fetch("/notifications/unread")
+    fetch("/notifications/all") // Pobieramy WSZYSTKIE powiadomienia, nie tylko nieodczytane
         .then(response => response.json())
         .then(data => {
             notificationsList.innerHTML = "";
 
             if (data.length === 0) {
-                notificationsList.innerHTML = "<li>Brak nowych powiadomień</li>";
-                bellButton.classList.remove("new-notifications"); // Usuwamy czerwony kolor
+                notificationsList.innerHTML = "<li>Brak powiadomień</li>";
+                bellButton.classList.remove("new-notifications");
                 return;
             }
 
             data.forEach(notification => {
                 let listItem = document.createElement("li");
-                listItem.textContent = notification.message; // Teraz używamy poprawnie obiektu JSON
+                listItem.dataset.id = notification.id;
+                listItem.textContent = notification.message;
                 listItem.classList.add("notification-item");
-                listItem.onclick = function () {
+
+                // Jeśli powiadomienie jest nieodczytane, dodaj klasę wyróżniającą
+                if (notification.status === "UNREAD") {
+                    listItem.classList.add("unread");
+                }
+
+                // Obsługa kliknięcia - zmienia status, ale NIE USUWA z listy
+                listItem.addEventListener("click", function () {
                     markNotificationAsRead(notification.id, listItem);
-                };
+                });
+
+                // Przycisk "Zobacz"
+                let viewButton = document.createElement("button");
+                viewButton.textContent = "Zobacz";
+                viewButton.classList.add("view-button");
+                viewButton.addEventListener("click", function (event) {
+                    event.stopPropagation();
+                    window.location.href = "/client-panel";
+                });
+
+                // Przycisk "❌" do usuwania powiadomienia
+                let deleteButton = document.createElement("button");
+                deleteButton.textContent = "❌";
+                deleteButton.classList.add("delete-button");
+                deleteButton.addEventListener("click", function (event) {
+                    event.stopPropagation();
+                    deleteNotification(notification.id, listItem);
+                });
+
+                listItem.appendChild(viewButton);
+                listItem.appendChild(deleteButton);
                 notificationsList.appendChild(listItem);
             });
 
-            bellButton.classList.add("new-notifications"); // Dodajemy czerwony kolor
+            bellButton.classList.add("new-notifications");
         })
         .catch(error => console.error("Błąd pobierania powiadomień:", error));
 }
 
+function deleteNotification(notificationId, listItem) {
+    fetch(`/notifications/delete/${notificationId}`, { method: "DELETE" })
+        .then(() => {
+            listItem.remove();
+            if (notificationsList.children.length === 0) {
+                notificationsList.innerHTML = "<li>Brak nowych powiadomień</li>";
+                bellButton.classList.remove("new-notifications");
+            }
+        })
+        .catch(error => console.error("Błąd usuwania powiadomienia:", error));
+}
+
+
 
 function markNotificationAsRead(notificationId, listItem) {
-    fetch(`/notifications/mark-read/${notificationId}`, {
-        method: "POST"
-    })
-    .then(() => {
-        listItem.remove(); // Usuwamy powiadomienie z listy
-        if (notificationsList.children.length === 0) {
-            notificationsList.innerHTML = "<li>Brak nowych powiadomień</li>";
-            bellButton.classList.remove("new-notifications"); // Usuwamy czerwony kolor
-        }
-    })
-    .catch(error => console.error("Błąd oznaczania jako przeczytane:", error));
+    fetch(`/notifications/mark-read/${notificationId}`, { method: "POST" })
+        .then(() => {
+            listItem.classList.remove("unread"); // Zmienia kolor, ale NIE usuwa powiadomienia
+        })
+        .catch(error => console.error("Błąd oznaczania jako przeczytane:", error));
 }
+
+
 
 
 function toggleNotifications() {
