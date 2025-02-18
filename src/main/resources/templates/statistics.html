@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Statystyki Treningowe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #6c757d, #343a40);
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #212529;
+      border-radius: 15px;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      background: #495057;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Statystyki Treningowe</h1>
+
+  <div class="stat-box">
+    <h2>Najczęściej wykonywane ćwiczenia (ogólnie)</h2>
+    <ul>
+      <li th:each="entry : ${statistics.mostCommonExercises}">
+        <span th:text="${entry.key}"></span> - <span th:text="${entry.value}"></span> razy
+      </li>
+    </ul>
+  </div>
+
+  <div class="stat-box">
+    <h2>Najczęściej wykonywane ćwiczenia (w miesiącu)</h2>
+
+    <label for="yearEx">Rok:</label>
+    <select id="yearEx" name="year">
+      <option th:each="y : ${#numbers.sequence(2020, 2030)}"
+              th:value="${y}" th:text="${y}"
+              th:selected="${y == year}"></option>
+    </select>
+
+    <label for="monthEx">Miesiąc:</label>
+    <select id="monthEx" name="month">
+      <option th:each="m : ${monthsMap}"
+              th:value="${m.key}"
+              th:text="${m.value}"
+              th:selected="${m.key == month}"></option>
+    </select>
+
+    <ul id="mostCommonExercisesInMonth">
+      <li th:each="entry : ${statistics.mostCommonExercisesInMonth}">
+        <span th:text="${entry[0]}"></span> - <span th:text="${entry[1]}"></span> razy
+      </li>
+    </ul>
+  </div>
+
+
+  <div class="stat-box">
+    <h2>Największy ciężar dla ćwiczeń siłowych</h2>
+    <ul>
+      <li th:each="entry : ${statistics.maxWeightExercises}">
+        <span th:text="${entry.key}"></span> - <strong th:text="${entry.value.key}"></strong> kg
+        <span>(<strong th:text="${entry.value.value}"></strong>)</span>
+      </li>
+    </ul>
+  </div>
+
+
+  <div class="stat-box">
+    <h2>Najdłuższy trening cardio</h2>
+    <p th:if="${statistics.longestCardio != null}">
+      <span th:text="${statistics.longestCardio.exerciseName}"></span>:
+      <span th:text="${statistics.longestCardio.formattedDuration}"></span>
+    </p>
+  </div>
+
+  <div class="stat-box">
+    <h2>Ilość treningów w miesiącu</h2>
+
+    <label for="yearWo">Rok:</label>
+    <select id="yearWo" name="year">
+      <option th:each="y : ${#numbers.sequence(2020, 2030)}"
+              th:value="${y}" th:text="${y}"
+              th:selected="${y == year}"></option>
+    </select>
+
+    <label for="monthWo">Miesiąc:</label>
+    <select id="monthWo" name="month">
+      <option th:each="m : ${monthsMap}"
+              th:value="${m.key}"
+              th:text="${m.value}"
+              th:selected="${m.key == month}"></option>
+    </select>
+
+    <p>W <span id="selectedMonth" th:text="${monthName}"></span> <span id="selectedYear" th:text="${year}"></span> miałeś <strong id="workoutCount" th:text="${statistics.workoutsCount}"></strong> treningów.</p>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const yearEx = document.getElementById("yearEx");
+    const monthEx = document.getElementById("monthEx");
+    const yearWo = document.getElementById("yearWo");
+    const monthWo = document.getElementById("monthWo");
+
+    function updateExercisesStatistics() {
+        const year = yearEx.value;
+        const month = monthEx.value;
+
+        fetch(`/statistics/update?year=${year}&month=${month}`)
+            .then(response => response.json())
+            .then(data => {
+                // ✅ Aktualizacja najczęściej wykonywanych ćwiczeń w miesiącu
+                const exerciseList = document.querySelector("#mostCommonExercisesInMonth");
+                exerciseList.innerHTML = ""; // Czyszczenie listy przed dodaniem nowych danych
+
+                if (data.mostCommonExercisesInMonth && data.mostCommonExercisesInMonth.length > 0) {
+                    data.mostCommonExercisesInMonth.forEach(entry => {
+                        let li = document.createElement("li");
+                        li.textContent = `${entry[0]} - ${entry[1]} razy`; // `entry[0]` = nazwa ćwiczenia, `entry[1]` = liczba razy
+                        exerciseList.appendChild(li);
+                    });
+                } else {
+                    exerciseList.innerHTML = "<li>Brak danych</li>";
+                }
+            })
+            .catch(error => console.error("Błąd aktualizacji statystyk ćwiczeń:", error));
+    }
+
+    function updateWorkoutsStatistics() {
+        const year = yearWo.value;
+        const month = monthWo.value;
+
+        fetch(`/statistics/update?year=${year}&month=${month}`)
+            .then(response => response.json())
+            .then(data => {
+                // ✅ Aktualizacja ilości treningów w miesiącu
+                document.querySelector("#workoutCount").textContent = data.workoutsCount;
+                document.querySelector("#selectedMonth").textContent = document.getElementById("monthWo").selectedOptions[0].text;
+                document.querySelector("#selectedYear").textContent = year;
+            })
+            .catch(error => console.error("Błąd aktualizacji statystyk treningów:", error));
+    }
+
+    // Nasłuchujemy na zmiany selektorów osobno dla ćwiczeń i treningów
+    yearEx.addEventListener("change", updateExercisesStatistics);
+    monthEx.addEventListener("change", updateExercisesStatistics);
+    yearWo.addEventListener("change", updateWorkoutsStatistics);
+    monthWo.addEventListener("change", updateWorkoutsStatistics);
+});
+
+
+
+</script>
+
+</body>
+</html>
