@@ -31,12 +31,14 @@ public class NotificationController {
                 .map(notification -> Map.of(
                         "id", String.valueOf(notification.getId()),
                         "message", notification.getMessage(),
-                        "status", notification.getStatus().name() // Dodajemy status (READ / UNREAD)
+                        "status", notification.getStatus().name(),
+                        "createdAt", String.valueOf(notification.getCreatedAt().getTime()) // Zwracamy timestamp
                 ))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(notifications);
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
