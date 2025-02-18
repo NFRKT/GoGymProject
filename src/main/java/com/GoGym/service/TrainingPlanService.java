@@ -3,9 +3,11 @@ package com.GoGym.service;
 import com.GoGym.module.PlanExercise;
 import com.GoGym.module.TrainingPlan;
 import com.GoGym.module.TrainingPlanDay;
+import com.GoGym.module.User;
 import com.GoGym.repository.PlanExerciseRepository;
 import com.GoGym.repository.TrainingPlanDayRepository;
 import com.GoGym.repository.TrainingPlanRepository;
+import com.GoGym.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,15 +19,20 @@ public class TrainingPlanService {
 
     private final TrainingPlanRepository trainingPlanRepository;
     private final PlanExerciseRepository planExerciseRepository;
+    private final UserRepository userRepository;
     private final TrainingPlanDayRepository trainingPlanDayRepository;
+    private final NotificationService notificationService;
 
-    public TrainingPlanService(TrainingPlanRepository trainingPlanRepository, PlanExerciseRepository planExerciseRepository, TrainingPlanDayRepository trainingPlanDayRepository) {
+    public TrainingPlanService(TrainingPlanRepository trainingPlanRepository, PlanExerciseRepository planExerciseRepository, TrainingPlanDayRepository trainingPlanDayRepository, UserRepository userRepository, NotificationService notificationService) {
         this.trainingPlanRepository = trainingPlanRepository;
         this.planExerciseRepository = planExerciseRepository;
         this.trainingPlanDayRepository = trainingPlanDayRepository;
+        this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
 
+    @Transactional
     public TrainingPlan createTrainingPlan(TrainingPlan plan) {
         trainingPlanRepository.save(plan);
 
@@ -38,6 +45,16 @@ public class TrainingPlanService {
                 planExerciseRepository.save(exercise);
             }
         }
+
+        // Pobranie trenera i klienta do powiadomienia
+        User trainer = userRepository.findById(plan.getIdTrainer())
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o ID: " + plan.getIdTrainer()));
+
+        User client = userRepository.findById(plan.getIdClient())
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o ID: " + plan.getIdClient()));
+
+        // Tworzenie powiadomienia
+        notificationService.createNotification(client, trainer, "new_plan", plan.getName());
 
         return plan;
     }

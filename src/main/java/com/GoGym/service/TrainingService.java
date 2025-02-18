@@ -4,14 +4,8 @@ import com.GoGym.dto.ExerciseDTO;
 import com.GoGym.dto.TrainingPlanDTO;
 import com.GoGym.dto.TrainingPlanDayDTO;
 import com.GoGym.exception.TrainingNotFoundException;
-import com.GoGym.module.Exercise;
-import com.GoGym.module.PlanExercise;
-import com.GoGym.module.TrainingPlan;
-import com.GoGym.module.TrainingPlanDay;
-import com.GoGym.repository.ExerciseRepository;
-import com.GoGym.repository.PlanExerciseRepository;
-import com.GoGym.repository.TrainingPlanDayRepository;
-import com.GoGym.repository.TrainingPlanRepository;
+import com.GoGym.module.*;
+import com.GoGym.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +25,8 @@ public class TrainingService {
     private final TrainingPlanRepository trainingPlanRepository;
     private final ExerciseRepository exerciseRepository;
     private final PlanExerciseRepository planExerciseRepository;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
 
     private int parseDurationToSeconds(String duration) {
@@ -162,7 +158,15 @@ public class TrainingService {
             trainingPlan.setStatus(TrainingPlan.Status.active);
             trainingPlanRepository.save(trainingPlan);
         }
+        // Pobranie trenera i klienta do powiadomienia
+        User trainer = userRepository.findById(trainingPlan.getIdTrainer())
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o ID: " + trainingPlan.getIdTrainer()));
 
+        User client = userRepository.findById(trainingPlan.getIdClient())
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o ID: " + trainingPlan.getIdClient()));
+
+        // Tworzenie powiadomienia o edycji planu
+        notificationService.createNotification(client, trainer, "updated_plan", trainingPlan.getName());
         return trainingPlan;
     }
 

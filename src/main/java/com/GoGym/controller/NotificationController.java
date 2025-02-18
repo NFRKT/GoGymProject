@@ -32,7 +32,8 @@ public class NotificationController {
                         "id", String.valueOf(notification.getId()),
                         "message", notification.getMessage(),
                         "status", notification.getStatus().name(),
-                        "createdAt", String.valueOf(notification.getCreatedAt().getTime()) // Zwracamy timestamp
+                        "createdAt", String.valueOf(notification.getCreatedAt().getTime()),
+                        "userId", String.valueOf(loggedInUser.getIdUser())
                 ))
                 .collect(Collectors.toList());
 

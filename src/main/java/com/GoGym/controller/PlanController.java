@@ -105,7 +105,7 @@ public class PlanController {
             @RequestParam(required = false) List<Integer> sets,
             @RequestParam(required = false) List<Integer> reps,
             @RequestParam(required = false) List<Double> weight,
-            @RequestParam(required = false) List<String> duration,  // 🔥 Przyjmujemy jako String (hh:mm:ss lub mm:ss)
+            @RequestParam(required = false) List<String> duration,
             @RequestParam(required = false) List<Double> distance,
             @RequestParam List<Integer> exerciseDays,
             @RequestParam String startDate,
@@ -172,6 +172,7 @@ public class PlanController {
 
         return "redirect:/trainer-panel";
     }
+
 
     /**
      * Parsuje czas trwania z formatu "hh:mm:ss" lub "mm:ss" na liczbę sekund.

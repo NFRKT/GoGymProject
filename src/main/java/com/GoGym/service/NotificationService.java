@@ -12,8 +12,10 @@ public class NotificationService {
 
     @Autowired
     private NotificationRepository notificationRepository;
-
     public void createNotification(User client, User trainer, String status) {
+        createNotification(client, trainer, status, null); // Przekazujemy `null` jako domyślną nazwę planu
+    }
+    public void createNotification(User client, User trainer, String status, String planName) {
         String message;
 
         switch (status) {
@@ -25,6 +27,12 @@ public class NotificationService {
                 break;
             case "trainer_resigned":
                 message = "Trener " + trainer.getFirstName() + " " + trainer.getSecondName() + " zakończył z Tobą współpracę.";
+                break;
+            case "new_plan":
+                message = "Twój trener " + trainer.getFirstName() + " " + trainer.getSecondName() + " stworzył dla Ciebie nowy plan: " + planName + ".";
+                break;
+            case "updated_plan":
+                message = "Twój trener " + trainer.getFirstName() + " " + trainer.getSecondName() + " edytował Twój plan: " + planName + ".";
                 break;
             default:
                 throw new IllegalArgumentException("Nieznany status powiadomienia: " + status);

@@ -8,68 +8,75 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    function fetchNotifications() {
-        fetch("/notifications/all")
-            .then(response => response.json())
-            .then(data => {
-                notificationsList.innerHTML = "";
+function fetchNotifications() {
+    fetch("/notifications/all")
+        .then(response => response.json())
+        .then(data => {
+            notificationsList.innerHTML = "";
 
-                if (data.length === 0) {
-                    notificationsList.innerHTML = "<li>Brak powiadomień</li>";
-                    bellButton.classList.remove("new-notifications");
-                    return;
-                }
+            if (data.length === 0) {
+                notificationsList.innerHTML = "<li>Brak powiadomień</li>";
+                bellButton.classList.remove("new-notifications");
+                return;
+            }
 
-                let groupedNotifications = groupNotificationsByDate(data);
+            let groupedNotifications = groupNotificationsByDate(data);
 
-                Object.keys(groupedNotifications).forEach(date => {
-                    let dateHeader = document.createElement("li");
-                    dateHeader.textContent = date;
-                    dateHeader.classList.add("notification-date");
-                    notificationsList.appendChild(dateHeader);
+            Object.keys(groupedNotifications).forEach(date => {
+                let dateHeader = document.createElement("li");
+                dateHeader.textContent = date;
+                dateHeader.classList.add("notification-date");
+                notificationsList.appendChild(dateHeader);
 
-                    groupedNotifications[date].forEach(notification => {
-                        let listItem = document.createElement("li");
-                        listItem.dataset.id = notification.id;
-                        listItem.classList.add("notification-item");
+                groupedNotifications[date].forEach(notification => {
+                    let listItem = document.createElement("li");
+                    listItem.dataset.id = notification.id;
+                    listItem.classList.add("notification-item");
 
-                        if (notification.status === "UNREAD") {
-                            listItem.classList.add("unread");
-                        }
+                    if (notification.status === "UNREAD") {
+                        listItem.classList.add("unread");
+                    }
 
-                        let timeAgo = formatTimeAgo(notification.createdAt);
-                        listItem.textContent = `${notification.message} (${timeAgo})`;
+                    let timeAgo = formatTimeAgo(notification.createdAt);
+                    listItem.textContent = `${notification.message} (${timeAgo})`;
 
-                        listItem.addEventListener("click", function () {
-                            markNotificationAsRead(notification.id, listItem);
-                        });
-
-                        let viewButton = document.createElement("button");
-                        viewButton.textContent = "Zobacz";
-                        viewButton.classList.add("view-button");
-                        viewButton.addEventListener("click", function (event) {
-                            event.stopPropagation();
-                            window.location.href = "/client-panel";
-                        });
-
-                        let deleteButton = document.createElement("button");
-                        deleteButton.textContent = "❌";
-                        deleteButton.classList.add("delete-button");
-                        deleteButton.addEventListener("click", function (event) {
-                            event.stopPropagation();
-                            deleteNotification(notification.id, listItem);
-                        });
-
-                        listItem.appendChild(viewButton);
-                        listItem.appendChild(deleteButton);
-                        notificationsList.appendChild(listItem);
+                    listItem.addEventListener("click", function () {
+                        markNotificationAsRead(notification.id, listItem);
                     });
-                });
 
-                bellButton.classList.add("new-notifications");
-            })
-            .catch(error => console.error("Błąd pobierania powiadomień:", error));
-    }
+                    let viewButton = document.createElement("button");
+                    viewButton.textContent = "Zobacz";
+                    viewButton.classList.add("view-button");
+                    viewButton.addEventListener("click", function (event) {
+                        event.stopPropagation();
+
+                        if (notification.message.includes("stworzył dla Ciebie nowy plan") ||
+                            notification.message.includes("edytował Twój plan")) {
+                            window.location.href = `/user-plans?idUser=${notification.userId}`;
+                        } else {
+                            window.location.href = "/client-panel";
+                        }
+                    });
+
+                    let deleteButton = document.createElement("button");
+                    deleteButton.textContent = "❌";
+                    deleteButton.classList.add("delete-button");
+                    deleteButton.addEventListener("click", function (event) {
+                        event.stopPropagation();
+                        deleteNotification(notification.id, listItem);
+                    });
+
+                    listItem.appendChild(viewButton);
+                    listItem.appendChild(deleteButton);
+                    notificationsList.appendChild(listItem);
+                });
+            });
+
+            bellButton.classList.add("new-notifications");
+        })
+        .catch(error => console.error("Błąd pobierania powiadomień:", error));
+}
+
 
 function deleteNotification(notificationId, listItem) {
     fetch(`/notifications/delete/${notificationId}`, { method: "DELETE" })
