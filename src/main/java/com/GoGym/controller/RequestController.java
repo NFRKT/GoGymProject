@@ -100,25 +100,32 @@ public class RequestController {
     public ResponseEntity<Map<String, String>> updateRequestStatus(@PathVariable Long requestId, @RequestParam String status) {
         Request.RequestStatus requestStatus = Request.RequestStatus.valueOf(status);
         Request updatedRequest = requestService.updateRequestStatus(requestId, requestStatus);
+        User client = updatedRequest.getClient();
+        User trainer = updatedRequest.getTrainer();
 
         Map<String, String> response = new HashMap<>();
 
         if (requestStatus == Request.RequestStatus.accepted) {
-            trainerClientService.createTrainerClient(updatedRequest.getTrainer().getIdUser(), updatedRequest.getClient().getIdUser());
+            trainerClientService.createTrainerClient(trainer.getIdUser(), client.getIdUser());
 
             response.put("status", "accepted");
-            response.put("firstName", updatedRequest.getClient().getFirstName());
-            response.put("secondName", updatedRequest.getClient().getSecondName());
-            response.put("id", String.valueOf(updatedRequest.getClient().getIdUser()));
+            response.put("firstName", client.getFirstName());
+            response.put("secondName", client.getSecondName());
+            response.put("id", String.valueOf(client.getIdUser()));
+
+            notificationService.createNotification(client, trainer, "accepted");
         } else if (requestStatus == Request.RequestStatus.rejected) {
             response.put("status", "rejected");
+
+            notificationService.createNotification(client, trainer, "rejected");
         }
 
-        // 🔹 Usunięcie zapytania po zmianie statusu
         requestRepository.delete(updatedRequest);
 
         return ResponseEntity.ok(response);
     }
+
+
 
 
 

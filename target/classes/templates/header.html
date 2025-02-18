@@ -19,27 +19,36 @@
 
         <!-- 🔥 Przycisk Chatu -->
         <button id="chat-toggle" class="chat-button" onclick="toggleChat()">💬 Chat</button>
-
         <a href="/logout" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Wyloguj się</a>
     </div>
 </div>
 
-<div id="chat-container">
+<!-- ✅ Przeniesiony poza w3-bar -->
+<div id="notifications-container">
+    <button id="notifications-bell">🔔</button>
+    <div id="notifications-dropdown">
+        <ul id="notifications-list"></ul>
+    </div>
+</div>
+
+
+<!-- 🔥 Okienko chatu -->
+<div id="chat-container" class="chat-hidden">
     <div id="chat-header">
         <h3>Chat</h3>
         <button onclick="toggleChat()">❌</button>
     </div>
-
+    <div id="new-chat">
+        <h4>Nowa rozmowa:</h4>
+        <select id="trainerSelect">
+            <option value="">-- Wybierz trenera --</option>
+        </select>
+        <button onclick="startNewChat()">Rozpocznij</button>
+    </div>
     <div id="chat-rooms">
         <p>Ładowanie rozmów...</p>
     </div>
-
-    <!-- 🔥 Przycisk "Nowa rozmowa" będzie zawsze widoczny -->
-    <div id="new-chat" onclick="openNewChatModal()">
-        Nowa rozmowa ➕
-    </div>
 </div>
-
 
 
 
@@ -65,28 +74,30 @@
     }
 
     /* Stylizacja okienka chatu */
-#chat-container {
-    position: fixed;
-    bottom: 60px;
-    right: 20px;
-    width: 300px;
-    max-height: 400px; /* 🔥 Ograniczenie wysokości */
-    background: white;
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    display: none;
-    overflow: hidden; /* 🔥 Zapobiega rozciąganiu */
-}
+    #chat-container {
+        position: fixed;
+        bottom: 70px;
+        right: 20px;
+        width: 350px;
+        max-height: 500px;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: none;
+        overflow: hidden;
+    }
 
     /* Nagłówek chatu */
-#chat-header {
-    background: #007bff;
-    color: white;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    #chat-header {
+        background: #007bff;
+        color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 16px;
+    }
 
     .close-chat-btn {
         background: none;
@@ -97,11 +108,11 @@
     }
 
     /* Lista pokoi rozmów */
-#chat-rooms {
-    padding: 10px;
-    height: 250px; /* 🔥 Ustaw wysokość na stałą */
-    overflow-y: auto; /* 🔥 Dodaj przewijanie jeśli wiadomości jest dużo */
-}
+    #chat-rooms {
+        padding: 10px;
+        height: 400px;
+        overflow-y: auto;
+    }
 
     .chat-room-link {
         display: block;
@@ -168,21 +179,68 @@
     .send-btn:hover {
         background-color: #0056b3;
     }
-    #new-chat {
-    background-color: #28a745; /* Zielony kolor */
-    color: white;
-    padding: 10px;
-    text-align: center;
+#notifications-container {
+    position: fixed; /* Ustawione na stałe */
+    top: 15px; /* Dopasowane do wysokości nagłówka */
+    right: 20px;
+    display: flex;
+    align-items: center;
+    z-index: 9999; /* Zapewnia, że dropdown jest nad innymi elementami */
+}
+
+#notifications-bell {
+    font-size: 24px;
+    background: none;
+    border: none;
     cursor: pointer;
+    position: relative;
+}
+
+#notifications-bell.new-notifications {
+    color: red; /* Zmienia kolor dzwonka, gdy są nowe powiadomienia */
+}
+
+#notifications-dropdown {
     position: absolute;
-    bottom: 0;
-    width: 100%;
+    top: 40px; /* Dopasowane do dzwonka */
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 250px;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none; /* Ukryte domyślnie */
+    z-index: 99999; /* Upewnia się, że dropdown jest zawsze na wierzchu */
+    border-radius: 5px;
+    padding: 10px;
 }
 
-#new-chat:hover {
-    background-color: #218838;
+#notifications-dropdown.active {
+    display: block; /* Pokazuje dropdown */
+    opacity: 1;
+    transform: translateY(0);
 }
+
+#notifications-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.notification-item:hover {
+    background: #f5f5f5;
+}
+
+
 </style>
-
+<script defer src="/js/notifications.js"></script>
 </body>
 </html>

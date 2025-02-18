@@ -1,41 +1,40 @@
 package com.GoGym.module;
 
 import jakarta.persistence.*;
-import lombok.Data;
-
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Entity
-@Data
 @Table(name = "notifications")
 public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_notification")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;  // Odbiorca powiadomienia
+    @JoinColumn(name = "id_user", nullable = false)
+    private User user;
 
     @Column(name = "message", nullable = false)
     private String message;
 
-    @Column(name = "read", nullable = false)
-    private boolean read;
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private NotificationStatus status;
 
     @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
 
-    public Notification() {
+    public enum NotificationStatus {
+        UNREAD, READ
     }
+
+    public Notification() {}
 
     public Notification(User user, String message) {
         this.user = user;
         this.message = message;
-        this.read = false;
+        this.status = NotificationStatus.UNREAD;
         this.createdAt = new Timestamp(System.currentTimeMillis());
     }
 
@@ -63,12 +62,12 @@ public class Notification {
         this.message = message;
     }
 
-    public boolean isRead() {
-        return read;
+    public NotificationStatus getStatus() {
+        return status;
     }
 
-    public void setRead(boolean read) {
-        this.read = read;
+    public void setStatus(NotificationStatus status) {
+        this.status = status;
     }
 
     public Timestamp getCreatedAt() {

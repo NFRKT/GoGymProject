@@ -13,18 +13,31 @@ public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public void sendNotification(User user, String message) {
-        Notification notification = new Notification(user, message);
+    public void createNotification(User client, User trainer, String status) {
+        String message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getSecondName() +
+                " została " + (status.equals("accepted") ? "zaakceptowana!" : "odrzucona.");
+
+        Notification notification = new Notification(client, message);
         notificationRepository.save(notification);
     }
 
+
     public List<Notification> getUnreadNotifications(User user) {
-        return notificationRepository.findByUserAndReadFalse(user);
+        return notificationRepository.findByUserAndStatus(user, Notification.NotificationStatus.UNREAD);
     }
 
-    public void markNotificationsAsRead(User user) {
-        List<Notification> notifications = notificationRepository.findByUserAndReadFalse(user);
-        notifications.forEach(n -> n.setRead(true));
-        notificationRepository.saveAll(notifications);
+    public void markAsRead(Long id) {
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono powiadomienia"));
+        notification.setStatus(Notification.NotificationStatus.READ);
+        notificationRepository.save(notification);
     }
+
+    public void markAsReadByMessage(String message) {
+        Notification notification = notificationRepository.findByMessage(message)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono powiadomienia"));
+        notification.setStatus(Notification.NotificationStatus.READ);
+        notificationRepository.save(notification);
+    }
+
 }
