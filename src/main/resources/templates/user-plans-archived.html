@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Twoje Archiwalne Plany Treningowe</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset i globalne ustawienia */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    /* Filtry */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .filters input[type="text"],
+    .filters input[type="date"],
+    .filters select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      min-width: 200px;
+    }
+    .filters label {
+      font-size: 14px;
+    }
+    .reset-button {
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    /* Plans Grid */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .plan-each {
+      /* Opcjonalnie możesz dodać margines lub padding */
+    }
+    /* Plan Card */
+    .plan-panel {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .plan-panel:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .plan-panel h3 {
+      margin-bottom: 10px;
+      color: #007bff;
+    }
+    .plan-panel p {
+      margin-bottom: 5px;
+    }
+    .status-container {
+      margin-top: 15px;
+    }
+    .status-text {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .status-text.completed {
+      background-color: #28a745;
+    }
+    .status-text.active {
+      background-color: #ffc107;
+    }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7); /* ciemniejsze tło */
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 80%;
+      overflow-y: auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #007bff;
+      margin-bottom: 20px;
+    }
+    .modal-header h3 {
+      font-size: 24px;
+      color: #007bff;
+    }
+    .close-modal {
+      font-size: 28px;
+      color: #dc3545;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .close-modal:hover {
+      color: #a71d2a;
+    }
+    /* Przyciski wewnątrz modala */
+    .modal-content button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-right: 10px;
+    }
+    .modal-content button:hover {
+      background-color: #0056b3;
+    }
+    /* Przyciski anulowania – opcjonalnie */
+    .modal-content button.cancel-btn {
+      background-color: #6c757d;
+    }
+    .modal-content button.cancel-btn:hover {
+      background-color: #5a6268;
+    }
+    /* Dodatkowy odstęp na dole modala */
+    .modal-content:last-child {
+      margin-bottom: 0;
+    }
+    /* Exercise list */
+    .exercise {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 5px;
+      background-color: #f8f9fa;
+    }
+    .exercise button {
+      padding: 5px 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .status-icon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-circle {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: red;
+    }
+    .status-icon.completed .status-circle { background-color: #28a745; }
+    .status-icon.active .status-circle { background-color: #ffc107; }
+    /* Loading Spinner */
+    .loading-spinner {
+      display: none;
+      border: 4px solid rgba(0,0,0,0.1);
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Szukaj nazwy planu..." />
+    <label for="dateFilter">Data rozpoczęcia:</label>
+    <input type="date" id="dateFilter" />
+    <label for="trainerSelect">Trener:</label>
+    <select id="trainerSelect">
+      <option value="">Wszyscy trenerzy</option>
+      <option th:each="trainer : ${trainers}"
+              th:value="${trainer.firstName + ' ' + trainer.secondName}"
+              th:text="${trainer.firstName + ' ' + trainer.secondName}"></option>
+    </select>
+    <select id="sortSelect">
+      <option value="">Sortuj według...</option>
+      <option value="name">Sortuj według nazwy</option>
+      <option value="startDate">Sortuj według daty rozpoczęcia</option>
+      <option value="status">Sortuj według statusu</option>
+    </select>
+    <label>
+      <input type="checkbox" id="hideCompletedPlans" />
+      Ukryj ukończone plany
+    </label>
+    <button class="reset-button">Resetuj filtry</button>
+  </div>
+
+  <!-- Link do przejścia do widoku aktywnych planów -->
+  <div style="margin-bottom: 20px;">
+    <a th:href="@{'/user-plans?idUser=' + ${idUser}}">
+      Przejdź do aktywnych planów
+    </a>
+  </div>
+
+  <h2>Twoje Archiwalne Plany Treningowe</h2>
+  <div class="plans-grid" th:if="${#lists.isEmpty(archivedPlans)}">
+    <p>Brak dostępnych planów treningowych.</p>
+  </div>
+  <div class="plans-grid">
+    <div class="plan-each" th:each="plan : ${archivedPlans}">
+      <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
+        <h3 class="plan-name" th:text="${plan.name}">Nazwa Planu</h3>
+        <p>
+          <strong>Opis:</strong>
+          <span th:text="${plan.description}">Opis planu...</span>
+        </p>
+        <p>
+          <strong>Data:</strong>
+          <span class="start-date" th:text="${plan.startDate}">Data startu</span> -
+          <span th:text="${plan.endDate}">Data końca</span>
+        </p>
+        <p>
+          <strong>Trener:</strong>
+          <span class="trainer-name" th:text="${plan.trainer.firstName + ' ' + plan.trainer.secondName}">Imię i Nazwisko</span>
+        </p>
+        <div class="status-container">
+          <p>
+            <strong>Status:</strong>
+            <span class="status-text"
+                  th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
+                  th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}"></span>
+          </p>
+        </div>
+      </div>
+      <!-- Modal dla szczegółów planu -->
+      <div class="modal" th:data-plan-id="${plan.idPlan}">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
+            <span class="close-modal">&times;</span>
+          </div>
+          <div class="status-container">
+            <p>
+              <strong>Status planu:</strong>
+              <span id="plan-status" class="status-icon"
+                    th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
+                                <span class="status-circle"></span>
+                            </span>
+            </p>
+          </div>
+          <div th:each="day : ${plan.trainingPlanDays}">
+            <div th:data-day-id="${day.idDay}">
+              <h4>
+                <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
+                <span>-</span>
+                <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
+              </h4>
+              <div class="status-container">
+                <p>
+                  <strong>Status dnia:</strong>
+                  <span id="day-status" class="status-icon"
+                        th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
+                                        <span class="status-circle"></span>
+                                    </span>
+                  <button class="add-to-workout-btn" th:data-day-id="${day.idDay}">
+                    Sprawdzanie...
+                  </button>
+                </p>
+              </div>
+              <p>
+                <strong>Notatki:</strong>
+                <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
+              </p>
+              <div th:if="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).rest and #lists.isEmpty(day.exercises)}">
+                <button class="toggle-rest-day-status" th:data-day-id="${day.idDay}"
+                        th:text="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}">
+                </button>
+              </div>
+              <ul>
+                <li class="exercise" th:each="exercise : ${day.exercises}">
+                                    <span>
+                                        <strong th:text="${exercise.exercise.name}"></strong>
+                                        <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
+                                          - <span th:text="${exercise.sets}"></span> serie,
+                                          <span th:text="${exercise.reps}"></span> powtórzeń,
+                                          <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}"></span>
+                                        </span>
+                                        <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+                                          - <span class="exercise-duration" th:data-seconds="${exercise.duration}" th:text="${exercise.duration}"></span>,
+                                          <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
+                                        </span>
+                                    </span>
+                  <div class="status-container">
+                                        <span id="exercise-status" class="status-icon"
+                                              th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
+                                            <span class="status-circle"></span>
+                                        </span>
+                  </div>
+                  <button class="toggle-exercise-status" th:data-exercise-id="${exercise.id}"
+                          th:text="${exercise.status.name() == 'completed' ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}"></button>
+                  <div class="video-upload-section" th:if="${exercise.videoUrl == null}">
+                    <input type="file" class="video-input" th:data-exercise-id="${exercise.id}" accept="video/*">
+                    <button type="button" class="upload-video-btn">Dodaj film</button>
+                    <input type="text" class="video-link-input" th:data-exercise-id="${exercise.id}" placeholder="Lub wklej link do filmu">
+                    <button type="button" class="add-link-btn">Dodaj link</button>
+                  </div>
+                  <div class="video-preview" th:if="${exercise.videoUrl != null}">
+                    <video th:if="${exercise.videoUrl.contains('cloudinary.com')}"
+                           th:src="${exercise.videoUrl}" controls width="300">
+                      Twoja przeglądarka nie obsługuje odtwarzacza wideo.
+                    </video>
+                    <p th:if="!${exercise.videoUrl.contains('cloudinary.com')}">
+                      <a th:href="${exercise.videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a>
+                    </p>
+                    <button type="button" class="delete-video-btn" th:data-exercise-id="${exercise.id}">Usuń nagranie</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Workout Modal -->
+<div id="workoutModal" class="modal" data-day-id="">
+  <div class="modal-content">
+    <h3>Dodaj trening</h3>
+    <label>Data treningu:</label>
+    <input type="date" id="workoutDate" readonly>
+    <label>Godzina rozpoczęcia:</label>
+    <input type="time" id="startTime">
+    <label>Godzina zakończenia:</label>
+    <input type="time" id="endTime">
+    <label>Intensywność:</label>
+    <select id="intensity">
+      <option value="low">Niska</option>
+      <option value="medium">Średnia</option>
+      <option value="high">Wysoka</option>
+    </select>
+    <label>Notatki:</label>
+    <textarea id="notes"></textarea>
+    <h4>Ćwiczenia:</h4>
+    <div id="exerciseList"></div>
+    <button id="saveWorkout">Zapisz trening</button>
+    <button id="closeWorkoutModal">Anuluj</button>
+  </div>
+</div>
+<script defer src="/js/user-plans.js"></script>
+</body>
+</html>

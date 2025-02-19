@@ -52,6 +52,7 @@
     <div class="dynamic-section">
         <a th:if="${isUser}" href="/client-panel" class="w3-button w3-blue">Panel Klienta</a>
         <a th:if="${isUser}" th:href="@{/user-plans(idUser=${idUser})}" class="w3-button w3-blue">Moje Plany Treningowe</a>
+        <a th:if="${isUser}" th:href="@{/user-plans-archived(idUser=${idUser})}" class="w3-button w3-blue">Plany Treningowe Byłych Trenerów</a>
         <a th:if="${isTrainer}" href="/trainer-panel" class="w3-button w3-green">Panel Trenera</a>
         <a th:if="${isTrainer}" th:href="@{/trainer-plans(idUser=${idUser})}" class="w3-button w3-blue">Plany Treningowe Twoich Podopiecznych</a>
         <a th:if="${isTrainer}" th:href="@{/trainer-plans-archived(idUser=${idUser})}" class="w3-button w3-blue">Plany Treningowe Byłych Klientów</a>

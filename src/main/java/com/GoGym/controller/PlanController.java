@@ -38,17 +38,57 @@ public class PlanController {
     private final NotificationService notificationService;
 
     @GetMapping("/user-plans")
-    public String getUserPlans(@RequestParam Long idUser, Model model) {
+    public String getUserActivePlans(@RequestParam Long idUser, Model model) {
+        // Pobierz wszystkie plany przypisane do klienta
         List<TrainingPlan> plans = trainingPlanService.findPlansByIdClient(idUser);
-        // Sortowanie: ukończone plany na końcu
-        plans.sort(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed));
-        List<TrainerClient> clientTrainers = trainerClientService.getClientTrainers(idUser); // Pobranie klientów trenera
-        List<User> trainers = clientTrainers.stream().map(TrainerClient::getTrainer).toList(); // Przekształcenie na listę użytkowników
 
-        model.addAttribute("plans", plans);
-        model.addAttribute("trainers", trainers);  // Dodanie klientów do modelu
-        return "user-plans"; // Zwraca widok user-plans.html
+        // Pobierz aktywnych trenerów (tych, z którymi wciąż współpracujesz)
+        List<TrainerClient> clientTrainers = trainerClientService.getClientTrainers(idUser);
+        // Wyciągnij ich identyfikatory
+        List<Long> activeTrainerIds = clientTrainers.stream()
+                .map(tc -> tc.getTrainer().getIdUser())
+                .toList();
+
+        // Filtruj plany – zostaw tylko te, które pochodzą od aktywnych trenerów
+        List<TrainingPlan> activeTrainerPlans = plans.stream()
+                .filter(plan -> activeTrainerIds.contains(plan.getTrainer().getIdUser()))
+                .toList();
+
+        // Opcjonalnie – przekaż listę aktywnych trenerów do widoku
+        List<User> trainers = clientTrainers.stream()
+                .map(TrainerClient::getTrainer)
+                .toList();
+
+        model.addAttribute("activePlans", activeTrainerPlans);
+        model.addAttribute("trainers", trainers);
+        model.addAttribute("idUser", idUser);
+
+        return "user-plans"; // widok dla planów trenerów, z którymi współpracujesz
     }
+
+    @GetMapping("/user-plans-archived")
+    public String getUserArchivedPlans(@RequestParam Long idUser, Model model) {
+        // Pobierz wszystkie plany przypisane do klienta
+        List<TrainingPlan> plans = trainingPlanService.findPlansByIdClient(idUser);
+
+        // Pobierz aktywnych trenerów (tych, z którymi wciąż współpracujesz)
+        List<TrainerClient> clientTrainers = trainerClientService.getClientTrainers(idUser);
+        // Wyciągnij ich identyfikatory
+        List<Long> activeTrainerIds = clientTrainers.stream()
+                .map(tc -> tc.getTrainer().getIdUser())
+                .toList();
+
+        // Filtruj plany – zostaw te, których trener NIE jest już aktywny (współpraca zakończona)
+        List<TrainingPlan> archivedPlans = plans.stream()
+                .filter(plan -> !activeTrainerIds.contains(plan.getTrainer().getIdUser()))
+                .toList();
+
+        model.addAttribute("archivedPlans", archivedPlans);
+        model.addAttribute("idUser", idUser);
+
+        return "user-plans-archived"; // widok dla planów trenerów, z którymi współpraca została zakończona
+    }
+
 
     @GetMapping("/trainer-plans")
     public String getTrainerPlans(@RequestParam Long idUser, Model model) {
