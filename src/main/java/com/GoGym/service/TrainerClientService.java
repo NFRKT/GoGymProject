@@ -44,11 +44,8 @@ public class TrainerClientService {
         return trainerClientRepository.findByClient_IdUser(clientId);
     }
 
-    public List<User> getAllTrainers() {
-        return userRepository.findAllTrainers();
-    }
     public List<User> findAllTrainers() {
-        return userRepository.findAllByUserType(User.UserType.TRENER);
+        return userRepository.findAllByUserType(User.UserType.TRAINER);
     }
 
     @Transactional

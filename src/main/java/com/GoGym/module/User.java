@@ -57,7 +57,7 @@ public class User {
     }
 
     public enum UserType {
-        UŻYTKOWNIK, TRENER
+        CLIENT, TRAINER, ADMIN
     }
 
     public User() {

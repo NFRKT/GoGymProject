@@ -80,8 +80,8 @@
 
         <label for="UserType">Typ użytkownika:</label>
         <select class="w3-input w3-border" id="UserType" th:field="*{userType}">
-          <option value="UŻYTKOWNIK">Użytkownik</option>
-          <option value="TRENER">Trener</option>
+          <option value="CLIENT">Użytkownik</option>
+          <option value="TRAINER">Trener</option>
         </select><br/>
 
         <!-- Sekcja widoczna tylko dla trenerów -->
@@ -256,9 +256,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const trainerInputs = trainerFields.querySelectorAll("input");
 
     function toggleTrainerFields() {
-        const isTrainer = userTypeSelect.value === "TRENER";
+        const isTrainer = userTypeSelect.value === "TRAINER";
 
-        // Pokaż pola dla trenerów, jeśli wybrano "TRENER"
+        // Pokaż pola dla trenerów, jeśli wybrano "TRAINER"
         trainerFields.style.display = isTrainer ? "block" : "none";
 
         // Włącz lub wyłącz pola trenerów

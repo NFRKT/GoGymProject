@@ -31,12 +31,15 @@ public class HomeController {
         if (auth != null && auth.isAuthenticated()) {
             // Zakładamy, że role to "ROLE_USER" i "ROLE_TRAINER"
             boolean isUser = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("UŻYTKOWNIK"));
+                    .anyMatch(a -> a.getAuthority().equals("CLIENT"));
             boolean isTrainer = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("TRENER"));
+                    .anyMatch(a -> a.getAuthority().equals("TRAINER"));
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ADMIN"));
 
             model.addAttribute("isUser", isUser);
             model.addAttribute("isTrainer", isTrainer);
+            model.addAttribute("isAdmin", isAdmin);
             model.addAttribute("idUser", idUser);
         }
         model.addAttribute("username", username);

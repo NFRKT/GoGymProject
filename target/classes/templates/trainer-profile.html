@@ -45,6 +45,60 @@
     <p><strong>Data urodzenia:</strong> <span th:text="${user.birthDate != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : 'Nie podano'}"></span></p>
     <p><strong>Płeć:</strong> <span th:text="${not #strings.isEmpty(user.gender)} ? ${user.gender} : 'Nie podano'"></span></p>
 </div>
+<div class="w3-container w3-padding-32">
+    <h3>Opinie i oceny</h3>
+
+    <!-- Średnia ocena -->
+    <div>
+        <strong>Średnia ocena:</strong> <span id="averageRating">Brak ocen</span> ⭐
+    </div>
+
+    <!-- Formularz dodawania oceny (tylko jeśli użytkownik jeszcze nie ocenił) -->
+    <form id="reviewForm" th:if="${!isOwnProfile}">
+        <label>Ocena:</label>
+        <select name="rating">
+            <option value="5">⭐⭐⭐⭐⭐</option>
+            <option value="4">⭐⭐⭐⭐</option>
+            <option value="3">⭐⭐⭐</option>
+            <option value="2">⭐⭐</option>
+            <option value="1">⭐</option>
+        </select>
+        <label>Komentarz:</label>
+        <textarea name="comment"></textarea>
+        <button type="submit">Dodaj opinię</button>
+    </form>
+    <!-- Jeśli użytkownik już ocenił trenera, pokaż jego opinię na górze -->
+    <div id="userReviewContainer" style="display: none;">
+        <h4>Twoja opinia</h4>
+        <ul id="userReviewList"></ul>
+    </div>
+    <!-- Formularz edycji opinii (ukryty domyślnie) -->
+    <div id="editReviewForm" style="display: none;">
+        <h4>Edytuj swoją opinię</h4>
+        <label>Ocena:</label>
+        <select id="editRating">
+            <option value="5">⭐⭐⭐⭐⭐</option>
+            <option value="4">⭐⭐⭐⭐</option>
+            <option value="3">⭐⭐⭐</option>
+            <option value="2">⭐⭐</option>
+            <option value="1">⭐</option>
+        </select>
+        <label>Komentarz:</label>
+        <textarea id="editComment"></textarea>
+        <button onclick="saveEditedReview()">Zapisz zmiany</button>
+        <button onclick="cancelEdit()">Anuluj</button>
+    </div>
+    <!-- Lista opinii (paginacja) -->
+    <h4>Opinie</h4>
+    <ul id="reviewList"></ul>
+    <div>
+        <button id="prevPage" onclick="changePage(-1)" disabled>Poprzednia</button>
+        <span id="currentPage">1</span>
+        <button id="nextPage" onclick="changePage(1)">Następna</button>
+    </div>
+
+
+</div>
 
 <!-- Informacje zawodowe -->
 <div class="w3-container w3-padding-32">
@@ -169,6 +223,165 @@
         <button type="submit" class="w3-button w3-green w3-small">Dodaj doświadczenie</button>
     </form>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let trainerId = [[${user.idUser}]];
+    let loggedInUserId = [[${isAuthenticated} ? ${userId} : -1]];
+    let currentPage = 1;
+    let totalReviews = 0;
+    let reviewsPerPage = 5;
+
+    let reviewList = document.getElementById("reviewList");
+    let userReviewList = document.getElementById("userReviewList");
+    let averageRating = document.getElementById("averageRating");
+    let reviewForm = document.getElementById("reviewForm");
+    let editReviewForm = document.getElementById("editReviewForm");
+    let editRating = document.getElementById("editRating");
+    let editComment = document.getElementById("editComment");
+    let userReviewContainer = document.getElementById("userReviewContainer");
+    let editingReviewId = null;
+
+    function fetchReviews() {
+        fetch(`/trainer/reviews/${trainerId}`)
+            .then(response => response.json())
+            .then(data => {
+                reviewList.innerHTML = "";
+                userReviewList.innerHTML = "";
+                if (data.length === 0) {
+                    reviewList.innerHTML = "<p>Brak opinii.</p>";
+                    averageRating.textContent = "Brak ocen";
+                    return;
+                }
+
+                let totalRating = 0;
+                let userReview = null;
+                let otherReviews = [];
+
+                // Podziel opinie na własną i resztę
+                data.forEach(review => {
+                    totalRating += review.rating;
+                    if (review.client.idUser === loggedInUserId) {
+                        userReview = review;
+                    } else {
+                        otherReviews.push(review);
+                    }
+                });
+
+                // Wyświetl własną opinię na górze (jeśli istnieje)
+                if (userReview) {
+                    let li = createReviewElement(userReview, true);
+                    userReviewList.appendChild(li);
+                    userReviewContainer.style.display = "block";
+                } else {
+                    userReviewContainer.style.display = "none";
+                }
+
+                // Paginacja dla pozostałych opinii
+                totalReviews = otherReviews.length;
+                displayReviews(otherReviews);
+
+                let avg = (totalRating / data.length).toFixed(1);
+                averageRating.textContent = `${avg} ⭐`;
+            })
+            .catch(error => console.error("Błąd pobierania opinii:", error));
+    }
+
+    function createReviewElement(review, isUserReview) {
+        let li = document.createElement("li");
+        li.innerHTML = `<strong>${review.client.firstName} ${review.client.secondName}:</strong>
+                        ${"⭐".repeat(review.rating)}
+                        <p>${review.comment ? review.comment : "Brak komentarza"}</p>
+                        <small>${new Date(review.createdAt).toLocaleDateString()}</small>`;
+
+        // Jeśli to opinia zalogowanego użytkownika, dodaj przyciski Edytuj i Usuń
+        if (isUserReview) {
+            let editButton = document.createElement("button");
+            editButton.textContent = "Edytuj";
+            editButton.onclick = function () { editReview(review); };
+            li.appendChild(editButton);
+
+            let deleteButton = document.createElement("button");
+            deleteButton.textContent = "Usuń";
+            deleteButton.onclick = function () { deleteReview(review.id); };
+            li.appendChild(deleteButton);
+        }
+
+        return li;
+    }
+
+    function displayReviews(reviews) {
+        reviewList.innerHTML = "";
+        let start = (currentPage - 1) * reviewsPerPage;
+        let end = Math.min(start + reviewsPerPage, totalReviews);
+
+        for (let i = start; i < end; i++) {
+            let li = createReviewElement(reviews[i], false);
+            reviewList.appendChild(li);
+        }
+
+        document.getElementById("currentPage").textContent = currentPage;
+        document.getElementById("prevPage").disabled = currentPage === 1;
+        document.getElementById("nextPage").disabled = end >= totalReviews;
+    }
+
+    window.changePage = function (direction) {
+        currentPage += direction;
+        fetchReviews();
+    };
+
+    window.editReview = function(review) {
+        editingReviewId = review.id;
+        editRating.value = review.rating;
+        editComment.value = review.comment || "";
+        editReviewForm.style.display = "block";
+        window.scrollTo({ top: editReviewForm.offsetTop, behavior: "smooth" });
+    };
+
+    window.saveEditedReview = function() {
+        if (!editingReviewId) return;
+
+        let formData = new URLSearchParams();
+        formData.append("reviewId", editingReviewId);
+        formData.append("rating", editRating.value);
+        formData.append("comment", editComment.value);
+
+        fetch("/trainer/reviews/update", {
+            method: "PUT",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            editReviewForm.style.display = "none";
+            fetchReviews();
+        })
+        .catch(error => console.error("Błąd edycji opinii:", error));
+    };
+
+    window.cancelEdit = function() {
+        editReviewForm.style.display = "none";
+        editingReviewId = null;
+    };
+
+    window.deleteReview = function(reviewId) {
+        if (!confirm("Czy na pewno chcesz usunąć swoją opinię?")) return;
+
+        fetch(`/trainer/reviews/delete/${reviewId}`, {
+            method: "DELETE"
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            fetchReviews();
+        })
+        .catch(error => console.error("Błąd usuwania opinii:", error));
+    };
+
+    fetchReviews();
+});
+</script>
+
+
 
 
 <script>

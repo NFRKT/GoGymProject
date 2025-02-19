@@ -47,7 +47,7 @@ public class UserService {
 
         User savedUser = userRepository.save(newUser);
 
-        if (userTypeEnum == User.UserType.TRENER) {
+        if (userTypeEnum == User.UserType.TRAINER) {
             TrainerDetails trainerDetails = new TrainerDetails();
             trainerDetails.setIdTrainer(Math.toIntExact(savedUser.getIdUser()));
             trainerDetails.setStartDate(userDTO.getStartDate());
