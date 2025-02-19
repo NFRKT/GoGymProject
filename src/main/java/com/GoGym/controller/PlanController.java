@@ -52,17 +52,49 @@ public class PlanController {
 
     @GetMapping("/trainer-plans")
     public String getTrainerPlans(@RequestParam Long idUser, Model model) {
-        List<TrainingPlan> plans = trainingPlanService.findPlansByIdTrainer(idUser);
-        plans.sort(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed));
+        List<TrainingPlan> allPlans = trainingPlanService.findPlansByIdTrainer(idUser);
 
-        List<TrainerClient> trainerClients = trainerClientService.getTrainerClients(idUser); // Pobranie klientów trenera
-        List<User> clients = trainerClients.stream().map(TrainerClient::getClient).toList(); // Przekształcenie na listę użytkowników
+        // Pobranie listy aktywnych klientów
+        List<TrainerClient> activeTrainerClients = trainerClientService.getTrainerClients(idUser);
+        List<Long> activeClientIds = activeTrainerClients.stream()
+                .map(tc -> tc.getClient().getIdUser())
+                .toList();
 
-        model.addAttribute("plans", plans);
-        model.addAttribute("clients", clients);  // Dodanie klientów do modelu
+        // Filtrowanie planów aktywnych klientów
+        List<TrainingPlan> activeClientPlans = allPlans.stream()
+                .filter(plan -> activeClientIds.contains(plan.getIdClient()))
+                .toList();
 
-        return "trainer-plans";
+        model.addAttribute("activePlans", activeClientPlans);
+        model.addAttribute("clients", activeTrainerClients.stream().map(TrainerClient::getClient).toList());
+        model.addAttribute("idUser", idUser);
+
+        return "trainer-plans"; // lub "trainer-plans" jeśli tak nazywasz widok aktywny
     }
+
+    @GetMapping("/trainer-plans-archived")
+    public String getArchivedTrainerPlans(@RequestParam Long idUser, Model model) {
+        List<TrainingPlan> allPlans = trainingPlanService.findPlansByIdTrainer(idUser);
+
+        // Pobranie listy aktywnych klientów
+        List<TrainerClient> activeTrainerClients = trainerClientService.getTrainerClients(idUser);
+        List<Long> activeClientIds = activeTrainerClients.stream()
+                .map(tc -> tc.getClient().getIdUser())
+                .toList();
+
+        // Filtrowanie planów byłych klientów
+        List<TrainingPlan> archivedClientPlans = allPlans.stream()
+                .filter(plan -> !activeClientIds.contains(plan.getIdClient()))
+                .toList();
+
+        model.addAttribute("archivedPlans", archivedClientPlans);
+        model.addAttribute("idUser", idUser);
+
+        return "trainer-plans-archived";
+    }
+
+
+
 
 
     @GetMapping("/{id}/create-plan")

@@ -1,20 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-  <title>Moje Plany Treningowe</title>
-  <style>
+    <title>Aktywne Plany Treningowe</title>
+    <style>
     .body {
       font-family: Arial, sans-serif;
       margin: 20px;
     }
-
     .plans-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 20px;
     }
-
     .plan-panel {
       border: 1px solid #ccc;
       border-radius: 10px;
@@ -23,11 +20,9 @@
       cursor: pointer;
       text-align: center;
     }
-
     .plan-panel h3 {
       color: #333;
     }
-
     /* Modal */
     .modal {
       display: none;
@@ -40,7 +35,6 @@
       justify-content: center;
       align-items: center;
     }
-
     .modal-content {
       background: white;
       padding: 20px;
@@ -49,7 +43,6 @@
       max-height: 80%;
       overflow-y: auto;
     }
-
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -57,94 +50,67 @@
       border-bottom: 1px solid #ddd;
       margin-bottom: 20px;
     }
-
     .modal-header h3 {
       margin: 0;
     }
-
     .close-modal {
       cursor: pointer;
       font-size: 20px;
       color: red;
     }
-
-.exercise {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-
+    .exercise {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #ddd;
+    }
     .status-icon {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
     .status-circle {
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background-color: red; /* Domyślnie czerwony (nieukończony) */
+      background-color: red;
     }
-
     .status-icon.completed .status-circle {
-      background-color: green; /* Ukończony */
+      background-color: green;
     }
-
     .status-icon.active .status-circle {
-      background-color: orange; /* Kolor dla aktywnych planów */
+      background-color: orange;
     }
     .plan-panel .status-container {
       margin-top: 10px;
     }
-
     .plan-panel .status-text {
       font-weight: bold;
       padding: 5px 10px;
       border-radius: 5px;
       color: white;
     }
-
     .plan-panel .status-text:empty {
       display: none;
     }
-
-    .plan-panel .status-text[th\\:text="'UKOŃCZONY'"] {
+    .status-text.completed {
       background-color: green;
     }
-
-    .plan-panel .status-text[th\\:text="'AKTYWNY'"] {
+    .status-text.active {
       background-color: orange;
     }
-    .status-text {
-      font-weight: bold;
-      padding: 5px 10px;
-      border-radius: 5px;
-      color: white;
-    }
-
-    .status-text.completed {
-      background-color: green; /* Tło dla statusu UKOŃCZONY */
-    }
-
-    .status-text.active {
-      background-color: orange; /* Tło dla statusu AKTYWNY */
-    }
     .edit-button {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #007BFF;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        margin-top: 10px;
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 10px;
     }
-
     .edit-button:hover {
-        background-color: #0056b3;
+      background-color: #0056b3;
     }
     .reset-button {
       background-color: #6c757d;
@@ -155,322 +121,264 @@
       cursor: pointer;
       margin-left: 10px;
     }
-
     .reset-button:hover {
       background-color: #5a6268;
     }
-    </style>
+  </style>
 </head>
 <body>
+<!-- Filtry i sortowanie -->
 <div>
-  <input type="text" id="searchInput" placeholder="Szukaj nazwy planu..." onkeyup="filterPlans()">
-  <label for="dateFilter">Data rozpoczęcia:</label>
-  <input type="date" id="dateFilter" onchange="filterPlans()">
-  <label for="clientSelect">Klient:</label>
-  <select id="clientSelect" onchange="filterPlans()">
-    <option value="">Wszyscy klienci</option>
-    <option th:each="client : ${clients}"
-            th:value="${client.firstName + ' ' + client.secondName}"
-            th:text="${client.firstName + ' ' + client.secondName}">
-    </option>
-  </select>
-  <select id="sortSelect" onchange="sortPlans()">
-    <option value="" >Sortuj według...</option>
-    <option value="name">Sortuj według nazwy</option>
-    <option value="startDate">Sortuj według daty rozpoczęcia</option>
-    <option value="status">Sortuj według statusu</option>
-  </select>
-  <label>
-    <input type="checkbox" id="hideCompletedPlans" onchange="filterPlans()"> Ukryj ukończone plany
-  </label>
-  <button onclick="resetFilters()" class="reset-button">Resetuj filtry</button>
+    <input type="text" id="searchInput" placeholder="Szukaj nazwy planu..." onkeyup="filterPlans()">
+    <label for="dateFilter">Data rozpoczęcia:</label>
+    <input type="date" id="dateFilter" onchange="filterPlans()">
+    <label for="clientSelect">Klient:</label>
+    <select id="clientSelect" onchange="filterPlans()">
+        <option value="">Wszyscy klienci</option>
+        <option th:each="client : ${clients}"
+                th:value="${client.firstName + ' ' + client.secondName}"
+                th:text="${client.firstName + ' ' + client.secondName}">
+        </option>
+    </select>
+    <select id="sortSelect" onchange="sortPlans()">
+        <option value="">Sortuj według...</option>
+        <option value="name">Sortuj według nazwy</option>
+        <option value="startDate">Sortuj według daty rozpoczęcia</option>
+        <option value="status">Sortuj według statusu</option>
+    </select>
+    <label>
+        <input type="checkbox" id="hideCompletedPlans" onchange="filterPlans()"> Ukryj ukończone plany
+    </label>
+    <button onclick="resetFilters()" class="reset-button">Resetuj filtry</button>
 </div>
-<h2>Twoje Plany Treningowe</h2>
-<div class="plans-grid" th:if="${#lists.isEmpty(plans)}">
-  <p>Brak dostępnych planów treningowych.</p>
-</div>
-<div class="plans-grid">
-  <div class="plan-each" th:each="plan : ${plans}">
-    <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
-      <h3 class="plan-name" th:text="${plan.name}">Nazwa Planu</h3>
-      <p>
-        <strong>Opis:</strong>
-        <span th:text="${plan.description}">Opis planu...</span>
-      </p>
-      <p>
-        <strong>Data:</strong>
-        <span class="start-date" th:text="${plan.startDate}">Data startu</span>-
-        <span th:text="${plan.endDate}">Data końca</span>
-      </p>
-      <p>
-        <strong>Klient:</strong>
-        <span class="client-name" th:text="${plan.client.firstName + ' ' + plan.client.secondName}">Imię i Nazwisko</span>
-      </p>
-      <div class="status-container">
-        <p>
-          <strong>Status:</strong>
-          <span class="status-text"
-                th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
-                th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
-                    </span>
-        </p>
-      </div>
-      <!-- Nowy przycisk edycji -->
-      <div>
-        <a th:href="@{'/trainer-plans/edit/' + ${plan.idPlan}}" class="edit-button">Edytuj</a>
-      </div>
-      <div>
-        <form th:action="@{'/trainer-plans/delete/' + ${plan.idPlan}}" method="post"
-              onsubmit="return confirm('Czy na pewno chcesz usunąć ten plan?');">
-          <button type="button" class="delete-button"
-                  onclick="deletePlan(this)"
-                  th:data-plan-id="${plan.idPlan}"
-                  style="background-color: #dc3545; color: white; padding: 10px 20px; border-radius: 5px;">
-            Usuń
-          </button>
 
-        </form>
-      </div>
-    </div>
-    <!-- Modal dla szczegółów planu -->
-    <div class="modal" th:data-plan-id="${plan.idPlan}">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
-          <span class="close-modal">&times;</span>
-        </div>
-        <div class="status-container">
-          <p>
-            <strong>Status planu:</strong>
-            <span id="plan-status" class="status-icon"
-                  th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
-                          <span class="status-circle"></span>
-                        </span>
-          </p>
-        </div>
-        <div th:each="day : ${plan.trainingPlanDays}">
-          <div th:data-day-id="${day.idDay}">
-            <h4>
-              <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
-              <span>-</span>
-              <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
-            </h4>
-            <div class="status-container">
-              <p>
-                <strong>Status dnia:</strong>
-                <span id="day-status" class="status-icon"
-                      th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
-                                  <span class="status-circle"></span>
-                                </span>
-              </p>
-            </div>
+<!-- Link przechodzący do widoku archiwalnych planów -->
+<div style="margin: 20px 0;">
+    <a th:href="@{'/trainer-plans-archived?idUser=' + ${idUser}}">
+        Przejdź do planów byłych podopiecznych
+    </a>
+</div>
+
+<h2>Aktywne Plany Treningowe</h2>
+<div class="plans-grid" th:if="${#lists.isEmpty(activePlans)}">
+    <p>Brak dostępnych aktywnych planów treningowych.</p>
+</div>
+<div class="plans-grid" id="activePlansGrid" th:if="${!#lists.isEmpty(activePlans)}">
+    <div class="plan-each" th:each="plan : ${activePlans}">
+        <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
+            <h3 class="plan-name" th:text="${plan.name}">Nazwa Planu</h3>
+            <p><strong>Opis:</strong> <span th:text="${plan.description}">Opis planu...</span></p>
             <p>
-              <strong>Notatki:</strong>
-              <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
+                <strong>Data:</strong>
+                <span class="start-date" th:text="${plan.startDate}">Data startu</span> -
+                <span th:text="${plan.endDate}">Data końca</span>
             </p>
-            <ul>
-              <li class="exercise" th:each="exercise : ${day.exercises}">
-    <span>
-        <strong th:text="${exercise.exercise.name}">Nazwa ćwiczenia</strong>
-
-      <!-- Obsługa ćwiczeń siłowych -->
-        <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
-            - <span th:text="${exercise.sets}"></span> serie,
-            <span th:text="${exercise.reps}"></span> powtórzeń,
-            <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
-        </span>
-
-      <!-- Obsługa ćwiczeń cardio -->
-<span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
-    - <span class="exercise-duration"
-            th:data-seconds="${exercise.duration}"
-            th:text="${exercise.duration}"></span>,
-    <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
-</span>
-    </span>
-
-                <!-- Status ćwiczenia -->
-                <div class="status-container">
-        <span id="exercise-status" class="status-icon"
-              th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
-            <span class="status-circle"></span>
-        </span>
-                </div>
-                  <!-- 🔥 Sekcja podglądu nagrania -->
-                  <div class="video-preview" th:if="${exercise.videoUrl != null}">
-                      <!-- Jeśli nagranie jest na Cloudinary – pokazujemy osadzone wideo -->
-                      <video th:if="${exercise.videoUrl.contains('cloudinary.com')}"
-                             th:src="${exercise.videoUrl}" controls width="300">
-                          Twoja przeglądarka nie obsługuje odtwarzacza wideo.
-                      </video>
-
-                      <!-- Jeśli to link YouTube lub inne źródło – pokazujemy tylko link -->
-                      <p th:if="!${exercise.videoUrl.contains('cloudinary.com')}">
-                          <a th:href="${exercise.videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a>
-                      </p>
-                  </div>
-              </li>
-
-            </ul>
-          </div>
+            <p>
+                <strong>Klient:</strong>
+                <span class="client-name" th:text="${plan.client.firstName + ' ' + plan.client.secondName}">Imię i Nazwisko</span>
+            </p>
+            <div class="status-container">
+                <p>
+                    <strong>Status:</strong>
+                    <span class="status-text"
+                          th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
+                          th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+            </span>
+                </p>
+            </div>
+            <div>
+                <a th:href="@{'/trainer-plans/edit/' + ${plan.idPlan}}" class="edit-button">Edytuj</a>
+            </div>
+            <div>
+                <form th:action="@{'/trainer-plans/delete/' + ${plan.idPlan}}" method="post"
+                      onsubmit="return confirm('Czy na pewno chcesz usunąć ten plan?');">
+                    <button type="button" class="delete-button"
+                            onclick="deletePlan(this)"
+                            th:data-plan-id="${plan.idPlan}"
+                            style="background-color: #dc3545; color: white; padding: 10px 20px; border-radius: 5px;">
+                        Usuń
+                    </button>
+                </form>
+            </div>
         </div>
-      </div>
+        <!-- Modal ze szczegółami planu -->
+        <div class="modal" th:data-plan-id="${plan.idPlan}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="status-container">
+                    <p>
+                        <strong>Status planu:</strong>
+                        <span id="plan-status" class="status-icon"
+                              th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
+                <span class="status-circle"></span>
+              </span>
+                    </p>
+                </div>
+                <div th:each="day : ${plan.trainingPlanDays}">
+                    <div th:data-day-id="${day.idDay}">
+                        <h4>
+                            <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
+                            -
+                            <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
+                        </h4>
+                        <div class="status-container">
+                            <p>
+                                <strong>Status dnia:</strong>
+                                <span id="day-status" class="status-icon"
+                                      th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
+                    <span class="status-circle"></span>
+                  </span>
+                            </p>
+                        </div>
+                        <p>
+                            <strong>Notatki:</strong>
+                            <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
+                        </p>
+                        <ul>
+                            <li class="exercise" th:each="exercise : ${day.exercises}">
+                  <span>
+                    <strong th:text="${exercise.exercise.name}">Nazwa ćwiczenia</strong>
+                    <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
+                      - <span th:text="${exercise.sets}"></span> serie,
+                      <span th:text="${exercise.reps}"></span> powtórzeń,
+                      <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
+                    </span>
+                    <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+                      - <span class="exercise-duration"
+                              th:data-seconds="${exercise.duration}"
+                              th:text="${exercise.duration}"></span>,
+                      <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
+                    </span>
+                  </span>
+                                <div class="status-container">
+                    <span id="exercise-status" class="status-icon"
+                          th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
+                      <span class="status-circle"></span>
+                    </span>
+                                </div>
+                                <div class="video-preview" th:if="${exercise.videoUrl != null}">
+                                    <video th:if="${exercise.videoUrl.contains('cloudinary.com')}"
+                                           th:src="${exercise.videoUrl}" controls width="300">
+                                        Twoja przeglądarka nie obsługuje odtwarzacza wideo.
+                                    </video>
+                                    <p th:if="!${exercise.videoUrl.contains('cloudinary.com')}">
+                                        <a th:href="${exercise.videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a>
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
+<!-- Skrypty JS -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        originalPlansOrder = Array.from(document.querySelectorAll(".plan-each"));
-        // Otwieranie modali
-        document.querySelectorAll('.plan-panel').forEach(panel => {
-            panel.addEventListener('click', () => {
-                // Sprawdza, czy kliknięty element jest przyciskiem lub linkiem
-                if (event.target.closest("button") || event.target.closest("a")) {
-                    return; // Jeśli kliknięto przycisk lub link, nie otwieramy modala
-                }
-                const planId = panel.getAttribute('data-plan-id');
-                const modal = document.querySelector(`.modal[data-plan-id="${planId}"]`);
-                modal.style.display = 'flex';
-            });
+      document.querySelectorAll('.plan-panel').forEach(panel => {
+        panel.addEventListener('click', (event) => {
+          if (event.target.closest("button") || event.target.closest("a")) return;
+          const planId = panel.getAttribute('data-plan-id');
+          const modal = document.querySelector(`.modal[data-plan-id="${planId}"]`);
+          modal.style.display = 'flex';
         });
-
-    // Obsługa zamykania modali: kliknięcie na X, kliknięcie poza modalem, ESC
-    document.addEventListener('click', (event) => {
-        const modal = event.target.closest('.modal'); // Sprawdza, czy kliknięto modal
-        if (
-            event.target.classList.contains('close-modal') || // Kliknięcie w X
-            (modal && event.target === modal) // Kliknięcie poza zawartością modala
-        ) {
-            closeModal(modal);
+      });
+      document.addEventListener('click', (event) => {
+        const modal = event.target.closest('.modal');
+        if (event.target.classList.contains('close-modal') || (modal && event.target === modal)) {
+          closeModal(modal);
         }
-    });
-
-    // Zamykanie modali po naciśnięciu ESC
-    document.addEventListener('keydown', (event) => {
+      });
+      document.addEventListener('keydown', (event) => {
         if (event.key === "Escape") {
-            document.querySelectorAll('.modal').forEach(closeModal);
+          document.querySelectorAll('.modal').forEach(closeModal);
         }
-    });
-
-    function closeModal(modal) {
+      });
+      function closeModal(modal) {
         if (modal) modal.style.display = 'none';
-    }
+      }
     });
     function deletePlan(button) {
-    let planId = button.getAttribute("data-plan-id");
-
-    if (confirm("Czy na pewno chcesz usunąć ten plan?")) {
-        fetch(`/trainer-plans/delete/${planId}`, {
-            method: "POST"
-        })
-        .then(response => {
+      let planId = button.getAttribute("data-plan-id");
+      if (confirm("Czy na pewno chcesz usunąć ten plan?")) {
+        fetch(`/trainer-plans/delete/${planId}`, { method: "POST" })
+          .then(response => {
             if (response.ok) {
-                alert("Plan został usunięty.");
-                location.reload(); // Odśwież stronę po usunięciu
+              alert("Plan został usunięty.");
+              location.reload();
             } else {
-                return response.text().then(text => { throw new Error(text); });
+              return response.text().then(text => { throw new Error(text); });
             }
-        })
-        .catch(error => {
+          })
+          .catch(error => {
             console.error("Błąd podczas usuwania planu:", error);
             alert("Wystąpił błąd podczas usuwania planu.");
-        });
+          });
+      }
     }
-}
-
-   function filterPlans() {
-        let input = document.getElementById("searchInput").value.toLowerCase();
-        let selectedDate = document.getElementById("dateFilter").value;
-        let selectedClient = document.getElementById("clientSelect").value.toLowerCase();
-        let plans = document.querySelectorAll(".plan-each");
-        let hideCompleted = document.getElementById("hideCompletedPlans").checked;
-        plans.forEach(plan => {
-            let planName = plan.querySelector(".plan-name").innerText.toLowerCase();
-            let startDate = plan.querySelector(".start-date").innerText.trim();
-            let clientName = plan.querySelector(".client-name").innerText.toLowerCase();
-            let statusText = plan.querySelector(".status-text").innerText.toLowerCase();
-            let isCompleted = statusText.includes("ukończony");
-            let matchesSearch = planName.includes(input);
-            let matchesDate = selectedDate === "" || startDate === selectedDate;
-            let matchesClient = selectedClient === "" || clientName.includes(selectedClient);
-            if (matchesSearch && matchesDate && matchesClient && (!hideCompleted || !isCompleted)) {
-                plan.style.display = "block";
-            } else {
-                plan.style.display = "none";
-            }
-        });
+    function filterPlans() {
+      let input = document.getElementById("searchInput").value.toLowerCase();
+      let selectedDate = document.getElementById("dateFilter").value;
+      let selectedClient = document.getElementById("clientSelect").value.toLowerCase();
+      let plans = document.querySelectorAll(".plan-each");
+      let hideCompleted = document.getElementById("hideCompletedPlans").checked;
+      plans.forEach(plan => {
+        let planName = plan.querySelector(".plan-name").innerText.toLowerCase();
+        let startDate = plan.querySelector(".start-date").innerText.trim();
+        let clientName = plan.querySelector(".client-name").innerText.toLowerCase();
+        let statusText = plan.querySelector(".status-text").innerText.toLowerCase();
+        let isCompleted = statusText.includes("ukończony");
+        let matchesSearch = planName.includes(input);
+        let matchesDate = selectedDate === "" || startDate === selectedDate;
+        let matchesClient = selectedClient === "" || clientName.includes(selectedClient);
+        plan.style.display = (matchesSearch && matchesDate && matchesClient && (!hideCompleted || !isCompleted)) ? "block" : "none";
+      });
     }
-
-function sortPlans() {
-    let sortBy = document.getElementById("sortSelect").value;
-    let container = document.querySelector(".plans-grid");
-    let plans = Array.from(document.querySelectorAll(".plan-each"));
-
-    // Posortowanie planów
-    plans.sort((a, b) => {
-        if (sortBy === "name") {
-            let nameA = a.querySelector(".plan-name").innerText;
-            let nameB = b.querySelector(".plan-name").innerText;
-            return naturalSort(nameA, nameB);
-        } else if (sortBy === "startDate") {
-            let dateA = new Date(a.querySelector(".start-date").innerText.trim());
-            let dateB = new Date(b.querySelector(".start-date").innerText.trim());
-            return dateA - dateB;
-        } else if (sortBy === "status") {
+    function sortPlans() {
+      let sortBy = document.getElementById("sortSelect").value;
+      document.querySelectorAll(".plans-grid").forEach(container => {
+        let plans = Array.from(container.querySelectorAll(".plan-each"));
+        plans.sort((a, b) => {
+          if (sortBy === "name") {
+            return a.querySelector(".plan-name").innerText.localeCompare(b.querySelector(".plan-name").innerText, undefined, { numeric: true, sensitivity: 'base' });
+          } else if (sortBy === "startDate") {
+            return new Date(a.querySelector(".start-date").innerText.trim()) - new Date(b.querySelector(".start-date").innerText.trim());
+          } else if (sortBy === "status") {
             return a.querySelector(".status-text").innerText.localeCompare(b.querySelector(".status-text").innerText);
-        }
-    });
-
-    // Zresetowanie zawartości plans-grid
-    container.innerHTML = '';
-
-    // Dodanie posortowanych elementów z powrotem do DOM
-    plans.forEach(plan => container.appendChild(plan));
+          }
+        });
+        container.innerHTML = '';
+        plans.forEach(plan => container.appendChild(plan));
+      });
     }
-
-
-        function naturalSort(a, b) {
-        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-    }
-    let originalPlansOrder = []; // Przechowuje oryginalny układ planów
-
-
     function resetFilters() {
-        // Resetuj pole wyszukiwania
-        document.getElementById("searchInput").value = "";
-        document.getElementById("dateFilter").value = "";
-        document.getElementById("sortSelect").value = "";
-        document.getElementById("clientSelect").value = "";
-        document.getElementById("hideCompletedPlans").checked = false;
-        let container = document.querySelector(".plans-grid");
-        container.innerHTML = ""; // Wyczyść obecne plany
-        originalPlansOrder.forEach(plan => container.appendChild(plan));
-        let plans = document.querySelectorAll(".plan-each");
-        plans.forEach(plan => plan.style.display = "block");
+      document.getElementById("searchInput").value = "";
+      document.getElementById("dateFilter").value = "";
+      document.getElementById("sortSelect").value = "";
+      document.getElementById("clientSelect").value = "";
+      document.getElementById("hideCompletedPlans").checked = false;
+      document.querySelectorAll(".plan-each").forEach(plan => plan.style.display = "block");
     }
-
     function formatDuration(seconds) {
-    if (isNaN(seconds) || seconds === null) return "Brak danych";
-
-    let hours = Math.floor(seconds / 3600);
-    let minutes = Math.floor((seconds % 3600) / 60);
-    let remainingSeconds = seconds % 60;
-
-    let formattedTime = hours > 0
+      if (isNaN(seconds) || seconds === null) return "Brak danych";
+      let hours = Math.floor(seconds / 3600);
+      let minutes = Math.floor((seconds % 3600) / 60);
+      let remainingSeconds = seconds % 60;
+      return hours > 0
         ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
         : `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-
-    return formattedTime;
-}
-
-// Automatyczna konwersja wszystkich wartości `duration` na czytelny format
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".exercise-duration").forEach(el => {
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".exercise-duration").forEach(el => {
         let seconds = parseInt(el.getAttribute("data-seconds"), 10);
         el.textContent = formatDuration(seconds);
+      });
     });
-});
-
-</script>
+  </script>
 </body>
 </html>
