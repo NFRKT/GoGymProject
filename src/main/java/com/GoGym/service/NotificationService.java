@@ -4,6 +4,7 @@ import com.GoGym.module.Notification;
 import com.GoGym.module.User;
 import com.GoGym.repository.NotificationRepository;
 import com.GoGym.repository.TrainerClientRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,16 +45,16 @@ public class NotificationService {
                 message = "Twój trener " + trainer.getFirstName() + " " + trainer.getSecondName() + " edytował Twój plan: " + additionalInfo + ".";
                 break;
             case "new_request":
-                message = "Nowa prośba o współpracę od " + client.getFirstName() + " " + client.getSecondName() + ".";
+                message = "Nowa prośba o współpracę od " + trainer.getFirstName() + " " + trainer.getSecondName() + ".";
                 break;
             case "day_updated":
-                message = "Twój klient " + client.getFirstName() + " " + client.getSecondName() + " ukończył dzień treningowy: " + additionalInfo  + ".";
+                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył dzień treningowy: " + additionalInfo  + ".";
                 break;
             case "plan_completed":
-                message = "Twój klient " + client.getFirstName() + " " + client.getSecondName() + " ukończył plan treningowy: " + additionalInfo + ".";
+                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył plan treningowy: " + additionalInfo + ".";
                 break;
             case "rest_day_completed":
-                message = "Twój klient " + client.getFirstName() + " " + client.getSecondName() + " ukończył dzień treningowy:" + additionalInfo + ".";
+                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył dzień regeneracyjny:" + additionalInfo + ".";
                 break;
             default:
                 throw new IllegalArgumentException("Nieznany status powiadomienia: " + status);
@@ -68,14 +69,14 @@ public class NotificationService {
         return notificationRepository.findByUserOrderByCreatedAtDesc(user);
     }
 
-
+    @Transactional
     public void markAsRead(Long id) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono powiadomienia"));
         notification.setStatus(Notification.NotificationStatus.READ);
         notificationRepository.save(notification);
     }
-
+    @Transactional
     public void deleteNotification(Long id) {
         notificationRepository.deleteById(id);
     }

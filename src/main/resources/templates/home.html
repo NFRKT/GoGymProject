@@ -59,6 +59,8 @@
         <a th:if="${isTrainer}" th:href="@{/trainer/profile}" class="w3-button w3-blue w3-round">Mój profil trenera</a>
         <a th:if="${isUser}" th:href="@{/client/profile}" class="w3-button w3-blue w3-round">Mój profil klienta</a>
         <a th:href="@{/listTrainers}" class="w3-button w3-blue w3-round">Nasi trenerzy!</a>
+        <a th:if="${isAdmin}" th:href="@{/admin/panel}" class="w3-button w3-red">Panel Administratora</a>
+
 
     </div>
     <p class="w3-large">Monitoruj swój budżet, realizuj cele i kontroluj wydatki. 💰📊</p>

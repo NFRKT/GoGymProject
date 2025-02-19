@@ -28,7 +28,7 @@ public class HomeController {
         String username = auth.getName(); // Login zalogowanego użytkownika
         Long idUser = UserRepository.findByEmail(username).get().getIdUser();
 
-        if (auth != null && auth.isAuthenticated()) {
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
             // Zakładamy, że role to "ROLE_USER" i "ROLE_TRAINER"
             boolean isUser = auth.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("CLIENT"));

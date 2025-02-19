@@ -50,11 +50,15 @@ function fetchNotifications() {
                     viewButton.addEventListener("click", function (event) {
                         event.stopPropagation();
 
-                        if (notification.message.includes("stworzył dla Ciebie nowy plan") ||
-                            notification.message.includes("edytował Twój plan")) {
+                        if (notification.message.includes("Twój trener")) {
                             window.location.href = `/user-plans?idUser=${notification.userId}`;
-                        } else {
+                        } else if(notification.message.includes("Twoja prośba o współpracę z trenerem") ||
+                            notification.message.includes("zakończył z Tobą współpracę")){
                             window.location.href = "/client-panel";
+                        }else if(notification.message.includes("Twój klient")){
+                            window.location.href = `/trainer-plans?idUser=${notification.userId}`;
+                        }else {
+                            window.location.href = "/trainer-panel";
                         }
                     });
 

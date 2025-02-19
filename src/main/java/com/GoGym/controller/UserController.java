@@ -1,35 +1,24 @@
 package com.GoGym.controller;
+import com.GoGym.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import com.GoGym.dto.UserRegistrationDTO;
-
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
-@ComponentScan({ "com.GoGym.*" })
+@AllArgsConstructor
 public class UserController {
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
     @Lazy
-    private com.GoGym.service.UserService UserService;
-    private final com.GoGym.service.UserService userService;
-    @Autowired
-    private com.GoGym.repository.UserRepository UserRepository;
+    private final UserService userService;
 
-    public UserController(com.GoGym.service.UserService userService) {
-        this.userService = userService;
-    }
-
-    @GetMapping("/Login")
+    @GetMapping("/login")
     public String Login(Model model) {
         model.addAttribute("message", "Logowanie");
         return "login";

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Panel Administratora</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .admin-header { text-align: center; padding: 10px; background-color: #007BFF; color: white; }
+        .section-title { margin-top: 20px; font-size: 20px; }
+        .delete-button { background-color: red; color: white; padding: 5px 10px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="admin-header">
+    <h2>Panel Administratora</h2>
+</div>
+
+<h3 class="section-title">Lista Klientów</h3>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Email</th>
+        <th>Akcja</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="client : ${clients}">
+        <td th:text="${client.idUser}"></td>
+        <td th:text="${client.firstName}"></td>
+        <td th:text="${client.secondName}"></td>
+        <td th:text="${client.email}"></td>
+        <td>
+            <button class="delete-button" th:data-id="${client.idUser}" onclick="deleteUser(this)">Usuń</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h3 class="section-title">Lista Trenerów</h3>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Email</th>
+        <th>Akcja</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="trainer : ${trainers}">
+        <td th:text="${trainer.idUser}"></td>
+        <td th:text="${trainer.firstName}"></td>
+        <td th:text="${trainer.secondName}"></td>
+        <td th:text="${trainer.email}"></td>
+        <td>
+            <button class="delete-button" th:data-id="${trainer.idUser}" onclick="deleteUser(this)">Usuń</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+        function deleteUser(button) {
+            let userId = button.getAttribute("data-id");
+            if (!confirm("Czy na pewno chcesz usunąć tego użytkownika?")) return;
+
+            fetch(`/admin/delete-user/${userId}`, {
+                method: "DELETE"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Użytkownik został usunięty.");
+                    location.reload();
+                } else {
+                    alert("Błąd usuwania użytkownika.");
+                }
+            })
+            .catch(error => console.error("Błąd:", error));
+        }
+    </script>
+
+</body>
+</html>

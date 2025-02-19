@@ -6,8 +6,8 @@ import com.GoGym.dto.UserRegistrationDTO;
 import com.GoGym.repository.TrainerSpecializationRepository;
 import com.GoGym.repository.UserRepository;
 import com.GoGym.repository.TrainerDetailsRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -16,21 +16,16 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
-@ComponentScan({ "com.GoGym.repository.UserRepository" })
+@AllArgsConstructor
 public class UserService {
-
-
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private TrainerDetailsRepository trainerDetailsRepository;
     @Autowired
-    private TrainerSpecializationRepository specializationRepository;
-
+    private TrainerSpecializationRepository trainerSpecializationRepository;
 
     public User registerUser(UserRegistrationDTO userDTO) {
         Optional<User> existingUser = userRepository.findByEmail(userDTO.getEmail());
@@ -47,9 +42,9 @@ public class UserService {
 
         User savedUser = userRepository.save(newUser);
 
-        if (userTypeEnum == User.UserType.TRAINER) {
+        if (userTypeEnum == User.UserType.TRAINER   ) {
             TrainerDetails trainerDetails = new TrainerDetails();
-            trainerDetails.setIdTrainer(Math.toIntExact(savedUser.getIdUser()));
+            trainerDetails.setIdTrainer(savedUser.getIdUser().intValue());
             trainerDetails.setStartDate(userDTO.getStartDate());
             trainerDetails.setPhoneNumber(userDTO.getPhoneNumber());
             trainerDetails.setWorkArea(userDTO.getWorkArea());
@@ -61,7 +56,7 @@ public class UserService {
                     TrainerSpecialization spec = new TrainerSpecialization();
                     spec.setTrainer(savedTrainer);
                     spec.setSpecialization(specialization);
-                    specializationRepository.save(spec);
+                    trainerSpecializationRepository.save(spec);
                 }
             }
 
@@ -71,13 +66,33 @@ public class UserService {
     }
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("Nie znaleziono użytkownika o podanym adresie email: " + email));
+                .orElseThrow(() -> new NoSuchElementException("Nie znaleziono użytkownika o podanym adresie email: " + email));
     }
-
     public User findById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Nie znaleziono użytkownika"));
     }
 
+    public List<User> getUsersByType(User.UserType userType) {
+        if (userType == null) {
+            throw new IllegalArgumentException("Typ użytkownika nie może być pusty.");
+        }
+        return userRepository.findAllByUserType(userType);
+    }
 
+    public boolean deleteUserById(Long id) {
+        if (userRepository.existsById(id)) {
+            User user = userRepository.findById(id).orElseThrow();
+            if (user.getUserType() == User.UserType.TRAINER) {
+                trainerDetailsRepository.deleteById(id);
+                trainerSpecializationRepository.deleteAllByTrainer_IdTrainer(id);
+            }
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 }

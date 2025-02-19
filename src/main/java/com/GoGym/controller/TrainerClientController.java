@@ -1,56 +1,44 @@
 package com.GoGym.controller;
-
 import com.GoGym.module.*;
-import com.GoGym.repository.*;
 import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.RequestService;
 import com.GoGym.service.TrainerClientService;
-import com.GoGym.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
+@AllArgsConstructor
 public class TrainerClientController {
-    private TrainerClientService trainerClientService;
-    private RequestService requestService;
-    private TrainerClientRepository trainerClientRepository;
-
-    private UserService userService;
-
     @Autowired
-    public TrainerClientController(TrainerClientService trainerClientService, RequestService requestService, TrainerClientRepository trainerClientRepository) {
-        this.trainerClientService = trainerClientService;
-        this.requestService = requestService;
-        this.trainerClientRepository = trainerClientRepository;
-    }
-
+    private TrainerClientService trainerClientService;
+    @Autowired
+    private RequestService requestService;
+    @PreAuthorize("hasAuthority('CLIENT')")
     @GetMapping("/client-panel")
     public String clientPanel(Model model, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
         Long clientId = loggedInUser.getIdUser();
 
-        // Pobierz listę obecnych trenerów klienta
         List<TrainerClient> clientTrainers = trainerClientService.getClientTrainers(clientId);
         List<Long> currentTrainerIds = clientTrainers.stream()
                 .map(tc -> tc.getTrainer().getIdUser())
                 .toList();
 
-        // Lista trenerów z oczekującymi zapytaniami
         List<Long> pendingRequestTrainerIds = requestService.getPendingRequestsByClient(clientId).stream()
                 .map(request -> request.getTrainer().getIdUser())
                 .toList();
 
-        // Pobierz listę wszystkich dostępnych trenerów i odfiltruj obecnych
         List<User> availableTrainers = trainerClientService.findAllTrainers().stream()
                 .filter(trainer -> !currentTrainerIds.contains(trainer.getIdUser()))
                 .toList();
@@ -58,29 +46,30 @@ public class TrainerClientController {
         model.addAttribute("clientTrainers", clientTrainers);
         model.addAttribute("trainers", availableTrainers);
         model.addAttribute("clientId", clientId);
-        model.addAttribute("pendingTrainerIds", pendingRequestTrainerIds); // ID trenerów z oczekującymi zapytaniami
-        model.addAttribute("currentTrainerIds", currentTrainerIds); // ID obecnych trenerów
-
-        // Dodanie listy wysłanych zapytań
+        model.addAttribute("pendingTrainerIds", pendingRequestTrainerIds);
+        model.addAttribute("currentTrainerIds", currentTrainerIds);
         List<Request> requests = requestService.getRequestsByClientId(clientId);
         model.addAttribute("requests", requests);
-
         List<TrainerClient> trainerClients = trainerClientService.getClientTrainers(clientId);
         model.addAttribute("clientTrainers", clientTrainers);
 
-        return "client-panel"; // Załaduj widok Thymeleaf
+        return "client-panel";
     }
+
+    @PreAuthorize("hasAuthority('TRAINER')")
     @GetMapping("/trainer-panel")
     public String trainerPanel(Authentication authentication, Model model) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User loggedInTrainer = userDetails.getUser(); // Pobranie użytkownika z CustomUserDetails
-        Long trainerId = loggedInTrainer.getIdUser(); // Pobranie ID trenera
+        User loggedInTrainer = userDetails.getUser();
+        Long trainerId = loggedInTrainer.getIdUser();
 
         List<TrainerClient> trainerClients = trainerClientService.getTrainerClients(trainerId);
         model.addAttribute("trainerClients", trainerClients);
         model.addAttribute("requests", requestService.getRequestsForTrainer(trainerId));
         return "trainer-panel";
     }
+
+    @PreAuthorize("hasAuthority('TRAINER')")
     @PostMapping("/rejectClient")
     public ResponseEntity<Map<String, String>> rejectClient(@RequestParam Long clientId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -95,8 +84,7 @@ public class TrainerClientController {
         return ResponseEntity.ok(response);
     }
 
-
-
+    @PreAuthorize("hasAuthority('CLIENT')")
     @PostMapping("/rejectTrainer")
     public ResponseEntity<Map<String, String>> rejectTrainer(@RequestParam Long trainerId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -111,7 +99,6 @@ public class TrainerClientController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ Pobranie listy klientów trenera
     @GetMapping("/trainer/clients")
     public ResponseEntity<List<Map<String, String>>> getTrainerClients(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -128,7 +115,6 @@ public class TrainerClientController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ Pobranie listy trenerów klienta
     @GetMapping("/client/trainers")
     public ResponseEntity<List<Map<String, String>>> getClientTrainers(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -145,13 +131,11 @@ public class TrainerClientController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/listTrainers")
     public String listTrainers(Model model) {
         List<User> trainers = trainerClientService.findAllTrainers();
         model.addAttribute("trainers", trainers);
         return "trainer-list";
     }
-
-
-
 }
