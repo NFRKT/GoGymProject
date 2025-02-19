@@ -4,11 +4,14 @@ import com.GoGym.module.*;
 import com.GoGym.repository.TrainerDetailsRepository;
 import com.GoGym.repository.TrainerExperienceRepository;
 import com.GoGym.repository.TrainerSpecializationRepository;
+import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.TrainerClientService;
 import com.GoGym.service.TrainerDetailsService;
 import com.GoGym.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -57,8 +60,10 @@ public class TrainerProfileController {
 
 
     @GetMapping("/{trainerId}")
-    public String viewTrainerProfile(@PathVariable Long trainerId, Model model, Principal principal) {
-        User loggedUser = userService.findByEmail(principal.getName());
+    public String viewTrainerProfile(@PathVariable Long trainerId, Model model, Authentication authentication) {
+        boolean isAuthenticated = authentication != null && authentication.getPrincipal() instanceof CustomUserDetails;
+        Long loggedInUserId = isAuthenticated ? ((CustomUserDetails) authentication.getPrincipal()).getUser().getIdUser() : null;
+
         User trainer = userService.findById(trainerId);
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(trainerId).orElse(null);
         List<TrainerSpecialization> specializations = trainerSpecializationRepository.findByTrainer(trainerDetails);
@@ -68,12 +73,13 @@ public class TrainerProfileController {
         model.addAttribute("trainerDetails", trainerDetails);
         model.addAttribute("specializations", specializations);
         model.addAttribute("experiences", experiences);
-
-        // 🔥 Sprawdzamy, czy użytkownik ogląda swój profil
-        model.addAttribute("isOwnProfile", loggedUser.getIdUser().equals(trainerId));
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("userId", loggedInUserId);
+        model.addAttribute("isOwnProfile", isAuthenticated && loggedInUserId != null && loggedInUserId.equals(trainerId));
 
         return "trainer-profile";
     }
+
 
     @PostMapping("/upload")
     @ResponseBody
