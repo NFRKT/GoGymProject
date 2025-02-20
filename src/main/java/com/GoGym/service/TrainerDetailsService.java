@@ -1,4 +1,5 @@
 package com.GoGym.service;
+
 import com.GoGym.module.TrainerDetails;
 import com.GoGym.module.TrainerExperience;
 import com.GoGym.module.User;
@@ -13,11 +14,15 @@ import java.util.Optional;
 @Service
 public class TrainerDetailsService {
 
-    @Autowired
-    private TrainerDetailsRepository trainerDetailsRepository;
+    private final TrainerDetailsRepository trainerDetailsRepository;
+    private final TrainerExperienceRepository trainerExperienceRepository;
 
     @Autowired
-    private TrainerExperienceRepository trainerExperienceRepository;
+    public TrainerDetailsService(TrainerDetailsRepository trainerDetailsRepository,
+                                 TrainerExperienceRepository trainerExperienceRepository) {
+        this.trainerDetailsRepository = trainerDetailsRepository;
+        this.trainerExperienceRepository = trainerExperienceRepository;
+    }
 
     public TrainerDetails getTrainerDetails(User user) {
         return trainerDetailsRepository.findByUser(user);
@@ -29,8 +34,7 @@ public class TrainerDetailsService {
 
     public List<TrainerExperience> getTrainerExperience(Long trainerId) {
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(trainerId).orElse(null);
-
-        return trainerDetails != null ? trainerExperienceRepository.findByTrainer(trainerDetails) : null;
+        return trainerDetails != null ? trainerExperienceRepository.findByTrainer(trainerDetails) : List.of();
     }
 
     public void addTrainerExperience(TrainerExperience experience) {
@@ -48,5 +52,4 @@ public class TrainerDetailsService {
     public void updateTrainerExperience(TrainerExperience experience) {
         trainerExperienceRepository.save(experience);
     }
-
 }

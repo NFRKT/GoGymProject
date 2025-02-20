@@ -6,21 +6,22 @@ import com.GoGym.repository.NotificationRepository;
 import com.GoGym.repository.TrainerClientRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class NotificationService {
 
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
     private final TrainerClientRepository trainerClientRepository;
+
     public void createNotification(User client, User trainer, String status) {
-        createNotification(client, trainer, status, null); // Przekazujemy `null` jako domyślną nazwę planu
+        createNotification(client, trainer, status, null);
     }
-    public void createNotification(User client, User trainer, String status, String additionalInfo ) {
+
+    public void createNotification(User client, User trainer, String status, String additionalInfo) {
         String message;
         if (status.equals("day_updated") || status.equals("plan_completed") || status.equals("rest_day_completed")) {
             boolean isStillWorkingTogether = trainerClientRepository.existsByTrainerAndClient(trainer, client);
@@ -54,7 +55,7 @@ public class NotificationService {
                 message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył plan treningowy: " + additionalInfo + ".";
                 break;
             case "rest_day_completed":
-                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył dzień regeneracyjny:" + additionalInfo + ".";
+                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył dzień regeneracyjny: " + additionalInfo + ".";
                 break;
             default:
                 throw new IllegalArgumentException("Nieznany status powiadomienia: " + status);
@@ -63,7 +64,6 @@ public class NotificationService {
         Notification notification = new Notification(client, message);
         notificationRepository.save(notification);
     }
-
 
     public List<Notification> getAllNotifications(User user) {
         return notificationRepository.findByUserOrderByCreatedAtDesc(user);
@@ -76,10 +76,9 @@ public class NotificationService {
         notification.setStatus(Notification.NotificationStatus.READ);
         notificationRepository.save(notification);
     }
+
     @Transactional
     public void deleteNotification(Long id) {
         notificationRepository.deleteById(id);
     }
-
-
 }

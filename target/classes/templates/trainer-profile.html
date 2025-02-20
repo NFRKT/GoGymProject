@@ -183,8 +183,16 @@
             (Data: <span class="experience-date" th:text="${experience.graduationDate != null ? #dates.format(experience.graduationDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>)
 
             <div th:if="${experience.certificationFile}">
-                <img th:src="@{'/uploads/certifications/' + ${experience.certificationFile}}" width="100" alt="Certyfikat" class="experience-cert"/>
+                <span th:if="${#strings.endsWith(experience.certificationFile, '.pdf')}">
+                   <a th:href="@{'/uploads/certifications/' + ${experience.certificationFile}}" target="_blank">
+                       Otwórz certyfikat (PDF)
+                   </a>
+                </span>
+                            <span th:if="${!#strings.endsWith(experience.certificationFile, '.pdf')}">
+                   <img th:src="@{'/uploads/certifications/' + ${experience.certificationFile}}" width="100" alt="Certyfikat" class="experience-cert"/>
+                </span>
             </div>
+
 
             <button onclick="toggleEditExperience(this)" class="w3-button w3-blue w3-small" th:if="${isOwnProfile}">Edytuj</button>
             <button th:attr="onclick='deleteExperience(' + ${experience.id} + ', this)'" class="w3-button w3-red w3-small" th:if="${isOwnProfile}">Usuń</button>
@@ -241,6 +249,30 @@ document.addEventListener("DOMContentLoaded", function () {
     let userReviewContainer = document.getElementById("userReviewContainer");
     let editingReviewId = null;
 
+    if (reviewForm) {
+        reviewForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // 🔥 Blokuje domyślne odświeżenie strony
+
+            let formData = new FormData(reviewForm);
+            formData.append("trainerId", trainerId);
+
+            fetch("/trainer/reviews/add", {
+                method: "POST",
+                body: new URLSearchParams(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("Błąd: " + data.error);
+                } else {
+                    alert(data.message);
+                    fetchReviews(); // 🔥 Odśwież listę opinii
+                    reviewForm.reset(); // 🔥 Wyczyść formularz po dodaniu opinii
+                }
+            })
+            .catch(error => console.error("Błąd dodawania opinii:", error));
+        });
+    }
     function fetchReviews() {
         fetch(`/trainer/reviews/${trainerId}`)
             .then(response => response.json())
@@ -285,6 +317,7 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(error => console.error("Błąd pobierania opinii:", error));
     }
+    fetchReviews();
 
     function createReviewElement(review, isUserReview) {
         let li = document.createElement("li");
@@ -539,7 +572,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     newLi.innerHTML = `
                         <span class="experience-name">${data.graduationName}</span>
                         (Data: <span class="experience-date">${data.graduationDate}</span>)
-                        ${data.certificationFile ? `<br><img src="/uploads/certifications/${data.certificationFile}" width="100" alt="Certyfikat" class="experience-cert">` : ''}
+                        ${
+                          data.certificationFile
+                            ? (data.certificationFile.endsWith('.pdf')
+                                 ? `<br><a href="/uploads/certifications/${data.certificationFile}" target="_blank">Otwórz certyfikat (PDF)</a>`
+                                 : `<br><img src="/uploads/certifications/${data.certificationFile}" width="100" alt="Certyfikat" class="experience-cert">`
+                               )
+                            : ''
+                        }
                         <button onclick="toggleEditExperience(this)" class="w3-button w3-blue w3-small">Edytuj</button>
                         <button onclick="deleteExperience(${data.experienceId}, this)" class="w3-button w3-red w3-small">Usuń</button>
                         <form class="edit-experience-form w3-padding-16" style="display:none;">
@@ -583,14 +623,36 @@ document.addEventListener("DOMContentLoaded", function () {
                     li.querySelector(".experience-date").textContent = data.graduationDate;
 
                     if (data.certificationFile) {
-                        let img = li.querySelector(".experience-cert");
-                        if (!img) {
-                            img = document.createElement("img");
-                            img.classList.add("experience-cert");
-                            img.width = 100;
-                            li.appendChild(img);
+                        if (data.certificationFile.endsWith('.pdf')) {
+                            let link = li.querySelector(".experience-cert-link");
+                            if (!link) {
+                                link = document.createElement("a");
+                                link.classList.add("experience-cert-link");
+                                link.target = "_blank";
+                                li.appendChild(link);
+                            }
+                            link.href = "/uploads/certifications/" + data.certificationFile;
+                            link.textContent = "Otwórz certyfikat (PDF)";
+                            // Jeśli wcześniej był obrazek, usuń go
+                            const img = li.querySelector(".experience-cert");
+                            if (img) {
+                                img.remove();
+                            }
+                        } else {
+                            let img = li.querySelector(".experience-cert");
+                            if (!img) {
+                                img = document.createElement("img");
+                                img.classList.add("experience-cert");
+                                img.width = 100;
+                                li.appendChild(img);
+                            }
+                            img.src = "/uploads/certifications/" + data.certificationFile;
+                            // Jeśli wcześniej był link, usuń go
+                            const link = li.querySelector(".experience-cert-link");
+                            if (link) {
+                                link.remove();
+                            }
                         }
-                        img.src = "/uploads/certifications/" + data.certificationFile;
                     }
 
                     form.style.display = "none";

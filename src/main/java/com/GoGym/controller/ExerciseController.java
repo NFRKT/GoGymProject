@@ -9,18 +9,15 @@ import com.GoGym.service.ExerciseService;
 import com.GoGym.repository.ExerciseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 
 @Controller
 public class ExerciseController {
@@ -31,13 +28,21 @@ public class ExerciseController {
     private final EquipmentService equipmentService;
 
     @Autowired
-    public ExerciseController(ExerciseService exerciseService, ExerciseRepository exerciseRepository, BodyPartService bodyPartService, EquipmentService equipmentService) {
+    public ExerciseController(ExerciseService exerciseService,
+                              ExerciseRepository exerciseRepository,
+                              BodyPartService bodyPartService,
+                              EquipmentService equipmentService) {
         this.exerciseService = exerciseService;
         this.exerciseRepository = exerciseRepository;
         this.bodyPartService = bodyPartService;
         this.equipmentService = equipmentService;
     }
 
+    // ******************************
+    // Widoki (HTML)
+    // ******************************
+
+    // Widok listy ćwiczeń
     @GetMapping("/exercises")
     public String getExercises(
             @RequestParam(defaultValue = "0") int page,
@@ -47,10 +52,10 @@ public class ExerciseController {
             @RequestParam(required = false) String name,
             Model model) {
 
-        int pageSize = 9; // Ustawienie na 9 elementów na stronę
+        int pageSize = 9; // 9 elementów na stronę
         Pageable pageable = PageRequest.of(page, pageSize);
 
-        // Konwersja difficulty na Enum
+        // Konwersja difficulty na Enum (jeśli podano)
         Exercise.Difficulty difficultyEnum = null;
         if (difficulty != null && !difficulty.isEmpty()) {
             try {
@@ -60,15 +65,14 @@ public class ExerciseController {
             }
         }
 
-        // Pobieranie listy części ciała
+        // Pobieramy listy części ciała i sprzętów
         List<BodyPart> bodyParts = bodyPartService.findAll();
         model.addAttribute("bodyParts", bodyParts);
 
-        // Pobieranie listy sprzętów
         List<Equipment> equipments = equipmentService.findAll();
         model.addAttribute("equipments", equipments);
 
-        // Filtrowanie z paginacją
+        // Filtrowanie ćwiczeń z paginacją
         Page<Exercise> exercisesPage = exerciseRepository.filter(
                 difficultyEnum,
                 (bodyPart != null && !bodyPart.isEmpty()) ? bodyPart : null,
@@ -85,37 +89,48 @@ public class ExerciseController {
         model.addAttribute("equipment", equipment);
         model.addAttribute("name", name);
 
-
         return "exercises-list";
     }
 
+    // Widok szczegółów ćwiczenia
     @GetMapping("/exercise/{id}")
     public String getExerciseDetails(@PathVariable Long id, Model model) {
         Exercise exercise = exerciseRepository.findById(id)
-              .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ćwiczenia o ID: " + id));
-
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ćwiczenia o ID: " + id));
         model.addAttribute("exercise", exercise);
         return "exercise-details";
     }
 
-    @GetMapping
+    // ******************************
+    // REST API (prefiks /api/exercises)
+    // ******************************
+
+    // Pobranie wszystkich ćwiczeń (JSON)
+    @GetMapping("/api/exercises")
+    @ResponseBody
     public List<Exercise> getAllExercises() {
         return exerciseService.getAllExercises();
     }
 
-    @GetMapping("/{id}")
+    // Pobranie ćwiczenia po ID (JSON)
+    @GetMapping("/api/exercises/{id}")
+    @ResponseBody
     public ResponseEntity<Exercise> getExerciseById(@PathVariable Long id) {
         return exerciseService.getExerciseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    // Tworzenie nowego ćwiczenia
+    @PostMapping("/api/exercises")
+    @ResponseBody
     public Exercise createExercise(@RequestBody Exercise exercise) {
         return exerciseService.createExercise(exercise);
     }
 
-    @PutMapping("/{id}")
+    // Aktualizacja ćwiczenia
+    @PutMapping("/api/exercises/{id}")
+    @ResponseBody
     public ResponseEntity<Exercise> updateExercise(@PathVariable Long id, @RequestBody Exercise updatedExercise) {
         try {
             return ResponseEntity.ok(exerciseService.updateExercise(id, updatedExercise));
@@ -124,7 +139,9 @@ public class ExerciseController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    // Usuwanie ćwiczenia
+    @DeleteMapping("/api/exercises/{id}")
+    @ResponseBody
     public ResponseEntity<Void> deleteExercise(@PathVariable Long id) {
         exerciseService.deleteExercise(id);
         return ResponseEntity.noContent().build();

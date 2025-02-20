@@ -25,14 +25,13 @@ public class StatisticsService {
         List<Workout> workouts = workoutRepository.findByUserOrderByWorkoutDateDesc(user);
         Map<String, Object> stats = new HashMap<>();
 
-        // 🔹 Najczęściej wykonywane ćwiczenia (ogólnie)
+        // Najczęściej wykonywane ćwiczenia (ogólnie)
         Map<String, Long> exerciseFrequency = workouts.stream()
                 .flatMap(w -> w.getWorkoutExercises().stream())
                 .collect(Collectors.groupingBy(e -> e.getExercise().getName(), Collectors.counting()));
 
         List<Map.Entry<String, Long>> mostCommonExercises = exerciseFrequency.entrySet().stream()
-                .sorted(Comparator
-                        .comparing(Map.Entry<String, Long>::getValue, Comparator.reverseOrder())
+                .sorted(Comparator.comparing(Map.Entry<String, Long>::getValue, Comparator.reverseOrder())
                         .thenComparing(Map.Entry::getKey))
                 .limit(5)
                 .toList();
@@ -49,15 +48,12 @@ public class StatisticsService {
                 .sorted(Comparator.comparing(Map.Entry<String, Long>::getValue, Comparator.reverseOrder())
                         .thenComparing(Map.Entry::getKey))
                 .limit(5)
-                .map(entry -> List.of(entry.getKey(), String.valueOf(entry.getValue()))) // `entry.getKey()` = nazwa ćwiczenia, `entry.getValue()` = liczba razy
+                .map(entry -> List.of(entry.getKey(), String.valueOf(entry.getValue())))
                 .toList();
 
         stats.put("mostCommonExercisesInMonth", mostCommonExercisesInMonth);
 
-
-
-
-        // 🔹 Największy ciężar dla ćwiczeń siłowych (z datą treningu)
+        // Największy ciężar dla ćwiczeń siłowych (z datą treningu)
         Map<String, Map.Entry<Double, LocalDate>> maxWeightExercises = new HashMap<>();
 
         for (Workout workout : workouts) {
@@ -74,12 +70,11 @@ public class StatisticsService {
         }
 
         stats.put("maxWeightExercises", maxWeightExercises.entrySet().stream()
-                .sorted(Comparator
-                        .comparing((Map.Entry<String, Map.Entry<Double, LocalDate>> e) -> e.getValue().getKey(), Comparator.reverseOrder())
+                .sorted(Comparator.comparing((Map.Entry<String, Map.Entry<Double, LocalDate>> e) -> e.getValue().getKey(), Comparator.reverseOrder())
                         .thenComparing(Map.Entry::getKey))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new)));
 
-        // 🔹 Najdłuższy trening cardio
+        // Najdłuższy trening cardio
         Optional<WorkoutExercise> longestCardio = workouts.stream()
                 .flatMap(w -> w.getWorkoutExercises().stream())
                 .filter(e -> e.getExercise().getType() == Exercise.ExerciseType.CARDIO)
@@ -88,7 +83,7 @@ public class StatisticsService {
         longestCardio.ifPresent(e -> stats.put("longestCardioFormatted", formatDuration(e.getDuration())));
         stats.put("longestCardio", longestCardio.map(WorkoutExerciseDTO::new).orElse(null));
 
-        // 🔹 Ilość treningów w miesiącu
+        // Ilość treningów w miesiącu
         long workoutsCount = workouts.stream()
                 .filter(w -> w.getWorkoutDate().getYear() == year && w.getWorkoutDate().getMonthValue() == month)
                 .count();
@@ -98,7 +93,7 @@ public class StatisticsService {
         return stats;
     }
 
-    // 🔹 Funkcja konwertująca sekundy na `hh:mm:ss`
+    // Funkcja konwertująca sekundy na format hh:mm:ss
     private String formatDuration(Integer seconds) {
         if (seconds == null || seconds <= 0) return "00:00:00";
         int hours = seconds / 3600;

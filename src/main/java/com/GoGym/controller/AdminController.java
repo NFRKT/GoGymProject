@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
-
+@PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
     private final UserService userService;

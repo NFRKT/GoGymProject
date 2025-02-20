@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Controller
 public class GlobalExceptionHandler implements ErrorController {
 
@@ -33,4 +35,17 @@ public class GlobalExceptionHandler implements ErrorController {
     public String handleAccessDeniedException() {
         return "redirect:/error/403"; // 🔥 Poprawne przekierowanie na 403
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleIllegalState(IllegalStateException ex) {
+        return Map.of("error", ex.getMessage());
+    }
+
+    @ExceptionHandler(SecurityException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleSecurityException(SecurityException ex) {
+        return Map.of("error", "Nie masz uprawnień do wykonania tej operacji");
+    }
+
 }

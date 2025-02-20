@@ -2,25 +2,22 @@ package com.GoGym.controller;
 
 import com.GoGym.module.*;
 import com.GoGym.repository.TrainerDetailsRepository;
-import com.GoGym.repository.TrainerExperienceRepository;
 import com.GoGym.repository.TrainerSpecializationRepository;
 import com.GoGym.security.CustomUserDetails;
-import com.GoGym.service.TrainerClientService;
 import com.GoGym.service.TrainerDetailsService;
 import com.GoGym.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -28,20 +25,26 @@ import java.util.*;
 @Controller
 @RequestMapping("/trainer/profile")
 public class TrainerProfileController {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private TrainerClientService trainerClientService;
+
+    private static final Logger logger = LoggerFactory.getLogger(TrainerProfileController.class);
+    private static final String AVATAR_UPLOAD_DIR = "uploads/avatars/";
+    private static final String CERTIFICATION_UPLOAD_DIR = "uploads/certifications/";
+
+    private final UserService userService;
+    private final TrainerDetailsRepository trainerDetailsRepository;
+    private final TrainerDetailsService trainerDetailsService;
+    private final TrainerSpecializationRepository trainerSpecializationRepository;
 
     @Autowired
-    private TrainerDetailsRepository trainerDetailsRepository;
-    @Autowired
-    private TrainerDetailsService trainerDetailsService;
-
-    @Autowired
-    private TrainerSpecializationRepository trainerSpecializationRepository;
-    @Autowired
-    private TrainerExperienceRepository trainerExperienceRepository;
+    public TrainerProfileController(UserService userService,
+                                    TrainerDetailsRepository trainerDetailsRepository,
+                                    TrainerDetailsService trainerDetailsService,
+                                    TrainerSpecializationRepository trainerSpecializationRepository) {
+        this.userService = userService;
+        this.trainerDetailsRepository = trainerDetailsRepository;
+        this.trainerDetailsService = trainerDetailsService;
+        this.trainerSpecializationRepository = trainerSpecializationRepository;
+    }
 
     @GetMapping
     public String trainerProfile(Model model, Principal principal) {
@@ -54,10 +57,9 @@ public class TrainerProfileController {
         model.addAttribute("trainerDetails", trainerDetails);
         model.addAttribute("specializations", specializations);
         model.addAttribute("experiences", experiences);
-        model.addAttribute("isOwnProfile", true);  // 🔥 Dodajemy flagę do rozróżnienia
+        model.addAttribute("isOwnProfile", true);
         return "trainer-profile";
     }
-
 
     @GetMapping("/{trainerId}")
     public String viewTrainerProfile(@PathVariable Long trainerId, Model model, Authentication authentication) {
@@ -80,57 +82,64 @@ public class TrainerProfileController {
         return "trainer-profile";
     }
 
-
     @PostMapping("/upload")
     @ResponseBody
     public Map<String, Object> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file, Principal principal) {
         Map<String, Object> response = new HashMap<>();
 
+        // Walidacja, czy plik nie przekracza ustalonego rozmiaru (np. 5MB)
+        long MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+        if (file.getSize() > MAX_AVATAR_SIZE) {
+            response.put("success", false);
+            response.put("message", "Plik jest za duży. Maksymalny rozmiar to 5MB.");
+            return response;
+        }
+        // Walidacja typu pliku – akceptujemy tylko obrazy
+        if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
+            response.put("success", false);
+            response.put("message", "Nieobsługiwany typ pliku. Akceptowane są tylko obrazy.");
+            return response;
+        }
+
         if (!file.isEmpty()) {
             try {
                 User user = userService.findByEmail(principal.getName());
                 TrainerDetails trainerDetails = trainerDetailsService.getTrainerDetails(user);
-
                 if (trainerDetails == null) {
                     trainerDetails = new TrainerDetails();
                     trainerDetails.setUser(user);
                 }
 
-                // 🔥 Ścieżka do katalogu
-                Path uploadDir = Paths.get("uploads/avatars/");
+                Path uploadDir = Paths.get(AVATAR_UPLOAD_DIR);
                 if (!Files.exists(uploadDir)) {
                     Files.createDirectories(uploadDir);
                 }
 
-                // 🔥 Usunięcie starego zdjęcia (jeśli istnieje)
+                // Usunięcie starego zdjęcia, jeśli istnieje
                 if (trainerDetails.getProfilePicture() != null) {
                     Path oldFilePath = uploadDir.resolve(trainerDetails.getProfilePicture());
                     Files.deleteIfExists(oldFilePath);
                 }
 
-                // 🔥 Zapis nowego pliku
                 String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 Path filePath = uploadDir.resolve(fileName);
-                Files.copy(file.getInputStream(), filePath);
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-                // 🔥 Aktualizacja w bazie danych
                 trainerDetails.setProfilePicture(fileName);
                 trainerDetailsService.saveTrainerDetails(trainerDetails);
 
-                // 🔥 Odpowiedź JSON
                 response.put("success", true);
                 response.put("profilePictureUrl", "/uploads/avatars/" + fileName);
-
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Błąd podczas uploadu zdjęcia profilowego", e);
                 response.put("success", false);
             }
         } else {
             response.put("success", false);
         }
-
         return response;
     }
+
 
     @PostMapping("/deleteProfilePicture")
     @ResponseBody
@@ -141,27 +150,21 @@ public class TrainerProfileController {
 
         if (trainerDetails != null && trainerDetails.getProfilePicture() != null) {
             try {
-                // Ścieżka do katalogu
-                Path filePath = Paths.get("uploads/avatars/").resolve(trainerDetails.getProfilePicture());
-
-                // 🔥 Usunięcie pliku z serwera
+                Path filePath = Paths.get(AVATAR_UPLOAD_DIR).resolve(trainerDetails.getProfilePicture());
                 Files.deleteIfExists(filePath);
 
-                // Usunięcie informacji o zdjęciu z bazy danych
                 trainerDetails.setProfilePicture(null);
                 trainerDetailsService.saveTrainerDetails(trainerDetails);
 
                 response.put("success", true);
                 response.put("defaultProfilePicture", "/images/default-profile.png");
-
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Błąd podczas usuwania zdjęcia profilowego", e);
                 response.put("success", false);
             }
         } else {
             response.put("success", false);
         }
-
         return response;
     }
 
@@ -171,7 +174,6 @@ public class TrainerProfileController {
         Map<String, Object> response = new HashMap<>();
         User user = userService.findByEmail(principal.getName());
         TrainerDetails trainerDetails = trainerDetailsService.getTrainerDetails(user);
-
         if (trainerDetails == null) {
             trainerDetails = new TrainerDetails();
             trainerDetails.setUser(user);
@@ -210,14 +212,13 @@ public class TrainerProfileController {
     @ResponseBody
     public Map<String, Object> deleteSpecialization(@RequestParam("specializationId") Long specializationId) {
         Map<String, Object> response = new HashMap<>();
-
         try {
             trainerSpecializationRepository.deleteById(specializationId);
             response.put("success", true);
         } catch (Exception e) {
+            logger.error("Błąd podczas usuwania specjalizacji", e);
             response.put("success", false);
         }
-
         return response;
     }
 
@@ -226,7 +227,6 @@ public class TrainerProfileController {
     public Map<String, Object> updateSpecialization(@RequestParam("specializationId") Long specializationId,
                                                     @RequestParam("specialization") String specialization) {
         Map<String, Object> response = new HashMap<>();
-
         Optional<TrainerSpecialization> specializationOpt = trainerSpecializationRepository.findById(specializationId);
         if (specializationOpt.isPresent()) {
             TrainerSpecialization existingSpecialization = specializationOpt.get();
@@ -239,16 +239,13 @@ public class TrainerProfileController {
         } else {
             response.put("success", false);
         }
-
         return response;
     }
-
 
     @PostMapping("/addSpecialization")
     @ResponseBody
     public Map<String, Object> addSpecialization(@RequestParam("specialization") String specialization, Principal principal) {
         Map<String, Object> response = new HashMap<>();
-
         User user = userService.findByEmail(principal.getName());
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(user.getIdUser()).orElse(null);
 
@@ -261,7 +258,6 @@ public class TrainerProfileController {
         } else {
             response.put("success", false);
         }
-
         return response;
     }
 
@@ -282,11 +278,11 @@ public class TrainerProfileController {
             if (certificationFile != null && !certificationFile.isEmpty()) {
                 try {
                     fileName = UUID.randomUUID() + "_" + certificationFile.getOriginalFilename();
-                    Path filePath = Paths.get("uploads/certifications/", fileName);
+                    Path filePath = Paths.get(CERTIFICATION_UPLOAD_DIR, fileName);
                     Files.createDirectories(filePath.getParent());
-                    Files.copy(certificationFile.getInputStream(), filePath);
+                    Files.copy(certificationFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("Błąd podczas uploadu certyfikatu", e);
                 }
             }
 
@@ -304,86 +300,119 @@ public class TrainerProfileController {
         } else {
             response.put("success", false);
         }
-
         return response;
     }
+
     @PostMapping("/updateExperience")
     @ResponseBody
     public Map<String, Object> updateExperience(
             @RequestParam("experienceId") Long experienceId,
             @RequestParam("graduationName") String graduationName,
             @RequestParam(value = "graduationDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date graduationDate,
-            @RequestParam(value = "certificationFile", required = false) MultipartFile certificationFile) {
+            @RequestParam(value = "certificationFile", required = false) MultipartFile certificationFile,
+            Principal principal) {
 
         Map<String, Object> response = new HashMap<>();
+        User user = userService.findByEmail(principal.getName());
         Optional<TrainerExperience> experienceOpt = trainerDetailsService.findTrainerExperienceById(experienceId);
 
-        if (experienceOpt.isPresent()) {
-            TrainerExperience experience = experienceOpt.get();
-
-            experience.setGraduationName(graduationName);
-            experience.setGraduationDate(graduationDate);
-
-            String fileName = experience.getCertificationFile(); // Zachowanie starego pliku, jeśli nowy nie został przesłany
-
-            if (certificationFile != null && !certificationFile.isEmpty()) {
-                try {
-                    fileName = UUID.randomUUID() + "_" + certificationFile.getOriginalFilename();
-                    Path filePath = Paths.get("uploads/certifications/", fileName);
-                    Files.createDirectories(filePath.getParent());
-                    Files.copy(certificationFile.getInputStream(), filePath);
-                    experience.setCertificationFile(fileName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            trainerDetailsService.updateTrainerExperience(experience);
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String formattedDate = (graduationDate != null) ? dateFormat.format(graduationDate) : "Nie podano";
-
-            response.put("success", true);
-            response.put("experienceId", experience.getId());
-            response.put("graduationName", experience.getGraduationName());
-            response.put("graduationDate", formattedDate);
-            response.put("certificationFile", fileName);
-        } else {
+        if (!experienceOpt.isPresent()) {
             response.put("success", false);
+            response.put("message", "Nie znaleziono doświadczenia");
+            return response;
         }
 
+        TrainerExperience experience = experienceOpt.get();
+        // Sprawdzenie, czy doświadczenie należy do zalogowanego trenera
+        if (!experience.getTrainer().getUser().getIdUser().equals(user.getIdUser())) {
+            response.put("success", false);
+            response.put("message", "Brak uprawnień do edycji tego doświadczenia");
+            return response;
+        }
+
+        experience.setGraduationName(graduationName);
+        experience.setGraduationDate(graduationDate);
+
+        if (certificationFile != null && !certificationFile.isEmpty()) {
+            // Walidacja typu pliku – akceptujemy PDF oraz obrazy
+            String contentType = certificationFile.getContentType();
+            if (!(("application/pdf".equals(contentType)) || (contentType != null && contentType.startsWith("image/")))) {
+                response.put("success", false);
+                response.put("message", "Nieobsługiwany typ pliku certyfikatu");
+                return response;
+            }
+            // Walidacja rozmiaru pliku (np. maks. 10MB)
+            long MAX_CERTIFICATION_SIZE = 10 * 1024 * 1024; // 10MB
+            if (certificationFile.getSize() > MAX_CERTIFICATION_SIZE) {
+                response.put("success", false);
+                response.put("message", "Plik jest za duży. Maksymalny rozmiar to 10MB.");
+                return response;
+            }
+            try {
+                // Usunięcie starego pliku, jeśli istnieje
+                if (experience.getCertificationFile() != null) {
+                    Path oldFilePath = Paths.get(CERTIFICATION_UPLOAD_DIR, experience.getCertificationFile());
+                    Files.deleteIfExists(oldFilePath);
+                }
+                // Zapis nowego pliku
+                String fileName = UUID.randomUUID() + "_" + certificationFile.getOriginalFilename();
+                Path filePath = Paths.get(CERTIFICATION_UPLOAD_DIR, fileName);
+                Files.createDirectories(filePath.getParent());
+                Files.copy(certificationFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                experience.setCertificationFile(fileName);
+            } catch (IOException e) {
+                logger.error("Błąd podczas aktualizacji certyfikatu", e);
+                response.put("success", false);
+                response.put("message", "Błąd podczas zapisu pliku");
+                return response;
+            }
+        }
+
+        trainerDetailsService.updateTrainerExperience(experience);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = (graduationDate != null) ? dateFormat.format(graduationDate) : "Nie podano";
+
+        response.put("success", true);
+        response.put("experienceId", experience.getId());
+        response.put("graduationName", experience.getGraduationName());
+        response.put("graduationDate", formattedDate);
+        response.put("certificationFile", experience.getCertificationFile());
         return response;
     }
 
     @PostMapping("/deleteExperience")
     @ResponseBody
-    public Map<String, Object> deleteExperience(@RequestParam("experienceId") Long experienceId) {
+    public Map<String, Object> deleteExperience(@RequestParam("experienceId") Long experienceId, Principal principal) {
         Map<String, Object> response = new HashMap<>();
+        User user = userService.findByEmail(principal.getName());
+        Optional<TrainerExperience> experienceOpt = trainerDetailsService.findTrainerExperienceById(experienceId);
 
-        try {
-            Optional<TrainerExperience> experienceOpt = trainerDetailsService.findTrainerExperienceById(experienceId);
-
-            if (experienceOpt.isPresent()) {
-                TrainerExperience experience = experienceOpt.get();
-
-                // 🔥 Jeśli istnieje plik certyfikatu, usuń go z serwera
-                if (experience.getCertificationFile() != null) {
-                    Path filePath = Paths.get("uploads/certifications/", experience.getCertificationFile());
-                    Files.deleteIfExists(filePath);
-                }
-
-                // 🔥 Usuń doświadczenie z bazy danych
-                trainerDetailsService.deleteTrainerExperience(experienceId);
-
-                response.put("success", true);
-            } else {
-                response.put("success", false);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!experienceOpt.isPresent()) {
             response.put("success", false);
+            response.put("message", "Nie znaleziono doświadczenia");
+            return response;
         }
 
+        TrainerExperience experience = experienceOpt.get();
+        // Sprawdzenie, czy doświadczenie należy do zalogowanego trenera
+        if (!experience.getTrainer().getUser().getIdUser().equals(user.getIdUser())) {
+            response.put("success", false);
+            response.put("message", "Brak uprawnień do usunięcia tego doświadczenia");
+            return response;
+        }
+
+        try {
+            if (experience.getCertificationFile() != null) {
+                Path filePath = Paths.get(CERTIFICATION_UPLOAD_DIR, experience.getCertificationFile());
+                Files.deleteIfExists(filePath);
+            }
+            trainerDetailsService.deleteTrainerExperience(experienceId);
+            response.put("success", true);
+        } catch (IOException e) {
+            logger.error("Błąd podczas usuwania doświadczenia", e);
+            response.put("success", false);
+        }
         return response;
     }
 

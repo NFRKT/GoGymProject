@@ -36,8 +36,8 @@ public class SecurityConfig {
 //                        .requestMatchers("/notifications/**").authenticated() // 🔥 Powiadomienia dostępne dla zalogowanych
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
 //                        .requestMatchers("/trainer/profile/**").authenticated() // 🔥 Tylko zalogowani użytkownicy mogą zobaczyć profile trenerów
-//                        .requestMatchers("/trainer/**").hasAuthority("TRAINER")
-//                        .requestMatchers("/client/**").hasAuthority("CLIENT")
+                        .requestMatchers("/trainer-plans/**").hasAuthority("TRAINER")
+                        .requestMatchers("/user-plans/**").hasAuthority("CLIENT")
                         .anyRequest().authenticated()
                 )
 

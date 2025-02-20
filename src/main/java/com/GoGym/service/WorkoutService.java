@@ -5,21 +5,25 @@ import com.GoGym.module.Workout;
 import com.GoGym.module.WorkoutExercise;
 import com.GoGym.module.User;
 import com.GoGym.repository.ExerciseRepository;
-import com.GoGym.repository.WorkoutRepository;
 import com.GoGym.repository.WorkoutExerciseRepository;
+import com.GoGym.repository.WorkoutRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class WorkoutService {
 
     private final WorkoutRepository workoutRepository;
     private final ExerciseRepository exerciseRepository;
     private final WorkoutExerciseRepository workoutExerciseRepository;
 
-    public WorkoutService(WorkoutRepository workoutRepository, ExerciseRepository exerciseRepository, WorkoutExerciseRepository workoutExerciseRepository) {
+    public WorkoutService(WorkoutRepository workoutRepository,
+                          ExerciseRepository exerciseRepository,
+                          WorkoutExerciseRepository workoutExerciseRepository) {
         this.workoutRepository = workoutRepository;
         this.exerciseRepository = exerciseRepository;
         this.workoutExerciseRepository = workoutExerciseRepository;
@@ -28,17 +32,15 @@ public class WorkoutService {
     @Transactional
     public Workout addWorkoutWithExercises(Workout workout, List<Long> exerciseIds, List<Integer> sets, List<Integer> reps,
                                            List<Double> weight, List<String> durations, List<Double> distances) {
+        log.info("Dodawanie treningu dla użytkownika: {}", workout.getUser().getIdUser());
         Workout savedWorkout = workoutRepository.save(workout);
-
         for (int i = 0; i < exerciseIds.size(); i++) {
             Long exerciseId = exerciseIds.get(i);
             Exercise exercise = exerciseRepository.findById(exerciseId)
-                    .orElseThrow(() -> new RuntimeException("Ćwiczenie nie istnieje"));
-
+                    .orElseThrow(() -> new RuntimeException("Ćwiczenie nie istnieje, ID: " + exerciseId));
             WorkoutExercise workoutExercise = new WorkoutExercise();
             workoutExercise.setWorkout(savedWorkout);
             workoutExercise.setExercise(exercise);
-
             if (exercise.getType() == Exercise.ExerciseType.STRENGTH) {
                 workoutExercise.setSets(sets.get(i));
                 workoutExercise.setReps(reps.get(i));
@@ -47,35 +49,28 @@ public class WorkoutService {
                 workoutExercise.setDuration(durations.get(i) != null ? parseDuration(durations.get(i)) : null);
                 workoutExercise.setDistance(distances.get(i));
             }
-
             workoutExerciseRepository.save(workoutExercise);
+            log.info("Dodano ćwiczenie o ID: {} do treningu", exerciseId);
         }
-
         return savedWorkout;
     }
 
-    // 🚀 Konwersja formatu "hh:mm:ss" / "mm:ss" na sekundy
     public Integer parseDuration(String duration) {
         if (duration == null || duration.isEmpty()) return null;
-
-        // Jeśli przekazana wartość jest już liczbą (sekundy), zwróć ją jako integer
         try {
+            // Spróbuj sparsować jako liczbę – jeśli to sekundy
             return Integer.parseInt(duration);
         } catch (NumberFormatException e) {
-            // Kontynuuj parsowanie, jeśli nie jest liczbą
+            // Kontynuujemy parsowanie formatu "hh:mm:ss" lub "mm:ss"
         }
-
-        // Jeśli format jest "hh:mm:ss" lub "mm:ss", dokonaj konwersji
         String[] parts = duration.split(":");
         if (parts.length == 2) { // Format mm:ss
             return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
         } else if (parts.length == 3) { // Format hh:mm:ss
             return Integer.parseInt(parts[0]) * 3600 + Integer.parseInt(parts[1]) * 60 + Integer.parseInt(parts[2]);
         }
-
         throw new IllegalArgumentException("Niepoprawny format czasu: " + duration);
     }
-
 
     public List<Workout> getWorkoutsByUser(User user) {
         return workoutRepository.findByUserOrderByWorkoutDateDesc(user);
@@ -86,22 +81,4 @@ public class WorkoutService {
                 .orElseThrow(() -> new RuntimeException("Trening o ID " + id + " nie istnieje."));
     }
 
-    // ✅ Pomocnicza metoda do konwersji sekundy → "mm:ss" lub "hh:mm:ss"
-    private String formatDuration(Integer seconds) {
-        if (seconds == null) return "";
-        int hours = seconds / 3600;
-        int minutes = (seconds % 3600) / 60;
-        int remainingSeconds = seconds % 60;
-
-        if (hours > 0) {
-            return String.format("%d:%02d:%02d", hours, minutes, remainingSeconds);
-        } else {
-            return String.format("%d:%02d", minutes, remainingSeconds);
-        }
-    }
-
-
-
-
 }
-

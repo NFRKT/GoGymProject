@@ -15,8 +15,12 @@ import java.util.Map;
 @RequestMapping("/trainer/reviews")
 public class TrainerReviewController {
 
+    private final TrainerReviewService trainerReviewService;
+
     @Autowired
-    private TrainerReviewService trainerReviewService;
+    public TrainerReviewController(TrainerReviewService trainerReviewService) {
+        this.trainerReviewService = trainerReviewService;
+    }
 
     @GetMapping("/{trainerId}")
     public List<TrainerReview> getTrainerReviews(@PathVariable Long trainerId) {
@@ -24,10 +28,12 @@ public class TrainerReviewController {
     }
 
     @PostMapping("/add")
-    public Map<String, String> addReview(@RequestParam Long trainerId, @RequestParam int rating, @RequestParam(required = false) String comment, Authentication authentication) {
+    public Map<String, String> addReview(@RequestParam Long trainerId,
+                                         @RequestParam int rating,
+                                         @RequestParam(required = false) String comment,
+                                         Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
-
         trainerReviewService.addReview(trainerId, loggedInUser.getIdUser(), rating, comment);
         return Map.of("message", "Opinia dodana pomyślnie");
     }
@@ -39,18 +45,15 @@ public class TrainerReviewController {
                                             Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
-
         trainerReviewService.updateReview(reviewId, loggedInUser.getIdUser(), rating, comment);
         return Map.of("message", "Opinia została zaktualizowana");
     }
+
     @DeleteMapping("/delete/{reviewId}")
     public Map<String, String> deleteReview(@PathVariable Long reviewId, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
-
         trainerReviewService.deleteReview(reviewId, loggedInUser.getIdUser());
         return Map.of("message", "Opinia została usunięta");
     }
-
-
 }

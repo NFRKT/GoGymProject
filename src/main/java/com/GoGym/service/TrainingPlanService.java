@@ -10,11 +10,13 @@ import com.GoGym.repository.TrainingPlanRepository;
 import com.GoGym.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class TrainingPlanService {
 
     private final TrainingPlanRepository trainingPlanRepository;
@@ -23,7 +25,11 @@ public class TrainingPlanService {
     private final TrainingPlanDayRepository trainingPlanDayRepository;
     private final NotificationService notificationService;
 
-    public TrainingPlanService(TrainingPlanRepository trainingPlanRepository, PlanExerciseRepository planExerciseRepository, TrainingPlanDayRepository trainingPlanDayRepository, UserRepository userRepository, NotificationService notificationService) {
+    public TrainingPlanService(TrainingPlanRepository trainingPlanRepository,
+                               PlanExerciseRepository planExerciseRepository,
+                               TrainingPlanDayRepository trainingPlanDayRepository,
+                               UserRepository userRepository,
+                               NotificationService notificationService) {
         this.trainingPlanRepository = trainingPlanRepository;
         this.planExerciseRepository = planExerciseRepository;
         this.trainingPlanDayRepository = trainingPlanDayRepository;
@@ -31,30 +37,39 @@ public class TrainingPlanService {
         this.notificationService = notificationService;
     }
 
-
     @Transactional
     public TrainingPlan createTrainingPlan(TrainingPlan plan) {
+        // Zapisujemy plan, aby wygenerować jego ID
         trainingPlanRepository.save(plan);
+        log.info("Utworzono plan treningowy o ID: {}", plan.getIdPlan());
 
-        for (TrainingPlanDay day : plan.getTrainingPlanDays()) {
-            day.setTrainingPlan(plan);
-            trainingPlanDayRepository.save(day);
+        if (plan.getTrainingPlanDays() != null) {
+            for (TrainingPlanDay day : plan.getTrainingPlanDays()) {
+                day.setTrainingPlan(plan);
+                trainingPlanDayRepository.save(day);
+                log.info("Zapisano dzień treningowy o ID: {}", day.getIdDay());
 
-            for (PlanExercise exercise : day.getExercises()) {
-                exercise.setTrainingPlanDay(day);
-                planExerciseRepository.save(exercise);
+                if (day.getExercises() != null) {
+                    for (PlanExercise exercise : day.getExercises()) {
+                        exercise.setTrainingPlanDay(day);
+                        planExerciseRepository.save(exercise);
+                        log.info("Zapisano ćwiczenie w dniu o ID: {}", day.getIdDay());
+                    }
+                }
             }
+        } else {
+            log.warn("Plan treningowy o ID {} nie posiada dni treningowych.", plan.getIdPlan());
         }
 
-        // Pobranie trenera i klienta do powiadomienia
+        // Pobieramy trenera i klienta do powiadomienia
         User trainer = userRepository.findById(plan.getIdTrainer())
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o ID: " + plan.getIdTrainer()));
-
         User client = userRepository.findById(plan.getIdClient())
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o ID: " + plan.getIdClient()));
 
-        // Tworzenie powiadomienia
+        // Tworzymy powiadomienie o nowym planie
         notificationService.createNotification(client, trainer, "new_plan", plan.getName());
+        log.info("Wysłano powiadomienie o nowym planie: {} do trenera i klienta.", plan.getName());
 
         return plan;
     }
@@ -72,7 +87,9 @@ public class TrainingPlanService {
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ćwiczenia o ID: " + exerciseId));
         exercise.setStatus(newStatus);
         planExerciseRepository.save(exercise);
+        log.info("Zaktualizowano status ćwiczenia o ID: {} na {}", exerciseId, newStatus);
 
+        // Aktualizujemy status dnia, do którego należy ćwiczenie
         updateDayStatus(exercise.getTrainingPlanDay().getIdDay());
     }
 
@@ -82,35 +99,29 @@ public class TrainingPlanService {
 
         boolean allExercisesCompleted = day.getExercises().stream()
                 .allMatch(exercise -> exercise.getStatus() == PlanExercise.Status.completed);
-
-        TrainingPlanDay.Status previousStatus = day.getStatus(); // Pobranie starego statusu przed zmianą
-
+        TrainingPlanDay.Status previousStatus = day.getStatus();
         TrainingPlanDay.Status newStatus = allExercisesCompleted
                 ? TrainingPlanDay.Status.completed
                 : TrainingPlanDay.Status.notCompleted;
 
         day.setStatus(newStatus);
         trainingPlanDayRepository.save(day);
+        log.info("Dzień o ID: {} zmieniono ze statusu {} na {}", dayId, previousStatus, newStatus);
 
         updatePlanStatus(day.getTrainingPlan().getIdPlan());
 
-        // 🔥 Wysyłanie powiadomienia TYLKO jeśli dzień został ukończony po raz pierwszy
+        // Wyślij powiadomienie tylko, gdy dzień został ukończony po raz pierwszy
         if (previousStatus != TrainingPlanDay.Status.completed && newStatus == TrainingPlanDay.Status.completed) {
             TrainingPlan plan = day.getTrainingPlan();
             User trainer = userRepository.findById(plan.getIdTrainer())
                     .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o ID: " + plan.getIdTrainer()));
-
             User client = userRepository.findById(plan.getIdClient())
                     .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o ID: " + plan.getIdClient()));
-
             int dayNumber = plan.getTrainingPlanDays().indexOf(day) + 1;
-
             notificationService.createNotification(trainer, client, "day_updated", "Dzień " + dayNumber + " w planie: " + plan.getName());
+            log.info("Wysłano powiadomienie o ukończeniu dnia treningowego: {}", dayNumber);
         }
     }
-
-
-
 
     public void updatePlanStatus(Long planId) {
         TrainingPlan plan = trainingPlanRepository.findById(planId)
@@ -121,33 +132,32 @@ public class TrainingPlanService {
 
         plan.setStatus(allDaysCompleted ? TrainingPlan.Status.completed : TrainingPlan.Status.active);
         trainingPlanRepository.save(plan);
+        log.info("Zaktualizowano status planu o ID: {} na {}", planId, plan.getStatus());
 
         if (allDaysCompleted) {
-            // 🔥 Pobranie klienta i trenera
+            // Pobieramy trenera i klienta
             User trainer = userRepository.findById(plan.getIdTrainer())
                     .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o ID: " + plan.getIdTrainer()));
-
             User client = userRepository.findById(plan.getIdClient())
                     .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o ID: " + plan.getIdClient()));
-
-            // 🔥 Powiadomienie dla trenera
             notificationService.createNotification(trainer, client, "plan_completed", plan.getName());
+            log.info("Wysłano powiadomienie o ukończeniu planu: {}", plan.getName());
         }
     }
-
 
     public void deleteTrainingPlan(Long planId) {
         TrainingPlan plan = trainingPlanRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + planId));
 
-        // Usuń powiązane ćwiczenia i dni
-        for (TrainingPlanDay day : plan.getTrainingPlanDays()) {
-            planExerciseRepository.deleteAll(day.getExercises());  // Usuń ćwiczenia z danego dnia
-            trainingPlanDayRepository.delete(day);  // Usuń dzień
+        // Usuwamy powiązane dni i ćwiczenia
+        if (plan.getTrainingPlanDays() != null) {
+            for (TrainingPlanDay day : plan.getTrainingPlanDays()) {
+                planExerciseRepository.deleteAll(day.getExercises());
+                trainingPlanDayRepository.delete(day);
+                log.info("Usunięto dzień treningowy o ID: {} i powiązane ćwiczenia", day.getIdDay());
+            }
         }
-
-        trainingPlanRepository.delete(plan);  // Usuń plan
+        trainingPlanRepository.delete(plan);
+        log.info("Usunięto plan treningowy o ID: {}", planId);
     }
-
-
 }

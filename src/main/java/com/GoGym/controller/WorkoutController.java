@@ -2,14 +2,16 @@ package com.GoGym.controller;
 
 import com.GoGym.dto.WorkoutDTO;
 import com.GoGym.module.*;
-import com.GoGym.repository.*;
+import com.GoGym.repository.ExerciseRepository;
+import com.GoGym.repository.TrainingPlanDayRepository;
+import com.GoGym.repository.UserRepository;
+import com.GoGym.repository.WorkoutExerciseRepository;
+import com.GoGym.repository.WorkoutRepository;
 import com.GoGym.service.ExerciseService;
 import com.GoGym.service.WorkoutService;
 import com.GoGym.security.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,12 +21,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
+@Slf4j
 @RequestMapping("/workouts")
 public class WorkoutController {
 
@@ -36,9 +38,13 @@ public class WorkoutController {
     private final WorkoutExerciseRepository workoutExerciseRepository;
     private final ExerciseRepository exerciseRepository;
 
-
-    @Autowired
-    public WorkoutController(WorkoutService workoutService, ExerciseService exerciseService, UserRepository userRepository, TrainingPlanDayRepository trainingPlanDayRepository, WorkoutRepository workoutRepository, WorkoutExerciseRepository workoutExerciseRepository, ExerciseRepository exerciseRepository) {
+    public WorkoutController(WorkoutService workoutService,
+                             ExerciseService exerciseService,
+                             UserRepository userRepository,
+                             TrainingPlanDayRepository trainingPlanDayRepository,
+                             WorkoutRepository workoutRepository,
+                             WorkoutExerciseRepository workoutExerciseRepository,
+                             ExerciseRepository exerciseRepository) {
         this.workoutService = workoutService;
         this.exerciseService = exerciseService;
         this.userRepository = userRepository;
@@ -51,10 +57,7 @@ public class WorkoutController {
     @GetMapping("/create")
     public String createWorkoutForm(Model model) {
         List<Exercise> exercises = exerciseService.getAllExercises();
-
-        // ✅ Debugowanie: sprawdź, czy ćwiczenia są pobierane
-        System.out.println("Załadowane ćwiczenia: " + exercises.size());
-
+        log.info("Załadowano ćwiczenia: {}", exercises.size());
         model.addAttribute("workout", new Workout());
         model.addAttribute("exercises", exercises);
         return "create-workout";
@@ -66,7 +69,7 @@ public class WorkoutController {
                                 @RequestParam(required = false) List<Integer> sets,
                                 @RequestParam(required = false) List<Integer> reps,
                                 @RequestParam(required = false) List<Double> weight,
-                                @RequestParam(required = false) List<String> durations, // 🚀 Format "hh:mm:ss" lub "mm:ss"
+                                @RequestParam(required = false) List<String> durations,
                                 @RequestParam(required = false) List<Double> distances,
                                 Model model) {
         try {
@@ -79,22 +82,32 @@ public class WorkoutController {
             }
 
             workout.setUser(currentUser);
-            workoutService.addWorkoutWithExercises(workout, exerciseIds, sets, reps, weight, durations, distances);
-            return "redirect:/workouts/" + workout.getIdWorkout();
+            Workout savedWorkout = workoutService.addWorkoutWithExercises(workout, exerciseIds, sets, reps, weight, durations, distances);
+            log.info("Workout utworzony o ID: {}", savedWorkout.getIdWorkout());
+            return "redirect:/workouts/" + savedWorkout.getIdWorkout();
         } catch (Exception e) {
+            log.error("Błąd przy tworzeniu treningu", e);
             model.addAttribute("error", "Nie udało się stworzyć workoutu: " + e.getMessage());
             return "create-workout";
         }
     }
 
-
-
     @GetMapping("/{id}")
-    public String getWorkoutDetails(@PathVariable Long id, Model model) {
+    public String getWorkoutDetails(@PathVariable Long id, Model model, Principal principal) {
         Workout workout = workoutService.getWorkoutById(id);
+        // Pobranie aktualnie zalogowanego użytkownika
+        User currentUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+
+        // Sprawdzenie, czy trening należy do aktualnie zalogowanego użytkownika
+        if (!workout.getUser().equals(currentUser)) {
+            throw new RuntimeException("Nie masz uprawnień do przeglądania tego treningu.");
+        }
+
         model.addAttribute("workout", workout);
         return "workout-details";
     }
+
 
     @GetMapping
     public String getUserWorkouts(Model model) {
@@ -109,8 +122,7 @@ public class WorkoutController {
 
     @PostMapping("/add-workout-from-day")
     public ResponseEntity<?> addWorkoutFromDay(@RequestBody WorkoutDTO workoutDTO, Principal principal) {
-        System.out.println("Otrzymane żądanie: " + workoutDTO);
-
+        log.info("Otrzymane żądanie addWorkoutFromDay: {}", workoutDTO);
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
@@ -126,9 +138,8 @@ public class WorkoutController {
         workout.setUser(user);
         workout.setTrainingPlanDay(day);
 
-        // 🔥 Filtrujemy tylko ćwiczenia z status == completed
         Set<WorkoutExercise> workoutExercises = day.getExercises().stream()
-                .filter(planExercise -> planExercise.getStatus() == PlanExercise.Status.completed) // 👈 Filtrowanie
+                .filter(planExercise -> planExercise.getStatus() == PlanExercise.Status.completed)
                 .map(planExercise -> {
                     WorkoutExercise we = new WorkoutExercise();
                     we.setExercise(planExercise.getExercise());
@@ -150,9 +161,10 @@ public class WorkoutController {
 
         workout.setWorkoutExercises(workoutExercises);
         workoutRepository.save(workout);
-
+        log.info("Workout dodany z dnia treningowego o ID: {}", day.getIdDay());
         return ResponseEntity.ok("Workout został zapisany!");
     }
+
     @GetMapping("/check-workout-exists/{dayId}")
     public ResponseEntity<Boolean> checkWorkoutExists(@PathVariable Long dayId) {
         boolean exists = workoutRepository.existsByTrainingPlanDay_IdDay(dayId);
@@ -163,9 +175,9 @@ public class WorkoutController {
     public ResponseEntity<?> removeWorkoutFromDay(@RequestParam Long dayId, Principal principal) {
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
-
-        Workout workout = workoutRepository.findByUserAndTrainingPlanDay(user, trainingPlanDayRepository.findById(dayId)
-                        .orElseThrow(() -> new RuntimeException("Nie znaleziono dnia treningowego")))
+        TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono dnia treningowego"));
+        Workout workout = workoutRepository.findByUserAndTrainingPlanDay(user, day)
                 .orElse(null);
 
         if (workout == null) {
@@ -173,6 +185,7 @@ public class WorkoutController {
         }
 
         workoutRepository.delete(workout);
+        log.info("Workout usunięty dla dnia o ID: {}", dayId);
         return ResponseEntity.ok("Workout został usunięty!");
     }
 
@@ -180,7 +193,6 @@ public class WorkoutController {
     public ResponseEntity<?> deleteWorkout(@PathVariable Long id, Principal principal) {
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
-
         Workout workout = workoutRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nie znaleziono treningu o ID: " + id));
 
@@ -189,6 +201,7 @@ public class WorkoutController {
         }
 
         workoutRepository.delete(workout);
+        log.info("Workout o ID {} usunięty przez użytkownika {}", id, user.getIdUser());
         return ResponseEntity.ok("Trening został usunięty.");
     }
 
@@ -196,7 +209,6 @@ public class WorkoutController {
     public String editWorkoutForm(@PathVariable Long id, Model model, Principal principal) {
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
-
         Workout workout = workoutRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nie znaleziono treningu o ID: " + id));
 
@@ -205,12 +217,12 @@ public class WorkoutController {
         }
 
         List<Exercise> allExercises = exerciseRepository.findAll();
-
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            String allExercisesJson = objectMapper.writeValueAsString(allExercises); // ✅ Konwersja na JSON
+            String allExercisesJson = objectMapper.writeValueAsString(allExercises);
             model.addAttribute("allExercisesJson", allExercisesJson);
         } catch (Exception e) {
+            log.error("Błąd serializacji ćwiczeń do JSON", e);
             throw new RuntimeException("Błąd serializacji ćwiczeń do JSON", e);
         }
 
@@ -218,7 +230,6 @@ public class WorkoutController {
         model.addAttribute("allExercises", allExercises);
         return "edit-workout";
     }
-
 
     @PostMapping("/update")
     public String updateWorkout(@ModelAttribute Workout workout,
@@ -231,10 +242,8 @@ public class WorkoutController {
                                 @RequestParam(required = false) List<String> durations,
                                 @RequestParam(required = false) List<Double> distances,
                                 Principal principal) {
-
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
-
         Workout existingWorkout = workoutRepository.findById(workout.getIdWorkout())
                 .orElseThrow(() -> new RuntimeException("Nie znaleziono treningu o ID: " + workout.getIdWorkout()));
 
@@ -242,29 +251,27 @@ public class WorkoutController {
             throw new RuntimeException("Nie masz uprawnień do edycji tego treningu.");
         }
 
-        // ✅ 1. AKTUALIZACJA PODSTAWOWYCH DANYCH TRENINGU
+        // Aktualizacja podstawowych danych treningu
         existingWorkout.setWorkoutDate(workout.getWorkoutDate());
         existingWorkout.setIntensity(workout.getIntensity());
         existingWorkout.setStartTime(workout.getStartTime());
         existingWorkout.setEndTime(workout.getEndTime());
         existingWorkout.setNotes(workout.getNotes());
 
-        // ✅ 2. USUNIĘCIE ĆWICZEŃ, KTÓRE UŻYTKOWNIK USUNĄŁ
+        // Usunięcie ćwiczeń, które użytkownik usunął
         if (deletedExerciseIds != null) {
             workoutExerciseRepository.deleteAllById(deletedExerciseIds);
+            log.info("Usunięto ćwiczenia o ID: {}", deletedExerciseIds);
         }
 
-        // ✅ 3. AKTUALIZACJA ISTNIEJĄCYCH ĆWICZEŃ
+        // Aktualizacja istniejących ćwiczeń
         if (existingExerciseIds != null) {
             for (int i = 0; i < existingExerciseIds.size(); i++) {
                 WorkoutExercise workoutExercise = workoutExerciseRepository.findById(existingExerciseIds.get(i))
                         .orElseThrow(() -> new RuntimeException("Nie znaleziono ćwiczenia"));
-
                 Exercise exercise = exerciseRepository.findById(exerciseIds.get(i))
                         .orElseThrow(() -> new RuntimeException("Nie znaleziono ćwiczenia"));
-
-                workoutExercise.setExercise(exercise); // ✅ ZAMIANA ĆWICZENIA NA NOWE
-
+                workoutExercise.setExercise(exercise);
                 if (exercise.getType() == Exercise.ExerciseType.STRENGTH) {
                     workoutExercise.setSets(sets.get(i));
                     workoutExercise.setReps(reps.get(i));
@@ -278,24 +285,21 @@ public class WorkoutController {
                     workoutExercise.setReps(null);
                     workoutExercise.setWeight(null);
                 }
-
                 workoutExerciseRepository.save(workoutExercise);
+                log.info("Zaktualizowano ćwiczenie o ID: {}", existingExerciseIds.get(i));
             }
         }
 
-        // ✅ 4. DODANIE NOWYCH ĆWICZEŃ
+        // Dodanie nowych ćwiczeń
         if (exerciseIds != null) {
             int existingSize = (existingExerciseIds != null) ? existingExerciseIds.size() : 0;
             for (int i = 0; i < exerciseIds.size(); i++) {
-                if (i < existingSize) continue; // Pomijamy już istniejące ćwiczenia
-
+                if (i < existingSize) continue;
                 Exercise exercise = exerciseRepository.findById(exerciseIds.get(i))
                         .orElseThrow(() -> new RuntimeException("Nie znaleziono ćwiczenia"));
-
                 WorkoutExercise newExercise = new WorkoutExercise();
                 newExercise.setWorkout(existingWorkout);
                 newExercise.setExercise(exercise);
-
                 if (exercise.getType() == Exercise.ExerciseType.STRENGTH) {
                     newExercise.setSets(sets.get(i));
                     newExercise.setReps(reps.get(i));
@@ -309,13 +313,13 @@ public class WorkoutController {
                     newExercise.setReps(null);
                     newExercise.setWeight(null);
                 }
-
                 workoutExerciseRepository.save(newExercise);
+                log.info("Dodano nowe ćwiczenie o ID: {} do treningu o ID: {}", exercise.getIdExercise(), existingWorkout.getIdWorkout());
             }
         }
 
         workoutRepository.save(existingWorkout);
-        return "redirect:/workouts/" + workout.getIdWorkout();
+        log.info("Zaktualizowano trening o ID: {}", existingWorkout.getIdWorkout());
+        return "redirect:/workouts/" + existingWorkout.getIdWorkout();
     }
-
 }
