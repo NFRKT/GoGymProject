@@ -31,6 +31,39 @@
             margin-top: 20px;
             text-align: center;
         }
+.badge-carousel {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px;
+  scroll-behavior: smooth;
+  user-select: none;          /* Standard */
+  -webkit-user-select: none;  /* Safari */
+  -moz-user-select: none;     /* Firefox */
+  -ms-user-select: none;      /* IE 10+ */
+}
+
+.badge-item {
+  flex: 0 0 auto; /* zapobiega skalowaniu */
+  width: 120px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #fff;
+}
+.badge-img {
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+}
+.badge-carousel.active {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
+
+
     </style>
 </head>
 <body>
@@ -66,6 +99,20 @@
     <p class="w3-large">Monitoruj swój budżet, realizuj cele i kontroluj wydatki. 💰📊</p>
     <p class="w3-text-grey"><i>Twój budżet, Twoje cele, Twoje możliwości.</i></p>
 </div>
+<!-- Sekcja odznak -->
+<div th:if="${isUser}">
+    <h2 class="w3-center">Twoje odznaki</h2>
+    <div class="badge-carousel">
+        <div class="badge-item" th:each="userBadge : ${badges}">
+            <img th:src="@{${userBadge.badge.imageUrl}}" alt="Odznaka" class="badge-img">
+            <p th:text="${userBadge.badge.name}">Odznaka</p>
+        </div>
+        <div th:if="${#lists.isEmpty(badges)}" class="badge-item">
+            <p>Brak odznak</p>
+        </div>
+    </div>
+</div>
+
 <!-- Sekcja z progress barami dla aktywnych planów treningowych (widoczna tylko dla klienta) -->
 <div th:if="${isUser}">
     <h2 class="w3-center">Postępy w Twoich planach treningowych</h2>
@@ -142,6 +189,37 @@
         }
     }
 
+</script>
+<script>
+  const carousel = document.querySelector('.badge-carousel');
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  carousel.addEventListener('mousedown', (e) => {
+    isDown = true;
+    carousel.classList.add('active'); // opcjonalnie do stylizacji
+    startX = e.pageX - carousel.offsetLeft;
+    scrollLeft = carousel.scrollLeft;
+  });
+
+  carousel.addEventListener('mouseleave', () => {
+    isDown = false;
+    carousel.classList.remove('active');
+  });
+
+  carousel.addEventListener('mouseup', () => {
+    isDown = false;
+    carousel.classList.remove('active');
+  });
+
+  carousel.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - carousel.offsetLeft;
+    const walk = (x - startX) * 2; // mnożnik dla szybszego scrollowania
+    carousel.scrollLeft = scrollLeft - walk;
+  });
 </script>
 </body>
 </html>

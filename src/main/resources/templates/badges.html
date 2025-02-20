@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>GoGym - Twoje odznaki</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Podstawowy CSS (możesz dodać więcej) -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <style>
+    .badge-container {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 20px;
+      user-select: none;
+      justify-content: center;
+    }
+    .badge-item {
+      flex: 0 0 auto;
+      width: 150px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      background-color: #fff;
+    }
+    .badge-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 50%;
+    }
+    .progress-bar {
+      width: 100%;
+      background-color: #f1f1f1;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    .progress-bar-inner {
+      height: 20px;
+      background-color: #4CAF50;
+      text-align: center;
+      line-height: 20px;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<div class="w3-container w3-padding-64">
+  <h1 class="w3-center">Twoje odznaki</h1>
+  <div class="badge-container">
+    <div class="badge-item" th:each="badge : ${allBadges}">
+      <img th:src="@{${badge.imageUrl}}" alt="Odznaka">
+      <p th:text="${badge.name}">Nazwa odznaki</p>
+      <p th:text="${badge.description}">Opis</p>
+      <div class="progress-bar">
+        <div class="progress-bar-inner"
+             th:style="'width:' + ${badgeProgress[badge.id]} + ';'"
+             th:text="${badgeProgress[badge.id]}">
+          0/0
+        </div>
+      </div>
+      <!-- Informacja, czy odznaka została już zdobyta -->
+      <div th:if="${#lists.contains(userBadges.?[badge.id == badge.id], badge)}" style="margin-top: 5px; color: green;">
+        Zdobyta!
+      </div>
+    </div>
+    <div th:if="${#lists.isEmpty(allBadges)}" class="w3-center">
+      <p>Brak odznak</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

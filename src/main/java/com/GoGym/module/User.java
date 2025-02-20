@@ -52,6 +52,7 @@ public class User {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<TrainerClient> trainers; // Trener przypisany do klienta
+
     public enum Gender {
         KOBIETA, MĘŻCZYZNA
     }

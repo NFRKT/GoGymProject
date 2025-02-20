@@ -1,16 +1,16 @@
 package com.GoGym.controller;
 
-import com.GoGym.module.TrainingPlan;
-import com.GoGym.module.TrainingPlanDay;
-import com.GoGym.module.PlanExercise;
-import com.GoGym.module.User;
+import com.GoGym.module.*;
+import com.GoGym.repository.BadgeRepository;
 import com.GoGym.security.CustomUserDetails;
+import com.GoGym.service.BadgeService;
 import com.GoGym.service.TrainingPlanService;
 import com.GoGym.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,18 +32,21 @@ public class HomeController {
     @Autowired
     private TrainingPlanService trainingPlanService;
 
+    @Autowired
+    private BadgeService badgeService;
+
     @GetMapping("/home")
     public String home(Model model, Authentication authentication) {
-        // Pobranie danych zalogowanego użytkownika
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        Long idUser = userRepository.findByEmail(username).get().getIdUser();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+        Long idUser = currentUser.getIdUser();
 
-        boolean isUser = auth.getAuthorities().stream()
+        boolean isUser = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CLIENT"));
-        boolean isTrainer = auth.getAuthorities().stream()
+        boolean isTrainer = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("TRAINER"));
-        boolean isAdmin = auth.getAuthorities().stream()
+        boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ADMIN"));
 
         model.addAttribute("isUser", isUser);
@@ -52,7 +55,6 @@ public class HomeController {
         model.addAttribute("idUser", idUser);
         model.addAttribute("username", username);
 
-        // Jeśli to klient, pobieramy aktywne plany treningowe i obliczamy progres
         if (isUser) {
             List<TrainingPlan> plans = trainingPlanService.findPlansByIdClient(idUser);
             List<TrainingPlan> activePlans = plans.stream()
@@ -80,10 +82,15 @@ public class HomeController {
             }
             model.addAttribute("activePlans", activePlans);
             model.addAttribute("progressMap", progressMap);
-        }
 
-        return "home"; // Zwraca widok home.html
+            badgeService.checkAndAwardBadgesForUser(currentUser);
+            model.addAttribute("badges", badgeService.getBadgesForUser(currentUser));
+
+
+        }
+        return "home";
     }
+
 
     @GetMapping({"/", "/gogym"})
     public String landingPage() {

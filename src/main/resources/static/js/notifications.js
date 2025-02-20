@@ -57,6 +57,8 @@ function fetchNotifications() {
                             window.location.href = "/client-panel";
                         }else if(notification.message.includes("Twój klient")){
                             window.location.href = `/trainer-plans?idUser=${notification.userId}`;
+                        }else if(notification.message.includes("Otrzymałeś odznakę")){
+                            window.location.href = "/badges";
                         }else {
                             window.location.href = "/trainer-panel";
                         }

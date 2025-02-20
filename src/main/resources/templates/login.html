@@ -1,149 +1,132 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>MyBudget - logowanie</title>
+    <title>GoGym - Logowanie</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
-    body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
-    .w3-bar,h1,button {font-family: "Montserrat", sans-serif}
-    .fa-anchor,.fa-coffee {font-size:200px}
-
-    /* Styl dla komunikatu błędu (czerwone tło) */
-    .error-message {
-      background-color: #ffdddd;
-      color: #d8000c;
-      border: 1px solid #d8000c;
-      border-radius: 5px;
-      padding: 10px;
-      font-size: 0.9em;
-      margin-top: 5px;
-    }
-
-    .invalid {
-      border: 2px solid #d8000c;
-    }
-
+        body {
+            font-family: "Lato", sans-serif;
+            background-color: #f5f5f5;
+        }
+        .w3-bar, h1, button {
+            font-family: "Montserrat", sans-serif;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .login-button {
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-button:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            background-color: #ffdddd;
+            color: #d8000c;
+            border: 1px solid #d8000c;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .success-message {
+            background-color: #ddffdd;
+            color: #28a745;
+            border: 1px solid #28a745;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .register-link {
+            text-align: center;
+            display: block;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .register-link a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+
 <!-- Navbar -->
 <div class="w3-top">
     <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
-        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-red"
-           href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu">
-            <i class="fa fa-bars"></i>
-        </a>
-        <a href="#" th:href="@{/register}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Zarejestruj
-            się</a>
-        <a href="#" th:href="@{/login}"
-           class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Zaloguj się</a>
-    </div>
-    <!-- Navbar on small screens -->
-    <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
-        <a href="#" th:href="@{/register}" class="w3-bar-item w3-button w3-padding-large">Zarejestruj się</a>
-        <a href="#" th:href="@{/login}" class="w3-bar-item w3-button w3-padding-large">Zaloguj się</a>
-    </div>
-
-</div>
-<!-- Header -->
-<header class="w3-container w3-blue w3-center" style="padding:128px 16px">
-    <h1 class="w3-margin w3-jumbo" th:text="${message}"></h1>
-    <p class="w3-xlarge">
-    </p>
-</header>
-<!-- First Grid -->
-<div class="w3-row-padding w3-padding-64 w3-container">
-    <div class="w3-content">
-        <div class="w3-twothird">
-            <form th:action="@{/login}" method="post" id="loginForm">
-                <label for="username">Login:</label>
-                <input class="w3-input" type="text" id="username" name="username">
-                <div id="usernameError" class="error-message" style="display: none;"></div>
-                <br/>
-
-                <label for="password">Hasło:</label>
-                <input class="w3-input" type="password" id="password" name="password">
-                <div id="passwordError" class="error-message" style="display: none;"></div>
-                <br/>
-
-                <button type="submit" class="w3-btn w3-blue-grey w3-round-xxlarge">Zaloguj się</button>
-            </form>
-
-            <!-- Błąd o nieprawidłowym loginie lub haśle -->
-            <div th:if="${param.error}" class="error-message">
-                <p>Nieprawidłowy login lub hasło</p>
-            </div>
-
-            <!-- Błąd o wylogowaniu -->
-            <div th:if="${param.logout}" style="color: green;">
-                <p>Wylogowano pomyślnie</p>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Second Grid -->
-<div class="w3-row-padding w3-light-grey w3-padding-64 w3-container">
-    <div class="w3-content">
-        <div class="w3-twothird">
-            <h1>Witaj w Twoim Asystencie Budżetowym!</h1>
-            <h5 class="w3-padding-32">Zarządzaj swoimi finansami w prosty i przyjemny sposób!</h5>
-            <p class="w3-text-grey">💡 Zaplanuj swoje wydatki i oszczędności:
-              Zobacz, na co idą Twoje pieniądze dzięki przejrzystym wykresom i zestawieniom. Monitoruj wydatki i dochody w czasie rzeczywistym!
-
-              🎯 Ustawiaj cele oszczędnościowe:
-              Marzysz o nowym rowerze, wakacjach czy funduszu awaryjnym? Ustal cele, śledź postępy i realizuj swoje marzenia krok po kroku.
-
-              📊 Pełna kontrola nad budżetem:
-              Interaktywne wykresy pokażą Ci, ile zarabiasz, ile wydajesz i ile możesz oszczędzić. Wszystko w zasięgu jednego kliknięcia.
-
-              ✨ Przyjazny interfejs i prostota:
-              Intuicyjna obsługa sprawi, że zarządzanie finansami stanie się przyjemnością.
-
-              Zacznij oszczędzać i planować już dziś!
-              Nie czekaj – Twoje finanse nigdy wcześniej nie były tak dobrze zorganizowane. </p>
-        </div>
+        <a th:href="@{/gogym}" class="w3-bar-item w3-button w3-padding-large">GoGym</a>
+        <a th:href="@{/register}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Zarejestruj się</a>
+        <a th:href="@{/login}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Zaloguj się</a>
     </div>
 </div>
 
+<!-- Login Form -->
+<div class="login-container">
+    <h2>Logowanie</h2>
+
+    <!-- Komunikat o błędzie logowania -->
+    <div th:if="${param.error}" class="error-message" style="display: block;">
+        <p>Nieprawidłowy login lub hasło.</p>
+    </div>
+
+    <!-- Komunikat o pomyślnym wylogowaniu -->
+    <div th:if="${param.logout}" class="success-message" style="display: block;">
+        <p>Wylogowano pomyślnie.</p>
+    </div>
+
+    <form th:action="@{/login}" method="post" id="loginForm">
+        <input class="login-input" type="text" id="username" name="username" placeholder="Login">
+        <div id="usernameError" class="error-message"></div>
+
+        <input class="login-input" type="password" id="password" name="password" placeholder="Hasło">
+        <div id="passwordError" class="error-message"></div>
+
+        <button type="submit" class="login-button">Zaloguj się</button>
+    </form>
+
+    <p class="register-link">Nie masz konta? <a th:href="@{/register}">Zarejestruj się</a></p>
+</div>
+
+<!-- Footer -->
 <div th:replace="~{footer :: footer}"></div>
 
+<!-- Walidacja formularza -->
 <script>
-// Used to toggle the menu on small screens when clicking on the menu button
-function myFunction() {
-  var x = document.getElementById("navDemo");
-  if (x.className.indexOf("w3-show") == -1) {
-    x.className += " w3-show";
-  } else {
-    x.className = x.className.replace(" w3-show", "");
-  }
-}
-
-</script>
-<script>
-        // Pobieramy elementy
-        const button = document.getElementById('showButton');
-        const div = document.getElementById('hiddenDiv');
-
-        // Funkcja do pokazania div po kliknięciu przycisku
-        button.onclick = function() {
-            // Sprawdzamy, czy div jest widoczny
-            if (div.style.display === 'none' || div.style.display === '') {
-                // Jeśli div jest ukryty, to go pokazujemy
-                div.style.display = 'block';
-            } else {
-                // Jeśli div jest widoczny, to go ukrywamy
-                div.style.display = 'none';
-            }
-        };
-
-</script>
-<script>
-  // Walidacja formularza
   document.getElementById('loginForm').addEventListener('submit', function(event) {
     let isValid = true;
 
@@ -178,12 +161,7 @@ function myFunction() {
       event.preventDefault();
     }
   });
-
 </script>
 
 </body>
 </html>
-
-
-
-

@@ -14,6 +14,8 @@ import org.hibernate.Hibernate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,7 @@ public class PlanController {
     private final TrainingService trainingService;
     private final TrainerClientService trainerClientService;
     private final NotificationService notificationService;
+    private final BadgeService badgeService;
 
     @PreAuthorize("hasAuthority('CLIENT')")
     @GetMapping("/user-plans")
@@ -278,18 +281,25 @@ public class PlanController {
     @PostMapping("/update-plan-status/{planId}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> updatePlanStatus(@PathVariable Long planId) {
+
         try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
             trainingPlanService.updatePlanStatus(planId);
             TrainingPlan plan = trainingPlanRepository.findById(planId)
                     .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + planId));
             Map<String, Object> response = new HashMap<>();
             response.put("planId", plan.getIdPlan());
             response.put("status", plan.getStatus().name());
+            badgeService.checkAndAwardBadgesForUser(currentUser);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Błąd aktualizacji statusu planu", e);
             return ResponseEntity.status(500).body(Map.of("error", "Błąd aktualizacji statusu planu"));
         }
+
+
     }
 
     @PostMapping("/update-rest-day-status/{dayId}")

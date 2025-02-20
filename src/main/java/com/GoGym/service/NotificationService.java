@@ -57,6 +57,9 @@ public class NotificationService {
             case "rest_day_completed":
                 message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył dzień regeneracyjny: " + additionalInfo + ".";
                 break;
+            case "badge_awarded":
+                message = "Gratulacje! Otrzymałeś odznakę: " + additionalInfo + ".";
+                break;
             default:
                 throw new IllegalArgumentException("Nieznany status powiadomienia: " + status);
         }
