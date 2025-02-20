@@ -32,10 +32,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
-//                        .requestMatchers("/notifications/**").authenticated() // 🔥 Powiadomienia dostępne dla zalogowanych
+                        .requestMatchers("/", "/gogym","/register", "/login", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
-//                        .requestMatchers("/trainer/profile/**").authenticated() // 🔥 Tylko zalogowani użytkownicy mogą zobaczyć profile trenerów
+                        .requestMatchers("/trainer/profile/**").authenticated()
                         .requestMatchers("/trainer-plans/**").hasAuthority("TRAINER")
                         .requestMatchers("/user-plans/**").hasAuthority("CLIENT")
                         .anyRequest().authenticated()

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>GoGym - Strona główna</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- W3.CSS oraz czcionki -->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body, h1, h2, h3, h4, h5, h6 { font-family: "Lato", sans-serif; }
+        .w3-bar, h1, button { font-family: "Montserrat", sans-serif; }
+        /* Ikona dumbbell – symbolizująca siłę i trening */
+        .fa-dumbbell { font-size:200px; }
+        /* Hero Section – pełnoekranowe tło, z overlay dla czytelności tekstu */
+        .hero {
+          background: url('/images/hero.jpg') no-repeat center center;
+          background-size: cover;
+          padding: 150px 0;
+          color: white;
+          position: relative;
+        }
+        .hero .overlay {
+          background: rgba(0, 0, 0, 0.5);
+          padding: 50px;
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<div class="w3-top">
+    <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
+        <a th:href="@{/gogym}" class="w3-bar-item w3-button w3-padding-large">GoGym</a>
+        <a th:href="@{/register}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Zarejestruj się</a>
+        <a th:href="@{/login}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Zaloguj się</a>
+        <a href="javascript:void(0);" class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large" onclick="toggleMenu()">
+            <i class="fa fa-bars"></i>
+        </a>
+    </div>
+    <!-- Menu dla małych ekranów -->
+    <div id="navDemo" class="w3-bar-block w3-blue w3-hide w3-hide-large w3-hide-medium w3-large">
+        <a href="#" th:href="@{/register}" class="w3-bar-item w3-button w3-padding-large">Zarejestruj się</a>
+        <a href="#" th:href="@{/login}" class="w3-bar-item w3-button w3-padding-large">Zaloguj się</a>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<header class="hero w3-center">
+    <div class="overlay">
+        <h1 class="w3-jumbo">Witaj w GoGym!</h1>
+        <h3>Twój osobisty asystent treningowy</h3>
+        <p>Twórz i monitoruj spersonalizowane plany treningowe, śledź postępy oraz korzystaj z porad ekspertów – wszystko w jednym miejscu.</p>
+        <a href="#" th:href="@{/login}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zaloguj się</a>
+        <a href="#" th:href="@{/register}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zarejestruj się</a>
+    </div>
+</header>
+
+<!-- About Section -->
+<div class="w3-container w3-padding-64">
+    <h2 class="w3-center">Dlaczego GoGym?</h2>
+    <p class="w3-center w3-large">Wykorzystaj nowoczesne narzędzia do planowania treningów i osiągaj swoje cele!</p>
+    <div class="w3-row-padding w3-margin-top">
+        <div class="w3-third">
+            <h3>Profesjonalne Plany</h3>
+            <p>Skorzystaj z doświadczenia najlepszych trenerów i otrzymuj spersonalizowane plany treningowe, dopasowane do Twoich możliwości i celów.</p>
+        </div>
+        <div class="w3-third">
+            <h3>Monitorowanie Postępów</h3>
+            <p>Analizuj statystyki treningów, śledź swoje wyniki oraz rozwój – wszystko dzięki przejrzystemu panelowi użytkownika.</p>
+        </div>
+        <div class="w3-third">
+            <h3>Wsparcie Ekspertów</h3>
+            <p>Otrzymuj powiadomienia i wskazówki, które pomogą Ci osiągać kolejne cele.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer (wstawiany przez Thymeleaf, jeśli masz odpowiedni fragment) -->
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+    // Funkcja do przełączania menu na małych ekranach
+    function toggleMenu() {
+      var x = document.getElementById("navDemo");
+      if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+      } else {
+        x.className = x.className.replace(" w3-show", "");
+      }
+    }
+</script>
+</body>
+</html>

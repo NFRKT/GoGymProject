@@ -66,6 +66,20 @@
     <p class="w3-large">Monitoruj swój budżet, realizuj cele i kontroluj wydatki. 💰📊</p>
     <p class="w3-text-grey"><i>Twój budżet, Twoje cele, Twoje możliwości.</i></p>
 </div>
+<!-- Sekcja z progress barami dla aktywnych planów treningowych (widoczna tylko dla klienta) -->
+<div th:if="${isUser}">
+    <h2 class="w3-center">Postępy w Twoich planach treningowych</h2>
+    <div th:each="plan : ${activePlans}" style="margin: 20px auto; max-width: 600px;">
+        <p><strong th:text="${plan.name}">Plan treningowy</strong></p>
+        <div class="w3-light-grey w3-round-large" style="width: 100%; margin: 5px 0;">
+            <div class="w3-container w3-blue w3-round-large"
+                 th:style="'width:' + ${progressMap[plan.idPlan]} + '%'"
+                 th:text="${progressMap[plan.idPlan]} + '%'">
+                0%
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Key Features Section -->
 <div class="w3-row-padding w3-padding-64 w3-light-grey">
