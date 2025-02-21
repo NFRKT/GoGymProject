@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
-<head>
-  <style>
-
-  </style>
-</head>
-<body th:fragment="footer">
-<footer >
-  <div class="w3-container w3-black w3-center w3-opacity w3-padding-64">
-    <h1 class="w3-margin w3-xlarge">© Jan Dziwok</h1>
+<body>
+<footer th:fragment="footer" style="width: 100%; background: rgba(20, 30, 48, 0.9); color: white; padding: 20px 0; text-align: center; box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.5);">
+  <div style="text-align: center; padding: 32px;">
+    <div style="font-size: 24px; font-weight: bold; color: #00BFFF; margin-bottom: 10px;">
+      GoGym - Trenuj mądrze, żyj zdrowo
+    </div>
+    <p style="font-size: 18px; margin: 0;">
+      © 2025 GoGym - Wszystkie prawa zastrzeżone
+    </p>
+    <div style="margin-top: 10px;">
+      <a th:href="@{/about}" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">O nas</a> |
+      <a th:href="@{/contact}" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Kontakt</a> |
+      <a th:href="@{/terms}" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Regulamin</a> |
+      <a th:href="@{/privacy}" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Polityka prywatności</a>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+      <a href="#" style="color: white; font-size: 24px; transition: 0.3s;"><i class="fab fa-facebook"></i></a>
+      <a href="#" style="color: white; font-size: 24px; transition: 0.3s;"><i class="fab fa-twitter"></i></a>
+      <a href="#" style="color: white; font-size: 24px; transition: 0.3s;"><i class="fab fa-instagram"></i></a>
+      <a href="#" style="color: white; font-size: 24px; transition: 0.3s;"><i class="fab fa-youtube"></i></a>
+    </div>
   </div>
 </footer>
 </body>

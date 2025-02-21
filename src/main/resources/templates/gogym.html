@@ -5,12 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, h1, h2, h3, h4, h5, h6 { font-family: "Lato", sans-serif; }
-        .w3-bar, h1, button { font-family: "Montserrat", sans-serif; }
+        html, body {
+          height: 100%;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+        }
+        .content {
+            flex: 1;
+        }
+        body, h1, h2, h3, h4, h5, h6 {
+          font-family: "Lato", sans-serif;
+        }
+        .w3-bar, h1, button {
+          font-family: "Montserrat", sans-serif;
+        }
         .hero {
           background: url('/images/hero.jpg') no-repeat center center;
           background-size: cover;
@@ -27,85 +39,102 @@
 <body>
 
 <div class="w3-top">
-    <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
-        <a th:href="@{/gogym}" class="w3-bar-item w3-button w3-padding-large">GoGym</a>
-        <a th:href="@{/register}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Zarejestruj się</a>
-        <a th:href="@{/login}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Zaloguj się</a>
+    <div class="w3-bar" style="background: rgba(20, 30, 48, 0.9); color: white; padding: 10px;">
+        <!-- Logo/link główny -->
+        <a th:href="@{/gogym}" class="w3-bar-item w3-button" style="background: transparent; color: white;">GoGym</a>
+        <!-- Ikona hamburgera widoczna tylko na małych ekranach -->
+        <a href="javascript:void(0);" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="toggleNavMenu()" style="background: transparent; color: white;">
+            <i class="fa fa-bars"></i>
+        </a>
+        <!-- Menu dla większych ekranów -->
+        <div id="navLinks" class="w3-right w3-hide-small">
+            <a th:href="@{/register}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Zarejestruj się</a>
+            <a th:href="@{/login}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Zaloguj się</a>
+        </div>
+    </div>
+    <!-- Menu rozwijane dla małych ekranów -->
+    <div id="navMenu" class="w3-bar-block w3-hide w3-hide-large w3-hide-medium" style="background: rgba(20, 30, 48, 0.9);">
+        <a th:href="@{/register}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Zarejestruj się</a>
+        <a th:href="@{/login}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Zaloguj się</a>
     </div>
 </div>
 
-<header class="hero w3-center">
+<!-- Główna zawartość strony -->
+<div class="content">
+    <header class="hero w3-center">
+        <div class="overlay">
+            <h1 class="w3-jumbo">Witaj w GoGym!</h1>
+            <h3>Twój osobisty asystent treningowy</h3>
+            <p>Twórz i monitoruj spersonalizowane plany treningowe, śledź postępy oraz korzystaj z porad ekspertów.</p>
+            <a th:href="@{/login}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zaloguj się</a>
+            <a th:href="@{/register}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zarejestruj się</a>
+        </div>
+    </header>
 
-    <div class="overlay">
-        <h1 class="w3-jumbo">Witaj w GoGym!</h1>
-        <h3>Twój osobisty asystent treningowy</h3>
-        <p>Twórz i monitoruj spersonalizowane plany treningowe, śledź postępy oraz korzystaj z porad ekspertów.</p>
-        <a th:href="@{/login}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zaloguj się</a>
-        <a th:href="@{/register}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zarejestruj się</a>
-    </div>
-</header>
-
-<div class="w3-container w3-padding-64">
-    <h2 class="w3-center">Jak to działa?</h2>
-    <div class="w3-row-padding w3-margin-top w3-center">
-        <div class="w3-third">
-            <i class="fa fa-user-plus w3-xxlarge"></i>
-            <h3>Zarejestruj się</h3>
-            <p>Załóż darmowe konto i skonfiguruj swój profil.</p>
-        </div>
-        <div class="w3-third">
-            <i class="fa fa-dumbbell w3-xxlarge"></i>
-            <h3>Znajdź trenera</h3>
-            <p>Wybierz jednego z wielu niesamowitych trenerów personalnych działających na naszej platformie.</p>
-        </div>
-        <div class="w3-third">
-            <i class="fa fa-chart-line w3-xxlarge"></i>
-            <h3>Działajcie razem</h3>
-            <p>Rozwijaj się z pomocą stworzonego przez trenera planu treningowego.</p>
-        </div>
-    </div>
-</div>
-
-<div class="w3-container w3-light-grey w3-padding-64">
-    <h2 class="w3-center">Opinie naszych użytkowników</h2>
-    <div class="w3-row-padding w3-margin-top w3-center">
-        <div class="w3-third">
-            <p><i>"GoGym pomógł mi osiągnąć moje cele szybciej, niż się spodziewałem!"</i></p>
-            <p><strong>Adam, 28 lat</strong></p>
-        </div>
-        <div class="w3-third">
-            <p><i>"Dzięki tej platformie łatwo monitoruję postępy moich podopiecznych."</i></p>
-            <p><strong>Trener Michał</strong></p>
-        </div>
-        <div class="w3-third">
-            <p><i>"Personalizowane plany to coś, czego mi brakowało w innych aplikacjach."</i></p>
-            <p><strong>Kasia, 24 lata</strong></p>
+    <div class="w3-container w3-padding-64">
+        <h2 class="w3-center">Jak to działa?</h2>
+        <div class="w3-row-padding w3-margin-top w3-center">
+            <div class="w3-third">
+                <i class="fa fa-user-plus w3-xxlarge"></i>
+                <h3>Zarejestruj się</h3>
+                <p>Załóż darmowe konto i skonfiguruj swój profil.</p>
+            </div>
+            <div class="w3-third">
+                <i class="fa fa-dumbbell w3-xxlarge"></i>
+                <h3>Znajdź trenera</h3>
+                <p>Wybierz jednego z wielu niesamowitych trenerów personalnych działających na naszej platformie.</p>
+            </div>
+            <div class="w3-third">
+                <i class="fa fa-chart-line w3-xxlarge"></i>
+                <h3>Działajcie razem</h3>
+                <p>Rozwijaj się z pomocą stworzonego przez trenera planu treningowego.</p>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="w3-container w3-padding-64 w3-center">
-    <h2>GoGym w liczbach</h2>
-    <div class="w3-row-padding w3-margin-top">
-        <div class="w3-third">
-            <h3><i class="fa fa-users w3-xxlarge w3-text-blue"></i></h3>
-            <h2 id="userCount">0</h2>
-            <p>Zarejestrowanych użytkowników</p>
-        </div>
-        <div class="w3-third">
-            <h3><i class="fa fa-dumbbell w3-xxlarge w3-text-blue"></i></h3>
-            <h2 id="trainerCount">0</h2>
-            <p>Aktywnych trenerów</p>
-        </div>
-        <div class="w3-third">
-            <h3><i class="fa fa-check-circle w3-xxlarge w3-text-blue"></i></h3>
-            <h2 id="workoutCount">0</h2>
-            <p>Ukończonych planów treningowych</p>
+    <div class="w3-container w3-light-grey w3-padding-64">
+        <h2 class="w3-center">Opinie naszych użytkowników</h2>
+        <div class="w3-row-padding w3-margin-top w3-center">
+            <div class="w3-third">
+                <p><i>"GoGym pomógł mi osiągnąć moje cele szybciej, niż się spodziewałem!"</i></p>
+                <p><strong>Adam, 28 lat</strong></p>
+            </div>
+            <div class="w3-third">
+                <p><i>"Dzięki tej platformie łatwo monitoruję postępy moich podopiecznych."</i></p>
+                <p><strong>Trener Michał</strong></p>
+            </div>
+            <div class="w3-third">
+                <p><i>"Personalizowane plany to coś, czego mi brakowało w innych aplikacjach."</i></p>
+                <p><strong>Kasia, 24 lata</strong></p>
+            </div>
         </div>
     </div>
-</div>
 
+    <div class="w3-container w3-padding-64 w3-center">
+        <h2>GoGym w liczbach</h2>
+        <div class="w3-row-padding w3-margin-top">
+            <div class="w3-third">
+                <h3><i class="fa fa-users w3-xxlarge w3-text-blue"></i></h3>
+                <h2 id="userCount">0</h2>
+                <p>Zarejestrowanych użytkowników</p>
+            </div>
+            <div class="w3-third">
+                <h3><i class="fa fa-dumbbell w3-xxlarge w3-text-blue"></i></h3>
+                <h2 id="trainerCount">0</h2>
+                <p>Aktywnych trenerów</p>
+            </div>
+            <div class="w3-third">
+                <h3><i class="fa fa-check-circle w3-xxlarge w3-text-blue"></i></h3>
+                <h2 id="workoutCount">0</h2>
+                <p>Ukończonych planów treningowych</p>
+            </div>
+        </div>
+    </div>
+</div> <!-- end .content -->
+
+<!-- Stopka -->
 <div th:replace="~{footer :: footer}"></div>
+
 <script>
     // Funkcja animująca licznik
     function animateValue(id, start, end, duration) {
@@ -131,6 +160,14 @@
         animateValue("trainerCount", 0, [[${trainerCount}]], 2000);
         animateValue("workoutCount", 0, [[${workoutCount}]], 2000);
     });
+      function toggleNavMenu() {
+    var menu = document.getElementById("navMenu");
+    if (menu.className.indexOf("w3-show") == -1) {
+      menu.className += " w3-show";
+    } else {
+      menu.className = menu.className.replace(" w3-show", "");
+    }
+  }
 </script>
 </body>
 </html>
