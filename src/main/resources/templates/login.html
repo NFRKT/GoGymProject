@@ -6,26 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
         body {
             font-family: "Lato", sans-serif;
-            background-color: #f5f5f5;
+            background: url('/images/hero.jpg') no-repeat center center fixed;
+            background-size: cover;
         }
         .w3-bar, h1, button {
             font-family: "Montserrat", sans-serif;
         }
         .login-container {
             max-width: 400px;
-            margin: 50px auto;
+            margin: 80px auto;
             padding: 30px;
-            background: white;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
         }
         .login-container h2 {
-            text-align: center;
             margin-bottom: 20px;
+            color: #333;
         }
         .login-input {
             width: 100%;
@@ -86,25 +94,19 @@
 </head>
 <body>
 
-<!-- Navbar -->
 <div class="w3-top">
     <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
         <a th:href="@{/gogym}" class="w3-bar-item w3-button w3-padding-large">GoGym</a>
-        <a th:href="@{/register}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Zarejestruj się</a>
-        <a th:href="@{/login}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Zaloguj się</a>
     </div>
 </div>
 
-<!-- Login Form -->
 <div class="login-container">
     <h2>Logowanie</h2>
 
-    <!-- Komunikat o błędzie logowania -->
     <div th:if="${param.error}" class="error-message" style="display: block;">
         <p>Nieprawidłowy login lub hasło.</p>
     </div>
 
-    <!-- Komunikat o pomyślnym wylogowaniu -->
     <div th:if="${param.logout}" class="success-message" style="display: block;">
         <p>Wylogowano pomyślnie.</p>
     </div>
@@ -122,15 +124,12 @@
     <p class="register-link">Nie masz konta? <a th:href="@{/register}">Zarejestruj się</a></p>
 </div>
 
-<!-- Footer -->
 <div th:replace="~{footer :: footer}"></div>
 
-<!-- Walidacja formularza -->
 <script>
   document.getElementById('loginForm').addEventListener('submit', function(event) {
     let isValid = true;
 
-    // Walidacja loginu
     const username = document.getElementById('username');
     const usernameError = document.getElementById('usernameError');
     if (!username.value.trim()) {
@@ -143,7 +142,6 @@
       username.classList.remove('invalid');
     }
 
-    // Walidacja hasła
     const password = document.getElementById('password');
     const passwordError = document.getElementById('passwordError');
     if (!password.value.trim()) {
@@ -156,7 +154,6 @@
       password.classList.remove('invalid');
     }
 
-    // Zapobiegaj wysyłaniu formularza, jeśli dane są niepoprawne
     if (!isValid) {
       event.preventDefault();
     }

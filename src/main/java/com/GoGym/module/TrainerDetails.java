@@ -13,7 +13,7 @@ public class TrainerDetails {
 
     @Id
     @Column(name = "id_trainer", nullable = false)
-    private Integer idTrainer;
+    private Long idTrainer;
 
     @Column(name = "start_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -41,7 +41,7 @@ public class TrainerDetails {
     public TrainerDetails() {
     }
 
-    public TrainerDetails(Integer idTrainer, Date startDate, String phoneNumber, String workArea, String bio, String profilePicture, User user, List<TrainerSpecialization> specializations) {
+    public TrainerDetails(Long idTrainer, Date startDate, String phoneNumber, String workArea, String bio, String profilePicture, User user, List<TrainerSpecialization> specializations) {
         this.idTrainer = idTrainer;
         this.startDate = startDate;
         this.phoneNumber = phoneNumber;
@@ -52,11 +52,11 @@ public class TrainerDetails {
         this.specializations = specializations;
     }
 
-    public Integer getIdTrainer() {
+    public Long getIdTrainer() {
         return idTrainer;
     }
 
-    public void setIdTrainer(Integer idTrainer) {
+    public void setIdTrainer(Long idTrainer) {
         this.idTrainer = idTrainer;
     }
 

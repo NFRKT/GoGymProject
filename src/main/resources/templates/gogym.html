@@ -4,92 +4,133 @@
     <title>GoGym - Strona główna</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- W3.CSS oraz czcionki -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-    body, h1, h2, h3, h4, h5, h6 { font-family: "Lato", sans-serif; }
-    .w3-bar, h1, button { font-family: "Montserrat", sans-serif; }
-    /* Ikona dumbbell – symbolizująca siłę i trening */
-    .fa-dumbbell { font-size:200px; }
-    /* Hero Section – pełnoekranowe tło, z overlay dla czytelności tekstu */
-    .hero {
-      background: url('/images/hero.jpg') no-repeat center center;
-      background-size: cover;
-      padding: 150px 0;
-      color: white;
-      position: relative;
-    }
-    .hero .overlay {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 50px;
-    }
-  </style>
+        body, h1, h2, h3, h4, h5, h6 { font-family: "Lato", sans-serif; }
+        .w3-bar, h1, button { font-family: "Montserrat", sans-serif; }
+        .hero {
+          background: url('/images/hero.jpg') no-repeat center center;
+          background-size: cover;
+          padding: 150px 0;
+          color: white;
+          position: relative;
+        }
+        .hero .overlay {
+          background: rgba(0, 0, 0, 0.5);
+          padding: 50px;
+        }
+    </style>
 </head>
 <body>
-<!-- Navbar -->
+
 <div class="w3-top">
     <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
         <a th:href="@{/gogym}" class="w3-bar-item w3-button w3-padding-large">GoGym</a>
         <a th:href="@{/register}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Zarejestruj się</a>
         <a th:href="@{/login}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Zaloguj się</a>
-        <a href="javascript:void(0);" class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large" onclick="toggleMenu()">
-            <i class="fa fa-bars"></i>
-        </a>
-    </div>
-    <!-- Menu dla małych ekranów -->
-    <div id="navDemo" class="w3-bar-block w3-blue w3-hide w3-hide-large w3-hide-medium w3-large">
-        <a href="#" th:href="@{/register}" class="w3-bar-item w3-button w3-padding-large">Zarejestruj się</a>
-        <a href="#" th:href="@{/login}" class="w3-bar-item w3-button w3-padding-large">Zaloguj się</a>
     </div>
 </div>
 
-<!-- Hero Section -->
 <header class="hero w3-center">
+
     <div class="overlay">
         <h1 class="w3-jumbo">Witaj w GoGym!</h1>
         <h3>Twój osobisty asystent treningowy</h3>
-        <p>Twórz i monitoruj spersonalizowane plany treningowe, śledź postępy oraz korzystaj z porad ekspertów – wszystko w jednym miejscu.</p>
-        <a href="#" th:href="@{/login}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zaloguj się</a>
-        <a href="#" th:href="@{/register}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zarejestruj się</a>
+        <p>Twórz i monitoruj spersonalizowane plany treningowe, śledź postępy oraz korzystaj z porad ekspertów.</p>
+        <a th:href="@{/login}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zaloguj się</a>
+        <a th:href="@{/register}" class="w3-btn w3-blue-grey w3-round-xxlarge">Zarejestruj się</a>
     </div>
 </header>
 
-<!-- About Section -->
 <div class="w3-container w3-padding-64">
-    <h2 class="w3-center">Dlaczego GoGym?</h2>
-    <p class="w3-center w3-large">Wykorzystaj nowoczesne narzędzia do planowania treningów i osiągaj swoje cele!</p>
-    <div class="w3-row-padding w3-margin-top">
+    <h2 class="w3-center">Jak to działa?</h2>
+    <div class="w3-row-padding w3-margin-top w3-center">
         <div class="w3-third">
-            <h3>Profesjonalne Plany</h3>
-            <p>Skorzystaj z doświadczenia najlepszych trenerów i otrzymuj spersonalizowane plany treningowe, dopasowane do Twoich możliwości i celów.</p>
+            <i class="fa fa-user-plus w3-xxlarge"></i>
+            <h3>Zarejestruj się</h3>
+            <p>Załóż darmowe konto i skonfiguruj swój profil.</p>
         </div>
         <div class="w3-third">
-            <h3>Monitorowanie Postępów</h3>
-            <p>Analizuj statystyki treningów, śledź swoje wyniki oraz rozwój – wszystko dzięki przejrzystemu panelowi użytkownika.</p>
+            <i class="fa fa-dumbbell w3-xxlarge"></i>
+            <h3>Znajdź trenera</h3>
+            <p>Wybierz jednego z wielu niesamowitych trenerów personalnych działających na naszej platformie.</p>
         </div>
         <div class="w3-third">
-            <h3>Wsparcie i Motywacja</h3>
-            <p>Otrzymuj powiadomienia, przypomnienia oraz wsparcie zarówno od trenera, jak i społeczności GoGym, aby utrzymać wysoki poziom motywacji.</p>
+            <i class="fa fa-chart-line w3-xxlarge"></i>
+            <h3>Działajcie razem</h3>
+            <p>Rozwijaj się z pomocą stworzonego przez trenera planu treningowego.</p>
         </div>
     </div>
 </div>
 
-<!-- Footer (wstawiany przez Thymeleaf, jeśli masz odpowiedni fragment) -->
-<div th:replace="~{footer :: footer}"></div>
+<div class="w3-container w3-light-grey w3-padding-64">
+    <h2 class="w3-center">Opinie naszych użytkowników</h2>
+    <div class="w3-row-padding w3-margin-top w3-center">
+        <div class="w3-third">
+            <p><i>"GoGym pomógł mi osiągnąć moje cele szybciej, niż się spodziewałem!"</i></p>
+            <p><strong>Adam, 28 lat</strong></p>
+        </div>
+        <div class="w3-third">
+            <p><i>"Dzięki tej platformie łatwo monitoruję postępy moich podopiecznych."</i></p>
+            <p><strong>Trener Michał</strong></p>
+        </div>
+        <div class="w3-third">
+            <p><i>"Personalizowane plany to coś, czego mi brakowało w innych aplikacjach."</i></p>
+            <p><strong>Kasia, 24 lata</strong></p>
+        </div>
+    </div>
+</div>
 
+<div class="w3-container w3-padding-64 w3-center">
+    <h2>GoGym w liczbach</h2>
+    <div class="w3-row-padding w3-margin-top">
+        <div class="w3-third">
+            <h3><i class="fa fa-users w3-xxlarge w3-text-blue"></i></h3>
+            <h2 id="userCount">0</h2>
+            <p>Zarejestrowanych użytkowników</p>
+        </div>
+        <div class="w3-third">
+            <h3><i class="fa fa-dumbbell w3-xxlarge w3-text-blue"></i></h3>
+            <h2 id="trainerCount">0</h2>
+            <p>Aktywnych trenerów</p>
+        </div>
+        <div class="w3-third">
+            <h3><i class="fa fa-check-circle w3-xxlarge w3-text-blue"></i></h3>
+            <h2 id="workoutCount">0</h2>
+            <p>Ukończonych planów treningowych</p>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{footer :: footer}"></div>
 <script>
-    // Funkcja do przełączania menu na małych ekranach
-    function toggleMenu() {
-      var x = document.getElementById("navDemo");
-      if (x.className.indexOf("w3-show") == -1) {
-        x.className += " w3-show";
-      } else {
-        x.className = x.className.replace(" w3-show", "");
-      }
+    // Funkcja animująca licznik
+    function animateValue(id, start, end, duration) {
+        let obj = document.getElementById(id);
+        let range = end - start;
+        let increment = range / (duration / 5);
+        let current = start;
+        let step = function() {
+            current += increment;
+            obj.innerText = Math.floor(current);
+            if (current < end) {
+                requestAnimationFrame(step);
+            } else {
+                obj.innerText = end;
+            }
+        };
+        step();
     }
-  </script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Używamy wyrażeń Thymeleaf, aby pobrać wartości z modelu
+        animateValue("userCount", 0, [[${userCount}]], 2000);
+        animateValue("trainerCount", 0, [[${trainerCount}]], 2000);
+        animateValue("workoutCount", 0, [[${workoutCount}]], 2000);
+    });
+</script>
 </body>
 </html>

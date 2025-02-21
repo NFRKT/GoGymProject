@@ -2,6 +2,7 @@ package com.GoGym.controller;
 
 import com.GoGym.module.*;
 import com.GoGym.repository.BadgeRepository;
+import com.GoGym.repository.WorkoutRepository;
 import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.BadgeService;
 import com.GoGym.service.TrainingPlanService;
@@ -28,6 +29,10 @@ public class HomeController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private WorkoutRepository workoutRepository;
+
 
     @Autowired
     private TrainingPlanService trainingPlanService;
@@ -93,7 +98,24 @@ public class HomeController {
 
 
     @GetMapping({"/", "/gogym"})
-    public String landingPage() {
+    public String landingPage(Model model) {
+        // Pobierz liczbę wszystkich użytkowników
+        long userCount = userRepository.count();
+
+        // Liczba trenerów – przyjmujemy, że UserType jest przechowywany jako String w polu userType
+        long trainerCount = userRepository.findAll()
+                .stream()
+                .filter(u -> u.getUserType() != null && u.getUserType().toString().equals("TRAINER"))
+                .count();
+
+        // Liczba treningów (workoutów)
+        long workoutCount = workoutRepository.count();
+
+        model.addAttribute("userCount", userCount);
+        model.addAttribute("trainerCount", trainerCount);
+        model.addAttribute("workoutCount", workoutCount);
+
         return "gogym";
     }
+
 }

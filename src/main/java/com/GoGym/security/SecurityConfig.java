@@ -32,7 +32,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/gogym","/register", "/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/gogym","/register", "/login", "/css/**", "/js/**", "/static/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/trainer/profile/**").authenticated()
                         .requestMatchers("/trainer-plans/**").hasAuthority("TRAINER")

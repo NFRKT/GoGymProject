@@ -53,6 +53,10 @@ public class User {
     @JsonIgnore
     private Set<TrainerClient> trainers; // Trener przypisany do klienta
 
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private TrainerDetails trainerDetails;
+
     public enum Gender {
         KOBIETA, MĘŻCZYZNA
     }
@@ -170,6 +174,14 @@ public class User {
 
     public void setTrainers(Set<TrainerClient> trainers) {
         this.trainers = trainers;
+    }
+
+    public TrainerDetails getTrainerDetails() {
+        return trainerDetails;
+    }
+
+    public void setTrainerDetails(TrainerDetails trainerDetails) {
+        this.trainerDetails = trainerDetails;
     }
 
 }

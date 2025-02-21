@@ -1,137 +1,292 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>GoGym - Rejestracja</title>
+  <title>MyBudget - rejestracja</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
-    body { font-family: "Lato", sans-serif; background-color: #f0f0f0; }
-    .register-container {
-        max-width: 500px;
-        margin: auto;
-        padding: 30px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
-    }
+    body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
+    .w3-bar,h1,button {font-family: "Montserrat", sans-serif}
+    .fa-anchor,.fa-coffee {font-size:200px}
     .error-message {
-        color: red;
-        font-size: 0.9em;
-        display: none;
+      background-color: #ffdddd;
+      color: #d8000c;
+      border: 1px solid #d8000c;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none;
+    }
+    .invalid {
+      border: 2px solid #d8000c;
     }
   </style>
 </head>
 <body>
-<div class="w3-container w3-padding-64 w3-center">
-  <h2>GoGym - Rejestracja</h2>
-  <div class="register-container">
-    <form id="registrationForm" th:action="@{/register}" th:object="${User}" method="post">
-      <label>Email:</label>
-      <input class="w3-input w3-border" type="email" id="email" th:field="*{email}" required>
-      <div id="emailError" class="error-message">Wprowadź poprawny email.</div>
-
-      <label>Hasło:</label>
-      <input class="w3-input w3-border" type="password" id="password" th:field="*{password}" required>
-      <div id="passwordError" class="error-message">Hasło min. 6 znaków, zawiera cyfrę i literę.</div>
-
-      <label>Imię:</label>
-      <input class="w3-input w3-border" type="text" id="firstName" th:field="*{firstName}" required>
-      <div id="firstNameError" class="error-message">Wpisz poprawne imię.</div>
-
-      <label>Nazwisko:</label>
-      <input class="w3-input w3-border" type="text" id="secondName" th:field="*{secondName}" required>
-      <div id="secondNameError" class="error-message">Wpisz poprawne nazwisko.</div>
-
-      <label>Data urodzenia:</label>
-      <input class="w3-input w3-border" type="date" id="birthDate" th:field="*{birthDate}" required>
-
-      <label>Płeć:</label>
-      <select class="w3-input w3-border" id="gender" th:field="*{gender}">
-        <option value="KOBIETA">Kobieta</option>
-        <option value="MĘŻCZYZNA">Mężczyzna</option>
-      </select>
-
-      <label>Typ użytkownika:</label>
-      <select class="w3-input w3-border" id="userType" th:field="*{userType}">
-        <option value="CLIENT">Użytkownik</option>
-        <option value="TRAINER">Trener</option>
-      </select>
-
-      <!-- Pola dla trenerów -->
-      <div id="trainerFields" style="display: none;">
-        <label>Data rozpoczęcia działalności:</label>
-        <input class="w3-input w3-border" type="date" id="startDate" th:field="*{startDate}" required>
-
-        <label>Numer telefonu:</label>
-        <input class="w3-input w3-border" type="text" id="phoneNumber" th:field="*{phoneNumber}" required>
-
-        <label>Obszar pracy:</label>
-        <input class="w3-input w3-border" type="text" id="workArea" th:field="*{workArea}">
-
-        <label>Specjalizacje:</label>
-        <div id="specializations">
-          <div class="specialization-field">
-            <input class="w3-input w3-border" type="text" name="specializations" required>
-            <button type="button" onclick="addSpecialization()">Dodaj kolejną</button>
-          </div>
-        </div>
-      </div>
-
-      <button type="submit" class="w3-button w3-blue w3-margin-top w3-round">Zarejestruj</button>
-    </form>
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
+    <a th:href="@{/gogym}" class="w3-bar-item w3-button w3-padding-large">GoGym</a>
+    <a href="#" th:href="@{/register}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Zarejestruj się</a>
+    <a href="#" th:href="@{/login}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Zaloguj się</a>
+    <a href="javascript:void(0);" class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large" onclick="toggleMenu()">
+      <i class="fa fa-bars"></i>
+    </a>
+  </div>
+  <!-- Menu dla małych ekranów -->
+  <div id="navDemo" class="w3-bar-block w3-blue w3-hide w3-hide-large w3-hide-medium w3-large">
+    <a href="#" th:href="@{/register}" class="w3-bar-item w3-button w3-padding-large">Zarejestruj się</a>
+    <a href="#" th:href="@{/login}" class="w3-bar-item w3-button w3-padding-large">Zaloguj się</a>
   </div>
 </div>
+<!-- Header -->
+<header class="w3-container w3-blue w3-center" style="padding:128px 16px">
+  <h1 class="w3-margin w3-jumbo" th:text="${message}"></h1>
+  <p class="w3-xlarge"></p>
+</header>
+<!-- Form Section -->
+<div class="w3-row-padding w3-padding-64 w3-container">
+  <div class="w3-content">
+    <div class="w3-twothird">
+      <h2>Rejestracja użytkownika</h2>
+      <form id="registrationForm" th:action="@{/register}" th:object="${User}" method="post">
+        <label for="Email">Email:</label>
+        <input class="w3-input w3-border" type="text" id="Email" th:field="*{email}" required/>
+        <div id="emailError" class="error-message"></div><br/>
 
+        <label for="Password">Hasło:</label>
+        <input class="w3-input w3-border" type="password" id="Password" th:field="*{password}" required/>
+        <div id="passwordError" class="error-message"></div><br/>
+
+        <label for="First_name">Imię:</label>
+        <input class="w3-input w3-border" type="text" id="First_name" th:field="*{firstName}" required/>
+        <div id="firstNameError" class="error-message"></div><br/>
+
+        <label for="Second_name">Nazwisko:</label>
+        <input class="w3-input w3-border" type="text" id="Second_name" th:field="*{secondName}" required/>
+        <div id="secondNameError" class="error-message"></div><br/>
+
+        <label for="BirthDate">Data urodzenia:</label>
+        <input class="w3-input w3-border" type="date" id="BirthDate" th:field="*{birthDate}" required/><br/>
+
+        <label for="Gender">Płeć:</label>
+        <select class="w3-input w3-border" id="Gender" th:field="*{gender}">
+          <option value="KOBIETA">Kobieta</option>
+          <option value="MĘŻCZYZNA">Mężczyzna</option>
+        </select><br/>
+
+        <label for="UserType">Typ użytkownika:</label>
+        <select class="w3-input w3-border" id="UserType" th:field="*{userType}">
+          <option value="CLIENT">Użytkownik</option>
+          <option value="TRAINER">Trener</option>
+        </select><br/>
+
+        <!-- Sekcja widoczna tylko dla trenerów -->
+        <div id="trainerFields" style="display: none;">
+
+          <label for="StartDate">Data rozpoczęcia działalności:</label>
+          <input class="w3-input w3-border" type="date" id="StartDate" th:field="*{startDate}" required/><br/>
+
+          <label for="PhoneNumber">Numer kontaktowy:</label>
+          <input class="w3-input w3-border" type="text" id="PhoneNumber" th:field="*{phoneNumber}" required/><br/>
+
+          <label for="WorkArea">Obszar pracy:</label>
+          <input class="w3-input w3-border" type="text" id="WorkArea" th:field="*{workArea}"/><br/>
+
+          <label>Specjalizacje:</label>
+          <div id="specializations">
+            <!-- Pierwsze, bazowe pole bez przycisku "Usuń" -->
+            <div class="specialization-field">
+              <input class="w3-input w3-border" type="text" name="specializations" required/>
+            </div>
+          </div>
+          <button type="button" onclick="addSpecialization()">Dodaj specjalizację</button>
+        </div>
+        <button class="w3-btn w3-blue-grey w3-round-xxlarge" type="submit">Zarejestruj</button>
+      </form>
+
+
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<div th:replace="~{footer :: footer}"></div>
 <script>
-  document.getElementById("userType").addEventListener("change", function() {
-      document.getElementById("trainerFields").style.display = this.value === "TRAINER" ? "block" : "none";
-  });
-
-  function addSpecialization() {
-      const specDiv = document.createElement("div");
-      specDiv.classList.add("specialization-field");
-      specDiv.innerHTML = '<input class="w3-input w3-border" type="text" name="specializations" required> <button type="button" onclick="this.parentElement.remove()">Usuń</button>';
-      document.getElementById("specializations").appendChild(specDiv);
+// Used to toggle the menu on small screens when clicking on the menu button
+function myFunction() {
+  var x = document.getElementById("navDemo");
+  if (x.className.indexOf("w3-show") == -1) {
+    x.className += " w3-show";
+  } else {
+    x.className = x.className.replace(" w3-show", "");
   }
+}
+</script>
+<script>
+        // Pobieramy elementy
+        const button = document.getElementById('showButton');
+        const div = document.getElementById('hiddenDiv');
 
-  document.getElementById("registrationForm").addEventListener("submit", function(event) {
-      let isValid = true;
-      const email = document.getElementById("email");
-      const password = document.getElementById("password");
-      const firstName = document.getElementById("firstName");
-      const secondName = document.getElementById("secondName");
-      const emailError = document.getElementById("emailError");
-      const passwordError = document.getElementById("passwordError");
-      const firstNameError = document.getElementById("firstNameError");
-      const secondNameError = document.getElementById("secondNameError");
+        // Funkcja do pokazania div po kliknięciu przycisku
+        button.onclick = function() {
+            // Sprawdzamy, czy div jest widoczny
+            if (div.style.display === 'none' || div.style.display === '') {
+                // Jeśli div jest ukryty, to go pokazujemy
+                div.style.display = 'block';
+            } else {
+                // Jeśli div jest widoczny, to go ukrywamy
+                div.style.display = 'none';
+            }
+        };
+</script>
+<script>
 
-      function setError(field, errorElement, message) {
-          field.classList.add("w3-border-red");
-          errorElement.textContent = message;
-          errorElement.style.display = "block";
-          isValid = false;
-      }
+function addSpecialization() {
+    const container = document.getElementById("specializations");
 
-      function resetError(field, errorElement) {
-          field.classList.remove("w3-border-red");
-          errorElement.style.display = "none";
-      }
+    // Tworzymy nowy div dla specjalizacji
+    const specDiv = document.createElement("div");
+    specDiv.classList.add("specialization-field");
 
-      resetError(email, emailError);
-      resetError(password, passwordError);
-      resetError(firstName, firstNameError);
-      resetError(secondName, secondNameError);
+    // Tworzymy pole input
+    const input = document.createElement("input");
+    input.type = "text";
+    input.name = "specializations";
+    input.classList.add("w3-input", "w3-border");
+    input.required = true;
 
-      if (!email.value.includes("@")) setError(email, emailError, "Wprowadź poprawny email.");
-      if (password.value.length < 6 || !/\d/.test(password.value) || !/[a-zA-Z]/.test(password.value)) {
-          setError(password, passwordError, "Hasło musi zawierać co najmniej 6 znaków, literę i cyfrę.");
-      }
-      if (!/^[A-Z][a-z]+$/.test(firstName.value)) setError(firstName, firstNameError, "Imię musi zaczynać się wielką literą.");
-      if (!/^[A-Z][a-z]+$/.test(secondName.value)) setError(secondName, secondNameError, "Nazwisko musi zaczynać się wielką literą.");
+    // Tworzymy przycisk "Usuń"
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "Usuń";
+    removeBtn.classList.add("remove-btn");
+    removeBtn.onclick = function () {
+        removeSpecialization(specDiv);
+    };
 
-      if (!isValid) event.preventDefault();
-  });
+    // Dodajemy input i przycisk do div'a
+    specDiv.appendChild(input);
+    specDiv.appendChild(removeBtn);
+
+    // Dodajemy całość do kontenera
+    container.appendChild(specDiv);
+}
+
+function removeSpecialization(specDiv) {
+    specDiv.remove();
+}
+function validateForm(event) {
+    let isValid = true;
+
+    // Pobranie pól formularza
+    const email = document.getElementById('Email');
+    const password = document.getElementById('Password');
+    const firstName = document.getElementById('First_name');
+    const secondName = document.getElementById('Second_name');
+    const birthDate = document.getElementById('BirthDate');
+    const userType = document.getElementById('UserType');
+    const gender = document.getElementById('Gender');
+
+
+    const nameRegex = /^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+$/;
+
+    const firstNameError = document.getElementById('firstNameError');
+    const secondNameError = document.getElementById('secondNameError');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+
+    // Resetowanie błędów dla każdego pola
+    function resetError(field, errorElement) {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+    }
+
+    // Ustawianie błędów dla danego pola
+    function setError(field, errorElement, message) {
+        field.classList.add('invalid');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        isValid = false;
+    }
+
+    resetError(email, emailError);
+    resetError(password, passwordError);
+    resetError(firstName, firstNameError);
+    resetError(secondName, secondNameError);
+
+    // Walidacja emailu
+    if (!email.value.trim()) {
+        setError(email, emailError, "Email jest wymagany.");
+    }
+
+    // Walidacja hasła
+    if (!password.value.trim()) {
+        setError(password, passwordError, "Hasło jest wymagane.");
+    }
+
+    // Walidacja imienia
+    if (!firstName.value.trim()) {
+        setError(firstName, firstNameError, "Imię jest wymagane.");
+    } else if (!nameRegex.test(firstName.value)) {
+        setError(firstName, firstNameError, "Imię musi zaczynać się od wielkiej litery i zawierać tylko litery.");
+    }
+
+    // Walidacja nazwiska
+    if (!secondName.value.trim()) {
+        setError(secondName, secondNameError, "Nazwisko jest wymagane.");
+    } else if (!nameRegex.test(secondName.value)) {
+        setError(secondName, secondNameError, "Nazwisko musi zaczynać się od wielkiej litery i zawierać tylko litery.");
+    }
+
+    // Blokowanie wysyłania formularza, jeśli nie jest poprawny
+    if (!isValid) {
+        event.preventDefault();
+    }
+}
+
+// Podpięcie walidacji do formularza
+document.getElementById('registrationForm').addEventListener('submit', validateForm);
+
+document.addEventListener("DOMContentLoaded", function() {
+    const userTypeSelect = document.getElementById("UserType");
+    const trainerFields = document.getElementById("trainerFields");
+    const trainerInputs = trainerFields.querySelectorAll("input");
+
+    function toggleTrainerFields() {
+        const isTrainer = userTypeSelect.value === "TRAINER";
+
+        // Pokaż pola dla trenerów, jeśli wybrano "TRAINER"
+        trainerFields.style.display = isTrainer ? "block" : "none";
+
+        // Włącz lub wyłącz pola trenerów
+        trainerInputs.forEach(input => {
+            if (isTrainer) {
+                input.removeAttribute("disabled");
+            } else {
+                input.setAttribute("disabled", "disabled");
+            }
+        });
+    }
+
+    // Uruchom funkcję po zmianie typu użytkownika
+    userTypeSelect.addEventListener("change", toggleTrainerFields);
+
+    // Przed wysłaniem formularza włącz wszystkie pola, żeby się wysłały
+    document.getElementById("registrationForm").addEventListener("submit", function() {
+        trainerInputs.forEach(input => input.removeAttribute("disabled"));
+    });
+
+    // Uruchom funkcję przy ładowaniu strony (dla edycji)
+    toggleTrainerFields();
+
+
+});
+
 </script>
 </body>
 </html>

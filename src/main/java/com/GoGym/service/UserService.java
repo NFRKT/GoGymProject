@@ -44,7 +44,7 @@ public class UserService {
 
         if (userTypeEnum == User.UserType.TRAINER   ) {
             TrainerDetails trainerDetails = new TrainerDetails();
-            trainerDetails.setIdTrainer(savedUser.getIdUser().intValue());
+            trainerDetails.setIdTrainer(savedUser.getIdUser());
             trainerDetails.setStartDate(userDTO.getStartDate());
             trainerDetails.setPhoneNumber(userDTO.getPhoneNumber());
             trainerDetails.setWorkArea(userDTO.getWorkArea());
