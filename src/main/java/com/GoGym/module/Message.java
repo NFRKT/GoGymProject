@@ -25,15 +25,18 @@ public class Message {
     @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt = LocalDateTime.now();
 
+    @Column(name = "is_read", nullable = false)
+    private boolean read = false; // Domyślnie wiadomości są nieodczytane
     public Message() {
     }
 
-    public Message(Long id, ChatRoom chatRoom, User sender, String message, LocalDateTime sentAt) {
+    public Message(Long id, ChatRoom chatRoom, User sender, String message, LocalDateTime sentAt, boolean read) {
         this.id = id;
         this.chatRoom = chatRoom;
         this.sender = sender;
         this.message = message;
         this.sentAt = sentAt;
+        this.read = read;
     }
 
     public Long getId() {
@@ -75,4 +78,7 @@ public class Message {
     public void setSentAt(LocalDateTime sentAt) {
         this.sentAt = sentAt;
     }
+
+    public boolean isRead() { return read; }
+    public void setRead(boolean read) { this.read = read; }
 }

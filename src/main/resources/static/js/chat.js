@@ -33,12 +33,17 @@ function loadChatRooms() {
             chatRooms.forEach(room => {
                 let roomElement = document.createElement("div");
                 roomElement.classList.add("chat-room-link");
-                roomElement.innerText = room.targetUserName; // wyświetla imię i nazwisko rozmówcy
+                roomElement.dataset.chatRoomId = room.id; // ✅ Poprawione ustawienie ID
+                roomElement.innerHTML = `${room.targetUserName}
+                    ${room.unreadCount > 0 ? `<span class="unread-count">(${room.unreadCount})</span>` : ""}`;
+
                 roomElement.onclick = function () {
                     openChatRoom(room.id, room.targetUserName);
                 };
                 chatRoomsDiv.appendChild(roomElement);
             });
+
+            console.log("📋 Lista czatów załadowana.");
         })
         .catch(error => {
             console.error("Błąd ładowania pokoi chatu:", error);
@@ -48,8 +53,8 @@ function loadChatRooms() {
 
 
 
+
 function openChatRoom(chatRoomId, targetUserName) {
-    // Zapamiętaj ID pokoju dla usuwania wiadomości
     window.currentChatRoomId = chatRoomId;
 
     let chatRoomsDiv = document.getElementById("chat-rooms");
@@ -58,13 +63,33 @@ function openChatRoom(chatRoomId, targetUserName) {
             <button onclick="loadChatRooms()" class="back-button">← Powrót</button>
             <span class="chat-partner-name">${targetUserName}</span>
         </div>
-        <div id="chat-messages"></div>
-        <input type="text" id="messageInput" placeholder="Wpisz wiadomość...">
-        <button onclick="sendMessage(${chatRoomId})">Wyślij</button>
+        <div id="chat-content">
+            <div id="chat-messages"></div>
+            <div id="chat-input-container">
+                <textarea id="messageInput" placeholder="Wpisz wiadomość..." rows="1"></textarea>
+                <button onclick="sendMessage(${chatRoomId})">Wyślij</button>
+            </div>
+        </div>
     `;
 
     connectToChat(chatRoomId);
+    markMessagesAsRead(chatRoomId);
+        let messageInput = document.getElementById("messageInput");
+        messageInput.addEventListener("input", autoResizeTextarea);
 }
+function autoResizeTextarea() {
+    this.style.height = "auto"; // Resetujemy wysokość, by uniknąć nadmiernego powiększania
+    this.style.height = Math.min(this.scrollHeight, 100) + "px"; // Maksymalna wysokość to 150px
+}
+
+
+
+function markMessagesAsRead(chatRoomId) {
+    fetch(`/chat/${chatRoomId}/read`, { method: "POST" })
+        .then(() => console.log("Wiadomości oznaczone jako przeczytane"))
+        .catch(error => console.error("Błąd oznaczania wiadomości jako przeczytane:", error));
+}
+
 
 
 
@@ -77,23 +102,55 @@ function connectToChat(chatRoomId) {
     stompClient.connect({}, function () {
         console.log("Połączono z chatem");
 
-        // Subskrypcja na normalne wiadomości
+        // Subskrypcja wiadomości w aktualnym pokoju
         stompClient.subscribe(`/topic/chat/${chatRoomId}`, function (message) {
             addMessage(JSON.parse(message.body));
         });
 
-        // Subskrypcja na zdarzenie usunięcia wiadomości
+        // Subskrypcja usunięcia wiadomości
         stompClient.subscribe(`/topic/chat/${chatRoomId}/delete`, function (payload) {
             let deletedMessageId = payload.body;
             console.log("Usunięto wiadomość o ID:", deletedMessageId);
-            // Usuń element(y) z DOM
             let elements = document.querySelectorAll(`[data-message-id='${deletedMessageId}']`);
             elements.forEach(el => el.remove());
         });
 
+        // 🔥 Subskrypcja na aktualizację liczby nieodczytanych wiadomości
+        stompClient.subscribe(`/topic/chat/updateUnread`, function (update) {
+            console.log("🔔 Otrzymano aktualizację nieodczytanych wiadomości:", update.body);
+            let chatRoomUpdate = JSON.parse(update.body);
+            updateUnreadCount(chatRoomUpdate);
+        });
+
+
         loadChatHistory(chatRoomId);
     });
 }
+function updateUnreadCount(chatRoomUpdate) {
+    console.log("🔄 Aktualizacja pokoju:", chatRoomUpdate);
+
+    let chatRoomsDiv = document.getElementById("chat-rooms");
+
+    // Jeśli aktualnie nie ma chatu, wymuś ponowne załadowanie
+    if (!chatRoomsDiv.innerHTML || chatRoomsDiv.innerHTML.trim() === "") {
+        loadChatRooms();
+        return;
+    }
+
+    let chatRoomElements = chatRoomsDiv.getElementsByClassName("chat-room-link");
+
+    for (let roomElement of chatRoomElements) {
+        if (Number(roomElement.dataset.chatRoomId) === Number(chatRoomUpdate.id)) {
+            console.log("📌 Aktualizuję pokój:", chatRoomUpdate.targetUserName);
+
+            roomElement.innerHTML = `${chatRoomUpdate.targetUserName}
+                ${chatRoomUpdate.unreadCount > 0 ? `<span class="unread-count">(${chatRoomUpdate.unreadCount})</span>` : ""}`;
+        }
+    }
+}
+
+
+
 
 
 function loadChatHistory(chatRoomId) {

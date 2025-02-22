@@ -33,6 +33,7 @@
     </style>
 </head>
 <body>
+<div th:replace="~{header :: header}"></div>
 <h2>Panel Trenera</h2>
 <a href="/home" class="w3-button w3-light-grey">Powrót na stronę główną</a>
 
@@ -84,7 +85,9 @@
   </tr>
   </tbody>
 </table>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script defer src="/js/chat.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const clientsTable = document.querySelector("#clients-table tbody");

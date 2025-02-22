@@ -29,7 +29,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 @Controller
 @RequestMapping("/chat")
 public class ChatController {
-
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
@@ -42,39 +41,47 @@ public class ChatController {
         this.messagingTemplate = messagingTemplate;
     }
 
-@GetMapping
-@ResponseBody
-public List<ChatRoomDTO> getChatRooms(Principal principal) {
-    User user = userRepository.findByEmail(principal.getName())
-            .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+    @GetMapping
+    @ResponseBody
+    public List<ChatRoomDTO> getChatRooms(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
-    return chatRoomRepository.findByUserOrTrainer(user, user)
-            .stream()
-            .map(chatRoom -> {
-                boolean isClient = chatRoom.getUser().equals(user);
-                return new ChatRoomDTO(
-                        chatRoom.getId(),
-                        isClient ? chatRoom.getUser().getIdUser() : chatRoom.getTrainer().getIdUser(),
-                        isClient ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
-                                : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName()
-                );
-            })
-            .toList();
-}
-
-
-
+        return chatRoomRepository.findByUserOrTrainer(user, user)
+                .stream()
+                .map(chatRoom -> {
+                    boolean isClient = chatRoom.getUser().equals(user);
+                    long unreadCount = messageRepository.countUnreadMessages(chatRoom.getId(), user.getIdUser());
+                    return new ChatRoomDTO(
+                            chatRoom.getId(),
+                            isClient ? chatRoom.getTrainer().getIdUser() : chatRoom.getUser().getIdUser(),
+                            isClient ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
+                                    : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName(),
+                            unreadCount
+                    );
+                })
+                .toList();
+    }
 
     @GetMapping("/{chatRoomId}/messages")
     @ResponseBody
-    public List<MessageDTO> getChatMessages(@PathVariable Long chatRoomId) {
+    public List<MessageDTO> getChatMessages(@PathVariable Long chatRoomId, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+
         List<Message> messages = messageRepository.findByChatRoomId(chatRoomId);
+
+        // Oznacz nieodczytane wiadomości jako przeczytane, jeśli nie zostały wysłane przez aktualnego użytkownika
+        List<Message> unreadMessages = messageRepository.findUnreadMessages(chatRoomId, user.getIdUser());
+        for (Message message : unreadMessages) {
+            message.setRead(true);
+        }
+        messageRepository.saveAll(unreadMessages);
+
         return messages.stream()
                 .map(msg -> new MessageDTO(msg.getId(), msg.getSender(), msg.getMessage(), msg.getSentAt()))
                 .toList();
     }
-
-
 
     @PostMapping("/start")
     public ResponseEntity<ChatRoom> startChat(@RequestParam Long trainerId, Principal principal) {
@@ -105,15 +112,19 @@ public List<ChatRoomDTO> getChatRooms(Principal principal) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("Nie znaleziono pokoju chatu"));
 
+        // 🔥 Upewniamy się, że odbiorca to nie ten sam użytkownik co nadawca
+        User recipient = chatRoom.getTrainer().equals(sender) ? chatRoom.getUser() : chatRoom.getTrainer();
+
         Message message = new Message();
-        message.setSender(sender);  // ✅ Ustawienie nadawcy
+        message.setSender(sender);
         message.setChatRoom(chatRoom);
         message.setMessage(messageDTO.getMessage());
         message.setSentAt(LocalDateTime.now());
+        message.setRead(false);
 
         messageRepository.save(message);
 
-        // 🔥 Konwersja wiadomości na DTO przed wysłaniem do WebSocket
+        // Tworzymy DTO wiadomości do wysłania
         MessageDTO responseMessage = new MessageDTO(
                 message.getId(),
                 sender,
@@ -121,7 +132,32 @@ public List<ChatRoomDTO> getChatRooms(Principal principal) {
                 message.getSentAt()
         );
 
+        // Wysyłamy wiadomość do pokoju
         messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId, responseMessage);
+
+        System.out.println("📨 Wiadomość wysłana do pokoju " + chatRoomId);
+        System.out.println("👤 Nadawca: " + sender.getFirstName());
+        System.out.println("🎯 Odbiorca: " + recipient.getFirstName());
+
+        // 🔥 Aktualizujemy liczbę nieodczytanych wiadomości dla odbiorcy
+        List<Message> unreadMessages = messageRepository.findUnreadMessages(chatRoomId, recipient.getIdUser());
+
+        System.out.println("📬 Nieprzeczytane wiadomości:");
+        for (Message msg : unreadMessages) {
+            System.out.println("📝 ID: " + msg.getId() + " | Nadawca: " + msg.getSender().getFirstName() + " | Treść: " + msg.getMessage());
+        }
+
+        long unreadCount = unreadMessages.size();
+
+        // 🔥 Wysyłamy do odbiorcy aktualizację
+        messagingTemplate.convertAndSend("/topic/chat/updateUnread", new ChatRoomDTO(
+                chatRoom.getId(),
+                recipient.getIdUser(),
+                recipient.getFirstName() + " " + recipient.getSecondName(),
+                unreadCount
+        ));
+
+        System.out.println("🔔 Nieodczytane wiadomości: " + unreadCount);
     }
 
     @DeleteMapping("/{chatRoomId}/messages/{messageId}")
@@ -156,10 +192,26 @@ public List<ChatRoomDTO> getChatRooms(Principal principal) {
         return ResponseEntity.ok("Wiadomość usunięta");
     }
 
+    @PostMapping("/{chatRoomId}/read")
+    public ResponseEntity<?> markMessagesAsRead(@PathVariable Long chatRoomId, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
+        List<Message> unreadMessages = messageRepository.findUnreadMessages(chatRoomId, user.getIdUser());
+        unreadMessages.forEach(msg -> msg.setRead(true));
+        messageRepository.saveAll(unreadMessages);
 
+        // 🔥 Powiadamiamy o aktualizacji liczby nieprzeczytanych wiadomości
+        long unreadCount = messageRepository.countUnreadMessages(chatRoomId, user.getIdUser());
+        messagingTemplate.convertAndSend("/topic/chat/updateUnread", new ChatRoomDTO(
+                chatRoomId,
+                user.getIdUser(),
+                user.getFirstName() + " " + user.getSecondName(),
+                unreadCount
+        ));
 
-
+        return ResponseEntity.ok("Wiadomości oznaczone jako przeczytane");
+    }
 
 }
 
