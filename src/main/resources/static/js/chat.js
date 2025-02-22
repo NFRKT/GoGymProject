@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Chat.js załadowany");
     loadChatRooms();
-    loadTrainers();
 });
 
 function toggleChat() {
@@ -16,7 +15,12 @@ function toggleChat() {
 document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ `chat.js` załadowany!");
     loadChatRooms();
+
+    // Pobierz ID aktualnie zalogowanego użytkownika
+    window.currentUserId = document.getElementById("currentUserId")?.value || null;
+    console.log("Zalogowany użytkownik ID:", window.currentUserId);
 });
+
 
 
 function loadChatRooms() {
@@ -29,9 +33,9 @@ function loadChatRooms() {
             chatRooms.forEach(room => {
                 let roomElement = document.createElement("div");
                 roomElement.classList.add("chat-room-link");
-                roomElement.innerText = room.trainerName;
+                roomElement.innerText = room.targetUserName; // wyświetla imię i nazwisko rozmówcy
                 roomElement.onclick = function () {
-                    openChatRoom(room.id);
+                    openChatRoom(room.id, room.targetUserName);
                 };
                 chatRoomsDiv.appendChild(roomElement);
             });
@@ -42,9 +46,18 @@ function loadChatRooms() {
         });
 }
 
-function openChatRoom(chatRoomId) {
+
+
+function openChatRoom(chatRoomId, targetUserName) {
+    // Zapamiętaj ID pokoju dla usuwania wiadomości
+    window.currentChatRoomId = chatRoomId;
+
     let chatRoomsDiv = document.getElementById("chat-rooms");
     chatRoomsDiv.innerHTML = `
+        <div id="chat-conversation-header">
+            <button onclick="loadChatRooms()" class="back-button">← Powrót</button>
+            <span class="chat-partner-name">${targetUserName}</span>
+        </div>
         <div id="chat-messages"></div>
         <input type="text" id="messageInput" placeholder="Wpisz wiadomość...">
         <button onclick="sendMessage(${chatRoomId})">Wyślij</button>
@@ -52,6 +65,8 @@ function openChatRoom(chatRoomId) {
 
     connectToChat(chatRoomId);
 }
+
+
 
 let stompClient = null;
 
@@ -62,21 +77,35 @@ function connectToChat(chatRoomId) {
     stompClient.connect({}, function () {
         console.log("Połączono z chatem");
 
+        // Subskrypcja na normalne wiadomości
         stompClient.subscribe(`/topic/chat/${chatRoomId}`, function (message) {
-            showMessage(JSON.parse(message.body));
+            addMessage(JSON.parse(message.body));
+        });
+
+        // Subskrypcja na zdarzenie usunięcia wiadomości
+        stompClient.subscribe(`/topic/chat/${chatRoomId}/delete`, function (payload) {
+            let deletedMessageId = payload.body;
+            console.log("Usunięto wiadomość o ID:", deletedMessageId);
+            // Usuń element(y) z DOM
+            let elements = document.querySelectorAll(`[data-message-id='${deletedMessageId}']`);
+            elements.forEach(el => el.remove());
         });
 
         loadChatHistory(chatRoomId);
     });
 }
 
+
 function loadChatHistory(chatRoomId) {
     fetch(`/chat/${chatRoomId}/messages`)
         .then(response => response.json())
         .then(messages => {
-            messages.forEach(msg => showMessage(msg));
+            let messagesDiv = document.getElementById("chat-messages");
+            messagesDiv.innerHTML = "";
+            messages.forEach(msg => addMessage(msg));
         });
 }
+
 
 function sendMessage(chatRoomId) {
     let messageInput = document.getElementById("messageInput").value;
@@ -91,49 +120,82 @@ function sendMessage(chatRoomId) {
     document.getElementById("messageInput").value = "";
 }
 
-function showMessage(message) {
+function getCurrentUserId() {
+    let userId = document.getElementById("currentUserId")?.value || null;
+    return userId;
+}
+function addMessage(message) {
     let messagesDiv = document.getElementById("chat-messages");
-    let messageElement = document.createElement("p");
-    messageElement.innerHTML = `<strong>${message.senderName}:</strong> ${message.message}`;
+
+    // Formatowanie daty wiadomości (bez godziny)
+    let msgDateObj = new Date(message.sentAt);
+    let msgDate = msgDateObj.toLocaleDateString();
+
+    // Sprawdź, czy ostatni dodany element to separator z tą datą
+    let lastGroupDate = null;
+    let children = messagesDiv.children;
+    for (let i = children.length - 1; i >= 0; i--) {
+        if (children[i].classList.contains("message-date")) {
+            lastGroupDate = children[i].textContent;
+            break;
+        }
+    }
+    if (lastGroupDate !== msgDate) {
+        // Dodaj separator z datą – będzie on wyśrodkowany dzięki CSS
+        let dateHeader = document.createElement("div");
+        dateHeader.classList.add("message-date");
+        dateHeader.textContent = msgDate;
+        messagesDiv.appendChild(dateHeader);
+    }
+
+    // Utwórz element wiadomości
+    let messageElement = document.createElement("div");
+    let isCurrentUser = Number(message.senderId) === Number(window.currentUserId);
+    // Jeśli to Twoja wiadomość, zamiast imienia wyświetlamy "Ty:"
+    let senderDisplay = isCurrentUser ? "Ty:" : message.senderName + ":";
+    messageElement.classList.add("message", isCurrentUser ? "user-message" : "trainer-message");
+    messageElement.setAttribute("data-message-id", message.id);
+    // Formatowanie godziny wiadomości
+    let time = "";
+    if (message.sentAt) {
+        let dateTime = new Date(message.sentAt);
+        time = dateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    messageElement.innerHTML = `<strong>${senderDisplay}</strong> ${message.message} <span class="timestamp">${time}</span>`;
+
+    // Dodaj przycisk usuwania, jeśli to Twoja wiadomość
+    let deleteButtonHTML = "";
+    if (isCurrentUser) {
+        deleteButtonHTML = `<button class="delete-message-button" onclick="deleteMessage(${message.id})">Usuń</button>`;
+    }
+    messageElement.innerHTML = `<strong>${senderDisplay}</strong> ${message.message} <span class="timestamp">${time}</span> ${deleteButtonHTML}`;
+
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+function deleteMessage(messageId) {
+    if (!confirm("Czy na pewno chcesz usunąć tę wiadomość?")) return;
 
-// 🔥 Pobieranie dostępnych trenerów, z którymi klient ma powiązanie
-function loadTrainers() {
-    fetch("/client/trainers")  // 🔥 Pobiera trenerów klienta
-        .then(response => response.json())
-        .then(trainers => {
-            let trainerSelect = document.getElementById("trainerSelect");
-            trainerSelect.innerHTML = '<option value="">-- Wybierz trenera --</option>'; // 🔄 Reset
-
-            trainers.forEach(trainer => {
-                let option = document.createElement("option");
-                option.value = trainer.id;
-                option.innerText = trainer.firstName + " " + trainer.secondName;
-                trainerSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error("Błąd ładowania trenerów:", error));
+    fetch(`/chat/${window.currentChatRoomId}/messages/${messageId}`, {
+        method: "DELETE"
+    })
+    .then(response => {
+        if (response.ok) {
+            // Usuń element wiadomości z DOM – wiadomość znika natychmiast
+            let messageElement = document.querySelector(`[data-message-id='${messageId}']`);
+            if (messageElement) {
+                messageElement.remove();
+            }
+        } else {
+            alert("Błąd przy usuwaniu wiadomości");
+        }
+    })
+    .catch(error => {
+        console.error("Błąd przy usuwaniu wiadomości:", error);
+    });
 }
 
 
-// 🔥 Funkcja do rozpoczęcia nowej konwersacji
-function startNewChat() {
-    let trainerId = document.getElementById("trainerSelect").value;
-    if (!trainerId) {
-        alert("Wybierz trenera!");
-        return;
-    }
-
-    fetch(`/chat/start?trainerId=${trainerId}`, { method: "POST" })
-        .then(response => response.json())
-        .then(chatRoom => {
-            openChatRoom(chatRoom.id); // 🔥 Otwórz nową rozmowę po jej utworzeniu
-            loadChatRooms(); // 🔄 Odśwież listę rozmów
-        })
-        .catch(error => console.error("Błąd podczas tworzenia chatu:", error));
-}
 
 window.toggleChat = toggleChat;
 

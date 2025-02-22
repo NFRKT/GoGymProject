@@ -1,6 +1,8 @@
 package com.GoGym.service;
+import com.GoGym.module.ChatRoom;
 import com.GoGym.module.TrainerClient;
 import com.GoGym.module.User;
+import com.GoGym.repository.ChatRoomRepository;
 import com.GoGym.repository.TrainerClientRepository;
 import com.GoGym.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -23,11 +25,23 @@ public class TrainerClientService {
     @Autowired
     private final NotificationService notificationService;
 
+    @Autowired
+    private final ChatRoomRepository chatRoomRepository;
+
     public TrainerClient createTrainerClient(Long trainerId, Long clientId) {
         TrainerClient trainerClient = new TrainerClient();
         trainerClient.setTrainer(new User(trainerId));
         trainerClient.setClient(new User(clientId));
-        return trainerClientRepository.save(trainerClient);
+
+        TrainerClient savedRelation = trainerClientRepository.save(trainerClient);
+
+        // Automatyczne tworzenie pokoju chatu
+        ChatRoom chatRoom = new ChatRoom();
+        chatRoom.setUser(trainerClient.getClient());
+        chatRoom.setTrainer(trainerClient.getTrainer());
+        chatRoomRepository.save(chatRoom);
+
+        return savedRelation;
     }
 
     public List<TrainerClient> getTrainerClients(Long trainerId) {
@@ -49,9 +63,11 @@ public class TrainerClientService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Relacja trener-klient nie istnieje");
         }
         TrainerClient trainerClient = trainerClientOpt.get();
-        User trainer = trainerClient.getTrainer();
-        User client = trainerClient.getClient();
+
+        // Usunięcie pokoju chatu
+        chatRoomRepository.deleteByUserAndTrainer(trainerClient.getClient(), trainerClient.getTrainer());
+
         trainerClientRepository.delete(trainerClient);
-        notificationService.createNotification(client, trainer, "trainer_resigned");
+        notificationService.createNotification(trainerClient.getClient(), trainerClient.getTrainer(), "trainer_resigned");
     }
 }

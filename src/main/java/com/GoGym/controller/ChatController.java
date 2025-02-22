@@ -1,6 +1,7 @@
 package com.GoGym.controller;
 
 import com.GoGym.dto.ChatRoomDTO;
+
 import com.GoGym.dto.MessageDTO;
 import com.GoGym.module.ChatRoom;
 import com.GoGym.module.Message;
@@ -8,6 +9,7 @@ import com.GoGym.module.User;
 import com.GoGym.repository.ChatRoomRepository;
 import com.GoGym.repository.MessageRepository;
 import com.GoGym.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -40,29 +42,27 @@ public class ChatController {
         this.messagingTemplate = messagingTemplate;
     }
 
-//    @GetMapping
-//    public String getChatHome(Model model, Principal principal) {
-//        User user = userRepository.findByEmail(principal.getName())
-//                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
-//
-//        List<ChatRoom> chatRooms = chatRoomRepository.findByUserOrTrainer(user, user);
-//        List<User> trainers = userRepository.findAllByUserType(User.UserType.TRENER); // Pobierz listę trenerów
-//
-//        model.addAttribute("chatRooms", chatRooms);
-//        model.addAttribute("trainers", trainers);
-//
-//        return "chat";  // Strona główna chatu
-//    }
-    @GetMapping
-    @ResponseBody
-    public List<ChatRoomDTO> getChatRooms(Principal principal) {
-        User user = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+@GetMapping
+@ResponseBody
+public List<ChatRoomDTO> getChatRooms(Principal principal) {
+    User user = userRepository.findByEmail(principal.getName())
+            .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
-        List<ChatRoom> chatRooms = chatRoomRepository.findByUserOrTrainer(user, user);
+    return chatRoomRepository.findByUserOrTrainer(user, user)
+            .stream()
+            .map(chatRoom -> {
+                boolean isClient = chatRoom.getUser().equals(user);
+                return new ChatRoomDTO(
+                        chatRoom.getId(),
+                        isClient ? chatRoom.getUser().getIdUser() : chatRoom.getTrainer().getIdUser(),
+                        isClient ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
+                                : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName()
+                );
+            })
+            .toList();
+}
 
-        return chatRooms.stream().map(ChatRoomDTO::new).toList();  // 🔥 Konwersja na DTO
-    }
+
 
 
     @GetMapping("/{chatRoomId}/messages")
@@ -123,6 +123,39 @@ public class ChatController {
 
         messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId, responseMessage);
     }
+
+    @DeleteMapping("/{chatRoomId}/messages/{messageId}")
+    public ResponseEntity<?> deleteMessage(@PathVariable Long chatRoomId,
+                                           @PathVariable Long messageId,
+                                           Principal principal) {
+        // Pobranie aktualnego użytkownika
+        User currentUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
+
+        // Pobranie wiadomości
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono wiadomości"));
+
+        // Sprawdzenie, czy wiadomość należy do pokoju
+        if (!message.getChatRoom().getId().equals(chatRoomId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Niepoprawny pokój chatu");
+        }
+
+        // Weryfikacja, czy aktualny użytkownik jest nadawcą
+        if (!message.getSender().equals(currentUser)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Możesz usuwać tylko własne wiadomości");
+        }
+
+        // Usuwamy wiadomość
+        messageRepository.delete(message);
+
+        // Wysyłamy zdarzenie o usunięciu wiadomości do kanału WebSocket
+        messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId + "/delete", messageId);
+
+        return ResponseEntity.ok("Wiadomość usunięta");
+    }
+
 
 
 
