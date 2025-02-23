@@ -7,10 +7,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script defer src="/js/chat.js"></script>
-
 </head>
 <body th:fragment="header">
 
+<!-- Pasek nawigacji -->
 <div class="w3-top">
     <div class="w3-bar w3-orange w3-card w3-left-align w3-large">
         <a href="#" th:href="@{/home}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Home</a>
@@ -23,7 +23,7 @@
     </div>
 </div>
 
-<!-- ✅ Przeniesiony poza w3-bar -->
+<!-- Powiadomienia (poza w3-bar) -->
 <div id="notifications-container">
     <button id="notifications-bell">🔔</button>
     <div id="notifications-dropdown">
@@ -31,8 +31,7 @@
     </div>
 </div>
 
-
-<!-- 🔥 Okienko chatu -->
+<!-- Okienko chatu -->
 <div id="chat-container" class="chat-hidden">
     <div id="chat-header">
         <h3>Chat</h3>
@@ -42,334 +41,277 @@
         <p>Ładowanie rozmów...</p>
     </div>
 </div>
+
 <input type="hidden" id="currentUserEmail" sec:authentication="name">
 <input type="hidden" id="currentUserId" th:value="${idUser}" />
 
-<!-- 🔥 Poprawiony wygląd chatu -->
+<!-- Style chatu i powiadomień -->
 <style>
-#chat-content {
-    display: flex;
-    flex-direction: column;
-    height: 400px; /* Wysokość okna czatu */
-}
+        /* Kontener chatu */
+        #chat-container {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 350px;
+            max-height: 500px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            overflow: hidden;
+        }
 
-#chat-messages {
-    flex-grow: 1; /* Powoduje, że rośnie, zajmując dostępne miejsce */
-    overflow-y: auto;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
+        /* Nagłówek chatu */
+        #chat-header {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+        }
+        .close-chat-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
 
-#chat-input-container {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    background: white;
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
-    align-items: flex-end;
-}
+        /* Lista pokoi rozmów */
+        #chat-rooms {
+            padding: 10px;
+            height: 400px;
+        }
+        .chat-room-link {
+            display: block;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .chat-room-link:hover {
+            background: #f5f5f5;
+        }
 
-#messageInput {
-    flex-grow: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    min-height: 35px; /* Początkowa wysokość */
-    max-height: 100px; /* Maksymalna wysokość */
-    overflow-y: auto; /* Włącza przewijanie po osiągnięciu max-height */
-    resize: none; /* Blokuje manualne zmienianie rozmiaru przez użytkownika */
-}
+        /* Kontener zawartości rozmowy */
+        #chat-content {
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+        }
+        #chat-messages {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+        }
 
-#chat-input-container button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-}
+        /* Separator daty */
+        .message-date {
+            width: 100%;
+            text-align: center;
+            margin: 10px 0;
+            color: #888;
+            font-size: 0.9em;
+        }
 
-#chat-input-container button:hover {
-    background-color: #0056b3;
-}
+        /* Znacznik czasu wiadomości */
+        .timestamp {
+            display: block;
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 4px;
+        }
 
+        /* Pole wpisywania wiadomości i przycisk wyślij */
+        #chat-input-container {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            align-items: flex-end;
+        }
+        #messageInput {
+            width: 80%;
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 35px;
+            max-height: 100px;
+            overflow-y: auto;
+            resize: none;
+        }
+        #chat-input-container button,
+        .send-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #chat-input-container button:hover,
+        .send-btn:hover {
+            background-color: #0056b3;
+        }
 
-.unread-count {
-    color: red;
-    font-weight: bold;
-}
+        /* Styl wiadomości */
+        .message {
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            text-align: right;
+            align-self: flex-end;
+            border-radius: 15px 15px 0 15px;
+            padding: 8px 12px;
+            max-width: 70%;
+        }
+        .trainer-message {
+            background-color: #ddd;
+            text-align: left;
+            align-self: flex-start;
+            border-radius: 15px 15px 15px 0;
+            padding: 8px 12px;
+            max-width: 70%;
+        }
+        .delete-message-button {
+            background: none;
+            border: none;
+            color: red;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .unread-count {
+            color: red;
+            font-weight: bold;
+        }
 
+        /* Przycisk otwierający chat */
+        .chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .chat-button:hover {
+            background-color: #0056b3;
+        }
 
-.delete-message-button {
-    background: none;
-    border: none;
-    color: red;
-    cursor: pointer;
-    font-size: 0.8em;
-    margin-left: 10px;
-}
+        /* Powiadomienia */
+        #notifications-container {
+            position: fixed;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 9999;
+        }
+        #notifications-bell {
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+        }
+        #notifications-bell.new-notifications {
+            color: red;
+        }
+        #notifications-dropdown {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 250px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 99999;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        #notifications-dropdown.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #notifications-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease-in-out;
+            background-color: #f9f9f9;
+        }
+        .notification-item:hover {
+            background: #f5f5f5;
+        }
+        .notification-item.unread {
+            background-color: #ffebcc;
+            font-weight: bold;
+        }
+        .notification-item.trainer-resigned {
+            background-color: #ffcccc;
+            font-weight: bold;
+        }
+        .view-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .delete-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .notification-date {
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 5px;
+            background: #e0e0e0;
+            text-align: center;
+        }
+    </style>
 
-/* Separator daty – wyśrodkowany */
-.message-date {
-    width: 100%;
-    text-align: center;
-    margin: 10px 0;
-    color: #888;
-    font-size: 0.9em;
-}
-
-
-.timestamp {
-    display: block;
-    font-size: 0.8em;
-    color: #666;
-    margin-top: 4px;
-}
-
-    /* Styl dla przycisku otwierania chatu */
-    .chat-button {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 50%;
-        font-size: 18px;
-        cursor: pointer;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .chat-button:hover {
-        background-color: #0056b3;
-    }
-
-    /* Stylizacja okienka chatu */
-    #chat-container {
-        position: fixed;
-        bottom: 70px;
-        right: 20px;
-        width: 350px;
-        max-height: 500px;
-        background: white;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        display: none;
-        overflow: hidden;
-    }
-
-    /* Nagłówek chatu */
-    #chat-header {
-        background: #007bff;
-        color: white;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 16px;
-    }
-
-    .close-chat-btn {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 18px;
-        cursor: pointer;
-    }
-
-    /* Lista pokoi rozmów */
-    #chat-rooms {
-        padding: 10px;
-        height: 400px;
-    }
-
-    .chat-room-link {
-        display: block;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-        cursor: pointer;
-    }
-
-    .chat-room-link:hover {
-        background: #f5f5f5;
-    }
-
-
-
-    /* Pole wpisywania wiadomości */
-    #messageInput {
-        width: 80%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-
-#chat-messages {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-    padding: 10px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.message {
-    padding: 10px;
-    border-radius: 10px;
-    max-width: 80%;
-    word-wrap: break-word;
-}
-
-/* ✅ Wiadomości użytkownika – na PRAWO */
-.user-message {
-    background-color: #007bff;
-    color: white;
-    text-align: right;
-    align-self: flex-end;
-    border-radius: 15px 15px 0 15px;
-    padding: 8px 12px;
-    max-width: 70%;
-}
-
-/* ✅ Wiadomości trenera – na LEWO */
-.trainer-message {
-    background-color: #ddd;
-    text-align: left;
-    align-self: flex-start;
-    border-radius: 15px 15px 15px 0;
-    padding: 8px 12px;
-    max-width: 70%;
-}
-
-
-
-
-    /* Styl dla buttona wyślij */
-    .send-btn {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 8px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .send-btn:hover {
-        background-color: #0056b3;
-    }
-#notifications-container {
-    position: fixed; /* Ustawione na stałe */
-    top: 15px; /* Dopasowane do wysokości nagłówka */
-    right: 20px;
-    display: flex;
-    align-items: center;
-    z-index: 9999; /* Zapewnia, że dropdown jest nad innymi elementami */
-}
-
-#notifications-bell {
-    font-size: 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    position: relative;
-}
-
-#notifications-bell.new-notifications {
-    color: red; /* Zmienia kolor dzwonka, gdy są nowe powiadomienia */
-}
-
-#notifications-dropdown {
-    position: absolute;
-    top: 40px; /* Dopasowane do dzwonka */
-    right: 0;
-    background: white;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 250px;
-    max-height: 300px;
-    overflow-y: auto;
-    display: none; /* Ukryte domyślnie */
-    z-index: 99999; /* Upewnia się, że dropdown jest zawsze na wierzchu */
-    border-radius: 5px;
-    padding: 10px;
-}
-
-#notifications-dropdown.active {
-    display: block; /* Pokazuje dropdown */
-    opacity: 1;
-    transform: translateY(0);
-}
-
-#notifications-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.notification-item:hover {
-    background: #f5f5f5;
-}
-
-.notification-item {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background 0.3s ease-in-out;
-}
-
-/* Wyróżnienie dla nieodczytanych powiadomień */
-.notification-item.unread {
-    background-color: #ffebcc;
-    font-weight: bold;
-}
-
-/* Styl dla odczytanych powiadomień */
-.notification-item {
-    background-color: #f9f9f9;
-}
-
-/* Styl przycisku "Zobacz" */
-.view-button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-/* Styl przycisku "Usuń" */
-.delete-button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    background-color: red;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-}
-.notification-item.trainer-resigned {
-    background-color: #ffcccc; /* Czerwone tło dla rezygnacji */
-    font-weight: bold;
-}
-.notification-date {
-    font-weight: bold;
-    margin-top: 10px;
-    padding: 5px;
-    background: #e0e0e0;
-    text-align: center;
-}
-
-
-
-</style>
+<script defer src="/js/notifications.js"></script>
 </body>
 </html>
