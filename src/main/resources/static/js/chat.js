@@ -41,7 +41,6 @@ function loadChatRooms() {
 }
 
 function openChatRoom(chatRoomId, targetUserName) {
-    // Rozłącz poprzednie połączenie, jeśli istnieje
     disconnectChat();
     window.currentChatRoomId = chatRoomId;
     let chatRoomsDiv = document.getElementById("chat-rooms");
@@ -59,10 +58,13 @@ function openChatRoom(chatRoomId, targetUserName) {
         </div>
     `;
     connectToChat(chatRoomId);
-    markMessagesAsRead(chatRoomId);
-    let messageInput = document.getElementById("messageInput");
-    messageInput.addEventListener("input", autoResizeTextarea);
+
+    // 🔄 Poczekaj 100ms przed oznaczeniem wiadomości jako przeczytane (żeby WebSocket się połączył)
+    setTimeout(() => {
+        markMessagesAsRead(chatRoomId);
+    }, 100);
 }
+
 
 function autoResizeTextarea() {
     this.style.height = "auto"; // Reset wysokości, by uniknąć nadmiernego powiększania
@@ -81,14 +83,16 @@ function connectToGlobalUpdates() {
     const socket = new SockJS('/ws');
     globalStompClient = Stomp.over(socket);
     globalStompClient.connect({}, function() {
-        console.log("Połączono z globalnym kanałem aktualizacji nieodczytanych wiadomości");
+        console.log("📡 Połączono z globalnym kanałem aktualizacji");
         globalStompClient.subscribe(`/topic/chat/updateUnread`, function (update) {
-            console.log("🔔 Global update:", update.body);
+            console.log("📩 Otrzymano globalną aktualizację:", update.body);
             let chatRoomUpdate = JSON.parse(update.body);
+            console.log("📊 Przetworzona aktualizacja:", chatRoomUpdate);
             updateUnreadCount(chatRoomUpdate);
         });
     });
 }
+
 
 let stompClient = null;
 function connectToChat(chatRoomId) {
@@ -122,21 +126,36 @@ function disconnectChat() {
 
 function updateUnreadCount(chatRoomUpdate) {
     console.log("🔄 Aktualizacja pokoju:", chatRoomUpdate);
-    let chatRoomsDiv = document.getElementById("chat-rooms");
-    // Jeśli widok chatRooms jest pusty, przeładuj listę pokoi
-    if (!chatRoomsDiv.innerHTML || chatRoomsDiv.innerHTML.trim() === "") {
-        loadChatRooms();
+
+    // ✅ Aktualizuj tylko, jeśli użytkownik to targetUserId
+    if (window.currentUserId != chatRoomUpdate.targetUserId) {
+        console.log("⏭ Pomijam aktualizację dla innego użytkownika:", chatRoomUpdate.targetUserId);
         return;
     }
+
+    let chatRoomsDiv = document.getElementById("chat-rooms");
     let chatRoomElements = chatRoomsDiv.getElementsByClassName("chat-room-link");
+
     for (let roomElement of chatRoomElements) {
         if (Number(roomElement.dataset.chatRoomId) === Number(chatRoomUpdate.id)) {
-            console.log("📌 Aktualizuję pokój:", chatRoomUpdate.targetUserName);
-            roomElement.innerHTML = `${chatRoomUpdate.targetUserName}
-                ${chatRoomUpdate.unreadCount > 0 ? `<span class="unread-count">(${chatRoomUpdate.unreadCount})</span>` : ""}`;
+            console.log("📌 Aktualizuję UI pokoju:", chatRoomUpdate.targetUserName, "Unread:", chatRoomUpdate.unreadCount);
+
+            let unreadSpan = roomElement.querySelector(".unread-count");
+            if (chatRoomUpdate.unreadCount > 0) {
+                if (!unreadSpan) {
+                    unreadSpan = document.createElement("span");
+                    unreadSpan.classList.add("unread-count");
+                    roomElement.appendChild(unreadSpan);
+                }
+                unreadSpan.innerText = `(${chatRoomUpdate.unreadCount})`;
+            } else {
+                if (unreadSpan) unreadSpan.remove();
+            }
         }
     }
 }
+
+
 
 function loadChatHistory(chatRoomId) {
     fetch(`/chat/${chatRoomId}/messages`)
