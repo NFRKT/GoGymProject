@@ -210,14 +210,48 @@ function addMessage(message) {
         let dateTime = new Date(message.sentAt);
         time = dateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-    let deleteButtonHTML = "";
+
+        // 🔹 Kropka z menu
+        let optionsElement = document.createElement("div");
+        optionsElement.classList.add("message-options");
+        optionsElement.innerHTML = "⋮"; // Trzy kropki jako menu
+        optionsElement.onclick = function (event) {
+            event.stopPropagation();
+            toggleMessageMenu(message.id);
+        };
+
+    // 🔹 Ukryte menu
+    let menuElement = document.createElement("div");
+    menuElement.classList.add("message-menu");
+    menuElement.innerHTML = `<button onclick="deleteMessage(${message.id})">Usuń</button>`;
+
+    // 🔹 Dodanie wszystkiego do wiadomości
+    messageElement.innerHTML = `<strong>${senderDisplay}</strong> ${message.message} <span class="timestamp">${time}</span>`;
     if (isCurrentUser) {
-        deleteButtonHTML = `<button class="delete-message-button" onclick="deleteMessage(${message.id})">Usuń</button>`;
+        messageElement.appendChild(optionsElement);
+        messageElement.appendChild(menuElement);
     }
-    messageElement.innerHTML = `<strong>${senderDisplay}</strong> ${message.message} <span class="timestamp">${time}</span> ${deleteButtonHTML}`;
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+function toggleMessageMenu(messageId) {
+    let allMenus = document.querySelectorAll(".message-menu");
+    allMenus.forEach(menu => {
+        if (menu.getAttribute("data-message-id") !== messageId.toString()) {
+            menu.style.display = "none"; // Zamknij inne menu
+        }
+    });
+
+    let menu = document.querySelector(`[data-message-id='${messageId}'] .message-menu`);
+    if (menu) {
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+}
+
+// Ukrywanie menu, jeśli klikniesz poza nim
+document.addEventListener("click", function () {
+    document.querySelectorAll(".message-menu").forEach(menu => menu.style.display = "none");
+});
 
 function deleteMessage(messageId) {
     if (!confirm("Czy na pewno chcesz usunąć tę wiadomość?")) return;
