@@ -14,12 +14,26 @@ function toggleChat() {
         loadChatRooms();
     }
 }
+function filterChatRooms() {
+    let searchInput = document.getElementById("chat-search").value.toLowerCase();
+    let chatRooms = document.querySelectorAll(".chat-room-link");
+
+    chatRooms.forEach(room => {
+        let chatName = room.textContent.toLowerCase();
+        if (chatName.includes(searchInput)) {
+            room.style.display = "block";
+        } else {
+            room.style.display = "none";
+        }
+    });
+}
 
 function loadChatRooms() {
     fetch("/chat")
         .then(response => response.json())
         .then(chatRooms => {
             let chatRoomsDiv = document.getElementById("chat-rooms");
+            document.getElementById("chat-search-container").style.display = "block";
             chatRoomsDiv.innerHTML = "";
             chatRooms.forEach(room => {
                 let roomElement = document.createElement("div");
@@ -43,6 +57,7 @@ function loadChatRooms() {
 function openChatRoom(chatRoomId, targetUserName) {
     disconnectChat();
     window.currentChatRoomId = chatRoomId;
+    document.getElementById("chat-search-container").style.display = "none";
     let chatRoomsDiv = document.getElementById("chat-rooms");
     chatRoomsDiv.innerHTML = `
         <div id="chat-conversation-header">

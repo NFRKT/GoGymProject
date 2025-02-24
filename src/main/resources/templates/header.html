@@ -35,7 +35,10 @@
 <div id="chat-container" class="chat-hidden">
     <div id="chat-header">
         <h3>Chat</h3>
-        <button onclick="toggleChat()">❌</button>
+        <button class="close-chat-btn" onclick="toggleChat()">❌</button>
+    </div>
+    <div id="chat-search-container">
+        <input type="text" id="chat-search" placeholder="Wyszukaj rozmówcę..." onkeyup="filterChatRooms()">
     </div>
     <div id="chat-rooms">
         <p>Ładowanie rozmów...</p>
@@ -47,13 +50,27 @@
 
 <!-- Style chatu i powiadomień -->
 <style>
+#chat-search-container {
+    padding: 10px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+}
+
+#chat-search {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
         /* Kontener chatu */
         #chat-container {
             position: fixed;
             bottom: 70px;
             right: 20px;
             width: 350px;
-            max-height: 500px;
+            max-height: 550px;
             background: white;
             border-radius: 10px;
             border: 1px solid #ddd;
@@ -64,13 +81,14 @@
 
         /* Nagłówek chatu */
         #chat-header {
-            background: #007bff;
+            background: #323b45;
             color: white;
             padding: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 16px;
+            height: 40px;
         }
         .close-chat-btn {
             background: none;
@@ -80,10 +98,40 @@
             cursor: pointer;
         }
 
+        /* Styl nagłówka rozmowy czatu */
+#chat-conversation-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #323b45d4;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 40px;
+}
+
+/* Przycisk powrotu */
+#chat-conversation-header .back-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    margin-right: 15px;
+}
+
+/* Nazwa rozmówcy */
+#chat-conversation-header .chat-partner-name {
+    flex-grow: 1;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+
         /* Lista pokoi rozmów */
         #chat-rooms {
-            padding: 10px;
-            height: 400px;
+            height: 500px;
         }
         .chat-room-link {
             display: block;
@@ -99,7 +147,7 @@
         #chat-content {
             display: flex;
             flex-direction: column;
-            height: 400px;
+            height: 460px;
         }
         #chat-messages {
             flex-grow: 1;
@@ -107,8 +155,8 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 5px;
-            padding: 10px;
-            max-height: 300px;
+            padding: 5px;
+            max-height: 450px;
             overflow-y: auto;
             border-bottom: 1px solid #ddd;
         }
@@ -126,8 +174,8 @@
         .timestamp {
             display: block;
             font-size: 0.8em;
-            color: #666;
-            margin-top: 4px;
+            color: #9f9a9a;
+            margin-top: 3px;
         }
 
         /* Pole wpisywania wiadomości i przycisk wyślij */
@@ -153,7 +201,7 @@
         }
         #chat-input-container button,
         .send-btn {
-            background-color: #007bff;
+            background-color: #303a53;
             color: white;
             border: none;
             padding: 8px 12px;
@@ -170,14 +218,13 @@
     position: relative;
     padding: 10px;
     border-radius: 8px;
-    margin: 5px 0;
     transition: background 0.2s;
     white-space: pre-wrap;
     overflow-wrap: break-word;
 }
 
 .message:hover {
-    background: rgba(85, 118, 187, 0.8);
+    background: #0056b3;
 }
 
 .message-options {
@@ -221,12 +268,12 @@
 }
 
 .user-message {
-    background-color: #007bff;
+    background-color: #303a53;
     color: white;
-    text-align: right;
+    text-align: left;
     align-self: flex-end;
     border-radius: 15px 15px 0 15px;
-    padding: 8px 40px 8px 12px; /* Zwiększony padding z prawej strony */
+    padding: 2px 25px 2px 12px; /* Zwiększony padding z prawej strony */
     max-width: 70%;
 }
 
@@ -235,7 +282,7 @@
             text-align: left;
             align-self: flex-start;
             border-radius: 15px 15px 15px 0;
-            padding: 8px 12px;
+            padding: 2px 12px;
             max-width: 70%;
         }
         .delete-message-button {
@@ -256,7 +303,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background-color: #007bff;
+            background-color: #323b45;
             color: white;
             border: none;
             padding: 10px 15px;
