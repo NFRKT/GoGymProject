@@ -85,13 +85,21 @@ public class TrainingPlanService {
     public void updateExerciseStatus(Long exerciseId, PlanExercise.Status newStatus) {
         PlanExercise exercise = planExerciseRepository.findById(exerciseId)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ćwiczenia o ID: " + exerciseId));
+
+        // Jeśli status ćwiczenia się nie zmienia, nie wykonujemy aktualizacji
+        if (exercise.getStatus() == newStatus) {
+            log.info("Ćwiczenie o ID: {} już ma status {}. Nie aktualizuję ponownie.", exerciseId, newStatus);
+            return;
+        }
+
         exercise.setStatus(newStatus);
         planExerciseRepository.save(exercise);
         log.info("Zaktualizowano status ćwiczenia o ID: {} na {}", exerciseId, newStatus);
 
-        // Aktualizujemy status dnia, do którego należy ćwiczenie
-        updateDayStatus(exercise.getTrainingPlanDay().getIdDay());
+        // Usuwamy bezpośrednie wywołanie updateDayStatus()
+        // updateDayStatus(exercise.getTrainingPlanDay().getIdDay()); ❌
     }
+
 
     public void updateDayStatus(Long dayId) {
         TrainingPlanDay day = trainingPlanDayRepository.findById(dayId)
@@ -99,18 +107,26 @@ public class TrainingPlanService {
 
         boolean allExercisesCompleted = day.getExercises().stream()
                 .allMatch(exercise -> exercise.getStatus() == PlanExercise.Status.completed);
-        TrainingPlanDay.Status previousStatus = day.getStatus();
+
         TrainingPlanDay.Status newStatus = allExercisesCompleted
                 ? TrainingPlanDay.Status.completed
                 : TrainingPlanDay.Status.notCompleted;
 
+        // Sprawdź, czy status dnia się zmienił, zanim go zapiszesz
+        if (day.getStatus() == newStatus) {
+            log.info("Dzień o ID: {} już ma status {}. Nie aktualizuję ponownie.", dayId, newStatus);
+            return;
+        }
+
+        TrainingPlanDay.Status previousStatus = day.getStatus();
         day.setStatus(newStatus);
         trainingPlanDayRepository.save(day);
         log.info("Dzień o ID: {} zmieniono ze statusu {} na {}", dayId, previousStatus, newStatus);
 
+        // Aktualizujemy status planu tylko wtedy, gdy status dnia się zmienił
         updatePlanStatus(day.getTrainingPlan().getIdPlan());
 
-        // Wyślij powiadomienie tylko, gdy dzień został ukończony po raz pierwszy
+        // Powiadomienie wysyłamy tylko raz, gdy dzień został ukończony po raz pierwszy
         if (previousStatus != TrainingPlanDay.Status.completed && newStatus == TrainingPlanDay.Status.completed) {
             TrainingPlan plan = day.getTrainingPlan();
             User trainer = userRepository.findById(plan.getIdTrainer())
@@ -123,6 +139,7 @@ public class TrainingPlanService {
         }
     }
 
+
     public void updatePlanStatus(Long planId) {
         TrainingPlan plan = trainingPlanRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + planId));
@@ -130,20 +147,30 @@ public class TrainingPlanService {
         boolean allDaysCompleted = plan.getTrainingPlanDays().stream()
                 .allMatch(day -> day.getStatus() == TrainingPlanDay.Status.completed);
 
-        plan.setStatus(allDaysCompleted ? TrainingPlan.Status.completed : TrainingPlan.Status.active);
-        trainingPlanRepository.save(plan);
-        log.info("Zaktualizowano status planu o ID: {} na {}", planId, plan.getStatus());
+        TrainingPlan.Status newStatus = allDaysCompleted ? TrainingPlan.Status.completed : TrainingPlan.Status.active;
 
-        if (allDaysCompleted) {
-            // Pobieramy trenera i klienta
+        // Sprawdź, czy status rzeczywiście się zmienił, zanim zapiszesz i zalogujesz zmianę
+        if (plan.getStatus() == newStatus) {
+            log.info("Plan o ID: {} już ma status {}. Nie aktualizuję ponownie.", planId, newStatus);
+            return;
+        }
+
+        plan.setStatus(newStatus);
+        trainingPlanRepository.save(plan);
+        log.info("Zaktualizowano status planu o ID: {} na {}", planId, newStatus);
+
+        // Powiadomienie wysyłamy tylko raz, gdy plan zostanie ukończony
+        if (newStatus == TrainingPlan.Status.completed) {
             User trainer = userRepository.findById(plan.getIdTrainer())
                     .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera o ID: " + plan.getIdTrainer()));
             User client = userRepository.findById(plan.getIdClient())
                     .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta o ID: " + plan.getIdClient()));
+
             notificationService.createNotification(trainer, client, "plan_completed", plan.getName());
             log.info("Wysłano powiadomienie o ukończeniu planu: {}", plan.getName());
         }
     }
+
 
     public void deleteTrainingPlan(Long planId) {
         TrainingPlan plan = trainingPlanRepository.findById(planId)

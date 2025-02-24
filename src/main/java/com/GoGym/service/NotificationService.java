@@ -23,12 +23,12 @@ public class NotificationService {
 
     public void createNotification(User client, User trainer, String status, String additionalInfo) {
         String message;
-        if (status.equals("day_updated") || status.equals("plan_completed") || status.equals("rest_day_completed")) {
-            boolean isStillWorkingTogether = trainerClientRepository.existsByTrainerAndClient(trainer, client);
-            if (!isStillWorkingTogether) {
-                return; // Nie wysyłaj powiadomienia, jeśli współpraca została zakończona
-            }
+        boolean isStillWorkingTogether = trainerClientRepository.existsByTrainerAndClient(client, trainer);
+        if (!isStillWorkingTogether && (status.equals("day_updated") || status.equals("plan_completed") || status.equals("rest_day_completed"))) {
+//            log.info("Pominięto powiadomienie dla trenera {} od klienta {}, ponieważ współpraca została zakończona.", trainer.getIdUser(), client.getIdUser());
+            return;
         }
+
         switch (status) {
             case "accepted":
                 message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getSecondName() + " została zaakceptowana!";
