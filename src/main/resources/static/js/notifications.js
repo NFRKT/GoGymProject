@@ -19,6 +19,11 @@ function fetchNotifications() {
                 bellButton.classList.remove("new-notifications");
                 return;
             }
+if (data.length > 0) {
+    bellButton.classList.add("new-notifications"); // 🔴 Dodaj czerwoną kropkę
+} else {
+    bellButton.classList.remove("new-notifications"); // ❌ Usuń czerwoną kropkę, jeśli brak powiadomień
+}
 
             let groupedNotifications = groupNotificationsByDate(data);
 
@@ -159,6 +164,19 @@ function toggleNotifications() {
         dropdown.style.display = "none"; // Ukryj dropdown
     }
 }
+
+// Ukryj dropdown po kliknięciu poza nim
+document.addEventListener("click", function (event) {
+    const dropdown = document.getElementById("notifications-dropdown");
+    const bellButton = document.getElementById("notifications-bell");
+
+    if (dropdown && bellButton && !dropdown.contains(event.target) && !bellButton.contains(event.target)) {
+        dropdown.style.display = "none";
+    }
+});
+
+document.getElementById("notifications-bell").addEventListener("click", toggleNotifications);
+
 
     bellButton.addEventListener("click", toggleNotifications);
     setInterval(fetchNotifications, 5000); // Odświeżanie co 5s

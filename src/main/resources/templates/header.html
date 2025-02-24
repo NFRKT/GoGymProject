@@ -16,20 +16,22 @@
         <a href="#" th:href="@{/home}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Home</a>
         <a href="#" th:href="@{/budget}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Budżet</a>
         <a href="#" th:href="@{/addIncome}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Przychody</a>
-        <a href="#" th:href="@{/addExpense}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Wydatki</a>
-        <!-- 🔥 Przycisk Chatu -->
+        <a href="#" th:href="@{/addExpense}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Wydatki</a><!-- 🔔 Przycisk powiadomień w headerze -->
+        <!-- Powiadomienia -->
+        <div class="w3-dropdown-hover w3-right">
+            <button id="notifications-bell" class="w3-button w3-padding-large">🔔</button>
+            <div id="notifications-dropdown" class="w3-dropdown-content w3-bar-block w3-border">
+                <ul id="notifications-list"></ul>
+            </div>
+        </div>
+
+
         <button id="chat-toggle" class="chat-button" onclick="toggleChat()">💬 Chat</button>
         <a href="/logout" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Wyloguj się</a>
     </div>
 </div>
 
-<!-- Powiadomienia (poza w3-bar) -->
-<div id="notifications-container">
-    <button id="notifications-bell">🔔</button>
-    <div id="notifications-dropdown">
-        <ul id="notifications-list"></ul>
-    </div>
-</div>
+
 
 <!-- Okienko chatu -->
 <div id="chat-container" class="chat-hidden">
@@ -317,39 +319,55 @@
         }
 
         /* Powiadomienia */
-        #notifications-container {
-            position: fixed;
-            top: 15px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            z-index: 9999;
-        }
-        #notifications-bell {
-            font-size: 24px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            position: relative;
-        }
-        #notifications-bell.new-notifications {
-            color: red;
-        }
-        #notifications-dropdown {
-            position: absolute;
-            top: 40px;
-            right: 0;
-            background: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 250px;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-            z-index: 99999;
-            border-radius: 5px;
-            padding: 10px;
-        }
+        /* Stylowanie dropdowna powiadomień */
+.w3-dropdown-hover .w3-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Czerwony znacznik nowych powiadomień */
+.w3-dropdown-hover .w3-button.new-notifications::after {
+    content: "●";
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+#notifications-container {
+    position: relative;
+    display: inline-block;
+    margin-left: 20px;
+}
+#notifications-bell {
+    font-size: 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 8px;
+}
+#notifications-bell.new-notifications {
+    color: red;
+}
+/* Lista powiadomień */
+#notifications-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: white;
+    width: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 9999;
+}
+
         #notifications-dropdown.active {
             display: block;
             opacity: 1;
@@ -360,16 +378,17 @@
             padding: 0;
             margin: 0;
         }
-        .notification-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.3s ease-in-out;
-            background-color: #f9f9f9;
-        }
+.notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease-in-out;
+    cursor: pointer;
+    background-color: #f9f9f9;
+}
         .notification-item:hover {
             background: #f5f5f5;
         }
