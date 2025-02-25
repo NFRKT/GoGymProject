@@ -39,17 +39,17 @@
 <body>
 
 <div class="w3-top">
-    <div class="w3-bar" style="background: rgba(20, 30, 48, 0.9); color: white; padding: 10px;">
+    <div class="w3-bar w3-card w3-left-align w3-large" style="background: rgba(20, 30, 48, 0.9); color: white;">
         <!-- Logo/link główny -->
-        <a th:href="@{/gogym}" class="w3-bar-item w3-button" style="background: transparent; color: white;">GoGym</a>
+        <a th:href="@{/gogym}" class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;">GoGym</a>
         <!-- Ikona hamburgera widoczna tylko na małych ekranach -->
-        <a href="javascript:void(0);" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="toggleNavMenu()" style="background: transparent; color: white;">
+        <a href="javascript:void(0);" class="w3-bar-item w3-button w3-padding-large w3-right w3-hide-large w3-hide-medium" onclick="toggleNavMenu()" style="background: transparent; color: white;">
             <i class="fa fa-bars"></i>
         </a>
         <!-- Menu dla większych ekranów -->
         <div id="navLinks" class="w3-right w3-hide-small">
-            <a th:href="@{/register}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Zarejestruj się</a>
-            <a th:href="@{/login}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Zaloguj się</a>
+            <a th:href="@{/register}" class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;">Zarejestruj się</a>
+            <a th:href="@{/login}" class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;">Zaloguj się</a>
         </div>
     </div>
     <!-- Menu rozwijane dla małych ekranów -->
@@ -160,14 +160,14 @@
         animateValue("trainerCount", 0, [[${trainerCount}]], 2000);
         animateValue("workoutCount", 0, [[${workoutCount}]], 2000);
     });
-      function toggleNavMenu() {
+function toggleNavMenu() {
     var menu = document.getElementById("navMenu");
     if (menu.className.indexOf("w3-show") == -1) {
       menu.className += " w3-show";
     } else {
       menu.className = menu.className.replace(" w3-show", "");
     }
-  }
+}
 </script>
 </body>
 </html>

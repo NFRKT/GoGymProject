@@ -1,127 +1,104 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="pl" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>GoGym</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script defer src="/js/chat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body th:fragment="header">
-
-<!-- Pasek nawigacji -->
 <div class="w3-top">
-    <div class="w3-bar w3-card" style="background: rgba(20, 30, 48, 0.95); color: white; padding: 10px;">
+    <div class="w3-bar w3-card w3-left-align w3-large" style="background: rgba(20, 30, 48, 0.9); color: white;">
+        <!-- Logo/link główny -->
+        <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+           th:href="@{/home}">GoGym</a>
+        <div class="w3-dropdown-hover">
+            <button class="w3-bar-item w3-button w3-padding-large" id="notifications-bell"
+                    style="background: transparent; color: white;">🔔
+            </button>
+            <div class="w3-dropdown-content w3-bar-block w3-border" id="notifications-dropdown"
+                 style="left: 0; top: 100%;">
+                <ul id="notifications-list"></ul>
+            </div>
+        </div>
+        <!-- Przycisk chatu -->
+        <button class="w3-bar-item w3-button w3-padding-large" id="chat-toggle" onclick="toggleChat()"
+                style="background: transparent; color: white;">💬
+        </button>
+        <!-- Ikona hamburgera widoczna tylko na małych ekranach -->
 
-        <!-- Logo/link do strony głównej -->
-        <a th:href="@{/home}" class="w3-bar-item w3-button" style="background: transparent; color: white; font-size: 20px; font-weight: bold;">GoGym</a>
-
-        <!-- Ikona hamburgera dla małych ekranów -->
-        <a href="javascript:void(0);" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="toggleNavMenu()" style="background: transparent; color: white;">
+        <a class="w3-bar-item w3-button w3-padding-large w3-right w3-hide-large w3-hide-medium"
+           href="javascript:void(0);" onclick="toggleNavMenu()" style="background: transparent; color: white;">
             <i class="fa fa-bars"></i>
         </a>
-
         <!-- Menu dla większych ekranów -->
-        <div id="navLinks" class="w3-right w3-hide-small">
-            <a th:if="${isUser}" href="/client-panel" class="w3-bar-item w3-button" style="background: transparent; color: white;">Panel Klienta</a>
-            <a th:if="${isTrainer}" href="/trainer-panel" class="w3-bar-item w3-button" style="background: transparent; color: white;">Panel Trenera</a>
-            <a th:if="${isAdmin}" th:href="@{/admin/panel}" class="w3-bar-item w3-button w3-red">Panel Admina</a>
-
-            <a th:if="${isUser}" th:href="@{/client/profile}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Mój Profil</a>
-            <a th:if="${isTrainer}" th:href="@{/trainer/profile}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Mój Profil</a>
-
-            <a th:if="${isUser}" th:href="@{/user-plans(idUser=${idUser})}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Plany Treningowe</a>
-            <a th:if="${isTrainer}" th:href="@{/trainer-plans(idUser=${idUser})}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Plany Podopiecznych</a>
-
-            <a th:href="@{/listTrainers}" class="w3-bar-item w3-button" style="background: transparent; color: white;">Trenerzy</a>
-
-            <!-- Powiadomienia -->
-            <div class="w3-dropdown-hover w3-right">
-                <button id="notifications-bell" class="w3-button w3-padding-large">🔔</button>
-                <div id="notifications-dropdown" class="w3-dropdown-content w3-bar-block w3-border">
-                    <ul id="notifications-list"></ul>
-                </div>
-            </div>
-            <!-- Przycisk chatu -->
-            <button id="chat-toggle" class="w3-bar-item w3-button" style="background: transparent; color: white;" onclick="toggleChat()">💬</button>
-
-            <a href="/logout" class="w3-bar-item w3-button w3-hide-small w3-right" style="background: transparent; color: white;">Wyloguj się</a>
+        <div class="w3-right w3-hide-small" id="navLinks">
+            <a class="w3-bar-item w3-button w3-padding-large" href="/client-panel"
+               style="background: transparent; color: white;" th:if="${isUser}">Panel Klienta</a>
+            <a class="w3-bar-item w3-button w3-padding-large" href="/trainer-panel"
+               style="background: transparent; color: white;" th:if="${isTrainer}">Panel Trenera</a>
+            <a class="w3-bar-item w3-button w3-padding-large" th:href="@{/admin/panel}" th:if="${isAdmin}">Panel
+                Admina</a>
+            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+               th:href="@{/client/profile}" th:if="${isUser}">Mój Profil</a>
+            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+               th:href="@{/trainer/profile}" th:if="${isTrainer}">Mój Profil</a>
+            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+               th:href="@{/user-plans(idUser=${idUser})}" th:if="${isUser}">Plany Treningowe</a>
+            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+               th:href="@{/trainer-plans(idUser=${idUser})}" th:if="${isTrainer}">Plany Podopiecznych</a>
+            <a class="w3-bar-item w3-button w3-padding-large" href="/logout"
+               style="background: transparent; color: white;">Wyloguj się</a>
         </div>
     </div>
-
     <!-- Menu rozwijane dla małych ekranów -->
-    <div id="navMenu" class="w3-bar-block w3-hide w3-hide-large w3-hide-medium" style="background: rgba(20, 30, 48, 0.95);">
-        <a th:if="${isUser}" href="/client-panel" class="w3-bar-item w3-button">Panel Klienta</a>
-        <a th:if="${isTrainer}" href="/trainer-panel" class="w3-bar-item w3-button">Panel Trenera</a>
-        <a th:if="${isAdmin}" th:href="@{/admin/panel}" class="w3-bar-item w3-button w3-red">Panel Admina</a>
-
-        <a th:if="${isUser}" th:href="@{/client/profile}" class="w3-bar-item w3-button">Mój Profil</a>
-        <a th:if="${isTrainer}" th:href="@{/trainer/profile}" class="w3-bar-item w3-button">Mój Profil</a>
-
-        <a th:if="${isUser}" th:href="@{/user-plans(idUser=${idUser})}" class="w3-bar-item w3-button">Plany Treningowe</a>
-        <a th:if="${isTrainer}" th:href="@{/trainer-plans(idUser=${idUser})}" class="w3-bar-item w3-button">Plany Podopiecznych</a>
-
-        <a th:href="@{/listTrainers}" class="w3-bar-item w3-button">Trenerzy</a>
-
-        <button id="notifications-bell-mini" class="w3-bar-item w3-button">🔔 Powiadomienia</button>
-        <button id="chat-toggle-mini" class="w3-bar-item w3-button" onclick="toggleChat()">💬 Chat</button>
-
-        <a href="/logout" class="w3-bar-item w3-button w3-red">Wyloguj się</a>
+    <div class="w3-bar-block w3-hide w3-hide-large w3-hide-medium" id="navMenu"
+         style="background: rgba(20, 30, 48, 0.9);">
+        <a class="w3-bar-item w3-button" href="/client-panel" style="background: transparent; color: white;"
+           th:if="${isUser}">Panel Klienta</a>
+        <a class="w3-bar-item w3-button" href="/trainer-panel" style="background: transparent; color: white;"
+           th:if="${isTrainer}">Panel Trenera</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/admin/panel}"
+           th:if="${isAdmin}">Panel Admina</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/client/profile}"
+           th:if="${isUser}">Mój Profil</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/trainer/profile}"
+           th:if="${isTrainer}">Mój Profil</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;"
+           th:href="@{/user-plans(idUser=${idUser})}" th:if="${isUser}">Plany Treningowe</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;"
+           th:href="@{/trainer-plans(idUser=${idUser})}" th:if="${isTrainer}">Plany Podopiecznych</a>
+        <a class="w3-bar-item w3-button" href="/logout" style="background: transparent; color: white;">Wyloguj się</a>
     </div>
 </div>
 
-
-
-
 <!-- Okienko chatu -->
-<div id="chat-container" class="chat-hidden">
+<div class="chat-hidden" id="chat-container">
     <div id="chat-header">
         <h3>Chat</h3>
         <button class="close-chat-btn" onclick="toggleChat()">❌</button>
     </div>
     <div id="chat-search-container">
-        <input type="text" id="chat-search" placeholder="Wyszukaj rozmówcę..." onkeyup="filterChatRooms()">
+        <input id="chat-search" onkeyup="filterChatRooms()" placeholder="Wyszukaj rozmówcę..." type="text">
     </div>
     <div id="chat-rooms">
         <p>Ładowanie rozmów...</p>
     </div>
 </div>
 
-<input type="hidden" id="currentUserEmail" sec:authentication="name">
-<input type="hidden" id="currentUserId" th:value="${idUser}" />
+<input id="currentUserEmail" sec:authentication="name" type="hidden">
+<input id="currentUserId" th:value="${idUser}" type="hidden"/>
 
 <!-- Style chatu i powiadomień -->
 <style>
-    @media screen and (max-width: 768px) {
-        /* Zmniejszenie szerokości chatu na mniejszych ekranach */
-        #chat-container {
-            width: 90%;
-            max-width: 300px;
-            right: 5px;
-            bottom: 5px;
-            max-height: 70vh; /* Dostosowanie wysokości na telefonach */
-        }
-
-        /* Ograniczenie wysokości listy wiadomości */
-        #chat-messages {
-            max-height: 50vh; /* Wiadomości nie zajmą całej przestrzeni */
-        }
-
-        /* Poprawka dla pola wpisywania wiadomości */
-        #chat-input-container {
-            position: sticky;
-            bottom: 0;
-            background: white;
-        }
+    .w3-bar, h1, button {
+      font-family: "Montserrat", sans-serif;
     }
 
-/* Standardowa wersja chatu */
+            /* Kontener chatu */
 #chat-container {
     position: fixed;
-    bottom: 60px;
+    bottom: 10px;
     right: 10px;
     width: 350px;
     max-height: 75vh;
@@ -131,8 +108,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     display: none;
     overflow: hidden;
-    display: flex;
-    flex-direction: column; /* Pozwala na dynamiczne dostosowanie */
+    flex-direction: column;
 }
 
     /* Lista wiadomości */
@@ -144,6 +120,9 @@
 
     /* Pole wpisywania wiadomości */
 #chat-input-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
     display: flex;
     gap: 10px;
     padding: 10px;
@@ -152,30 +131,19 @@
     align-items: center;
 }
 
-#messageInput {
-    flex-grow: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    min-height: 35px;
-    max-height: 100px;
-    overflow-y: auto;
-    resize: none;
-}
-
-    /* Przyciski */
-#chat-input-container button {
-    background-color: #303a53;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#chat-input-container button:hover {
-    background-color: #0056b3;
-}
+            #chat-input-container button,
+            .send-btn {
+                background-color: #303a53;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            #chat-input-container button:hover,
+            .send-btn:hover {
+                background-color: #0056b3;
+            }
 
 
     /* Poprawka na problem z nawigacją */
@@ -196,20 +164,7 @@
         font-size: 14px;
     }
 
-            /* Kontener chatu */
-    #chat-container {
-        position: fixed;
-        bottom: 60px; /* Unikamy kolizji z navbar */
-        right: 10px;
-        width: 350px;
-        max-height: 75vh; /* Chat nie będzie większy niż 75% wysokości ekranu */
-        background: white;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        display: none;
-        overflow: hidden;
-    }
+
 
             /* Nagłówek chatu */
             #chat-header {
@@ -289,9 +244,8 @@
                 align-items: flex-start;
                 gap: 5px;
                 padding: 5px;
-                max-height: 60vh;
+                max-height: 40vh;
                 overflow-y: auto;
-                border-bottom: 1px solid #ddd;
             }
 
             /* Separator daty */
@@ -311,17 +265,6 @@
                 margin-top: 3px;
             }
 
-            /* Pole wpisywania wiadomości i przycisk wyślij */
-#chat-input-container {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    background: white;
-    border-top: 1px solid #ddd;
-    align-items: center;
-    position: sticky;
-    bottom: 0;
-}
 #messageInput {
     flex-grow: 1;
     padding: 8px;
@@ -332,19 +275,6 @@
     overflow-y: auto;
     resize: none;
 }
-            #chat-input-container button,
-            .send-btn {
-                background-color: #303a53;
-                color: white;
-                border: none;
-                padding: 8px 12px;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-            #chat-input-container button:hover,
-            .send-btn:hover {
-                background-color: #0056b3;
-            }
 
             /* Styl wiadomości */
     .message {
@@ -447,6 +377,8 @@
                 background-color: #0056b3;
             }
 
+</style>
+<style>
             /* Powiadomienia */
             /* Stylowanie dropdowna powiadomień */
     .w3-dropdown-hover .w3-button {
@@ -457,15 +389,6 @@
         position: relative;
     }
 
-    /* Czerwony znacznik nowych powiadomień */
-    .w3-dropdown-hover .w3-button.new-notifications::after {
-        content: "●";
-        color: red;
-        font-size: 14px;
-        position: absolute;
-        top: 5px;
-        right: 5px;
-    }
     #notifications-container {
         position: relative;
         display: inline-block;
@@ -483,25 +406,27 @@
         color: red;
     }
     /* Lista powiadomień */
-    #notifications-dropdown {
-        display: none;
-        position: absolute;
-        right: 0;
-        background: white;
-        width: 300px;
-        max-height: 300px;
-        overflow-y: auto;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        border-radius: 5px;
-        padding: 10px;
-        z-index: 9999;
-    }
+#notifications-dropdown {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: white;
+    width: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 9999;
+}
 
-            #notifications-dropdown.active {
-                display: block;
-                opacity: 1;
-                transform: translateY(0);
-            }
+#notifications-dropdown.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
             #notifications-list {
                 list-style: none;
                 padding: 0;
@@ -554,17 +479,24 @@
                 background: #e0e0e0;
                 text-align: center;
             }
-    </style>
 
-c<script>
-    function toggleNavMenu() {
-        var menu = document.getElementById("navMenu");
-        if (menu.className.indexOf("w3-show") == -1) {
-            menu.className += " w3-show";
-        } else {
-            menu.className = menu.className.replace(" w3-show", "");
-        }
+
+</style>
+
+<script>
+function toggleNavMenu() {
+    var menu = document.getElementById("navMenu");
+    if (menu.className.indexOf("w3-show") == -1) {
+      menu.className += " w3-show";
+    } else {
+      menu.className = menu.className.replace(" w3-show", "");
     }
+}
+
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script defer src="/js/chat.js"></script>
+<script defer src="/js/notifications.js"></script>
 </body>
 </html>
