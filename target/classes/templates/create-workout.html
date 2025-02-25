@@ -2,7 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <title>Stwórz Workout</title>
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
@@ -95,6 +98,7 @@
   </style>
 </head>
 <body>
+<div th:replace="~{header :: header}"></div>
 <div class="container">
   <h2>Stwórz Workout</h2>
   <form th:action="@{/workouts/create}" th:object="${workout}" method="post">
@@ -128,7 +132,7 @@
     <p th:text="${error}"></p>
   </div>
 </div>
-
+<div th:replace="~{footer :: footer}"></div>
 <!-- jQuery (wymagany przez Select2) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Select2 JS -->

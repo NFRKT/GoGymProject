@@ -91,8 +91,8 @@
         <a th:if="${isUser}" th:href="@{/client/profile}" class="w3-button w3-blue w3-round">Mój profil klienta</a>
         <a th:href="@{/listTrainers}" class="w3-button w3-blue w3-round">Nasi trenerzy!</a>
         <a th:if="${isAdmin}" th:href="@{/admin/panel}" class="w3-button w3-red">Panel Administratora</a>
-        <a th:href="@{/workouts}" class="w3-button w3-blue w3-round">Twoje treningi</a>
-        <a th:href="@{/workouts/create}" class="w3-button w3-blue w3-round">Stwórz trening</a>
+        <a th:unless="${isAdmin}"th:if="${isTrainer}" th:href="@{/workouts}" class="w3-button w3-blue w3-round">Twoje treningi</a>
+        <a th:unless="${isAdmin}" th:href="@{/workouts/create}" class="w3-button w3-blue w3-round">Stwórz trening</a>
         <a th:href="@{/exercises}" class="w3-button w3-blue w3-round">Zobacz ćwiczenia</a>
 
 
