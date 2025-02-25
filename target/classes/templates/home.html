@@ -5,8 +5,19 @@
     <title>MyBudget - home</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+            html, body {
+          height: 100%;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+        }
+        .content {
+            flex: 1;
+        }
         body, h1, h2, h3, h4, h5, h6 {
             font-family: "Lato", sans-serif
         }
@@ -65,8 +76,8 @@
 <body>
 
 <div th:replace="~{header :: header}"></div>
-
 <!-- Welcome Section -->
+<div class="content">
 <div class="w3-container w3-padding-64 w3-center">
     <h1>Witaj w GoGym!</h1>
     <div class="dynamic-section">
@@ -113,6 +124,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 <!-- Footer -->
 <div th:replace="~{footer :: footer}"></div>

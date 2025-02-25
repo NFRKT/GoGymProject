@@ -1,96 +1,268 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Panel Administratora</title>
+    <title>GoGym - Panel Administratora</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Te same style co na stronie głównej -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .admin-header { text-align: center; padding: 10px; background-color: #007BFF; color: white; }
-        .section-title { margin-top: 20px; font-size: 20px; }
-        .delete-button { background-color: red; color: white; padding: 5px 10px; border: none; cursor: pointer; }
+      html, body {
+          height: 100%;
+          margin: 0;
+          font-family: "Lato", sans-serif;
+          display: flex;
+          flex-direction: column;
+      }
+      .content {
+          flex: 1;
+      }
+      .hero {
+          background: url('/images/hero.jpg') no-repeat center center;
+          background-size: cover;
+          padding: 100px 0;
+          color: white;
+          position: relative;
+      }
+      .hero .overlay {
+          background: rgba(0, 0, 0, 0.5);
+          padding: 50px;
+      }
+      .w3-bar, h1, button {
+          font-family: "Montserrat", sans-serif;
+      }
+      .table-container {
+          overflow-x: auto;
+      }
+      table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 20px;
+      }
+      th, td {
+          padding: 10px;
+          border: 1px solid #ccc;
+          text-align: left;
+      }
+      th {
+          background-color: #f2f2f2;
+      }
+      .delete-button {
+          background-color: #e74c3c;
+          color: white;
+          padding: 5px 10px;
+          border: none;
+          cursor: pointer;
+      }
     </style>
 </head>
 <body>
 
-<div class="admin-header">
-    <h2>Panel Administratora</h2>
-</div>
+<!-- Nagłówek - może być wspólny z resztą systemu -->
+<div th:replace="~{header :: header}"></div>
 
-<h3 class="section-title">Lista Klientów</h3>
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Imię</th>
-        <th>Nazwisko</th>
-        <th>Email</th>
-        <th>Akcja</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="client : ${clients}">
-        <td th:text="${client.idUser}"></td>
-        <td th:text="${client.firstName}"></td>
-        <td th:text="${client.secondName}"></td>
-        <td th:text="${client.email}"></td>
-        <td>
-            <button class="delete-button" th:data-id="${client.idUser}" onclick="deleteUser(this)">Usuń</button>
-        </td>
-    </tr>
-    </tbody>
-</table>
+<div class="content">
 
-<h3 class="section-title">Lista Trenerów</h3>
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Imię</th>
-        <th>Nazwisko</th>
-        <th>Email</th>
-        <th>Akcja</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="trainer : ${trainers}">
-        <td th:text="${trainer.idUser}"></td>
-        <td th:text="${trainer.firstName}"></td>
-        <td th:text="${trainer.secondName}"></td>
-        <td th:text="${trainer.email}"></td>
-        <td>
-            <button class="delete-button" th:data-id="${trainer.idUser}" onclick="deleteUser(this)">Usuń</button>
-        </td>
-    </tr>
-    </tbody>
-</table>
+    <!-- Hero header panelu administratora -->
+    <header class="hero w3-center">
+        <div class="overlay">
+            <h1 class="w3-jumbo">Panel Administratora</h1>
+            <h3>Zarządzaj użytkownikami i monitoruj statystyki systemu</h3>
+        </div>
+    </header>
+
+    <!-- Dashboard ze statystykami -->
+    <div class="w3-container w3-padding-64">
+        <!-- Pierwszy rząd statystyk -->
+        <div class="w3-row-padding w3-margin-top w3-center">
+            <div class="w3-third w3-card w3-padding">
+                <i class="fa fa-users w3-xxlarge w3-text-blue"></i>
+                <h2 id="userCount">0</h2>
+                <p>Zarejestrowanych użytkowników</p>
+            </div>
+            <div class="w3-third w3-card w3-padding">
+                <i class="fa fa-dumbbell w3-xxlarge w3-text-blue"></i>
+                <h2 id="trainerCount">0</h2>
+                <p>Aktywnych trenerów</p>
+            </div>
+            <div class="w3-third w3-card w3-padding">
+                <i class="fa fa-check-circle w3-xxlarge w3-text-blue"></i>
+                <h2 id="workoutCount">0</h2>
+                <p>Ukończonych treningów</p>
+            </div>
+        </div>
+        <!-- Drugi rząd statystyk (opcjonalnie, jeśli używasz animacji liczników) -->
+        <div class="w3-row-padding w3-margin-top w3-center">
+            <div class="w3-third w3-card w3-padding">
+                <i class="fa fa-running w3-xxlarge w3-text-blue"></i>
+                <h2 id="exerciseCount">0</h2>
+                <p>Liczba ćwiczeń</p>
+            </div>
+            <div class="w3-third w3-card w3-padding">
+                <i class="fa fa-list-alt w3-xxlarge w3-text-blue"></i>
+                <h2 id="trainingPlanCount">0</h2>
+                <p>Liczba planów treningowych</p>
+            </div>
+            <div class="w3-third w3-card w3-padding">
+                <i class="fa fa-handshake w3-xxlarge w3-text-blue"></i>
+                <h2 id="collaborationCount">0</h2>
+                <p>Współprac klient-trener</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista klientów -->
+    <div class="w3-container w3-padding-64">
+        <h2 class="w3-center">Lista Klientów</h2>
+        <div class="table-container">
+            <table class="w3-table-all w3-hoverable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Imię</th>
+                    <th>Nazwisko</th>
+                    <th>Email</th>
+                    <th>Profil</th>
+                    <th>Akcja</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="client : ${clients}">
+                    <td th:text="${client.idUser}"></td>
+                    <td th:text="${client.firstName}"></td>
+                    <td th:text="${client.secondName}"></td>
+                    <td th:text="${client.email}"></td>
+                    <td>
+                        <a th:href="@{/client/profile/{id}(id=${client.idUser})}" class="w3-btn w3-blue-grey">Profil</a>
+                    </td>
+                    <td>
+                        <button class="delete-button" th:data-id="${client.idUser}" onclick="deleteUser(this)">Usuń</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Lista trenerów -->
+    <div class="w3-container w3-padding-64">
+        <h2 class="w3-center">Lista Trenerów</h2>
+        <div class="table-container">
+            <table class="w3-table-all w3-hoverable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Imię</th>
+                    <th>Nazwisko</th>
+                    <th>Email</th>
+                    <th>Profil</th>
+                    <th>Akcja</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="trainer : ${trainers}">
+                    <td th:text="${trainer.idUser}"></td>
+                    <td th:text="${trainer.firstName}"></td>
+                    <td th:text="${trainer.secondName}"></td>
+                    <td th:text="${trainer.email}"></td>
+                    <td>
+                        <a th:href="@{/trainer/profile/{id}(id=${trainer.idUser})}" class="w3-btn w3-blue-grey">Profil</a>
+                    </td>
+                    <td>
+                        <button class="delete-button" th:data-id="${trainer.idUser}" onclick="deleteUser(this)">Usuń</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sekcja Zarządzania Ćwiczeniami i Sprzętem -->
+    <div class="w3-container w3-padding-64">
+        <h2 class="w3-center">Zarządzanie Ćwiczeniami i Sprzętem</h2>
+        <div class="w3-row-padding w3-margin-top w3-center">
+            <div class="w3-quarter w3-card w3-padding">
+                <i class="fa fa-plus-circle w3-xxlarge w3-text-blue"></i>
+                <h3>Nowe ćwiczenie</h3>
+                <p>Stwórz nowe ćwiczenie.</p>
+                <a th:href="@{/admin/exercise/new}" class="w3-btn w3-blue-grey w3-round">Dodaj ćwiczenie</a>
+            </div>
+            <div class="w3-quarter w3-card w3-padding">
+                <i class="fa fa-edit w3-xxlarge w3-text-blue"></i>
+                <h3>Edytuj ćwiczenie</h3>
+                <p>Edytuj istniejące ćwiczenie.</p>
+                <a th:href="@{/admin/exercise/edit}" class="w3-btn w3-blue-grey w3-round">Edytuj ćwiczenie</a>
+            </div>
+            <div class="w3-quarter w3-card w3-padding">
+                <i class="fa fa-plus-square w3-xxlarge w3-text-blue"></i>
+                <h3>Nowa część ciała</h3>
+                <p>Dodaj nową część ciała.</p>
+                <a th:href="@{/admin/bodypart/new}" class="w3-btn w3-blue-grey w3-round">Dodaj część ciała</a>
+            </div>
+            <div class="w3-quarter w3-card w3-padding">
+                <i class="fa fa-plus-square w3-xxlarge w3-text-blue"></i>
+                <h3>Nowy sprzęt</h3>
+                <p>Dodaj nowy sprzęt.</p>
+                <a th:href="@{/admin/equipment/new}" class="w3-btn w3-blue-grey w3-round">Dodaj sprzęt</a>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- end .content -->
+
+<!-- Stopka -->
+<div th:replace="~{footer :: footer}"></div>
 
 <script>
-        function deleteUser(button) {
-            let userId = button.getAttribute("data-id");
-            if (!confirm("Czy na pewno chcesz usunąć tego użytkownika?")) return;
+    function deleteUser(button) {
+        let userId = button.getAttribute("data-id");
+        if (!confirm("Czy na pewno chcesz usunąć tego użytkownika?")) return;
 
-            fetch(`/admin/delete-user/${userId}`, {
-                method: "DELETE"
-            })
+        fetch(`/admin/delete-user/${userId}`, { method: "DELETE" })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Usunięcie wiersza z tabeli
+                    let row = button.closest("tr");
+                    row.remove();
                     alert("Użytkownik został usunięty.");
-                    location.reload();
                 } else {
                     alert("Błąd usuwania użytkownika.");
                 }
             })
             .catch(error => console.error("Błąd:", error));
-        }
-    </script>
+    }
+
+    // Funkcja animująca licznik
+    function animateValue(id, start, end, duration) {
+        let obj = document.getElementById(id);
+        let range = end - start;
+        let increment = range / (duration / 5);
+        let current = start;
+        let step = function() {
+            current += increment;
+            obj.innerText = Math.floor(current);
+            if (current < end) {
+                requestAnimationFrame(step);
+            } else {
+                obj.innerText = end;
+            }
+        };
+        step();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Używamy wyrażeń Thymeleaf, aby pobrać wartości z modelu
+        animateValue("userCount", 0, [[${userCount}]], 2000);
+        animateValue("trainerCount", 0, [[${trainerCount}]], 2000);
+        animateValue("workoutCount", 0, [[${workoutCount}]], 2000);
+        animateValue("exerciseCount", 0, [[${exerciseCount}]], 2000);
+        animateValue("trainingPlanCount", 0, [[${trainingPlanCount}]], 2000);
+        animateValue("collaborationCount", 0, [[${collaborationCount}]], 2000);
+    });
+</script>
 
 </body>
 </html>

@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>GoGym</title>
-
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body th:fragment="header">
 <div class="w3-top">
@@ -110,6 +109,7 @@
     display: none;
     overflow: hidden;
     flex-direction: column;
+    z-index: 10000; /* Najwyższy priorytet */
 }
 
     /* Lista wiadomości */
@@ -149,6 +149,7 @@
 
     /* Poprawka na problem z nawigacją */
     .w3-top {
+        position: relative; /*DO USTALENIA CZY ZOSTAWIĆ*/
         z-index: 10000; /* Upewnia się, że navbar jest nad wszystkim */
     }
     #chat-search-container {
@@ -499,8 +500,5 @@ function toggleNavMenu() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script defer src="/js/chat.js"></script>
 <script defer src="/js/notifications.js"></script>
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/font-awesome.min.css">
 </body>
 </html>

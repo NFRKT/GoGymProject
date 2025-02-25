@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Nowy Sprzęt</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+<div class="w3-container" style="max-width: 600px; margin:50px auto;">
+  <h2>Dodaj nowy sprzęt</h2>
+  <form th:action="@{/admin/equipment/new}" th:object="${equipment}" method="post">
+    <p>
+      <label>Nazwa sprzętu</label>
+      <input class="w3-input" type="text" th:field="*{name}" required />
+    </p>
+    <p>
+      <button class="w3-btn w3-blue-grey" type="submit">Zapisz</button>
+      <a th:href="@{/admin/panel}" class="w3-btn w3-red">Anuluj</a>
+    </p>
+  </form>
+</div>
+</body>
+</html>

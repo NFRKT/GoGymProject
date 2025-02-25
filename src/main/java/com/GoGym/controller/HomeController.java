@@ -95,8 +95,6 @@ public class HomeController {
         }
         return "home";
     }
-
-
     @GetMapping({"/", "/gogym"})
     public String landingPage(Model model) {
         // Pobierz liczbę wszystkich użytkowników

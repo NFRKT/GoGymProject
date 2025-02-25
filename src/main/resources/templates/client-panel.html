@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <title>Panel Klienta</title>
   <style>
     /* 🔹 Globalne style */
@@ -196,7 +201,7 @@
   </style>
 </head>
 <body>
-
+<div th:replace="~{header :: header}"></div>
 <div class="container">
   <h2>Panel Klienta</h2>
   <a href="/home">🏠 Powrót na stronę główną</a>
@@ -273,6 +278,7 @@
     </tbody>
   </table>
 </div>
+<div th:replace="~{footer :: footer}"></div>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const trainerSelect = document.getElementById("trainer");

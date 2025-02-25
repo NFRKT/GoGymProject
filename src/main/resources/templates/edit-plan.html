@@ -2,7 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Edycja planu treningowego</title>
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
@@ -97,6 +100,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 </head>
 <body>
+<div th:replace="~{header :: header}"></div>
 <div class="container">
     <h2>Edycja planu treningowego</h2>
     <form id="edit-plan-form">
@@ -196,7 +200,7 @@
     </form>
     <div id="formError" class="error-message" style="display:none;"></div>
 </div>
-
+<div th:replace="~{footer :: footer}"></div>
 <script th:inline="javascript">
     /*[[${exercises}]]*/
     let exercises = /*[[${exercises}]]*/ [];

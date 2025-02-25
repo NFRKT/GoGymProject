@@ -109,6 +109,7 @@
     display: none;
     overflow: hidden;
     flex-direction: column;
+    z-index: 10000; /* Najwyższy priorytet */
 }
 
     /* Lista wiadomości */
@@ -148,6 +149,7 @@
 
     /* Poprawka na problem z nawigacją */
     .w3-top {
+        position: relative; /*DO USTALENIA CZY ZOSTAWIĆ*/
         z-index: 10000; /* Upewnia się, że navbar jest nad wszystkim */
     }
     #chat-search-container {
