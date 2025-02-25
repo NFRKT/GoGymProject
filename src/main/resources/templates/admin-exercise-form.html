@@ -7,13 +7,27 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
   <style>
-        .form-container {
-            max-width: 600px;
-            margin: 50px auto;
-        }
-    </style>
+    html, body {
+height: 100%;
+margin: 0;
+font-family: "Lato", sans-serif;
+display: flex;
+flex-direction: column;
+}
+.form-container {
+    max-width: 600px;
+    margin: 50px auto;
+    flex: 1;
+}
+textarea {
+    resize: none; /* Zablokowanie możliwości rozszerzania pola */
+}
+  </style>
 </head>
 <body>
+
+<div th:replace="~{header :: header}"></div>
+
 <div class="w3-container form-container">
   <h2 th:text="${exercise.idExercise == null} ? 'Nowe Ćwiczenie' : 'Edytuj Ćwiczenie'"></h2>
   <form th:action="@{${exercise.idExercise == null} ? '/admin/exercise/new' : '/admin/exercise/edit/' + ${exercise.idExercise}}"
@@ -29,19 +43,21 @@
     <p>
       <label>Trudność</label>
       <select class="w3-select" th:field="*{difficulty}" required>
-        <option th:each="d : ${difficulties}" th:value="${d}" th:text="${d}"></option>
+        <option value="beginner">Początkujący</option>
+        <option value="intermediate">Średnio zaawansowany</option>
+        <option value="advanced">Zaawansowany</option>
       </select>
     </p>
     <p>
       <label>Typ ćwiczenia</label>
       <select class="w3-select" th:field="*{type}" th:disabled="${isTypeLocked}">
-        <option th:each="t : ${exerciseTypes}" th:value="${t}" th:text="${t}"></option>
+        <option value="STRENGTH">Siłowe</option>
+        <option value="CARDIO">Cardio</option>
       </select>
     <p th:if="${isTypeLocked}" style="color: red; font-weight: bold;">
       Nie można edytować typu ćwiczenia, ponieważ jest używane w planach lub workoutach.
     </p>
     </p>
-
     <p>
       <label>Części ciała</label>
       <select class="w3-select" name="bodyPartIds">
@@ -62,20 +78,24 @@
         <option th:if="${#lists.isEmpty(equipments)}" disabled>Brak dostępnych sprzętów</option>
       </select>
     </p>
+    <p>
+      <label>Nowe zdjęcie:</label>
+      <input class="w3-input" type="file" name="imageFile" accept=".jpg"/>
+    </p>
+
     <p th:if="${exercise.jpg != null}">
       <label>Obecne zdjęcie:</label><br>
       <img th:src="${exercise.jpg}" alt="Zdjęcie ćwiczenia" style="max-width: 200px;"/>
     </p>
 
     <p>
-      <label>Nowe zdjęcie:</label>
-      <input class="w3-input" type="file" name="imageFile" accept=".jpg"/>
-    </p>
-    <p>
       <button class="w3-btn w3-blue-grey" type="submit">Zapisz</button>
-      <a th:href="@{/admin/panel}" class="w3-btn w3-red">Anuluj</a>
+      <a th:href="@{/admin/exercise/list}" class="w3-btn w3-red">Anuluj</a>
     </p>
   </form>
 </div>
+
+<div th:replace="~{footer :: footer}"></div>
+
 </body>
 </html>
