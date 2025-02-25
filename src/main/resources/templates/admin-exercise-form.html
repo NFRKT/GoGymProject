@@ -16,7 +16,8 @@
 <body>
 <div class="w3-container form-container">
   <h2 th:text="${exercise.idExercise == null} ? 'Nowe Ćwiczenie' : 'Edytuj Ćwiczenie'"></h2>
-  <form th:action="@{${exercise.idExercise == null} ? '/admin/exercise/new' : '/admin/exercise/edit/' + ${exercise.idExercise}}" th:object="${exercise}" method="post">
+  <form th:action="@{${exercise.idExercise == null} ? '/admin/exercise/new' : '/admin/exercise/edit/' + ${exercise.idExercise}}"
+        th:object="${exercise}" method="post" enctype="multipart/form-data">
     <p>
       <label>Nazwa</label>
       <input class="w3-input" type="text" th:field="*{name}" required />
@@ -33,39 +34,42 @@
     </p>
     <p>
       <label>Typ ćwiczenia</label>
-      <select class="w3-select" th:field="*{type}" required>
+      <select class="w3-select" th:field="*{type}" th:disabled="${isTypeLocked}">
         <option th:each="t : ${exerciseTypes}" th:value="${t}" th:text="${t}"></option>
       </select>
+    <p th:if="${isTypeLocked}" style="color: red; font-weight: bold;">
+      Nie można edytować typu ćwiczenia, ponieważ jest używane w planach lub workoutach.
     </p>
-    <p>
-      <label>Obrazek (URL)</label>
-      <input class="w3-input" type="text" th:field="*{jpg}" />
     </p>
+
     <p>
       <label>Części ciała</label>
-      <select class="w3-select" name="bodyPartIds" multiple>
-        <option th:if="${bodyParts != null and not #lists.isEmpty(bodyParts)}"
-                th:each="bp : ${bodyParts}"
+      <select class="w3-select" name="bodyPartIds">
+        <option th:each="bp : ${bodyParts}"
                 th:value="${bp.idBodyPart}"
-                th:text="${bp.name}"
-                th:selected="${exercise.bodyParts != null ? exercise.bodyParts.contains(bp) : false}">
+                th:text="${bp.name}">
         </option>
         <option th:if="${#lists.isEmpty(bodyParts)}" disabled>Brak dostępnych części ciała</option>
       </select>
     </p>
     <p>
-    <p th:text="'EquipmentList: ' + ${equipmentList}"></p>
-
-    <label>Sprzęt</label>
-      <select class="w3-select" name="equipmentIds" multiple>
-        <option th:each="eq : ${equipmentList != null ? equipmentList : {}}"
-                th:value="${eq.idEquipment}"
-                th:text="${eq.name}"
-                th:selected="${exercise.equipment != null ? exercise.equipment.contains(eq) : false}">
+      <label>Sprzęt</label>
+      <select class="w3-select" name="equipmentIds">
+        <option th:each="bp : ${equipments}"
+                th:value="${bp.idEquipment}"
+                th:text="${bp.name}">
         </option>
-
-        <option th:if="${#lists.isEmpty(equipmentList)}" disabled>Brak dostępnego sprzętu</option>
+        <option th:if="${#lists.isEmpty(equipments)}" disabled>Brak dostępnych sprzętów</option>
       </select>
+    </p>
+    <p th:if="${exercise.jpg != null}">
+      <label>Obecne zdjęcie:</label><br>
+      <img th:src="${exercise.jpg}" alt="Zdjęcie ćwiczenia" style="max-width: 200px;"/>
+    </p>
+
+    <p>
+      <label>Nowe zdjęcie:</label>
+      <input class="w3-input" type="file" name="imageFile" accept=".jpg"/>
     </p>
     <p>
       <button class="w3-btn w3-blue-grey" type="submit">Zapisz</button>

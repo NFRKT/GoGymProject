@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Lista Ćwiczeń</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .container {
+        max-width: 900px;
+        margin: 50px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+    th {
+        background: #f2f2f2;
+    }
+    .btn {
+        padding: 8px 12px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    .btn-edit {
+        background: #007bff;
+        color: white;
+    }
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+    .btn-add {
+        display: block;
+        margin: 20px auto;
+        background: #28a745;
+        color: white;
+        padding: 10px 15px;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+
+<div class="container">
+  <h2>Lista Ćwiczeń</h2>
+
+  <a th:href="@{/admin/exercise/new}" class="btn-add">➕ Dodaj nowe ćwiczenie</a>
+
+  <table>
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nazwa</th>
+      <th>Typ</th>
+      <th>Trudność</th>
+      <th>Akcje</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="exercise : ${exercises}">
+      <td th:text="${exercise.idExercise}"></td>
+      <td th:text="${exercise.name}"></td>
+      <td th:text="${exercise.type}"></td>
+      <td th:text="${exercise.difficulty}"></td>
+      <td>
+        <a th:href="@{/admin/exercise/edit/{id}(id=${exercise.idExercise})}" class="btn btn-edit">
+          ✏️ Edytuj
+        </a>
+        <button class="btn btn-delete" th:data-id="${exercise.idExercise}" onclick="deleteExercise(this)">
+          ❌ Usuń
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+  function deleteExercise(button) {
+      let exerciseId = button.getAttribute("data-id");
+      if (!confirm("Czy na pewno chcesz usunąć to ćwiczenie?")) return;
+
+      fetch(`/admin/exercise/delete/${exerciseId}`, {
+          method: "DELETE"
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert("Ćwiczenie zostało usunięte.");
+              location.reload();
+          } else {
+              alert(data.message);
+          }
+      })
+      .catch(error => console.error("Błąd:", error));
+  }
+</script>
+
+</body>
+</html>

@@ -29,6 +29,8 @@ public interface PlanExerciseRepository extends JpaRepository<PlanExercise, Long
     @Query("UPDATE PlanExercise pe SET pe.videoUrl = :videoUrl WHERE pe.id = :exerciseId")
     void updateVideoUrl(@Param("exerciseId") Long exerciseId, @Param("videoUrl") String videoUrl);
 
+    @Query("SELECT COUNT(pe) FROM PlanExercise pe WHERE pe.exercise.idExercise = :exerciseId")
+    long countByExerciseId(@Param("exerciseId") Long exerciseId);
 
 
 }
