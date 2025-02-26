@@ -1,5 +1,6 @@
 package com.GoGym.controller;
 
+import com.GoGym.module.User;
 import com.GoGym.security.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,17 @@ public class GlobalControllerAdvice {
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             model.addAttribute("idUser", userDetails.getIdUser());
+
+            // Ustawiamy atrybuty dla ról – przykład
+            User user = userDetails.getUser();
+            if (user != null) {
+                boolean isUser = user.getUserType() == User.UserType.CLIENT;
+                boolean isTrainer = user.getUserType() == User.UserType.TRAINER;
+                boolean isAdmin = user.getUserType() == User.UserType.ADMIN;
+                model.addAttribute("isUser", isUser);
+                model.addAttribute("isTrainer", isTrainer);
+                model.addAttribute("isAdmin", isAdmin);
+            }
         }
     }
 }

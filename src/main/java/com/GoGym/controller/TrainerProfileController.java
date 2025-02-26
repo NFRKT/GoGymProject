@@ -52,6 +52,9 @@ public class TrainerProfileController {
     @GetMapping
     public String trainerProfile(Model model, Principal principal,Authentication authentication) {
         User user = userService.findByEmail(principal.getName());
+        if (user.getUserType() != User.UserType.TRAINER) {
+            throw new IllegalStateException("Tylko trenerzy mają profil trenera.");
+        }
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(user.getIdUser()).orElse(null);
         List<TrainerSpecialization> specializations = trainerSpecializationRepository.findByTrainer(trainerDetails);
         List<TrainerExperience> experiences = trainerDetailsService.getTrainerExperience(user.getIdUser());
@@ -93,8 +96,7 @@ public class TrainerProfileController {
     public Map<String, Object> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file, Principal principal) {
         Map<String, Object> response = new HashMap<>();
 
-        // Walidacja, czy plik nie przekracza ustalonego rozmiaru (np. 5MB)
-        long MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+        long MAX_AVATAR_SIZE = 10 * 1024 * 1024; // 5MB
         if (file.getSize() > MAX_AVATAR_SIZE) {
             response.put("success", false);
             response.put("message", "Plik jest za duży. Maksymalny rozmiar to 5MB.");

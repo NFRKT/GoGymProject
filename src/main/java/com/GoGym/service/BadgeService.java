@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -97,6 +99,62 @@ public class BadgeService {
         if (completedPlanExercises >= 10) {
             awardBadgeIfEligible(user, completedPlanExercises, 10, "10 Plan Exercises Completed");
         }
+    }
+    public Map<Long, String> calculateBadgeProgress(User user) {
+        Map<Long, String> badgeProgress = new HashMap<>();
+
+        // Pobieramy wszystkie odznaki
+        List<Badge> allBadges = badgeRepository.findAll();
+
+        // Obliczamy liczbę workoutów
+        int workoutCount = workoutRepository.findByUserOrderByWorkoutDateDesc(user).size();
+
+        // Obliczamy liczbę ukończonych planów treningowych
+        long completedPlans = trainingPlanRepository.findByIdClient(user.getIdUser())
+                .stream().filter(plan -> plan.getStatus() == TrainingPlan.Status.completed)
+                .count();
+
+        // Obliczamy liczbę ukończonych ćwiczeń planowych
+        int completedPlanExercises = 0;
+        List<TrainingPlan> plans = trainingPlanRepository.findByIdClient(user.getIdUser());
+        for (TrainingPlan plan : plans) {
+            if (plan.getTrainingPlanDays() != null) {
+                for (TrainingPlanDay day : plan.getTrainingPlanDays()) {
+                    if (day.getExercises() != null) {
+                        for (PlanExercise exercise : day.getExercises()) {
+                            if (exercise.getStatus() == PlanExercise.Status.completed) {
+                                completedPlanExercises++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Dla każdej odznaki przypisujemy postęp – przykładowo:
+        for (Badge badge : allBadges) {
+            String progress = "";
+            switch (badge.getName()) {
+                case "5 Plans Completed":
+                    progress = Math.min((int) completedPlans, 5) + "/5";
+                    break;
+                case "8 Plans Completed":
+                    progress = Math.min((int) completedPlans, 8) + "/8";
+                    break;
+                case "5 Workouts Completed":
+                    progress = Math.min(workoutCount, 5) + "/5";
+                    break;
+                case "10 Plan Exercises Completed":
+                    progress = Math.min(completedPlanExercises, 10) + "/10";
+                    break;
+                default:
+                    progress = "";
+                    break;
+            }
+            badgeProgress.put(badge.getId(), progress);
+        }
+
+        return badgeProgress;
     }
 
 }

@@ -9,68 +9,66 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-            html, body {
-          height: 100%;
-          margin: 0;
-          display: flex;
-          flex-direction: column;
-        }
-        .content {
-            flex: 1;
-        }
-        body, h1, h2, h3, h4, h5, h6 {
-            font-family: "Lato", sans-serif
-        }
-        .w3-bar, h1, button {
-            font-family: "Montserrat", sans-serif
-        }
-        .fa-bar-chart, .fa-money, .fa-bullseye {
-            font-size: 70px;
-            margin-bottom: 20px;
-        }
-        .highlight-box {
-            padding: 20px;
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-            margin: 20px 0;
-        }
-        .dynamic-section {
-            margin-top: 20px;
-            text-align: center;
-        }
-.badge-carousel {
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
-  gap: 10px;
-  padding: 10px;
-  scroll-behavior: smooth;
-  user-select: none;          /* Standard */
-  -webkit-user-select: none;  /* Safari */
-  -moz-user-select: none;     /* Firefox */
-  -ms-user-select: none;      /* IE 10+ */
-}
-
-.badge-item {
-  flex: 0 0 auto; /* zapobiega skalowaniu */
-  width: 120px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 10px;
-  background-color: #fff;
-}
-.badge-img {
-  width: 100%;
-  height: auto;
-  border-radius: 50%;
-}
-.badge-carousel.active {
-  cursor: grabbing;
-  cursor: -webkit-grabbing;
-}
-
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .content {
+        flex: 1;
+    }
+    body, h1, h2, h3, h4, h5, h6 {
+        font-family: "Lato", sans-serif
+    }
+    .w3-bar, h1, button {
+        font-family: "Montserrat", sans-serif
+    }
+    .fa-bar-chart, .fa-money, .fa-bullseye {
+        font-size: 70px;
+        margin-bottom: 20px;
+    }
+    .highlight-box {
+        padding: 20px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        margin: 20px 0;
+    }
+    .dynamic-section {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .badge-carousel {
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+      gap: 10px;
+      padding: 10px;
+      scroll-behavior: smooth;
+      user-select: none;          /* Standard */
+      -webkit-user-select: none;  /* Safari */
+      -moz-user-select: none;     /* Firefox */
+      -ms-user-select: none;      /* IE 10+ */
+    }
+    .badge-item {
+      flex: 0 0 auto;
+      width: 120px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      background-color: #fff;
+    }
+    .badge-img {
+      width: 100%;
+      height: auto;
+      border-radius: 50%;
+    }
+    .badge-carousel.active {
+      cursor: grabbing;
+      cursor: -webkit-grabbing;
+    }
     </style>
 </head>
 <body>
@@ -90,6 +88,7 @@
         <a th:if="${isTrainer}" th:href="@{/trainer/profile}" class="w3-button w3-blue w3-round">Mój profil trenera</a>
         <a th:if="${isUser}" th:href="@{/client/profile}" class="w3-button w3-blue w3-round">Mój profil klienta</a>
         <a th:href="@{/listTrainers}" class="w3-button w3-blue w3-round">Nasi trenerzy!</a>
+        <a th:href="@{/all-user-list}" class="w3-button w3-blue w3-round">Wszyscy użytkownicy!</a>
         <a th:if="${isAdmin}" th:href="@{/admin/panel}" class="w3-button w3-red">Panel Administratora</a>
         <a th:unless="${isAdmin}"th:if="${isTrainer}" th:href="@{/workouts}" class="w3-button w3-blue w3-round">Twoje treningi</a>
         <a th:unless="${isAdmin}" th:href="@{/workouts/create}" class="w3-button w3-blue w3-round">Stwórz trening</a>

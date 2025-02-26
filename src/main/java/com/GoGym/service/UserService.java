@@ -77,6 +77,10 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Nie znaleziono użytkownika"));
     }
 
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
     public List<User> getUsersByType(User.UserType userType) {
         if (userType == null) {
             throw new IllegalArgumentException("Typ użytkownika nie może być pusty.");

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Lista użytkowników</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Łącza do stylów -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #292d35;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      position: relative;
+      max-width: 1000px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 20px;
+      color: #303a53;
+    }
+    .search-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .search-container input[type="text"] {
+      width: 50%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .sort-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .sort-container select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .role-badge {
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: white;
+      font-size: 12px;
+    }
+    .role-client {
+      background-color: #3a87ad;
+    }
+    .role-trainer {
+      background-color: #4caf50;
+    }
+    .profile-button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      text-decoration: none;
+      font-size: 12px;
+    }
+    .profile-client {
+      background-color: #3a87ad;
+    }
+    .profile-trainer {
+      background-color: #4caf50;
+    }
+  </style>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="container">
+  <h2>Lista użytkowników</h2>
+  <div class="search-container">
+    <input type="text" id="userSearch" placeholder="Wyszukaj użytkownika...">
+  </div>
+  <div class="sort-container">
+    <label for="userTypeFilter">Sortuj po typie:</label>
+    <select id="userTypeFilter">
+      <option value="all">Wszyscy</option>
+      <option value="CLIENT">Klienci</option>
+      <option value="TRAINER">Trenerzy</option>
+    </select>
+  </div>
+  <table id="userTable">
+    <thead>
+    <tr>
+      <th>Email</th>
+      <th>Imię i nazwisko</th>
+      <th>Rola</th>
+      <th>Profil</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}" th:data-type="${user.userType}">
+      <td th:text="${user.email}">user@example.com</td>
+      <td th:text="${user.firstName + ' ' + user.secondName}">Imię Nazwisko</td>
+      <td>
+        <span th:if="${user.userType.name() == 'CLIENT'}" class="role-badge role-client">Klient</span>
+        <span th:if="${user.userType.name() == 'TRAINER'}" class="role-badge role-trainer">Trener</span>
+      </td>
+      <td>
+        <a th:if="${user.userType.name() == 'CLIENT'}"
+           th:href="@{'/client/profile/' + ${user.idUser}}"
+           class="profile-button profile-client">Profil</a>
+        <a th:if="${user.userType.name() == 'TRAINER'}"
+           th:href="@{'/trainer/profile/' + ${user.idUser}}"
+           class="profile-button profile-trainer">Profil</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+  // Filtr wyszukiwania po tabeli
+  document.getElementById('userSearch').addEventListener('keyup', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#userTable tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.indexOf(filter) > -1 ? '' : 'none';
+    });
+  });
+
+  // Filtracja po typie użytkownika
+  document.getElementById('userTypeFilter').addEventListener('change', function() {
+    const filter = this.value;
+    const rows = document.querySelectorAll('#userTable tbody tr');
+    rows.forEach(row => {
+      const userType = row.getAttribute('data-type');
+      if (filter === "all" || userType === filter) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  });
+
+    // Funkcja filtrująca tabelę – łączy wyszukiwanie i sortowanie według typu
+  function filterTable() {
+    const searchValue = document.getElementById('userSearch').value.toLowerCase();
+    const typeFilter = document.getElementById('userTypeFilter').value;
+    const rows = document.querySelectorAll('#userTable tbody tr');
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const userType = row.getAttribute('data-type');
+      const matchesSearch = text.indexOf(searchValue) > -1;
+      const matchesType = (typeFilter === "all" || userType === typeFilter);
+      row.style.display = (matchesSearch && matchesType) ? "" : "none";
+    });
+  }
+
+  document.getElementById('userSearch').addEventListener('keyup', filterTable);
+  document.getElementById('userTypeFilter').addEventListener('change', filterTable);
+</script>
+</body>
+</html>

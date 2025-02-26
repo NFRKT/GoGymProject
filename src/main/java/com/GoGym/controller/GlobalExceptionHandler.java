@@ -28,7 +28,7 @@ public class GlobalExceptionHandler implements ErrorController {
                 return "error/404"; // 🔥 Zwrot poprawnego widoku 404
             }
         }
-        return "error/default"; // 🔥 Zwrot domyślnego błędu
+        return "redirect:/home"; // 🔥 Zwrot domyślnego błędu
     }
 
     @ExceptionHandler(AccessDeniedException.class)
