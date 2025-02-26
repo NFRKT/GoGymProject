@@ -35,17 +35,26 @@ function loadChatRooms() {
             let chatRoomsDiv = document.getElementById("chat-rooms");
             document.getElementById("chat-search-container").style.display = "block";
             chatRoomsDiv.innerHTML = "";
+
             chatRooms.forEach(room => {
                 let roomElement = document.createElement("div");
                 roomElement.classList.add("chat-room-link");
-                roomElement.dataset.chatRoomId = room.id; // Ustawienie ID pokoju
-                roomElement.innerHTML = `${room.targetUserName}
-                    ${room.unreadCount > 0 ? `<span class="unread-count">(${room.unreadCount})</span>` : ""}`;
+                roomElement.dataset.chatRoomId = room.id;
+                roomElement.innerHTML = `${room.targetUserName} ${room.unreadCount > 0 ? `<span class="unread-count">(${room.unreadCount})</span>` : ""}`;
+
                 roomElement.onclick = function () {
                     openChatRoom(room.id, room.targetUserName);
                 };
-                chatRoomsDiv.appendChild(roomElement);
+
+                // Jeśli to chat z administracją, wstaw na samą górę listy
+                if (room.targetUserName === "Administracja") {
+                    roomElement.classList.add("admin-chat"); // Możemy dodać specjalną klasę do stylizacji
+                    chatRoomsDiv.prepend(roomElement);
+                } else {
+                    chatRoomsDiv.appendChild(roomElement);
+                }
             });
+
             console.log("📋 Lista czatów załadowana.");
         })
         .catch(error => {
@@ -53,6 +62,7 @@ function loadChatRooms() {
             document.getElementById("chat-rooms").innerHTML = "<p>Błąd ładowania rozmów</p>";
         });
 }
+
 
 function openChatRoom(chatRoomId, targetUserName) {
     disconnectChat();

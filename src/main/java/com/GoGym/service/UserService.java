@@ -1,8 +1,10 @@
 package com.GoGym.service;
+import com.GoGym.module.ChatRoom;
 import com.GoGym.module.TrainerSpecialization;
 import com.GoGym.module.User;
 import com.GoGym.module.TrainerDetails;
 import com.GoGym.dto.UserRegistrationDTO;
+import com.GoGym.repository.ChatRoomRepository;
 import com.GoGym.repository.TrainerSpecializationRepository;
 import com.GoGym.repository.UserRepository;
 import com.GoGym.repository.TrainerDetailsRepository;
@@ -23,9 +25,12 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private ChatRoomRepository chatRoomRepository;
+    @Autowired
     private TrainerDetailsRepository trainerDetailsRepository;
     @Autowired
     private TrainerSpecializationRepository trainerSpecializationRepository;
+    @Autowired ChatService chatService;
 
     public User registerUser(UserRegistrationDTO userDTO) {
         Optional<User> existingUser = userRepository.findByEmail(userDTO.getEmail());
@@ -61,7 +66,7 @@ public class UserService {
             }
 
         }
-
+        chatService.createChatWithAdmin(savedUser);
         return savedUser;
     }
     public User findByEmail(String email) {
@@ -91,8 +96,8 @@ public class UserService {
         }
         return false;
     }
-
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
 }

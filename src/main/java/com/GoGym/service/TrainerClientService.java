@@ -35,7 +35,6 @@ public class TrainerClientService {
 
         TrainerClient savedRelation = trainerClientRepository.save(trainerClient);
 
-        // Automatyczne tworzenie pokoju chatu
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.setUser(trainerClient.getClient());
         chatRoom.setTrainer(trainerClient.getTrainer());

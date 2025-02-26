@@ -9,11 +9,13 @@ import com.GoGym.module.User;
 import com.GoGym.repository.ChatRoomRepository;
 import com.GoGym.repository.MessageRepository;
 import com.GoGym.repository.UserRepository;
+import com.GoGym.service.ChatService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +25,8 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -33,35 +37,54 @@ public class ChatController {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChatService chatService;
 
-    public ChatController(ChatRoomRepository chatRoomRepository, MessageRepository messageRepository, UserRepository userRepository, SimpMessagingTemplate messagingTemplate) {
+    public ChatController(ChatRoomRepository chatRoomRepository, MessageRepository messageRepository, UserRepository userRepository, SimpMessagingTemplate messagingTemplate, ChatService chatService) {
         this.chatRoomRepository = chatRoomRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
+        this.chatService = chatService;
     }
 
     @GetMapping
     @ResponseBody
-    public List<ChatRoomDTO> getChatRooms(Principal principal) {
-        User user = userRepository.findByEmail(principal.getName())
+    public List<ChatRoomDTO> getChatRooms(Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
-        return chatRoomRepository.findByUserOrTrainer(user, user)
+        boolean isAdmin = user.getUserType() == User.UserType.ADMIN;
+
+        return chatService.getChatRoomsForUser(user)
                 .stream()
                 .map(chatRoom -> {
-                    boolean isClient = chatRoom.getUser().equals(user);
-                    long unreadCount = messageRepository.countUnreadMessages(chatRoom.getId(), user.getIdUser());
+                    boolean isAdminChat = chatRoom.getTrainer().getUserType() == User.UserType.ADMIN
+                            || chatRoom.getUser().getUserType() == User.UserType.ADMIN;
+
+                    String chatName;
+                    if (isAdmin) {
+                        // Jeśli admin, pokaż prawdziwe imię i nazwisko użytkownika
+                        chatName = chatRoom.getUser().getUserType() == User.UserType.ADMIN
+                                ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
+                                : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName();
+                    } else {
+                        // Dla użytkowników zamiast "Admin Admin" pokażemy "Administracja"
+                        chatName = isAdminChat ? "Administracja"
+                                : (chatRoom.getUser().equals(user)
+                                ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
+                                : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName());
+                    }
+
                     return new ChatRoomDTO(
                             chatRoom.getId(),
-                            isClient ? chatRoom.getTrainer().getIdUser() : chatRoom.getUser().getIdUser(),
-                            isClient ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
-                                    : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName(),
-                            unreadCount
+                            isAdminChat ? -1 : (chatRoom.getUser().equals(user) ? chatRoom.getTrainer().getIdUser() : chatRoom.getUser().getIdUser()),
+                            chatName,
+                            0
                     );
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
+
 
     @GetMapping("/{chatRoomId}/messages")
     @ResponseBody
@@ -221,6 +244,11 @@ public class ChatController {
         System.out.println("✅ Wiadomości oznaczone jako przeczytane w pokoju: " + chatRoomId + " przez: " + user.getFirstName());
 
         return ResponseEntity.ok("Wiadomości oznaczone jako przeczytane");
+    }
+    @PostMapping("/admin/init-chats")
+    public ResponseEntity<String> initializeAdminChats() {
+        chatService.createAdminChatsOnStartup();
+        return ResponseEntity.ok("Wszystkie czaty administratora zostały zainicjalizowane.");
     }
 
 
