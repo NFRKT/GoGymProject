@@ -1,5 +1,6 @@
 package com.GoGym.module;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.util.Date;
 
@@ -12,10 +13,12 @@ public class TrainerReview {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "trainer_id", nullable = false)
     private User trainer;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "client_id", nullable = false)
     private User client;
 

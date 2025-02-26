@@ -38,12 +38,13 @@ public class TrainerReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono klienta"));
 
         if (trainerReviewRepository.existsByTrainerAndClient(trainer, client)) {
-            throw new IllegalStateException("Już dodałeś ocenę dla tego trenera");
+            throw new IllegalStateException("Dodałeś już opinię na temat tego trenera!");
         }
 
         TrainerReview review = new TrainerReview(trainer, client, rating, comment);
         return trainerReviewRepository.save(review);
     }
+
 
     public TrainerReview updateReview(Long reviewId, Long clientId, int rating, String comment) {
         TrainerReview review = trainerReviewRepository.findById(reviewId)
@@ -72,4 +73,9 @@ public class TrainerReviewService {
 
         trainerReviewRepository.delete(review);
     }
+
+    public void deleteReviewByAdmin(Long reviewId) {
+        trainerReviewRepository.deleteById(reviewId);
+    }
+
 }

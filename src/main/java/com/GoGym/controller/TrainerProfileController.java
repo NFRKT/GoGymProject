@@ -3,6 +3,7 @@ package com.GoGym.controller;
 import com.GoGym.module.*;
 import com.GoGym.repository.TrainerDetailsRepository;
 import com.GoGym.repository.TrainerSpecializationRepository;
+import com.GoGym.repository.UserRepository;
 import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.TrainerDetailsService;
 import com.GoGym.service.UserService;
@@ -31,6 +32,7 @@ public class TrainerProfileController {
     private static final String CERTIFICATION_UPLOAD_DIR = "uploads/certifications/";
 
     private final UserService userService;
+    private final UserRepository userRepository;
     private final TrainerDetailsRepository trainerDetailsRepository;
     private final TrainerDetailsService trainerDetailsService;
     private final TrainerSpecializationRepository trainerSpecializationRepository;
@@ -39,25 +41,28 @@ public class TrainerProfileController {
     public TrainerProfileController(UserService userService,
                                     TrainerDetailsRepository trainerDetailsRepository,
                                     TrainerDetailsService trainerDetailsService,
-                                    TrainerSpecializationRepository trainerSpecializationRepository) {
+                                    TrainerSpecializationRepository trainerSpecializationRepository, UserRepository userRepository) {
         this.userService = userService;
         this.trainerDetailsRepository = trainerDetailsRepository;
         this.trainerDetailsService = trainerDetailsService;
         this.trainerSpecializationRepository = trainerSpecializationRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
-    public String trainerProfile(Model model, Principal principal) {
+    public String trainerProfile(Model model, Principal principal,Authentication authentication) {
         User user = userService.findByEmail(principal.getName());
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(user.getIdUser()).orElse(null);
         List<TrainerSpecialization> specializations = trainerSpecializationRepository.findByTrainer(trainerDetails);
         List<TrainerExperience> experiences = trainerDetailsService.getTrainerExperience(user.getIdUser());
-
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
         model.addAttribute("user", user);
         model.addAttribute("trainerDetails", trainerDetails);
         model.addAttribute("specializations", specializations);
         model.addAttribute("experiences", experiences);
         model.addAttribute("isOwnProfile", true);
+        model.addAttribute("isAdmin", loggedInUser.getUserType() == User.UserType.ADMIN);
         return "trainer-profile";
     }
 
@@ -70,7 +75,8 @@ public class TrainerProfileController {
         TrainerDetails trainerDetails = trainerDetailsRepository.findById(trainerId).orElse(null);
         List<TrainerSpecialization> specializations = trainerSpecializationRepository.findByTrainer(trainerDetails);
         List<TrainerExperience> experiences = trainerDetailsService.getTrainerExperience(trainerId);
-
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
         model.addAttribute("user", trainer);
         model.addAttribute("trainerDetails", trainerDetails);
         model.addAttribute("specializations", specializations);
@@ -78,7 +84,7 @@ public class TrainerProfileController {
         model.addAttribute("isAuthenticated", isAuthenticated);
         model.addAttribute("userId", loggedInUserId);
         model.addAttribute("isOwnProfile", isAuthenticated && loggedInUserId != null && loggedInUserId.equals(trainerId));
-
+        model.addAttribute("isAdmin", loggedInUser.getUserType() == User.UserType.ADMIN);
         return "trainer-profile";
     }
 
@@ -415,5 +421,82 @@ public class TrainerProfileController {
         }
         return response;
     }
+    @PostMapping("/updateName")
+    @ResponseBody
+    public Map<String, Object> updateName(@RequestParam("firstName") String firstName,
+                                          @RequestParam("lastName") String lastName,
+                                          Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        User user = userService.findByEmail(principal.getName());
+        if (firstName == null || firstName.trim().isEmpty() ||
+                lastName == null || lastName.trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Imię i nazwisko są wymagane.");
+            return response;
+        }
+        user.setFirstName(firstName.trim());
+        user.setSecondName(lastName.trim());
+        userRepository.save(user);
+        response.put("success", true);
+        return response;
+    }
+
+    @PostMapping("/updateBirthDate")
+    @ResponseBody
+    public Map<String, Object> updateBirthDate(@RequestParam("birthDate")
+                                               @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthDate,
+                                               Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        User user = userService.findByEmail(principal.getName());
+        if (birthDate == null) {
+            response.put("success", false);
+            response.put("message", "Data urodzenia jest wymagana.");
+            return response;
+        }
+        Date today = new Date();
+        // Ustawiamy godziny na 0, aby porównanie było tylko datowe
+        Calendar calToday = Calendar.getInstance();
+        calToday.setTime(today);
+        calToday.set(Calendar.HOUR_OF_DAY, 0);
+        calToday.set(Calendar.MINUTE, 0);
+        calToday.set(Calendar.SECOND, 0);
+        calToday.set(Calendar.MILLISECOND, 0);
+        if (birthDate.after(calToday.getTime())) {
+            response.put("success", false);
+            response.put("message", "Data urodzenia nie może być w przyszłości.");
+            return response;
+        }
+        user.setBirthDate(birthDate);
+        userRepository.save(user);
+        response.put("success", true);
+        return response;
+    }
+
+    @PostMapping("/updateGender")
+    @ResponseBody
+    public Map<String, Object> updateGender(@RequestParam("gender") String gender,
+                                            Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        User user = userService.findByEmail(principal.getName());
+        if (gender == null || gender.trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Płeć jest wymagana.");
+            return response;
+        }
+        try {
+            // Zakładamy, że enum w klasie User nazywa się Gender i ma wartości KOBIETA oraz MĘŻCZYZNA.
+            // Używamy toUpperCase() aby mieć pewność, że przekazany tekst odpowiada nazwie enuma.
+            User.Gender genderEnum = User.Gender.valueOf(gender.trim().toUpperCase());
+            user.setGender(genderEnum);
+        } catch (IllegalArgumentException e) {
+            response.put("success", false);
+            response.put("message", "Podano nieprawidłową wartość płci. Wybierz KOBIETA lub MĘŻCZYZNA.");
+            return response;
+        }
+        userRepository.save(user);
+        response.put("success", true);
+        return response;
+    }
+
 
 }

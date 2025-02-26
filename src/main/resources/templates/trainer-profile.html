@@ -1,245 +1,814 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head >
-    <title>Mój profil trenera</title>
+<head>
+    <title>Profil Trenera - Panel Admina</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Wspólne style -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .profile-pic {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid #333;
+      html, body {
+        height: 100%;
+        margin: 0;
+        background-color: #292d35;
+        font-family: "Lato", sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+      .container {
+        position: relative;
+        max-width: 800px;
+        width: 94%;
+        margin: 40px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        flex: 1;
+      }
+      .btn-back {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: #303a53;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        z-index: 10;
+      }
+      h2 {
+        text-align: center;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        color: #303a53;
+      }
+      .section {
+        margin-bottom: 30px;
+      }
+      .section h3 {
+        color: #303a53;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+      }
+      .profile-pic {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #303a53;
+        display: block;
+        margin: 0 auto;
+      }
+      .info {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .info p {
+        margin: 5px 0;
+      }
+      .btn {
+        background: #303a53;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 14px;
+        margin: 5px;
+      }
+      .btn-edit, .btn-delete {
+        margin: 5px;
+      }
+      .table-container {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        min-width: 500px;
+      }
+      th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      /* Responsywność */
+      @media screen and (max-width: 768px) {
+        .container {
+          margin: 20px;
+          padding: 15px;
         }
+        h2 {
+          font-size: 1.6em;
+        }
+        .btn-back, .btn {
+          font-size: 12px;
+          padding: 6px 10px;
+        }
+        table, th, td {
+          font-size: 12px;
+        }
+      }
+      /* Formularz edycji */
+      .edit-experience-form {
+          margin-top: 15px;
+          padding: 15px;
+          background: #f9f9f9;
+          border-radius: 8px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      /* Podgląd nowego certyfikatu */
+      .cert-preview-container {
+          margin-top: 10px;
+          text-align: center;
+      }
+      .cert-preview {
+          max-width: 100px;
+          max-height: 100px;
+          object-fit: cover;
+          border: 2px solid #ccc;
+          border-radius: 8px;
+          display: block;
+          margin: 5px auto;
+      }
+      /* Kontener na certyfikaty */
+      .certificates-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 15px;
+          list-style: none;
+          padding: 0;
+          text-align: center;
+      }
+      /* Pojedynczy certyfikat */
+      .certificate-container {
+          text-align: center;
+          position: relative;
+      }
+      /* Obrazy certyfikatów */
+      .experience-cert {
+          width: 150px;
+          height: 150px;
+          object-fit: cover;
+          border-radius: 8px;
+          border: 2px solid #ccc;
+          cursor: pointer;
+          transition: transform 0.3s ease;
+      }
+      /* Hover efekt dla obrazów */
+      .experience-cert:hover {
+          transform: scale(1.05);
+      }
+      /* PDF link */
+      .certificate-pdf {
+          display: block;
+          text-align: center;
+          font-weight: bold;
+          color: #303a53;
+          text-decoration: none;
+          padding: 5px;
+          border-radius: 5px;
+          border: 1px solid #303a53;
+          transition: background 0.3s ease;
+      }
+      .certificate-pdf:hover {
+          background: #303a53;
+          color: white;
+      }
+      /* Lightbox – Powiększanie zdjęć */
+      .lightbox {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+      }
+      .lightbox-content {
+          max-width: 90%;
+          max-height: 90%;
+          border-radius: 8px;
+      }
+      /* Styl dla błędnych pól */
+      .input-error {
+          border: 2px solid red !important;
+          background-color: #ffe6e6;
+      }
+      /* Komunikaty błędów */
+      .error-message {
+          color: red;
+          font-size: 12px;
+          margin-top: 5px;
+      }
+          .img-preview-container {
+      position: relative;
+      display: none;
+      width: 200px;
+      margin-top: 10px;
+    }
+    .img-preview {
+      width: 100%;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+    }
+    .remove-img-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     </style>
 </head>
 <body>
+
 <div th:replace="~{header :: header}"></div>
-<div class="w3-container w3-blue w3-center">
-    <h2>Mój profil trenera</h2>
-</div>
 
-<!-- Zdjęcie profilowe -->
-<div class="w3-container w3-padding-32">
-    <h3>Zdjęcie profilowe</h3>
-    <div>
-        <img th:if="${trainerDetails?.profilePicture != null}" th:src="@{'/uploads/avatars/' + ${trainerDetails.profilePicture}}" class="profile-pic"/>
-        <img th:if="${trainerDetails?.profilePicture == null}" th:src="@{'/images/default-profile.png'}" class="profile-pic"/>
-    </div>
-
-    <!-- Formularz do zmiany zdjęcia -->
-    <form id="uploadProfilePictureForm" enctype="multipart/form-data" th:if="${isOwnProfile}">
-        <input type="file" name="profilePicture" required/>
-        <button type="button" onclick="uploadProfilePicture()" class="w3-button w3-green">Zmień zdjęcie</button>
-    </form>
-
-    <!-- Przycisk do usunięcia zdjęcia profilowego -->
-    <button onclick="deleteProfilePicture()" class="w3-button w3-red" th:if="${isOwnProfile}">Usuń zdjęcie</button>
-</div>
-
-
-<!-- Informacje o trenerze -->
-<div class="w3-container w3-padding-32">
-    <h3>Informacje osobiste</h3>
-    <p><strong>Imię i nazwisko:</strong> <span th:text="${user.firstName + ' ' + user.secondName} ?: 'Nie podano'"></span></p>
-    <p><strong>Data urodzenia:</strong> <span th:text="${user.birthDate != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : 'Nie podano'}"></span></p>
-    <p><strong>Płeć:</strong> <span th:text="${not #strings.isEmpty(user.gender)} ? ${user.gender} : 'Nie podano'"></span></p>
-</div>
-<div class="w3-container w3-padding-32">
-    <h3>Opinie i oceny</h3>
-
-    <!-- Średnia ocena -->
-    <div>
-        <strong>Średnia ocena:</strong> <span id="averageRating">Brak ocen</span> ⭐
-    </div>
-
-    <!-- Formularz dodawania oceny (tylko jeśli użytkownik jeszcze nie ocenił) -->
-    <form id="reviewForm" th:if="${!isOwnProfile}">
-        <label>Ocena:</label>
-        <select name="rating">
-            <option value="5">⭐⭐⭐⭐⭐</option>
-            <option value="4">⭐⭐⭐⭐</option>
-            <option value="3">⭐⭐⭐</option>
-            <option value="2">⭐⭐</option>
-            <option value="1">⭐</option>
-        </select>
-        <label>Komentarz:</label>
-        <textarea name="comment"></textarea>
-        <button type="submit">Dodaj opinię</button>
-    </form>
-    <!-- Jeśli użytkownik już ocenił trenera, pokaż jego opinię na górze -->
-    <div id="userReviewContainer" style="display: none;">
-        <h4>Twoja opinia</h4>
-        <ul id="userReviewList"></ul>
-    </div>
-    <!-- Formularz edycji opinii (ukryty domyślnie) -->
-    <div id="editReviewForm" style="display: none;">
-        <h4>Edytuj swoją opinię</h4>
-        <label>Ocena:</label>
-        <select id="editRating">
-            <option value="5">⭐⭐⭐⭐⭐</option>
-            <option value="4">⭐⭐⭐⭐</option>
-            <option value="3">⭐⭐⭐</option>
-            <option value="2">⭐⭐</option>
-            <option value="1">⭐</option>
-        </select>
-        <label>Komentarz:</label>
-        <textarea id="editComment"></textarea>
-        <button onclick="saveEditedReview()">Zapisz zmiany</button>
-        <button onclick="cancelEdit()">Anuluj</button>
-    </div>
-    <!-- Lista opinii (paginacja) -->
-    <h4>Opinie</h4>
-    <ul id="reviewList"></ul>
-    <div>
-        <button id="prevPage" onclick="changePage(-1)" disabled>Poprzednia</button>
-        <span id="currentPage">1</span>
-        <button id="nextPage" onclick="changePage(1)">Następna</button>
-    </div>
-
-
-</div>
-
-<!-- Informacje zawodowe -->
-<div class="w3-container w3-padding-32">
-    <h3>Informacje zawodowe</h3>
-
-    <p><strong>Data rozpoczęcia kariery:</strong>
-        <span id="startDateText" th:text="${trainerDetails?.startDate != null ? #dates.format(trainerDetails.startDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editStartDate', 'startDateInput', 'startDateText')" th:if="${isOwnProfile}">Edytuj</button>
-    </p>
-
-    <form id="editStartDate" style="display:none;" onsubmit="event.preventDefault(); updateField('startDateText', 'startDateInput', 'startDate');">
-        <input type="date" id="startDateInput" class="w3-input w3-border"/>
-        <button type="submit" class="w3-button w3-green">Zapisz</button>
-    </form>
-
-
-    <p><strong>Numer telefonu:</strong>
-        <span id="phoneNumberText" th:text="${trainerDetails?.phoneNumber != null ? trainerDetails.phoneNumber : 'Nie podano'}"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editPhoneNumber', 'phoneNumberInput', 'phoneNumberText')" th:if="${isOwnProfile}">Edytuj</button>
-    </p>
-    <form id="editPhoneNumber" style="display:none;" onsubmit="event.preventDefault(); updateField('phoneNumberText', 'phoneNumberInput', 'phoneNumber');">
-        <input type="text" id="phoneNumberInput" class="w3-input w3-border"/>
-        <button type="submit" class="w3-button w3-green">Zapisz</button>
-    </form>
-
-    <p><strong>Obszar pracy:</strong>
-        <span id="workAreaText" th:text="${trainerDetails?.workArea != null ? trainerDetails.workArea : 'Nie podano'}"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editWorkArea', 'workAreaInput', 'workAreaText')" th:if="${isOwnProfile}">Edytuj</button>
-    </p>
-    <form id="editWorkArea" style="display:none;" onsubmit="event.preventDefault(); updateField('workAreaText', 'workAreaInput', 'workArea');">
-        <input type="text" id="workAreaInput" class="w3-input w3-border"/>
-        <button type="submit" class="w3-button w3-green">Zapisz</button>
-    </form>
-</div>
-
-<!-- 🔥 Bio -->
-<div class="w3-container w3-padding-32">
-    <h3>Bio</h3>
-    <p><strong>Opis:</strong> <span id="bioText" th:text="${trainerDetails?.bio != null ? trainerDetails.bio : 'Nie podano'}"></span>
-        <button class="w3-button w3-small w3-blue" onclick="toggleEdit('editBioForm', 'bioInput', 'bioText')" th:if="${isOwnProfile}">Edytuj</button>
-    </p>
-
-    <form id="editBioForm" style="display:none;" onsubmit="event.preventDefault(); updateField('bioText', 'bioInput', 'bio');" >
-        <textarea id="bioInput" name="bio" class="w3-input w3-border" rows="4"></textarea>
-        <button type="submit" class="w3-button w3-green">Zapisz</button>
-    </form>
-</div>
-
-
-<!-- Specjalizacje -->
-<div class="w3-container w3-padding-32">
-    <h3>Specjalizacje</h3>
-    <ul id="specializationList">
-        <li th:each="specialization : ${specializations}" th:attr="data-specialization-id=${specialization.id}">
-            <span class="specialization-name" th:text="${specialization.specialization}"></span>
-            <button onclick="toggleEditSpecialization(this)" class="w3-button w3-blue w3-small" th:if="${isOwnProfile}">Edytuj</button>
-            <button th:attr="onclick='deleteSpecialization(' + ${specialization.id} + ', this)'" class="w3-button w3-red w3-small" th:if="${isOwnProfile}">Usuń</button>
-
-            <!-- Formularz edycji (ukryty domyślnie) -->
-            <form class="edit-specialization-form w3-padding-16" style="display:none;">
-                <input type="hidden" name="specializationId" th:value="${specialization.id}">
-                <input type="text" name="specialization" class="w3-input w3-border" th:value="${specialization.specialization}" required/>
-                <button type="submit" class="w3-button w3-green w3-small">Zapisz</button>
-                <button type="button" onclick="toggleEditSpecialization(this)" class="w3-button w3-gray w3-small">Anuluj</button>
+<div class="container">
+    <a th:href="@{/home}" class="btn-back">← Powrót</a>
+    <h2>Profil Trenera</h2>
+    <!-- Sekcja zdjęcia profilowego -->
+    <div class="section">
+        <div style="text-align: center;">
+            <img th:if="${trainerDetails?.profilePicture != null}" th:src="@{'/uploads/avatars/' + ${trainerDetails.profilePicture}}" class="profile-pic" alt="Zdjęcie Profilowe"/>
+            <img th:if="${trainerDetails?.profilePicture == null}" th:src="@{'/images/default-profile.png'}" class="profile-pic" alt="Zdjęcie Profilowe"/>
+        </div>
+        <div style="text-align: center; margin-top: 10px;" th:if="${isOwnProfile}">
+            <form id="uploadProfilePictureForm" enctype="multipart/form-data">
+                <input type="file" name="profilePicture" required/>
+                <button type="button" class="btn" onclick="uploadProfilePicture()">Zmień zdjęcie</button>
             </form>
-        </li>
-    </ul>
+            <button type="button" class="btn btn-delete" onclick="deleteProfilePicture()">Usuń zdjęcie</button>
+        </div>
+    </div>
+    <!-- Sekcja informacji osobistych -->
+    <div class="section">
+        <h3>Informacje Osobiste</h3>
+        <div class="info">
+            <p>
+                <strong>Imię i nazwisko:</strong>
+                <span id="nameText" th:text="${user.firstName + ' ' + user.secondName}">Imię Nazwisko</span>
+                <button class="btn btn-edit" onclick="toggleEdit('editNameForm', 'nameText')" th:if="${isOwnProfile}">Edytuj</button>
+            </p>
+            <p>
+                <strong>Data urodzenia:</strong>
+                <span id="birthDateText" th:text="${user.birthDate != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : 'Nie podano'}">Data urodzenia</span>
+                <button class="btn btn-edit" onclick="toggleEdit('editBirthDateForm', 'birthDateText')" th:if="${isOwnProfile}">Edytuj</button>
+            </p>
+            <p>
+                <strong>Płeć:</strong>
+                <span id="genderText" th:text="${user.gender != null ? user.gender : 'Nie podano'}">Płeć</span>
+                <button class="btn btn-edit" onclick="toggleEdit('editGenderForm', 'genderText')" th:if="${isOwnProfile}">Edytuj</button>
+            </p>
+        </div>
+    </div>
 
-    <!-- Formularz dodawania nowej specjalizacji -->
-    <form id="specializationForm" th:if="${isOwnProfile}">
-        <h4>Dodaj nową specjalizację</h4>
-        <input type="text" name="specialization" placeholder="Nowa specjalizacja" required class="w3-input w3-border"/>
-        <button type="submit" class="w3-button w3-green w3-small">Dodaj</button>
+    <!-- Formularz edycji imienia i nazwiska -->
+    <form id="editNameForm" style="display:none;" novalidate>
+        <input type="text" id="firstNameInput" name="firstName" placeholder="Imię" class="w3-input w3-border" required/>
+        <input type="text" id="lastNameInput" name="lastName" placeholder="Nazwisko" class="w3-input w3-border" required/>
+        <button type="submit" class="btn">Zapisz</button>
+        <button type="button" class="btn" onclick="toggleEdit('editNameForm', 'nameText')">Anuluj</button>
     </form>
-</div>
 
-<div class="w3-container w3-padding-32">
-    <h3>Doświadczenie i Certyfikaty</h3>
-    <ul id="experienceList">
-        <li th:each="experience : ${experiences}" th:attr="data-experience-id=${experience.id}">
-            <span class="experience-name" th:text="${experience.graduationName}"></span>
-            (Data: <span class="experience-date" th:text="${experience.graduationDate != null ? #dates.format(experience.graduationDate, 'yyyy-MM-dd') : 'Nie podano'}"></span>)
+    <!-- Formularz edycji daty urodzenia -->
+    <form id="editBirthDateForm" style="display:none;" novalidate>
+        <input type="date" id="birthDateInput" name="birthDate" class="w3-input w3-border" required/>
+        <button type="submit" class="btn">Zapisz</button>
+        <button type="button" class="btn" onclick="toggleEdit('editBirthDateForm', 'birthDateText')">Anuluj</button>
+    </form>
 
-            <div th:if="${experience.certificationFile}">
+    <!-- Formularz edycji płci -->
+    <form id="editGenderForm" style="display:none;" novalidate>
+        <select id="genderInput" name="gender" class="w3-input w3-border" required>
+            <option value="">Wybierz płeć</option>
+            <option value="KOBIETA">KOBIETA</option>
+            <option value="MĘŻCZYZNA">MĘŻCZYZNA</option>
+        </select>
+        <button type="submit" class="btn">Zapisz</button>
+        <button type="button" class="btn" onclick="toggleEdit('editGenderForm', 'genderText')">Anuluj</button>
+    </form>
+
+    <!-- Sekcja opinii i ocen -->
+    <div class="section">
+        <h3>Opinie i Oceny</h3>
+        <div class="info">
+            <p><strong>Średnia ocena:</strong> <span id="averageRating">Brak ocen</span> ⭐</p>
+        </div>
+        <div th:if="${!isOwnProfile}">
+            <form id="reviewForm">
+                <label>Ocena:</label>
+                <select name="rating">
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                    <option value="2">⭐⭐</option>
+                    <option value="1">⭐</option>
+                </select>
+                <label>Komentarz:</label>
+                <textarea name="comment" rows="3" class="w3-input w3-border"></textarea>
+                <button type="submit" class="btn">Dodaj opinię</button>
+            </form>
+        </div>
+        <div id="userReviewContainer" style="display: none;">
+            <h4>Twoja opinia</h4>
+            <ul id="userReviewList"></ul>
+        </div>
+        <div id="editReviewForm" style="display: none;">
+            <h4>Edytuj swoją opinię</h4>
+            <label>Ocena:</label>
+            <select id="editRating">
+                <option value="5">⭐⭐⭐⭐⭐</option>
+                <option value="4">⭐⭐⭐⭐</option>
+                <option value="3">⭐⭐⭐</option>
+                <option value="2">⭐⭐</option>
+                <option value="1">⭐</option>
+            </select>
+            <label>Komentarz:</label>
+            <textarea id="editComment" rows="3" class="w3-input w3-border"></textarea>
+            <button class="btn" onclick="saveEditedReview()">Zapisz zmiany</button>
+            <button class="btn" onclick="cancelEdit()">Anuluj</button>
+        </div>
+        <h4>Opinie</h4>
+        <ul id="reviewList"></ul>
+        <div style="text-align: center;">
+            <button id="prevPage" class="btn" onclick="changePage(-1)" disabled>Poprzednia</button>
+            <span id="currentPage">1</span>
+            <button id="nextPage" class="btn" onclick="changePage(1)">Następna</button>
+        </div>
+    </div>
+
+    <!-- Sekcja informacji zawodowych -->
+    <div class="section">
+        <h3>Informacje Zawodowe</h3>
+        <div class="info">
+            <p><strong>Data rozpoczęcia kariery:</strong>
+                <span id="startDateText" th:text="${trainerDetails?.startDate != null ? #dates.format(trainerDetails.startDate, 'yyyy-MM-dd') : 'Nie podano'}">Data</span>
+                <button class="btn btn-edit" onclick="toggleEdit('editStartDate', 'startDateInput', 'startDateText')" th:if="${isOwnProfile}">Edytuj</button>
+            </p>
+            <form id="editStartDate" style="display:none;">
+                <input type="date" id="startDateInput" class="w3-input w3-border"/>
+                <button type="submit" class="btn">Zapisz</button>
+            </form>
+            <p><strong>Numer telefonu:</strong>
+                <span id="phoneNumberText" th:text="${trainerDetails?.phoneNumber != null ? trainerDetails.phoneNumber : 'Nie podano'}">Telefon</span>
+                <button class="btn btn-edit" onclick="toggleEdit('editPhoneNumber', 'phoneNumberInput', 'phoneNumberText')" th:if="${isOwnProfile}">Edytuj</button>
+            </p>
+            <form id="editPhoneNumber" style="display:none;">
+                <input type="text" id="phoneNumberInput" class="w3-input w3-border"/>
+                <button type="submit" class="btn">Zapisz</button>
+            </form>
+            <p><strong>Obszar pracy:</strong>
+                <span id="workAreaText" th:text="${trainerDetails?.workArea != null ? trainerDetails.workArea : 'Nie podano'}">Obszar</span>
+                <button class="btn btn-edit" onclick="toggleEdit('editWorkArea', 'workAreaInput', 'workAreaText')" th:if="${isOwnProfile}">Edytuj</button>
+            </p>
+            <form id="editWorkArea" style="display:none;">
+                <input type="text" id="workAreaInput" class="w3-input w3-border"/>
+                <button type="submit" class="btn">Zapisz</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sekcja Bio -->
+    <div class="section">
+        <h3>Bio</h3>
+        <div class="info">
+            <p><strong>Opis:</strong>
+                <span id="bioText" th:text="${trainerDetails?.bio != null ? trainerDetails.bio : 'Nie podano'}">Opis</span>
+                <button class="btn btn-edit" onclick="toggleEdit('editBioForm', 'bioInput', 'bioText')" th:if="${isOwnProfile}">Edytuj</button>
+            </p>
+            <form id="editBioForm" style="display:none;">
+                <textarea id="bioInput" name="bio" class="w3-input w3-border" rows="4"></textarea>
+                <button type="submit" class="btn">Zapisz</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sekcja Specjalizacji -->
+    <div class="section">
+        <h3>Specjalizacje</h3>
+        <ul id="specializationList">
+            <li th:each="specialization : ${specializations}" th:attr="data-specialization-id=${specialization.id}">
+                <span class="specialization-name" th:text="${specialization.specialization}">Specjalizacja</span>
+                <button class="btn btn-edit" onclick="toggleEditSpecialization(this)" th:if="${isOwnProfile}">Edytuj</button>
+                <button class="btn btn-delete" th:attr="onclick='deleteSpecialization(' + ${specialization.id} + ', this)'" th:if="${isOwnProfile}">Usuń</button>
+                <!-- Formularz edycji specjalizacji -->
+                <form class="edit-specialization-form" style="display:none; margin-top:10px;">
+                    <input type="hidden" name="specializationId" th:value="${specialization.id}">
+                    <input type="text" name="specialization" class="w3-input w3-border" th:value="${specialization.specialization}" required/>
+                    <button type="submit" class="btn">Zapisz</button>
+                    <button type="button" onclick="toggleEditSpecialization(this)" class="btn">Anuluj</button>
+                </form>
+            </li>
+        </ul>
+        <form id="specializationForm" th:if="${isOwnProfile}">
+            <h4>Dodaj nową specjalizację</h4>
+            <input type="text" name="specialization" placeholder="Nowa specjalizacja" required class="w3-input w3-border"/>
+            <button type="submit" class="btn">Dodaj</button>
+        </form>
+    </div>
+
+    <!-- Sekcja Doświadczenia i Certyfikatów -->
+    <div class="section">
+        <h3>Doświadczenie i Certyfikaty</h3>
+        <ul id="experienceList" class="certificates-grid">
+            <li th:each="experience : ${experiences}" th:attr="data-experience-id=${experience.id}">
+                <span class="experience-name" th:text="${experience.graduationName}">Nazwa</span>
+                (Data: <span class="experience-date" th:text="${experience.graduationDate != null ? #dates.format(experience.graduationDate, 'yyyy-MM-dd') : 'Nie podano'}">Data</span>)
+                <div th:if="${experience.certificationFile}" class="certificate-container">
                 <span th:if="${#strings.endsWith(experience.certificationFile, '.pdf')}">
-                   <a th:href="@{'/uploads/certifications/' + ${experience.certificationFile}}" target="_blank">
-                       Otwórz certyfikat (PDF)
-                   </a>
+                    <a th:href="@{'/uploads/certifications/' + ${experience.certificationFile}}" target="_blank" class="certificate-pdf">
+                        Otwórz certyfikat (PDF)
+                    </a>
                 </span>
-                            <span th:if="${!#strings.endsWith(experience.certificationFile, '.pdf')}">
-                   <img th:src="@{'/uploads/certifications/' + ${experience.certificationFile}}" width="100" alt="Certyfikat" class="experience-cert"/>
+                    <span th:if="${!#strings.endsWith(experience.certificationFile, '.pdf')}">
+                    <img th:src="@{'/uploads/certifications/' + ${experience.certificationFile}}"
+                         class="experience-cert"
+                         alt="Certyfikat"
+                         onclick="openLightbox(this)" />
                 </span>
+                </div>
+                <button class="btn btn-edit" onclick="toggleEditExperience(this)" th:if="${isOwnProfile}">Edytuj</button>
+                <button class="btn btn-delete" th:attr="onclick='deleteExperience(' + ${experience.id} + ', this)'" th:if="${isOwnProfile}">Usuń</button>
+                <!-- Formularz edycji doświadczenia -->
+                <form class="edit-experience-form" style="display:none; margin-top:10px;">
+                    <input type="hidden" name="experienceId" th:value="${experience.id}">
+
+                    <label>Nazwa kursu/szkoły:</label>
+                    <input type="text" name="graduationName" class="w3-input w3-border" th:value="${experience.graduationName}"/>
+
+                    <label>Data uzyskania certyfikatu:</label>
+                    <input type="date" name="graduationDate" class="w3-input w3-border"
+                           th:value="${experience.graduationDate != null ? #dates.format(experience.graduationDate, 'yyyy-MM-dd') : ''}"/>
+
+                    <label>Nowy plik certyfikatu (opcjonalnie):</label>
+                    <input type="file" class="w3-input w3-border certificationFileInput" accept="image/*,.pdf"
+                           onchange="previewNewCertificate(event, this)"/>
+
+                    <!-- Podgląd nowego certyfikatu -->
+                    <div class="img-preview-container" id="imgPreviewContainerEdit">
+                        <img class="img-preview" id="imgPreviewEdit" alt="Podgląd pliku"/>
+                        <button type="button" class="remove-img-btn" onclick="removeSelectedFile()">✖</button>
+                    </div>
+
+                    <button type="submit" class="btn">Zapisz</button>
+                    <button type="button" onclick="toggleEditExperience(this)" class="btn">Anuluj</button>
+                </form>
+
+            </li>
+        </ul>
+        <form id="experienceForm" enctype="multipart/form-data" th:if="${isOwnProfile}" class="experience-form">
+            <h4>Dodaj nowe doświadczenie</h4>
+
+            <label>Nazwa ukończonego kursu/szkoły:</label>
+            <input type="text" name="graduationName" class="w3-input w3-border" required/>
+
+            <label>Data uzyskania certyfikatu:</label>
+            <input type="date" name="graduationDate" class="w3-input w3-border" required/>
+
+            <label>Zdjęcie/PDF certyfikatu:</label>
+            <input type="file" id="certificationFile" name="certificationFile" class="w3-input w3-border" accept="image/*,.pdf" required onchange="previewCertificate(event)"/>
+
+            <!-- Podgląd załadowanego obrazu -->
+            <div class="img-preview-container" id="imgPreviewContainer">
+                <img class="img-preview" id="imgPreview" alt="Podgląd zdjęcia"/>
+                <button type="button" class="remove-img-btn" onclick="removeSelectedFile()">✖</button>
             </div>
 
+            <button type="submit" class="btn">Dodaj doświadczenie</button>
+        </form>
 
-            <button onclick="toggleEditExperience(this)" class="w3-button w3-blue w3-small" th:if="${isOwnProfile}">Edytuj</button>
-            <button th:attr="onclick='deleteExperience(' + ${experience.id} + ', this)'" class="w3-button w3-red w3-small" th:if="${isOwnProfile}">Usuń</button>
+    </div>
+    <!-- Lightbox dla powiększania zdjęć -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" class="lightbox-content" />
+    </div>
+</div> <!-- end .container -->
 
-            <!-- Formularz edycji (ukryty domyślnie) -->
-            <form class="edit-experience-form w3-padding-16" style="display:none;">
-                <input type="hidden" name="experienceId" th:value="${experience.id}">
-
-                <label>Nazwa kursu/szkoły:</label>
-                <input type="text" name="graduationName" class="w3-input w3-border" th:value="${experience.graduationName}" required/>
-
-                <label>Data uzyskania certyfikatu:</label>
-                <input type="date" name="graduationDate" class="w3-input w3-border" th:value="${experience.graduationDate != null ? #dates.format(experience.graduationDate, 'yyyy-MM-dd') : ''}"/>
-
-                <label>Nowy plik certyfikatu (opcjonalnie):</label>
-                <input type="file" name="certificationFile" class="w3-input w3-border"/>
-
-                <button type="submit" class="w3-button w3-green w3-small">Zapisz</button>
-                <button type="button" onclick="toggleEditExperience(this)" class="w3-button w3-gray w3-small">Anuluj</button>
-            </form>
-        </li>
-    </ul>
-
-    <!-- Formularz dodawania nowego doświadczenia -->
-    <form id="experienceForm" enctype="multipart/form-data" th:if="${isOwnProfile}">
-        <h4>Dodaj nowe doświadczenie</h4>
-        <label>Nazwa ukończonego kursu/szkoły:</label>
-        <input type="text" name="graduationName" class="w3-input w3-border" required/>
-
-        <label>Data uzyskania certyfikatu (opcjonalnie):</label>
-        <input type="date" name="graduationDate" class="w3-input w3-border"/>
-
-        <label>Zdjęcie certyfikatu (opcjonalnie):</label>
-        <input type="file" name="certificationFile" class="w3-input w3-border"/>
-
-        <button type="submit" class="w3-button w3-green w3-small">Dodaj doświadczenie</button>
-    </form>
-</div>
 <div th:replace="~{footer :: footer}"></div>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    function validateForm(event, form) {
+        console.log("Walidacja uruchomiona dla formularza:", form.id);
+        let isValid = true;
+
+        function showError(input, message) {
+            input.classList.add("input-error");
+            let errorMsg = document.createElement("div");
+            errorMsg.className = "error-message";
+            errorMsg.innerText = message;
+            input.parentNode.appendChild(errorMsg);
+        }
+
+        // Czyszczenie poprzednich błędów
+        form.querySelectorAll(".error-message").forEach(e => e.remove());
+        form.querySelectorAll(".input-error").forEach(e => e.classList.remove("input-error"));
+
+        if (form.id === "editStartDate") {
+            let startDateInput = document.getElementById("startDateInput");
+            let startDate = new Date(startDateInput.value);
+            let today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (startDate > today) {
+                showError(startDateInput, "Data rozpoczęcia kariery nie może być późniejsza niż dzisiaj.");
+                isValid = false;
+            }
+        }
+
+        if (form.id === "editPhoneNumber") {
+            let phoneInput = document.getElementById("phoneNumberInput");
+            let phoneRegex = /^\+?\d{9,11}$/;
+
+            if (!phoneRegex.test(phoneInput.value)) {
+                showError(phoneInput, "Numer telefonu musi mieć od 9 do 11 cyfr i może zaczynać się od '+'.");
+                isValid = false;
+            }
+        }
+
+        if (form.id === "editWorkArea") {
+            let workAreaInput = document.getElementById("workAreaInput");
+
+            if (workAreaInput.value.trim() === "") {
+                showError(workAreaInput, "Obszar pracy jest wymagany.");
+                isValid = false;
+            } else if (!/^[A-ZĄĆĘŁŃÓŚŹŻ]/.test(workAreaInput.value)) {
+                showError(workAreaInput, "Obszar pracy musi zaczynać się dużą literą.");
+                isValid = false;
+            }
+        }
+
+        if (form.id === "editBioForm") {
+            let bioInput = document.getElementById("bioInput");
+
+            if (bioInput.value.trim() === "") {
+                showError(bioInput, "Opis jest wymagany.");
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
+            event.preventDefault();
+            console.log("Formularz nie został wysłany:", form.id);
+            return false;
+        }
+        console.log("Formularz poprawny, wysyłka:", form.id);
+        return true;
+    }
+
+    function attachValidation(formId, fieldId, inputId, urlField) {
+        let form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                let isFormValid = validateForm(event, form);
+                if (!isFormValid) return false;
+
+                let input = document.getElementById(inputId);
+                let value = input.value.trim();
+
+                fetch('/trainer/profile/updateField', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `field=${urlField}&value=${encodeURIComponent(value)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(fieldId).innerText = value !== "" ? value : "Nie podano";
+                        form.style.display = "none";
+                    } else {
+                        alert("Błąd zapisu!");
+                    }
+                })
+                .catch(error => console.error("Błąd AJAX:", error));
+
+                event.preventDefault();
+            });
+        }
+    }
+
+    // Podpinanie walidacji do formularzy edycji
+    attachValidation("editStartDate", "startDateText", "startDateInput", "startDate");
+    attachValidation("editPhoneNumber", "phoneNumberText", "phoneNumberInput", "phoneNumber");
+    attachValidation("editWorkArea", "workAreaText", "workAreaInput", "workArea");
+    attachValidation("editBioForm", "bioText", "bioInput", "bio");
+});
+</script>
+
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function() {
+  // Funkcja pomocnicza do wyświetlania komunikatów walidacyjnych
+  function showError(input, message) {
+    input.classList.add("input-error");
+    let errorMsg = document.createElement("div");
+    errorMsg.className = "error-message";
+    errorMsg.innerText = message;
+    input.parentNode.appendChild(errorMsg);
+  }
+
+  // Funkcja do przełączania widoczności formularzy edycji
+  window.toggleEdit = function(formId, textId) {
+    let form = document.getElementById(formId);
+    let text = document.getElementById(textId);
+    if (!form || !text) {
+      console.error("Elementy formularza nie zostały znalezione.");
+      return;
+    }
+    if (form.style.display === "none" || form.style.display === "") {
+      form.style.display = "block";
+      // Ustawiamy wartości wejść na podstawie obecnych danych
+      if(formId === "editNameForm") {
+        let names = text.innerText.trim().split(" ");
+        document.getElementById("firstNameInput").value = names[0] || "";
+        document.getElementById("lastNameInput").value = names.slice(1).join(" ") || "";
+      } else if(formId === "editBirthDateForm") {
+        document.getElementById("birthDateInput").value = text.innerText.trim() !== "Nie podano" ? text.innerText.trim() : "";
+      } else if(formId === "editGenderForm") {
+        // Zakładamy, że w bazie zapisany enum ma wartości KOBIETA lub MĘŻCZYZNA
+        document.getElementById("genderInput").value = text.innerText.trim() !== "Nie podano" ? text.innerText.trim().toUpperCase() : "";
+      }
+    } else {
+      form.style.display = "none";
+    }
+  };
+
+  // Obsługa formularza edycji imienia i nazwiska
+// Obsługa formularza edycji imienia i nazwiska
+const editNameForm = document.getElementById("editNameForm");
+if(editNameForm) {
+  editNameForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    // Czyszczenie poprzednich błędów
+    editNameForm.querySelectorAll(".error-message").forEach(el => el.remove());
+    editNameForm.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+
+    let firstNameInput = document.getElementById("firstNameInput");
+    let lastNameInput = document.getElementById("lastNameInput");
+    let isValid = true;
+
+    const firstName = firstNameInput.value.trim();
+    const lastName = lastNameInput.value.trim();
+
+    // Walidacja imienia
+    if(firstName === ""){
+      showError(firstNameInput, "Imię jest wymagane.");
+      isValid = false;
+    } else if(firstName.length < 2) {
+      showError(firstNameInput, "Imię musi mieć minimum 2 znaki.");
+      isValid = false;
+    } else if(!/^[A-ZĄĆĘŁŃÓŚŹŻ]/.test(firstName)) {
+      showError(firstNameInput, "Imię musi zaczynać się z dużej litery.");
+      isValid = false;
+    }
+
+    // Walidacja nazwiska
+    if(lastName === ""){
+      showError(lastNameInput, "Nazwisko jest wymagane.");
+      isValid = false;
+    } else if(lastName.length < 2) {
+      showError(lastNameInput, "Nazwisko musi mieć minimum 2 znaki.");
+      isValid = false;
+    } else if(!/^[A-ZĄĆĘŁŃÓŚŹŻ]/.test(lastName)) {
+      showError(lastNameInput, "Nazwisko musi zaczynać się z dużej litery.");
+      isValid = false;
+    }
+
+    if(!isValid) return;
+
+    let data = new URLSearchParams();
+    data.append("firstName", firstName);
+    data.append("lastName", lastName);
+
+    fetch('/trainer/profile/updateName', {
+      method: "POST",
+      body: data,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    })
+    .then(response => response.json())
+    .then(result => {
+      if(result.success){
+        document.getElementById("nameText").innerText = firstName + " " + lastName;
+        editNameForm.style.display = "none";
+      } else {
+        alert("Błąd aktualizacji danych.");
+      }
+    })
+    .catch(error => console.error("Błąd:", error));
+  });
+}
+
+
+  // Obsługa formularza edycji daty urodzenia
+  const editBirthDateForm = document.getElementById("editBirthDateForm");
+  if(editBirthDateForm) {
+    editBirthDateForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      editBirthDateForm.querySelectorAll(".error-message").forEach(el => el.remove());
+      editBirthDateForm.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+
+      let birthDateInput = document.getElementById("birthDateInput");
+      let isValid = true;
+
+      if(birthDateInput.value === ""){
+        showError(birthDateInput, "Data urodzenia jest wymagana.");
+        isValid = false;
+      } else {
+        let selectedDate = new Date(birthDateInput.value);
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if(selectedDate > today){
+          showError(birthDateInput, "Data urodzenia nie może być w przyszłości.");
+          isValid = false;
+        }
+      }
+      if(!isValid) return;
+
+      let data = new URLSearchParams();
+      data.append("birthDate", birthDateInput.value);
+
+      fetch('/trainer/profile/updateBirthDate', {
+        method: "POST",
+        body: data,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      })
+      .then(response => response.json())
+      .then(result => {
+        if(result.success){
+          document.getElementById("birthDateText").innerText = birthDateInput.value;
+          editBirthDateForm.style.display = "none";
+        } else {
+          alert("Błąd aktualizacji daty urodzenia.");
+        }
+      })
+      .catch(error => console.error("Błąd:", error));
+    });
+  }
+
+  // Obsługa formularza edycji płci
+  const editGenderForm = document.getElementById("editGenderForm");
+  if(editGenderForm) {
+    editGenderForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      editGenderForm.querySelectorAll(".error-message").forEach(el => el.remove());
+      editGenderForm.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+
+      let genderInput = document.getElementById("genderInput");
+      if(genderInput.value === ""){
+        showError(genderInput, "Wybierz płeć.");
+        return;
+      }
+
+      let data = new URLSearchParams();
+      data.append("gender", genderInput.value); // wartość np. "KOBIETA" lub "MĘŻCZYZNA"
+
+      fetch('/trainer/profile/updateGender', {
+        method: "POST",
+        body: data,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      })
+      .then(response => response.json())
+      .then(result => {
+        if(result.success){
+          document.getElementById("genderText").innerText = genderInput.value;
+          editGenderForm.style.display = "none";
+        } else {
+          alert("Błąd aktualizacji płci.");
+        }
+      })
+      .catch(error => console.error("Błąd:", error));
+    });
+  }
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
     let trainerId = [[${user.idUser}]];
     let loggedInUserId = [[${isAuthenticated} ? ${userId} : -1]];
+    let isAdmin = [[${isAdmin} ? 'true' : 'false']];
+    isAdmin = isAdmin === 'true';
     let currentPage = 1;
     let totalReviews = 0;
     let reviewsPerPage = 5;
@@ -256,7 +825,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (reviewForm) {
         reviewForm.addEventListener("submit", function (event) {
-            event.preventDefault(); // 🔥 Blokuje domyślne odświeżenie strony
+            event.preventDefault();
 
             let formData = new FormData(reviewForm);
             formData.append("trainerId", trainerId);
@@ -271,13 +840,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     alert("Błąd: " + data.error);
                 } else {
                     alert(data.message);
-                    fetchReviews(); // 🔥 Odśwież listę opinii
-                    reviewForm.reset(); // 🔥 Wyczyść formularz po dodaniu opinii
+                    fetchReviews();
+                    reviewForm.reset();
                 }
             })
             .catch(error => console.error("Błąd dodawania opinii:", error));
         });
     }
+
     function fetchReviews() {
         fetch(`/trainer/reviews/${trainerId}`)
             .then(response => response.json())
@@ -294,17 +864,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 let userReview = null;
                 let otherReviews = [];
 
-                // Podziel opinie na własną i resztę
                 data.forEach(review => {
                     totalRating += review.rating;
-                    if (review.client.idUser === loggedInUserId) {
+                    if (review.clientId === loggedInUserId) {
                         userReview = review;
                     } else {
                         otherReviews.push(review);
                     }
                 });
 
-                // Wyświetl własną opinię na górze (jeśli istnieje)
                 if (userReview) {
                     let li = createReviewElement(userReview, true);
                     userReviewList.appendChild(li);
@@ -313,7 +881,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     userReviewContainer.style.display = "none";
                 }
 
-                // Paginacja dla pozostałych opinii
                 totalReviews = otherReviews.length;
                 displayReviews(otherReviews);
 
@@ -322,28 +889,35 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(error => console.error("Błąd pobierania opinii:", error));
     }
+
     fetchReviews();
 
     function createReviewElement(review, isUserReview) {
         let li = document.createElement("li");
-        li.innerHTML = `<strong>${review.client.firstName} ${review.client.secondName}:</strong>
+        li.innerHTML = `<strong>${review.clientFirstName} ${review.clientSecondName}:</strong>
                         ${"⭐".repeat(review.rating)}
                         <p>${review.comment ? review.comment : "Brak komentarza"}</p>
                         <small>${new Date(review.createdAt).toLocaleDateString()}</small>`;
 
-        // Jeśli to opinia zalogowanego użytkownika, dodaj przyciski Edytuj i Usuń
         if (isUserReview) {
             let editButton = document.createElement("button");
             editButton.textContent = "Edytuj";
+            editButton.classList.add("btn", "btn-edit");
             editButton.onclick = function () { editReview(review); };
             li.appendChild(editButton);
 
             let deleteButton = document.createElement("button");
             deleteButton.textContent = "Usuń";
+            deleteButton.classList.add("btn", "btn-delete");
+            deleteButton.onclick = function () { deleteReview(review.id); };
+            li.appendChild(deleteButton);
+        } else if (isAdmin) {
+            let deleteButton = document.createElement("button");
+            deleteButton.textContent = "Usuń";
+            deleteButton.classList.add("btn", "btn-delete");
             deleteButton.onclick = function () { deleteReview(review.id); };
             li.appendChild(deleteButton);
         }
-
         return li;
     }
 
@@ -357,9 +931,10 @@ document.addEventListener("DOMContentLoaded", function () {
             reviewList.appendChild(li);
         }
 
-        document.getElementById("currentPage").textContent = currentPage;
+        let totalPages = Math.ceil(totalReviews / reviewsPerPage);
+        document.getElementById("currentPage").textContent = `${currentPage} z ${totalPages}`;
         document.getElementById("prevPage").disabled = currentPage === 1;
-        document.getElementById("nextPage").disabled = end >= totalReviews;
+        document.getElementById("nextPage").disabled = currentPage >= totalPages;
     }
 
     window.changePage = function (direction) {
@@ -402,7 +977,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     window.deleteReview = function(reviewId) {
-        if (!confirm("Czy na pewno chcesz usunąć swoją opinię?")) return;
+        if (!confirm("Czy na pewno chcesz usunąć tę opinię?")) return;
 
         fetch(`/trainer/reviews/delete/${reviewId}`, {
             method: "DELETE"
@@ -418,9 +993,6 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchReviews();
 });
 </script>
-
-
-
 
 <script>
 function toggleEdit(formId, inputId, textId) {
@@ -442,7 +1014,13 @@ function toggleEdit(formId, inputId, textId) {
 }
 
 function updateField(fieldId, inputId, urlField) {
-    let value = document.getElementById(inputId).value;
+    let input = document.getElementById(inputId);
+    if (!input || input.classList.contains("input-error")) {
+        return;
+    }
+
+    let value = input.value.trim();
+    if (value === "") return;
 
     fetch('/trainer/profile/updateField', {
         method: 'POST',
@@ -453,25 +1031,48 @@ function updateField(fieldId, inputId, urlField) {
     .then(data => {
         if (data.success) {
             document.getElementById(fieldId).innerText = value !== "" ? value : "Nie podano";
-            document.getElementById(inputId).parentElement.style.display = "none"; // 🔥 Ukrywamy formularz po edycji
+            input.parentElement.style.display = "none";
         } else {
             alert("Błąd zapisu!");
         }
     })
     .catch(error => console.error("Błąd AJAX:", error));
 }
+</script>
 
-
-
-
+<script>
 document.addEventListener("DOMContentLoaded", function () {
+    // Dodajemy 'novalidate' aby wyłączyć domyślne komunikaty walidacyjne
     const specializationForm = document.getElementById("specializationForm");
+    if (specializationForm) {
+        specializationForm.setAttribute("novalidate", "novalidate");
+    }
+    const experienceForm = document.getElementById("experienceForm");
+    if (experienceForm) {
+        experienceForm.setAttribute("novalidate", "novalidate");
+    }
+
     const specializationList = document.getElementById("specializationList");
 
-    // Obsługa dodawania nowej specjalizacji
+    // Obsługa dodawania nowej specjalizacji z własną walidacją
     if (specializationForm) {
         specializationForm.addEventListener("submit", function (event) {
             event.preventDefault();
+            const specializationInput = specializationForm.querySelector("input[name='specialization']");
+
+            specializationInput.classList.remove("input-error");
+            let errorMsg = specializationInput.parentNode.querySelector(".error-message");
+            if (errorMsg) errorMsg.remove();
+
+            if (specializationInput.value.trim() === "") {
+                specializationInput.classList.add("input-error");
+                errorMsg = document.createElement("div");
+                errorMsg.className = "error-message";
+                errorMsg.innerText = "Nazwa specjalizacji jest wymagana.";
+                specializationInput.parentNode.appendChild(errorMsg);
+                return;
+            }
+
             const formData = new FormData(specializationForm);
 
             fetch('/trainer/profile/addSpecialization', {
@@ -484,9 +1085,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     const newLi = document.createElement("li");
                     newLi.innerHTML = `
                         <span class="specialization-name">${data.specialization}</span>
-                        <button onclick="toggleEditSpecialization(this)" class="w3-button w3-blue w3-small">Edytuj</button>
-                        <button onclick="deleteSpecialization(${data.specializationId}, this)" class="w3-button w3-red w3-small">Usuń</button>
-                        <form class="edit-specialization-form w3-padding-16" style="display:none;">
+                        <button onclick="toggleEditSpecialization(this)" class="btn btn-edit">Edytuj</button>
+                        <button onclick="deleteSpecialization(${data.specializationId}, this)" class="btn btn-delete">Usuń</button>
+                        <form class="edit-specialization-form w3-padding-16" style="display:none;" novalidate>
                             <input type="hidden" name="specializationId" value="${data.specializationId}">
                             <input type="text" name="specialization" class="w3-input w3-border" value="${data.specialization}" required/>
                             <button type="submit" class="w3-button w3-green w3-small">Zapisz</button>
@@ -503,7 +1104,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Obsługa edycji specjalizacji
     specializationList.addEventListener("submit", function (event) {
         if (event.target.classList.contains("edit-specialization-form")) {
             event.preventDefault();
@@ -528,18 +1128,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Otwieranie i zamykanie formularza edycji specjalizacji
     window.toggleEditSpecialization = function (button) {
         const li = button.closest("li");
         const form = li.querySelector(".edit-specialization-form");
         form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
     };
 
-    // Obsługa usuwania specjalizacji
     window.deleteSpecialization = function (specializationId, button) {
-        if (!confirm("Czy na pewno chcesz usunąć tą specjalizacje?")) {
-        return;
-    }
+        if (!confirm("Czy na pewno chcesz usunąć tą specjalizację?")) return;
         fetch('/trainer/profile/deleteSpecialization', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -556,14 +1152,60 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Błąd AJAX:", error));
     };
 });
+</script>
+
+<script>
 document.addEventListener("DOMContentLoaded", function () {
+    // Definicja funkcji pomocniczej showError, która wyświetla komunikat walidacyjny
+    function showError(input, message) {
+        input.classList.add("input-error");
+        let errorMsg = document.createElement("div");
+        errorMsg.className = "error-message";
+        errorMsg.innerText = message;
+        input.parentNode.appendChild(errorMsg);
+    }
+
     const experienceForm = document.getElementById("experienceForm");
     const experienceList = document.getElementById("experienceList");
 
-    // Obsługa dodawania nowego doświadczenia
+    // Obsługa dodawania nowego doświadczenia z walidacją certyfikatu
     if (experienceForm) {
         experienceForm.addEventListener("submit", function (event) {
             event.preventDefault();
+            // Usuwanie poprzednich komunikatów błędów
+            experienceForm.querySelectorAll(".error-message").forEach(e => e.remove());
+            experienceForm.querySelectorAll(".input-error").forEach(e => e.classList.remove("input-error"));
+
+            let isValid = true;
+            const graduationName = experienceForm.querySelector("input[name='graduationName']");
+            const graduationDate = experienceForm.querySelector("input[name='graduationDate']");
+            const certificationFile = experienceForm.querySelector("input[name='certificationFile']");
+
+            if (graduationName.value.trim() === "") {
+                showError(graduationName, "Nazwa ukończonego kursu/szkoły jest wymagana.");
+                isValid = false;
+            }
+
+            if (graduationDate.value === "") {
+                showError(graduationDate, "Data uzyskania certyfikatu jest wymagana.");
+                isValid = false;
+            } else {
+                let selectedDate = new Date(graduationDate.value);
+                let today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (selectedDate > today) {
+                    showError(graduationDate, "Data uzyskania certyfikatu nie może być późniejsza niż dzisiaj.");
+                    isValid = false;
+                }
+            }
+
+            if (certificationFile.files.length === 0) {
+                showError(certificationFile, "Plik certyfikatu jest wymagany.");
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
             const formData = new FormData(experienceForm);
 
             fetch('/trainer/profile/addExperience', {
@@ -573,6 +1215,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Dodaj nowy element doświadczenia do listy (reszta Twojego kodu)
                     const newLi = document.createElement("li");
                     newLi.innerHTML = `
                         <span class="experience-name">${data.graduationName}</span>
@@ -585,14 +1228,14 @@ document.addEventListener("DOMContentLoaded", function () {
                                )
                             : ''
                         }
-                        <button onclick="toggleEditExperience(this)" class="w3-button w3-blue w3-small">Edytuj</button>
-                        <button onclick="deleteExperience(${data.experienceId}, this)" class="w3-button w3-red w3-small">Usuń</button>
-                        <form class="edit-experience-form w3-padding-16" style="display:none;">
+                        <button onclick="toggleEditExperience(this)" class="btn btn-edit">Edytuj</button>
+                        <button onclick="deleteExperience(${data.experienceId}, this)" class="btn btn-delete">Usuń</button>
+                        <form class="edit-experience-form w3-padding-16" style="display:none;" novalidate>
                             <input type="hidden" name="experienceId" value="${data.experienceId}">
                             <label>Nazwa kursu/szkoły:</label>
                             <input type="text" name="graduationName" class="w3-input w3-border" value="${data.graduationName}" required/>
                             <label>Data uzyskania certyfikatu:</label>
-                            <input type="date" name="graduationDate" class="w3-input w3-border" value="${data.graduationDate}"/>
+                            <input type="date" name="graduationDate" class="w3-input w3-border" value="${data.graduationDate}" required/>
                             <label>Nowy plik certyfikatu (opcjonalnie):</label>
                             <input type="file" name="certificationFile" class="w3-input w3-border"/>
                             <button type="submit" class="w3-button w3-green w3-small">Zapisz</button>
@@ -609,13 +1252,37 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Obsługa edycji doświadczenia
     experienceList.addEventListener("submit", function (event) {
         if (event.target.classList.contains("edit-experience-form")) {
             event.preventDefault();
             const form = event.target;
-            const formData = new FormData(form);
+            // Czyszczenie poprzednich komunikatów błędów
+            form.querySelectorAll(".error-message").forEach(e => e.remove());
+            form.querySelectorAll(".input-error").forEach(e => e.classList.remove("input-error"));
 
+            let isValid = true;
+            const graduationName = form.querySelector("input[name='graduationName']");
+            const graduationDate = form.querySelector("input[name='graduationDate']");
+
+            if (graduationName.value.trim() === "") {
+                showError(graduationName, "Nazwa ukończonego kursu/szkoły jest wymagana.");
+                isValid = false;
+            }
+            if (graduationDate.value === "") {
+                showError(graduationDate, "Data uzyskania certyfikatu jest wymagana.");
+                isValid = false;
+            } else {
+                let selectedDate = new Date(graduationDate.value);
+                let today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (selectedDate > today) {
+                    showError(graduationDate, "Data uzyskania certyfikatu nie może być późniejsza niż dzisiaj.");
+                    isValid = false;
+                }
+            }
+            if (!isValid) return;
+
+            const formData = new FormData(form);
             fetch('/trainer/profile/updateExperience', {
                 method: 'POST',
                 body: formData
@@ -638,7 +1305,6 @@ document.addEventListener("DOMContentLoaded", function () {
                             }
                             link.href = "/uploads/certifications/" + data.certificationFile;
                             link.textContent = "Otwórz certyfikat (PDF)";
-                            // Jeśli wcześniej był obrazek, usuń go
                             const img = li.querySelector(".experience-cert");
                             if (img) {
                                 img.remove();
@@ -652,7 +1318,6 @@ document.addEventListener("DOMContentLoaded", function () {
                                 li.appendChild(img);
                             }
                             img.src = "/uploads/certifications/" + data.certificationFile;
-                            // Jeśli wcześniej był link, usuń go
                             const link = li.querySelector(".experience-cert-link");
                             if (link) {
                                 link.remove();
@@ -669,76 +1334,94 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Otwieranie i zamykanie formularza edycji
     window.toggleEditExperience = function (button) {
         const li = button.closest("li");
         const form = li.querySelector(".edit-experience-form");
         form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
     };
 
-    // Obsługa usuwania doświadczenia
-window.deleteExperience = function (experienceId, button) {
-    if (!confirm("Czy na pewno chcesz usunąć to doświadczenie?")) {
-        return;
-    }
+    window.deleteExperience = function (experienceId, button) {
+        if (!confirm("Czy na pewno chcesz usunąć to doświadczenie?")) return;
 
-    fetch('/trainer/profile/deleteExperience', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `experienceId=${experienceId}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const listItem = button.closest("li");
-            if (listItem) {
-                listItem.remove();
+        fetch('/trainer/profile/deleteExperience', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `experienceId=${experienceId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const listItem = button.closest("li");
+                if (listItem) listItem.remove();
+            } else {
+                alert("Błąd: Nie udało się usunąć doświadczenia!");
             }
-        } else {
-            alert("Błąd: Nie udało się usunąć doświadczenia!");
-        }
-    })
-    .catch(error => console.error("Błąd AJAX:", error));
-};
-
+        })
+        .catch(error => console.error("Błąd AJAX:", error));
+    };
 });
 
-function uploadProfilePicture() {
-    let formData = new FormData(document.getElementById("uploadProfilePictureForm"));
+  // Funkcja do podglądu wybranego pliku
+  document.getElementById("certificationFile").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("imgPreview").src = e.target.result;
+        document.getElementById("imgPreviewContainer").style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
-    fetch('/trainer/profile/upload', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // 🔥 Podmiana zdjęcia profilowego bez przeładowania
-            document.querySelector(".profile-pic").src = data.profilePictureUrl;
-        } else {
-            alert("Błąd podczas przesyłania zdjęcia!");
-        }
-    })
-    .catch(error => console.error("Błąd AJAX:", error));
+  // Funkcja usuwania załączonego pliku
+  function removeSelectedFile() {
+    document.getElementById("certificationFile").value = "";
+    document.getElementById("imgPreviewContainer").style.display = "none";
+  }
+
+function openLightbox(image) {
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
+    lightbox.style.display = "flex";
+    lightboxImg.src = image.src;
 }
 
-function deleteProfilePicture() {
-    fetch('/trainer/profile/deleteProfilePicture', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.querySelector(".profile-pic").src = "/images/default-profile.png";
-        } else {
-            alert("Błąd podczas usuwania zdjęcia!");
-        }
-    })
-    .catch(error => console.error("Błąd AJAX:", error));
+function closeLightbox() {
+    document.getElementById("lightbox").style.display = "none";
 }
 </script>
 
-
+<script>
+    function uploadProfilePicture() {
+      let formData = new FormData(document.getElementById("uploadProfilePictureForm"));
+      fetch('/trainer/profile/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.querySelector(".profile-pic").src = data.profilePictureUrl;
+        } else {
+          alert("Błąd podczas przesyłania zdjęcia!");
+        }
+      })
+      .catch(error => console.error("Błąd AJAX:", error));
+    }
+    function deleteProfilePicture() {
+      fetch('/trainer/profile/deleteProfilePicture', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.querySelector(".profile-pic").src = data.defaultProfilePicture;
+        } else {
+          alert("Błąd podczas usuwania zdjęcia!");
+        }
+      })
+      .catch(error => console.error("Błąd AJAX:", error));
+    }
+</script>
 </body>
 </html>
+
