@@ -189,9 +189,17 @@ public class AdminExerciseController {
     @GetMapping("/list")
     public String listExercises(Model model) {
         List<Exercise> exercises = exerciseRepository.findAll();
+        // Dla każdego ćwiczenia ustalamy, czy jest używane w planach lub workoutach
+        for (Exercise exercise : exercises) {
+            boolean usedInPlans = planExerciseRepository.countByExerciseId(exercise.getIdExercise()) > 0;
+            boolean usedInWorkouts = workoutExerciseRepository.countByExerciseId(exercise.getIdExercise()) > 0;
+            // Załóżmy, że Exercise posiada transient pole "used" (lub setter, który nie jest zapisywany do bazy)
+            exercise.setUsed(usedInPlans || usedInWorkouts);
+        }
         model.addAttribute("exercises", exercises);
         return "admin-exercise-list";
     }
+
 
 
 

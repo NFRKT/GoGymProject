@@ -1,24 +1,117 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Nowy Sprzęt</title>
+  <title th:text="${equipment.idEquipment == null} ? 'Nowy Sprzęt' : 'Edytuj Sprzęt'">Sprzęt</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .w3-input {
+      padding: 12px;
+      border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #303a53;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .error-message {
+      color: #d8000c;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .invalid {
+      border: 2px solid #d8000c !important;
+    }
+  </style>
 </head>
 <body>
-<div class="w3-container" style="max-width: 600px; margin:50px auto;">
-  <h2>Dodaj nowy sprzęt</h2>
-  <form th:action="@{/admin/equipment/new}" th:object="${equipment}" method="post">
-    <p>
-      <label>Nazwa sprzętu</label>
-      <input class="w3-input" type="text" th:field="*{name}" required />
-    </p>
-    <p>
-      <button class="w3-btn w3-blue-grey" type="submit">Zapisz</button>
-      <a th:href="@{/admin/panel}" class="w3-btn w3-red">Anuluj</a>
-    </p>
+<div th:replace="~{header :: header}"></div>
+<div class="container">
+  <h2 th:text="${equipment.idEquipment == null} ? 'Nowy Sprzęt' : 'Edytuj Sprzęt'"></h2>
+  <form id="equipmentForm" th:action="@{${equipment.idEquipment == null} ? '/admin/equipment/new' : '/admin/equipment/edit/' + ${equipment.idEquipment}}"
+        th:object="${equipment}" method="post">
+    <label>Nazwa</label>
+    <input type="text" th:field="*{name}" class="w3-input"/>
+    <div class="error-message" id="nameError"></div>
+    <div style="text-align: center; margin-top: 20px;">
+      <button type="submit" class="btn">Zapisz</button>
+      <a th:href="@{/admin/equipment/list}" class="btn" style="background: #dc3545; text-decoration: none;">Anuluj</a>
+    </div>
   </form>
 </div>
+<div th:replace="~{footer :: footer}"></div>
+<script>
+  document.getElementById('equipmentForm').addEventListener('submit', function(event) {
+    let isValid = true;
+    let firstErrorField = null;
+
+    function setError(field, message) {
+      field.classList.add('invalid');
+      let errorElem = field.nextElementSibling;
+      if (errorElem && errorElem.classList.contains('error-message')) {
+        errorElem.textContent = message;
+        errorElem.style.display = 'block';
+      }
+      if (!firstErrorField) {
+        firstErrorField = field;
+      }
+      isValid = false;
+    }
+
+    function clearError(field) {
+      field.classList.remove('invalid');
+      let errorElem = field.nextElementSibling;
+      if (errorElem && errorElem.classList.contains('error-message')) {
+        errorElem.style.display = 'none';
+      }
+    }
+
+    // Walidacja pola nazwy
+    let nameField = document.querySelector('input[name="name"]');
+    if (!nameField.value.trim()) {
+      setError(nameField, "Podaj nazwę sprzętu!");
+    } else {
+      clearError(nameField);
+    }
+
+    if (!isValid) {
+      event.preventDefault();
+      if (firstErrorField) firstErrorField.focus();
+    }
+  });
+</script>
 </body>
 </html>

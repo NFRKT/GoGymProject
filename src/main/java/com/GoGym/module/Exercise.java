@@ -136,4 +136,15 @@ public class Exercise {
     public void setJpg(String jpg) {
         this.jpg = jpg;
     }
+
+    @Transient
+    private boolean used;
+
+    public boolean isUsed() {
+        return used;
+    }
+
+    public void setUsed(boolean used) {
+        this.used = used;
+    }
 }

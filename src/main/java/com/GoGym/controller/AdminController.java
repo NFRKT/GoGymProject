@@ -72,4 +72,19 @@ public class AdminController {
         boolean success = userService.deleteUserById(id);
         return ResponseEntity.ok(Map.of("success", success));
     }
+
+    @GetMapping("/clients/list")
+    public String listClients(Model model) {
+        List<User> clients = userService.getUsersByType(User.UserType.CLIENT);
+        model.addAttribute("clients", clients);
+        return "admin-clients-list";
+    }
+
+    @GetMapping("/trainers/list")
+    public String listTrainers(Model model) {
+        List<User> trainers = userService.getUsersByType(User.UserType.TRAINER);
+        model.addAttribute("trainers", trainers);
+        return "admin-trainers-list";
+    }
+
 }

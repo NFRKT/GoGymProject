@@ -51,6 +51,21 @@ public class ClientProfileController {
 
         return "client-profile";
     }
+    @GetMapping("/{clientId}")
+    public String viewProfile(@PathVariable Long clientId, Model model) {
+        User user = userService.findById(clientId);
+        if (user == null || user.getUserType() != User.UserType.CLIENT) {
+            throw new IllegalArgumentException("Nie znaleziono klienta o ID: " + clientId);
+        }
+        ClientDetails clientDetails = clientDetailsService.getClientDetails(user);
+        if (clientDetails == null) {
+            clientDetails = new ClientDetails();
+            clientDetails.setUser(user);
+        }
+        model.addAttribute("user", user);
+        model.addAttribute("clientDetails", clientDetails);
+        return "client-profile";
+    }
 
     @PostMapping("/upload")
     @ResponseBody
