@@ -146,10 +146,10 @@
             <input type="hidden" name="clientId" th:value="${client.client.idUser}" />
             <button class="btn btn-delete" type="submit">Zrezygnuj ze współpracy</button>
           </form>
-          <form th:action="@{/{id}/create-plan(id=${client.client.idUser})}" method="get">
+          <form th:action="@{/{id}/create-plan(id=${client.client.idUser})}" method="get" target="_blank">
             <button type="submit" class="btn">Stwórz plan</button>
           </form>
-          <form th:action="@{/client/profile/{id}(id=${client.client.idUser})}" method="get" style="display: inline;">
+          <form th:action="@{/client/profile/{id}(id=${client.client.idUser})}" method="get" style="display: inline;" target="_blank">
             <button class="btn btn-info" type="submit">Pokaż profil</button>
           </form>
         </td>
@@ -177,7 +177,7 @@
             <input type="hidden" name="status" value="rejected">
             <button class="btn btn-delete" type="submit">Odrzuć</button>
           </form>
-          <form th:action="@{/client/profile/{id}(id=${request.client.idUser})}" method="get" style="display: inline;">
+          <form th:action="@{/client/profile/{id}(id=${request.client.idUser})}" method="get" style="display: inline;" target="_blank">
             <button class="btn btn-info" type="submit">Pokaż profil</button>
           </form>
         </td>
@@ -245,7 +245,7 @@ function attachRemoveClientListener(form) {
                                       <input type="hidden" name="status" value="rejected">
                                       <button class="btn btn-delete" type="submit">Odrzuć</button>
                                   </form>
-                                  <form action="/client/profile/${request.client ? request.client.idUser : ''}" method="get" style="display: inline;">
+                                  <form action="/client/profile/${request.client ? request.client.idUser : ''}" method="get" style="display: inline;" target="_blank">
                                       <button class="btn btn-info" type="submit">Pokaż profil</button>
                                   </form>
                               </td>
@@ -281,23 +281,25 @@ function checkForRemovedClients() {
     fetch("/trainer/clients")
         .then(response => response.json())
         .then(data => {
-            // ✅ Sprawdzenie, czy `data` to poprawna tablica
-            if (!Array.isArray(data)) {
-                console.warn("⚠️ Otrzymano niepoprawną odpowiedź dla klientów:", data);
-                return;
-            }
+            console.log("📡 Odpowiedź API:", data); // ✅ LOG: co zwraca API
 
-            // ✅ Filtrujemy tylko poprawne obiekty z `client.client`
-            let validClients = data.filter(client => client && client.client && client.client.idUser);
-
-            if (validClients.length === 0) {
+            // 🔹 Sprawdzamy, czy `data` to poprawna tablica
+            if (!Array.isArray(data) || data.length === 0) {
                 console.warn("⚠️ Brak poprawnych klientów w odpowiedzi API.");
                 return;
             }
 
-            let currentClientIds = new Set(validClients.map(client => client.client.idUser.toString()));
+            // 🔹 Sprawdzamy, czy dane zawierają poprawne ID użytkownika
+            let validClients = data.filter(client => client.id && client.firstName && client.secondName);
 
-            // 🔹 Usuwamy klientów, których nie ma w aktualnych danych
+            if (validClients.length === 0) {
+                console.warn("⚠️ Brak poprawnych klientów po filtracji.");
+                return;
+            }
+
+            let currentClientIds = new Set(validClients.map(client => client.id.toString()));
+
+            // 🔹 Usuwamy klientów, których nie ma w nowej liście
             document.querySelectorAll("#clients-table tbody tr").forEach(row => {
                 let clientId = row.getAttribute("data-client-id");
                 if (!currentClientIds.has(clientId)) {
@@ -306,26 +308,26 @@ function checkForRemovedClients() {
                 }
             });
 
-            // 🔹 Dodajemy klientów, którzy nie są jeszcze w tabeli
+            // 🔹 Dodajemy nowych klientów do tabeli
             validClients.forEach(client => {
-                let clientId = client.client.idUser.toString();
+                let clientId = client.id.toString();
                 if (!document.querySelector(`#clients-table tbody tr[data-client-id="${clientId}"]`)) {
-                    console.log(`➕ Dodawanie klienta: ${client.client.firstName} ${client.client.secondName}`);
+                    console.log(`➕ Dodawanie klienta: ${client.firstName} ${client.secondName}`);
 
                     let newRow = document.createElement("tr");
                     newRow.setAttribute("data-client-id", clientId);
                     newRow.innerHTML = `
-                        <td>${client.client.firstName}</td>
-                        <td>${client.client.secondName}</td>
+                        <td>${client.firstName}</td>
+                        <td>${client.secondName}</td>
                         <td>
                             <form action="/rejectClient" method="post" class="remove-client-form">
                                 <input type="hidden" name="clientId" value="${clientId}">
                                 <button class="btn btn-delete" type="submit">Zrezygnuj ze współpracy</button>
                             </form>
-                            <form action="/${clientId}/create-plan" method="get">
+                            <form action="/${clientId}/create-plan" method="get" target="_blank">
                               <button type="submit" class="btn">Stwórz plan</button>
                             </form>
-                            <form action="/client/profile/${clientId}" method="get">
+                            <form action="/client/profile/${clientId}" method="get" target="_blank">
                               <button class="btn btn-info" type="submit">Pokaż profil</button>
                             </form>
                         </td>
@@ -336,7 +338,7 @@ function checkForRemovedClients() {
             });
 
         })
-        .catch(error => console.error("Błąd sprawdzania usuniętych klientów:", error));
+        .catch(error => console.error("🚨 Błąd pobierania klientów:", error));
 }
 
 
@@ -362,10 +364,10 @@ function attachUpdateRequestListener(form) {
                                 <input type="hidden" name="clientId" value="${data.id}">
                                 <button class="btn btn-delete" type="submit">Zrezygnuj ze współpracy</button>
                             </form>
-                            <form action="/${data.id}/create-plan" method="get">
+                            <form action="/${data.id}/create-plan" method="get" target="_blank">
                               <button type="submit" class="btn">Stwórz plan</button>
                             </form>
-                            <form action="/client/profile/${data.id}" method="get">
+                            <form action="/client/profile/${data.id}" method="get" target="_blank">
                               <button class="btn btn-info" type="submit">Pokaż profil</button>
                             </form>
                         </td>
