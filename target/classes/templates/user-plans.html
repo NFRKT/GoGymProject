@@ -24,7 +24,7 @@
       background-color: #292d35;
     }
     .container {
-      max-width: 1200px;
+      max-width: 1300px;
       margin: 0 auto;
       flex: 1;
     }
@@ -241,28 +241,27 @@
       100% { transform: rotate(360deg); }
     }
     .status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 20px;
-  color: white;
-  font-weight: 500;
-  font-size: 12px;
-}
-.status-badge.completed {
-  background-color: #28a745;
-}
-.status-badge.active {
-  background-color: #ffc107;
-}
-.status-badge.notCompleted {
-  background-color: #ffc107;
-}
-.plan-description {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-  </style>
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      color: white;
+      font-weight: 500;
+      font-size: 12px;
+    }
+    .status-badge.completed {
+      background-color: #28a745;
+    }
+    .status-badge.active {
+      background-color: #ffc107;
+    }
+    .status-badge.notCompleted {
+      background-color: #ffc107;
+    }
+    .plan-description {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
@@ -293,9 +292,12 @@
             <button class="reset-button">Resetuj filtry</button>
         </div>
 
-        <!-- Link do widoku archiwalnych planów -->
         <div style="margin-bottom: 20px;">
-            <a th:href="@{'/user-plans-archived?idUser=' + ${idUser}}" class="btn">Przejdź do archiwalnych planów</a>
+            <a th:href="@{'/user-plans-archived?idUser=' + ${idUser}}"
+               class="btn"
+               style="background-color: #303a539e; color: #fff; border: none; padding: 2px 2px;
+               border-radius: 5px; cursor: pointer;transition: background-color 0.2s; margin-right: 10px;
+               margin-top: 5px; font-size: 14px; text-decoration: none;">Przejdź do planów byłych trenerów</a>
         </div>
 
         <h2 style="text-align: center; color: #303a53;">Twoje Aktywne Plany Treningowe</h2>
@@ -320,7 +322,7 @@
                             <strong>Status:</strong>
                             <span class="status-text" th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
                                   th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
-                </span>
+                            </span>
                         </p>
                     </div>
                 </div>
@@ -341,7 +343,7 @@
                                 <span id="plan-status" class="status-badge"
                                       th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? ' completed' : ' active'}"
                                       th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
-        </span>
+                                </span>
                             </p>
                         </div>
 
@@ -357,7 +359,7 @@
                                         <span class="status-badge"
                                               th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? ' completed' : ' active'}"
                                               th:text="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
-            </span>
+                                        </span>
                                         <button class="add-to-workout-btn" th:data-day-id="${day.idDay}" style="margin-left:10px; padding:5px 10px; font-size:13px;">
                                             Sprawdzanie...
                                         </button>
@@ -376,26 +378,16 @@
                                     <li class="exercise" th:each="exercise : ${day.exercises}" style="border-top:1px solid #eee; padding-top:10px; margin-top:10px;">
                                         <div style="margin-bottom:5px; font-size:13px;">
                                             <strong th:text="${exercise.exercise.name}">Ćwiczenie</strong>
-                                            <a th:href="@{'/exercise/' + ${exercise.exercise.idExercise}}" target="_blank" class="btn" style="    background-color: #303a539e;
-    color: #fff;
-    border: none;
-    padding: 2px 2px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    margin-right: 10px;
-    margin-top: 5px;
-    font-size: 14px;
-    text-decoration: none;">Zobacz ćwiczenie</a>
+                                            <a th:href="@{'/exercise/' + ${exercise.exercise.idExercise}}" target="_blank" class="btn" style="background-color: #303a539e; color: #fff; border: none; padding: 2px 2px; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; margin-right: 10px; margin-top: 5px; font-size: 14px; text-decoration: none;">Zobacz ćwiczenie</a>
                                             <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
-                - <span th:text="${exercise.sets}"></span> serie,
-                <span th:text="${exercise.reps}"></span> powtórzeń,
-                <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}"></span>
-              </span>
-                                            <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
-                - <span class="exercise-duration" th:data-seconds="${exercise.duration}" th:text="${exercise.duration}"></span> min,
-                <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
-              </span>
+                                            - <span th:text="${exercise.sets}"></span> serie,
+                                            <span th:text="${exercise.reps}"></span> powtórzeń,
+                                            <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}"></span>
+                                          </span>
+                                                                        <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+                                            - <span class="exercise-duration" th:data-seconds="${exercise.duration}" th:text="${exercise.duration}"></span> min,
+                                            <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
+                                          </span>
                                         </div>
                                         <div class="status-container" style="margin-bottom:5px;">
                                             <p style="font-size:13px;">
@@ -403,7 +395,7 @@
                                                 <span id="exercise-status" class="status-badge"
                                                       th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? ' completed' : ' notCompleted'}"
                                                       th:text="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'UKOŃCZONY' : 'NIEUKOŃCZONE'}">
-                </span>
+                                                </span>
                                             </p>
                                         </div>
                                         <button class="toggle-exercise-status" th:data-exercise-id="${exercise.id}" style="padding:5px 10px; font-size:13px;"
@@ -429,13 +421,11 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
-</div> <!-- end .container -->
-<!-- Workout Modal -->
+</div>
 <div id="workoutModal" class="modal" data-day-id="">
     <div class="modal-content">
         <h3>Dodaj trening</h3>
@@ -459,9 +449,7 @@
         <button id="closeWorkoutModal">Anuluj</button>
     </div>
 </div>
-
 <div th:replace="~{footer :: footer}"></div>
-
 <script defer src="/js/user-plans.js"></script>
 </body>
 </html>
