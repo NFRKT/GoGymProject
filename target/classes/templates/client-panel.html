@@ -12,7 +12,6 @@
       height: 100%;
       margin: 0;
       font-family: "Lato", sans-serif;
-      background: rgba(159, 161, 167, 0.07);
       display: flex;
       flex-direction: column;
     }
@@ -42,17 +41,6 @@
       background: rgba(0, 0, 0, 0.5);
       padding: 50px;
       text-align: center;
-    }
-    .btn-back {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: #303a53;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-size: 14px;
     }
     h2 {
       text-align: center;
@@ -171,8 +159,8 @@
           <option value="">-- Wybierz trenera --</option>
           <option th:each="trainer : ${trainers}"
                   th:value="${trainer.idUser}"
-                  th:text="${trainer.firstName}"
-                  th:disabled="${#lists.contains(currentTrainerIds, trainer.idUser) || #lists.contains(pendingTrainerIds, trainer.idUser)}">
+                  th:text="${trainer != null ? trainer.firstName + ' ' + trainer.secondName : 'Nieznany trener'}"
+                  th:disabled="${trainer == null || #lists.contains(currentTrainerIds, trainer.idUser) || #lists.contains(pendingTrainerIds, trainer.idUser)}">
           </option>
         </select>
         <button class="btn" type="submit" id="sendRequestButton">Wyślij prośbę</button>
@@ -182,14 +170,14 @@
       <table id="pending-requests">
         <thead>
         <tr>
-          <th>Imię trenera</th>
+          <th>Trener</th>
           <th>Data wysłania</th>
           <th>Akcja</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="request : ${requests}" th:if="${request.requestStatus.name() == 'pending'}" th:attr="data-request-id=${request.id}">
-          <td th:text="${request.trainer.firstName}"></td>
+          <td th:text="${request.trainer != null ? request.trainer.firstName + ' ' + request.trainer.secondName : 'Brak trenera'}"></td>
           <td th:text="${#dates.format(request.requestDate, 'yyyy-MM-dd HH:mm')}"></td>
           <td>
             <form class="cancel-request-form" th:action="@{/requests/{id}/cancel(id=${request.id})}" method="post">
