@@ -1,3 +1,4 @@
+    let originalPlansHTML = document.querySelector(".plans-grid").innerHTML;
     /* ==================== Inicjalizacja ==================== */
     document.addEventListener("DOMContentLoaded", () => {
       initFilters();
@@ -6,7 +7,6 @@
       initVideoHandlers();
       initWorkoutHandlers();
       initDurationFormatting();
-      originalPlansOrder = Array.from(document.querySelectorAll(".plan-each"));
     });
 
     /* ==================== Filtry i sortowanie ==================== */
@@ -63,7 +63,6 @@
       return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
     }
 
-    let originalPlansOrder = [];
     function resetFilters() {
       document.getElementById("searchInput").value = "";
       document.getElementById("dateFilter").value = "";
@@ -71,9 +70,10 @@
       document.getElementById("trainerSelect").value = "";
       document.getElementById("hideCompletedPlans").checked = false;
       const container = document.querySelector(".plans-grid");
-      container.innerHTML = "";
-      originalPlansOrder.forEach(plan => container.appendChild(plan));
+      container.innerHTML = originalPlansHTML;
       document.querySelectorAll(".plan-each").forEach(plan => plan.style.display = "block");
+      // Dodaj ponowne zainicjowanie workout handlerów:
+      initWorkoutHandlers();
     }
 
     /* ==================== Modale ==================== */

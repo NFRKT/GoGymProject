@@ -48,8 +48,11 @@ public class PlanController {
                 .map(tc -> tc.getTrainer().getIdUser())
                 .toList();
 
+        // Filtrowanie tylko planów od aktywnych trenerów
         List<TrainingPlan> activeTrainerPlans = plans.stream()
                 .filter(plan -> activeTrainerIds.contains(plan.getTrainer().getIdUser()))
+                // Sortowanie: ACTIVE jako pierwsze, COMPLETED jako drugie
+                .sorted(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed ? 1 : 0))
                 .toList();
 
         List<User> trainers = clientTrainers.stream()
@@ -62,6 +65,7 @@ public class PlanController {
 
         return "user-plans";
     }
+
 
     @PreAuthorize("hasAuthority('CLIENT')")
     @GetMapping("/user-plans-archived")
