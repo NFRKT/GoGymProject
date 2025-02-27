@@ -84,6 +84,60 @@
       font-size: 14px;
       cursor: pointer;
     }
+.floating-menu {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    background: rgba(48, 58, 83, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 160px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.floating-menu a {
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.floating-menu a:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Przycisk do zwijania */
+.menu-toggle {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    background: #303a53;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1100;
+    display: none;
+}
+
+/* Ukrycie menu na małych ekranach */
+@media screen and (max-width: 1024px) {
+    .floating-menu {
+        transform: translateX(-200px);
+    }
+    .menu-toggle {
+        display: block;
+    }
+}
   </style>
 </head>
 <body>
@@ -92,9 +146,23 @@
 
 <div class="container">
   <button class="btn-back" onclick="goBack()">Powrót</button>
-  <h1>📊 Statystyki Treningowe</h1>
 
-  <div class="stat-box">
+  <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
+  <div class="floating-menu">
+    <a href="#common-exercises">🏋️ Najczęstsze ćwiczenia</a>
+    <a href="#monthly-exercises">📆 Ćwiczenia w miesiącu</a>
+    <a href="#max-weight">💪 Największy ciężar</a>
+    <a href="#longest-cardio">⏳ Najdłuższy cardio</a>
+    <a href="#workout-count">📊 Ilość treningów</a>
+    <a href="#avg-training">🕒 Średnia długość</a>
+    <a href="#max-reps">🔄 Najwięcej powtórzeń</a>
+    <a href="#workout-days">📅 Dni treningowe</a>
+    <a href="#total-time">⏳ Całkowity czas treningów</a>
+  </div>
+
+  <h1 id="top">📊 Statystyki Treningowe</h1>
+
+  <div class="stat-box" id="common-exercises">
     <h2>🏋️ Najczęściej wykonywane ćwiczenia (ogólnie)</h2>
     <ul>
       <li th:each="entry : ${statistics.mostCommonExercises}">
@@ -103,7 +171,7 @@
     </ul>
   </div>
 
-  <div class="stat-box">
+  <div class="stat-box" id="monthly-exercises">
     <h2>📆 Najczęściej wykonywane ćwiczenia w miesiącu</h2>
     <div class="select-container">
       <select id="yearEx">
@@ -120,7 +188,7 @@
     </ul>
   </div>
 
-  <div class="stat-box">
+  <div class="stat-box" id="max-weight">
     <h2>💪 Największy ciężar dla ćwiczeń siłowych</h2>
     <ul>
       <li th:each="entry : ${statistics.maxWeightExercises}">
@@ -129,7 +197,7 @@
     </ul>
   </div>
 
-  <div class="stat-box">
+  <div class="stat-box" id="longest-cardio">
     <h2>⏳ Najdłuższy trening cardio</h2>
     <p th:if="${statistics.longestCardio != null}">
       <strong th:text="${statistics.longestCardio.exerciseName}"></strong>:
@@ -137,7 +205,7 @@
     </p>
   </div>
 
-  <div class="stat-box">
+  <div class="stat-box" id="workout-count">
     <h2>📅 Ilość treningów w miesiącu</h2>
     <div class="select-container">
       <select id="yearWo">
@@ -149,6 +217,34 @@
     </div>
     <p>W <span id="selectedMonth" th:text="${monthName}"></span> <span id="selectedYear" th:text="${year}"></span> miałeś <strong id="workoutCount" th:text="${statistics.workoutsCount}"></strong> treningów.</p>
   </div>
+
+  <div class="stat-box" id="avg-training">
+    <h2>🕒 Średnia długość treningu</h2>
+    <p><strong th:text="${statistics.averageWorkoutDuration}"></strong></p>
+  </div>
+
+  <div class="stat-box" id="max-reps">
+    <h2>🔄 Największa liczba powtórzeń</h2>
+    <ul>
+      <li th:each="entry : ${statistics.maxRepsExercises}">
+        <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="stat-box" id="workout-days">
+    <h2>📅 Najczęściej trenowane dni tygodnia</h2>
+    <ul>
+      <li th:each="entry : ${statistics.mostFrequentWorkoutDays}">
+        <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span> razy
+      </li>
+    </ul>
+  </div>
+  <div class="stat-box" id="total-time">
+    <h2>⏳ Całkowity czas treningów w miesiącu</h2>
+    <p><strong th:text="${statistics.totalWorkoutTime}"></strong></p>
+  </div>
+
 </div>
 
 <div th:replace="~{footer :: footer}"></div>
@@ -191,7 +287,51 @@ document.addEventListener("DOMContentLoaded", function () {
   function goBack() {
     window.history.back();
   }
-</script>
 
+document.addEventListener("DOMContentLoaded", function () {
+    const menu = document.querySelector('.floating-menu');
+    const toggleButton = document.querySelector('.menu-toggle');
+
+    // Funkcja przewijania do sekcji
+    document.querySelectorAll('.floating-menu a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute("href").substring(1);
+            document.getElementById(targetId).scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        });
+    });
+
+    // Funkcja do chowania/pokazywania menu
+    function toggleMenu() {
+        if (menu.classList.contains("hidden")) {
+            menu.classList.remove("hidden");
+            menu.style.transform = "translateX(0px)";
+        } else {
+            menu.classList.add("hidden");
+            menu.style.transform = "translateX(-200px)";
+        }
+    }
+
+    // Nasłuchiwanie na zmianę rozmiaru okna - automatycznie pokazuje menu na dużych ekranach
+    function handleResize() {
+        if (window.innerWidth > 1024) {
+            menu.classList.remove("hidden");
+            menu.style.transform = "translateX(0px)";
+        } else if (!menu.classList.contains("hidden")) {
+            menu.style.transform = "translateX(0px)";
+        } else {
+            menu.style.transform = "translateX(-200px)";
+        }
+    }
+
+    // Eventy
+    toggleButton.addEventListener("click", toggleMenu);
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Wywołujemy na start, aby dostosować się do okna
+});
+</script>
 </body>
 </html>

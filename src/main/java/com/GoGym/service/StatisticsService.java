@@ -8,6 +8,7 @@ import com.GoGym.module.WorkoutExercise;
 import com.GoGym.repository.WorkoutRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,7 +36,6 @@ public class StatisticsService {
                         .thenComparing(Map.Entry::getKey))
                 .limit(5)
                 .toList();
-
         stats.put("mostCommonExercises", mostCommonExercises);
 
         // Najczęściej wykonywane ćwiczenia (w miesiącu)
@@ -50,12 +50,10 @@ public class StatisticsService {
                 .limit(5)
                 .map(entry -> List.of(entry.getKey(), String.valueOf(entry.getValue())))
                 .toList();
-
         stats.put("mostCommonExercisesInMonth", mostCommonExercisesInMonth);
 
-        // Największy ciężar dla ćwiczeń siłowych (z datą treningu)
+        // Największy ciężar dla ćwiczeń siłowych
         Map<String, Map.Entry<Double, LocalDate>> maxWeightExercises = new HashMap<>();
-
         for (Workout workout : workouts) {
             for (WorkoutExercise exercise : workout.getWorkoutExercises()) {
                 if (exercise.getExercise().getType() == Exercise.ExerciseType.STRENGTH) {
@@ -68,18 +66,13 @@ public class StatisticsService {
                 }
             }
         }
-
-        stats.put("maxWeightExercises", maxWeightExercises.entrySet().stream()
-                .sorted(Comparator.comparing((Map.Entry<String, Map.Entry<Double, LocalDate>> e) -> e.getValue().getKey(), Comparator.reverseOrder())
-                        .thenComparing(Map.Entry::getKey))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new)));
+        stats.put("maxWeightExercises", maxWeightExercises);
 
         // Najdłuższy trening cardio
         Optional<WorkoutExercise> longestCardio = workouts.stream()
                 .flatMap(w -> w.getWorkoutExercises().stream())
                 .filter(e -> e.getExercise().getType() == Exercise.ExerciseType.CARDIO)
                 .max(Comparator.comparingInt(e -> (e.getDuration() != null) ? e.getDuration() : 0));
-
         longestCardio.ifPresent(e -> stats.put("longestCardioFormatted", formatDuration(e.getDuration())));
         stats.put("longestCardio", longestCardio.map(WorkoutExerciseDTO::new).orElse(null));
 
@@ -87,19 +80,79 @@ public class StatisticsService {
         long workoutsCount = workouts.stream()
                 .filter(w -> w.getWorkoutDate().getYear() == year && w.getWorkoutDate().getMonthValue() == month)
                 .count();
-
         stats.put("workoutsCount", workoutsCount);
+
+        // ✅ Nowe statystyki:
+
+        // Średnia długość treningu
+        OptionalDouble avgWorkoutDuration = workouts.stream()
+                .filter(w -> w.getWorkoutDate().getYear() == year && w.getWorkoutDate().getMonthValue() == month)
+                .mapToInt(w -> w.getWorkoutExercises().stream()
+                        .mapToInt(e -> (e.getDuration() != null) ? e.getDuration() : 0)
+                        .sum()
+                ).average();
+        stats.put("averageWorkoutDuration", avgWorkoutDuration.isPresent() ? formatDuration((int) avgWorkoutDuration.getAsDouble()) : "Brak danych");
+
+        // Największa liczba powtórzeń w jednym ćwiczeniu
+        // Liczenie największej liczby powtórzeń (serie * powtórzenia)
+        Map<String, String> maxRepsExercises = new HashMap<>();
+
+        for (Workout workout : workouts) {
+            for (WorkoutExercise exercise : workout.getWorkoutExercises()) {
+                if (exercise.getReps() != null && exercise.getSets() != null) {
+                    String exerciseName = exercise.getExercise().getName();
+                    int totalReps = exercise.getReps() * exercise.getSets();
+                    String formattedReps = totalReps + " powtórzeń (" + exercise.getSets() + " serii po " + exercise.getReps() + " powtórzeń)";
+
+                    if (!maxRepsExercises.containsKey(exerciseName) || totalReps > Integer.parseInt(maxRepsExercises.get(exerciseName).split(" ")[0])) {
+                        maxRepsExercises.put(exerciseName, formattedReps);
+                    }
+                }
+            }
+        }
+
+        stats.put("maxRepsExercises", maxRepsExercises);
+
+
+        // Najbardziej trenowane dni tygodnia
+        Map<DayOfWeek, String> dniTygodniaMap = Map.of(
+                DayOfWeek.MONDAY, "Poniedziałek",
+                DayOfWeek.TUESDAY, "Wtorek",
+                DayOfWeek.WEDNESDAY, "Środa",
+                DayOfWeek.THURSDAY, "Czwartek",
+                DayOfWeek.FRIDAY, "Piątek",
+                DayOfWeek.SATURDAY, "Sobota",
+                DayOfWeek.SUNDAY, "Niedziela"
+        );
+
+        Map<DayOfWeek, Long> treningiDniTygodnia = workouts.stream()
+                .collect(Collectors.groupingBy(w -> w.getWorkoutDate().getDayOfWeek(), Collectors.counting()));
+
+        List<Map.Entry<String, Long>> najczesciejDni = treningiDniTygodnia.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry<DayOfWeek, Long>::getValue, Comparator.reverseOrder()))
+                .map(entry -> Map.entry(dniTygodniaMap.get(entry.getKey()), entry.getValue()))
+                .toList();
+
+        stats.put("mostFrequentWorkoutDays", najczesciejDni);
+
+
+        // Całkowity czas treningów w miesiącu
+        int totalWorkoutTime = workouts.stream()
+                .filter(w -> w.getWorkoutDate().getYear() == year && w.getWorkoutDate().getMonthValue() == month)
+                .mapToInt(w -> w.getWorkoutExercises().stream()
+                        .mapToInt(e -> (e.getDuration() != null) ? e.getDuration() : 0)
+                        .sum()
+                ).sum();
+        stats.put("totalWorkoutTime", formatDuration(totalWorkoutTime));
 
         return stats;
     }
 
-    // Funkcja konwertująca sekundy na format hh:mm:ss
     private String formatDuration(Integer seconds) {
         if (seconds == null || seconds <= 0) return "00:00:00";
         int hours = seconds / 3600;
         int minutes = (seconds % 3600) / 60;
         int remainingSeconds = seconds % 60;
-
         return String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds);
     }
 }

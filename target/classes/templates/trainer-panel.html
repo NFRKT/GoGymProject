@@ -149,7 +149,7 @@
           <form th:action="@{/{id}/create-plan(id=${client.client.idUser})}" method="get" target="_blank">
             <button type="submit" class="btn">Stwórz plan</button>
           </form>
-          <form th:action="@{/client/profile/{id}(id=${client.client.idUser})}" method="get" style="display: inline;" target="_blank">
+          <form th:action="@{/client/profile/{id}(id=${client.client.idUser})}" method="get" style="display: inline;">
             <button class="btn btn-info" type="submit">Pokaż profil</button>
           </form>
         </td>
@@ -179,7 +179,7 @@
             <input type="hidden" name="status" value="rejected">
             <button class="btn btn-delete" type="submit">Odrzuć</button>
           </form>
-          <form th:action="@{/client/profile/{id}(id=${request.client.idUser})}" method="get" style="display: inline;" target="_blank">
+          <form th:action="@{/client/profile/{id}(id=${request.client.idUser})}" method="get" style="display: inline;">
             <button class="btn btn-info" type="submit">Pokaż profil</button>
           </form>
         </td>
@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <input type="hidden" name="status" value="rejected">
                             <button class="btn btn-delete" type="submit">Odrzuć</button>
                         </form>
-                        <form action="/client/profile/${request.clientId}" method="get" target="_blank">
+                        <form action="/client/profile/${request.clientId}" method="get">
                             <button class="btn btn-info" type="submit">Pokaż profil</button>
                         </form>
                     </td>
@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <form action="/${client.id}/create-plan" method="get" target="_blank">
                             <button type="submit" class="btn">Stwórz plan</button>
                         </form>
-                        <form action="/client/profile/${client.id}" method="get" target="_blank">
+                        <form action="/client/profile/${client.id}" method="get">
                             <button class="btn btn-info" type="submit">Pokaż profil</button>
                         </form>
                     </td>

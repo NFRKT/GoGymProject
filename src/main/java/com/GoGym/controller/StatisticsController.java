@@ -3,6 +3,7 @@ package com.GoGym.controller;
 import com.GoGym.module.User;
 import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.StatisticsService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Controller
+@PreAuthorize("hasAuthority('CLIENT')")
 @RequestMapping("/statistics")
 public class StatisticsController {
 
@@ -69,7 +71,6 @@ public class StatisticsController {
                                                 Authentication authentication) {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = customUserDetails.getUser();
-
         return statisticsService.calculateStatistics(user, year, month);
     }
 }
