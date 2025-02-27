@@ -46,6 +46,14 @@
       margin-bottom: 5px;
       color: #333;
     }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
     .w3-input, .w3-select {
       padding: 12px;
       border-radius: 5px;
@@ -148,6 +156,7 @@
 <div th:replace="~{header :: header}"></div>
 <div class="content">
   <div class="w3-container form-container">
+    <button class="btn-back" onclick="goBack()">Powrót</button>
     <h2 th:text="${exercise.idExercise == null} ? 'Nowe Ćwiczenie' : 'Edytuj Ćwiczenie'"></h2>
     <!-- Dodajemy zmienną hasExistingImage; jeśli exercise.jpg nie jest null, to wartość będzie true -->
     <script th:inline="javascript">
@@ -422,6 +431,9 @@
   function removeSelectedFile() {
     document.getElementById("imageInput").value = "";
     document.getElementById("imgPreviewContainer").style.display = "none";
+  }
+  function goBack() {
+    window.history.back();
   }
 </script>
 </body>

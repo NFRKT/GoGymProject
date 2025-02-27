@@ -10,58 +10,81 @@
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      padding: 20px;
+html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
     }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    .content{
+      flex: 1;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
+    .form-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 50px auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: left;
+    }
+    h2, h3, h4 {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
     }
     input, select, textarea {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       margin-top: 5px;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-    button {
-      background-color: #28a745;
+    .btn {
+      background: #303a53;
       color: white;
-      padding: 10px 15px;
+      padding: 8px 12px;
       border: none;
-      cursor: pointer;
-      font-weight: bold;
       border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
     }
-    button:hover {
-      background-color: #218838;
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
     }
-    .btn-remove {
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .btn-delete {
       background-color: #dc3545;
-      margin-top: 10px;
+      color: white;
     }
-    .btn-remove:hover {
+    .btn-delete:hover {
       background-color: #c82333;
     }
-    /* Wrapper, aby select wypełniał szerokość formularza */
+    .day-row, .exercise-row {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
     .select-wrapper {
       display: block;
       width: 100%;
-    }
-    /* Opcjonalny odstęp między wierszami ćwiczeń */
-    .exercise-row {
-      margin-bottom: 15px;
     }
     /* Select2 customizations */
     .select2-container .select2-selection--single {
@@ -81,15 +104,10 @@
       top: 50% !important;
       transform: translateY(-50%);
     }
-    .select2-dropdown {
-      font-size: 16px;
-      border-radius: 5px;
-    }
-    .error .select2-container .select2-selection,
-    .error input {
+    .error input,
+    .error .select2-container .select2-selection {
       border: 2px solid red !important;
     }
-    /* Styl dla komunikatów błędów */
     .error-message {
       color: red;
       text-align: center;
@@ -99,7 +117,9 @@
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container">
+<div class="content">
+<div class="form-container">
+  <button class="btn-back" onclick="goBack()">Powrót</button>
   <h2>Stwórz Workout</h2>
   <form th:action="@{/workouts/create}" th:object="${workout}" method="post">
     <label for="workoutDate">Data:</label>
@@ -122,15 +142,16 @@
     <input type="time" id="end_time" th:field="*{endTime}" required>
 
     <h3>Dodaj ćwiczenia do treningu:</h3>
-    <button type="button" id="addExerciseBtn">➕ Dodaj ćwiczenie</button>
+    <button type="button" class="btn" id="addExerciseBtn">Dodaj ćwiczenie</button>
     <div id="exercise-list"></div>
 
-    <button type="submit">Stwórz trening</button>
+    <button type="submit" class="btn" >Stwórz trening</button>
   </form>
 
   <div th:if="${error}" class="error-message">
     <p th:text="${error}"></p>
   </div>
+</div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <!-- jQuery (wymagany przez Select2) -->
@@ -198,7 +219,7 @@
 
           const removeButton = document.createElement("button");
           removeButton.type = "button";
-          removeButton.classList.add("btn-remove");
+          removeButton.classList.add("btn btn-delete");
           removeButton.textContent = "Usuń";
           removeButton.addEventListener("click", function () {
               removeExerciseRow(removeButton);
@@ -297,6 +318,10 @@
       } else {
           console.error("Błąd: Nie znaleziono wiersza ćwiczenia do usunięcia");
       }
+    }
+
+    function goBack() {
+      window.history.back();
     }
   </script>
 </body>

@@ -106,7 +106,7 @@
 <div th:replace="~{header :: header}"></div>
 
 <div class="container">
-  <a th:href="@{/admin/panel}" class="btn-back">← Powrót</a>
+  <button class="btn-back" onclick="goBack()">Powrót</button>
   <h2>Lista Klientów</h2>
   <div class="table-container">
     <table class="w3-table-all w3-hoverable">
@@ -158,6 +158,9 @@
         })
         .catch(error => console.error("Błąd:", error));
     }
+  function goBack() {
+    window.history.back();
+  }
   </script>
 
 </body>

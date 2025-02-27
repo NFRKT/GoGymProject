@@ -8,84 +8,109 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <title>Edytuj Trening</title>
   <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        .delete-btn {
-            background-color: #dc3545;
-        }
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-
-/* Naprawia wysokość pola wyboru */
-.select2-container .select2-selection--single {
-    height: 40px !important; /* Dopasowuje wysokość */
-    display: flex;
-    align-items: center; /* Wyrównuje tekst */
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Zapewnia odpowiednie wyświetlanie tekstu */
-.select2-container .select2-selection__rendered {
-    font-size: 16px; /* Dopasowuje rozmiar tekstu */
-    padding-left: 12px; /* Zapobiega przycinaniu */
-    line-height: 40px !important; /* Ustawia wysokość linii */
-}
-
-/* Strzałka rozwijania listy */
-.select2-container .select2-selection__arrow {
-    height: 100% !important;
-    top: 50% !important;
-    transform: translateY(-50%);
-}
-
-/* Poprawia szerokość i wysokość listy rozwijanej */
-.select2-dropdown {
-    font-size: 16px; /* Dopasowuje wielkość tekstu */
-    border-radius: 5px;
-}
-.error .select2-container .select2-selection {
-    border: 2px solid red !important;
-}
-
-.error input {
-    border: 2px solid red !important;
-}
-
-
-
+html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
+    }
+    .content{
+      flex: 1;
+    }
+    .form-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 50px auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: left;
+    }
+    h2, h3, h4 {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .btn {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .btn-delete {
+      background-color: #dc3545;
+      color: white;
+    }
+    .btn-delete:hover {
+      background-color: #c82333;
+    }
+    .day-row, .exercise-row {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    .select-wrapper {
+      display: block;
+      width: 100%;
+    }
+    /* Select2 customizations */
+    .select2-container .select2-selection--single {
+      height: 40px !important;
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .select2-container .select2-selection__rendered {
+      font-size: 16px;
+      padding-left: 12px;
+      line-height: 40px !important;
+    }
+    .select2-container .select2-selection__arrow {
+      height: 100% !important;
+      top: 50% !important;
+      transform: translateY(-50%);
+    }
+    .error input,
+    .error .select2-container .select2-selection {
+      border: 2px solid red !important;
+    }
+    .error-message {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
     </style>
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
@@ -93,7 +118,9 @@
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container">
+<div class="content">
+<div class="form-container">
+  <button class="btn-back" onclick="goBack()">Powrót</button>
   <h2>Edytuj Trening</h2>
   <form th:action="@{/workouts/update}" method="post">
     <input type="hidden" name="idWorkout" th:value="${workout.idWorkout}">
@@ -155,14 +182,15 @@
 
           <input type="number" name="distances" th:value="${exercise.distance}" placeholder="Dystans (km)">
         </div>
-        <button type="button" class="delete-btn" onclick="removeRow(this)">🗑 Usuń</button>
+        <button type="button" class="btn btn-delete" onclick="removeRow(this)">Usuń</button>
       </div>
     </div>
 
-    <button type="button" id="addExerciseBtn">➕ Dodaj ćwiczenie</button>
-    <button type="submit">Zapisz zmiany</button>
+    <button type="button" class="btn" id="addExerciseBtn">Dodaj ćwiczenie</button>
+    <button type="submit" class="btn" >Zapisz zmiany</button>
 
   </form>
+</div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <!-- jQuery (wymagany przez Select2) -->
@@ -310,7 +338,7 @@ function addExerciseRow() {
             <input type="text" name="durations" placeholder="Czas (hh:mm:ss lub mm:ss)">
             <input type="number" name="distances" placeholder="Dystans (km)">
         </div>
-        <button type="button" class="delete-btn" onclick="removeRow(this)">🗑 Usuń</button>
+        <button type="button" class="btn btn-delete" onclick="removeRow(this)">Usuń</button>
     `;
 
     // Wstawiamy nowy select na początek exercise-search-container
@@ -340,7 +368,9 @@ function showError(element, message) {
 
     parent.appendChild(errorMessage);
 }
-
+  function goBack() {
+    window.history.back();
+  }
 </script>
 </body>
 </html>

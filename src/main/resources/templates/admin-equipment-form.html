@@ -17,7 +17,7 @@
     }
     .container {
       max-width: 95%;
-      width: 600px
+      width: 600px;
       margin: 50px auto;
       padding: 30px;
       background: white;
@@ -36,6 +36,14 @@
       box-sizing: border-box;
       border: 1px solid #ccc;
       margin-bottom: 10px;
+    }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
     }
     .btn {
       display: inline-block;
@@ -61,6 +69,7 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
+  <button class="btn-back" onclick="goBack()">Powrót</button>
   <h2 th:text="${equipment.idEquipment == null} ? 'Nowy Sprzęt' : 'Edytuj Sprzęt'"></h2>
   <form id="equipmentForm" th:action="@{${equipment.idEquipment == null} ? '/admin/equipment/new' : '/admin/equipment/edit/' + ${equipment.idEquipment}}"
         th:object="${equipment}" method="post">
@@ -113,6 +122,9 @@
       if (firstErrorField) firstErrorField.focus();
     }
   });
+  function goBack() {
+    window.history.back();
+  }
 </script>
 </body>
 </html>

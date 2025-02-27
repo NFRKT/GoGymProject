@@ -122,6 +122,7 @@ public class PlanController {
         return "trainer-plans-archived";
     }
 
+    @PreAuthorize("hasAuthority('TRAINER')")
     @GetMapping("/{id}/create-plan")
     public String createPlan(@PathVariable Long id, Model model, Authentication authentication) {
         User client = userRepository.findById(id)
@@ -184,12 +185,18 @@ public class PlanController {
                         Exercise currentExercise = exerciseRepository.findById(exerciseIds.get(j))
                                 .orElseThrow(RuntimeException::new);
                         exercise.setExercise(currentExercise);
+                        exercise.setStatus(PlanExercise.Status.notCompleted);
+                        exercise.setTrainingPlan(plan);
+                        exercise.setTrainingPlanDay(day);
 
                         if (currentExercise.getType() == Exercise.ExerciseType.CARDIO) {
                             exercise.setSets(null);
                             exercise.setReps(null);
                             exercise.setWeight(null);
                             exercise.setDistance((distance != null && distance.size() > j) ? distance.get(j) : null);
+                            exercise.setDuration((duration != null && duration.size() > j && !duration.get(j).isEmpty())
+                                    ? parseDuration(duration.get(j))
+                                    : null);
                         } else {
                             exercise.setSets((sets != null && sets.size() > j) ? sets.get(j) : null);
                             exercise.setReps((reps != null && reps.size() > j) ? reps.get(j) : null);
@@ -198,9 +205,6 @@ public class PlanController {
                             exercise.setDistance(null);
                         }
 
-                        exercise.setStatus(PlanExercise.Status.notCompleted);
-                        exercise.setTrainingPlan(plan);
-                        exercise.setTrainingPlanDay(day);
                         exercisesForDay.add(exercise);
                     }
                 }
@@ -216,19 +220,29 @@ public class PlanController {
         return "redirect:/trainer-panel";
     }
 
+
     /**
      * Parsuje czas trwania z formatu "hh:mm:ss" lub "mm:ss" na liczbę sekund.
      */
     private Integer parseDuration(String duration) {
         if (duration == null || duration.isEmpty()) return null;
-        String[] parts = duration.split(":");
-        if (parts.length == 2) {
-            return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
-        } else if (parts.length == 3) {
-            return Integer.parseInt(parts[0]) * 3600 + Integer.parseInt(parts[1]) * 60 + Integer.parseInt(parts[2]);
+
+        try {
+            String[] parts = duration.split(":");
+            if (parts.length == 2) {
+                return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+            } else if (parts.length == 3) {
+                return Integer.parseInt(parts[0]) * 3600 + Integer.parseInt(parts[1]) * 60 + Integer.parseInt(parts[2]);
+            } else {
+                log.warn("Niepoprawny format czasu: " + duration);
+            }
+        } catch (NumberFormatException e) {
+            log.error("Błąd parsowania czasu: " + duration, e);
         }
-        throw new IllegalArgumentException("Niepoprawny format czasu: " + duration);
+
+        return null;
     }
+
 
     @PostMapping("/update-exercise-status/{exerciseId}")
     @ResponseBody
@@ -333,10 +347,21 @@ public class PlanController {
         }
     }
 
+    @PreAuthorize("hasAuthority('TRAINER')")
     @GetMapping("/trainer-plans/edit/{id}")
-    public String editPlan(@PathVariable Long id, Model model) {
+    public String editPlan(@PathVariable Long id, Model model, Authentication authentication) {
         TrainingPlan plan = trainingPlanRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + id));
+
+        // Pobieramy zalogowanego użytkownika
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User loggedInUser = userDetails.getUser();
+
+        // Sprawdzamy, czy trener edytuje swój własny plan
+        if (!plan.getIdTrainer().equals(loggedInUser.getIdUser())) {
+            log.warn("Użytkownik {} próbował edytować cudzy plan treningowy (ID: {})", loggedInUser.getIdUser(), id);
+            return "redirect:/home";
+        }
 
         TrainingPlanDTO planDTO = new TrainingPlanDTO();
         planDTO.setIdPlan(plan.getIdPlan());
@@ -373,6 +398,7 @@ public class PlanController {
         return "edit-plan";
     }
 
+    @PreAuthorize("hasAuthority('TRAINER')")
     @PutMapping("/trainer-plans/update/{id}")
     public ResponseEntity<TrainingPlanDTO> updatePlan(@PathVariable Long id, @RequestBody TrainingPlanDTO trainingPlanDTO) {
         try {
@@ -407,7 +433,7 @@ public class PlanController {
         }
     }
 
-
+    @PreAuthorize("hasAuthority('TRAINER')")
     @PostMapping("/trainer-plans/delete/{id}")
     public ResponseEntity<?> deletePlan(@PathVariable Long id) {
         try {

@@ -17,7 +17,7 @@
     }
     .container {
       max-width: 95%;
-      width: 600px
+      width: 600px;
       margin: 50px auto;
       padding: 30px;
       background: white;
@@ -47,6 +47,14 @@
       cursor: pointer;
       text-decoration: none;
     }
+     .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
     .error-message {
       color: #d8000c;
       font-size: 0.9em;
@@ -61,6 +69,7 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
+  <button class="btn-back" onclick="goBack()">Powrót</button>
   <h2 th:text="${bodyPart.idBodyPart == null} ? 'Nowa Część Ciała' : 'Edytuj Część Ciała'"></h2>
   <form id="bodyPartForm" th:action="@{${bodyPart.idBodyPart == null} ? '/admin/bodypart/new' : '/admin/bodypart/edit/' + ${bodyPart.idBodyPart}}"
         th:object="${bodyPart}" method="post">
@@ -113,6 +122,9 @@
       if (firstErrorField) firstErrorField.focus();
     }
   });
+  function goBack() {
+    window.history.back();
+  }
 </script>
 </body>
 </html>

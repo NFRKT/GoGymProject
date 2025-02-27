@@ -10,18 +10,26 @@
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
     <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f8f9fa;
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
     }
-    .container {
+    .content{
+      flex: 1;
+    }
+    .form-container {
       max-width: 800px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 100%;
+      margin: 50px auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: left;
     }
     h2, h3, h4 {
       margin-bottom: 10px;
@@ -38,21 +46,25 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-    button {
-      margin-top: 10px;
+    .btn {
+      background: #303a53;
+      color: white;
       padding: 8px 12px;
       border: none;
       border-radius: 5px;
+      text-decoration: none;
       cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
     }
-    button:hover {
+    .btn:hover {
       opacity: 0.9;
     }
-    .btn-remove {
+    .btn-delete {
       background-color: #dc3545;
       color: white;
     }
-    .btn-remove:hover {
+    .btn-delete:hover {
       background-color: #c82333;
     }
     .day-row, .exercise-row {
@@ -101,7 +113,8 @@
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="container">
+<div class="content">
+<div class="form-container">
     <h2>Edycja planu treningowego</h2>
     <form id="edit-plan-form">
         <div>
@@ -182,23 +195,24 @@
                                         </div>
                                     </div>
 
-                                    <button type="button" class="btn-remove" onclick="removeExercise(this)">Usuń ćwiczenie</button>
+                                    <button type="button" class="btn btn-delete" onclick="removeExercise(this)">Usuń ćwiczenie</button>
                                 </div>
                             </div>
                         </div>
                         <!-- Dla istniejących dni przekazujemy identyfikator jako string -->
-                        <button type="button" th:onclick="|addExerciseToDay('${day.idDay}')|">Dodaj ćwiczenie</button>
+                        <button type="button" class="btn" th:onclick="|addExerciseToDay('${day.idDay}')|">Dodaj ćwiczenie</button>
                     </div>
-                    <button type="button" class="btn-remove" onclick="removeDay(this)">Usuń dzień</button>
+                    <button type="button" class="btn btn-delete" onclick="removeDay(this)">Usuń dzień</button>
                 </div>
             </div>
         </div>
 
-        <button type="button" onclick="addNewDay()">Dodaj nowy dzień</button>
+        <button type="button" class="btn" onclick="addNewDay()">Dodaj nowy dzień</button>
         <br>
-        <button type="submit">Zapisz zmiany</button>
+        <button type="submit" class="btn">Zapisz zmiany</button>
     </form>
     <div id="formError" class="error-message" style="display:none;"></div>
+</div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <script th:inline="javascript">
@@ -266,7 +280,7 @@
                     <input type="number" step="0.1" name="distance[${dayId}][]" min="0">
                 </div>
             </div>
-            <button type="button" class="btn-remove" onclick="removeExercise(this)">Usuń ćwiczenie</button>
+            <button type="button" class="btn btn-delete" onclick="removeExercise(this)">Usuń ćwiczenie</button>
         `;
         exercisesContainer.appendChild(newExercise);
         $(newExercise).find('.exercise-select').select2({
@@ -299,9 +313,9 @@
             <div>
                 <h4>Ćwiczenia dnia</h4>
                 <div class="exercises"></div>
-                <button type="button" onclick="addExerciseToDay('new-${newDayIndex}')">Dodaj ćwiczenie</button>
+                <button type="button" class="btn" onclick="addExerciseToDay('new-${newDayIndex}')">Dodaj ćwiczenie</button>
             </div>
-            <button type="button" class="btn-remove" onclick="removeDay(this)">Usuń dzień</button>
+            <button type="button" class="btn btn-delete" onclick="removeDay(this)">Usuń dzień</button>
         `;
         daysContainer.appendChild(newDay);
     };

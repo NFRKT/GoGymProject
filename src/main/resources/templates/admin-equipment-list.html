@@ -118,7 +118,7 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-    <a th:href="@{/admin/panel}" class="btn-back">← Powrót</a>
+    <button class="btn-back" onclick="goBack()">Powrót</button>
     <h2>Lista Sprzętu</h2>
     <a th:href="@{/admin/equipment/new}" class="btn-add">➕ Dodaj nowy sprzęt</a>
     <table>
@@ -166,6 +166,9 @@
           }
         })
         .catch(error => console.error("Błąd:", error));
+    }
+    function goBack() {
+        window.history.back();
     }
   </script>
 </body>

@@ -137,7 +137,7 @@
 <div th:replace="~{header :: header}"></div>
 
 <div class="container">
-  <a th:href="@{/admin/panel}" class="btn-back">← Powrót</a>
+  <button class="btn-back" onclick="goBack()">Powrót</button>
   <h2>Lista Ćwiczeń</h2>
 
   <a th:href="@{/admin/exercise/new}" class="btn-add">➕ Dodaj nowe ćwiczenie</a>
@@ -233,6 +233,9 @@
       }
     }
   });
+  function goBack() {
+    window.history.back();
+  }
 </script>
 
 </body>
