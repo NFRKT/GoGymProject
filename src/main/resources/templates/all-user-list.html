@@ -137,10 +137,10 @@
       <td>
         <a th:if="${user.userType.name() == 'CLIENT'}"
            th:href="@{'/client/profile/' + ${user.idUser}}"
-           class="profile-button profile-client" target="_blank">Profil</a>
+           class="profile-button profile-client">Profil</a>
         <a th:if="${user.userType.name() == 'TRAINER'}"
            th:href="@{'/trainer/profile/' + ${user.idUser}}"
-           class="profile-button profile-trainer" target="_blank">Profil</a>
+           class="profile-button profile-trainer">Profil</a>
       </td>
     </tr>
     </tbody>

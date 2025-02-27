@@ -143,7 +143,7 @@ public class TrainerClientController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/listTrainers")
+    @GetMapping("/list-trainers")
     public String listTrainers(Model model) {
         List<User> trainers = trainerClientService.findAllTrainers();
 
