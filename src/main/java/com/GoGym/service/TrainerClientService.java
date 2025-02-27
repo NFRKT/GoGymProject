@@ -50,6 +50,9 @@ public class TrainerClientService {
     public List<TrainerClient> getClientTrainers(Long clientId) {
         return trainerClientRepository.findByClient_IdUser(clientId);
     }
+    public int countClientsByTrainer(Long trainerId) {
+        return trainerClientRepository.countByTrainerId(trainerId);
+    }
 
     public List<User> findAllTrainers() {
         return userRepository.findAllByUserType(User.UserType.TRAINER);

@@ -65,6 +65,14 @@
     th {
       background-color: #f2f2f2;
     }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
     .role-badge {
       padding: 5px 10px;
       border-radius: 5px;
@@ -96,6 +104,7 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
+  <button class="btn-back" onclick="goBack()">Powrót</button>
   <h2>Lista użytkowników</h2>
   <div class="search-container">
     <input type="text" id="userSearch" placeholder="Wyszukaj użytkownika...">
@@ -128,10 +137,10 @@
       <td>
         <a th:if="${user.userType.name() == 'CLIENT'}"
            th:href="@{'/client/profile/' + ${user.idUser}}"
-           class="profile-button profile-client">Profil</a>
+           class="profile-button profile-client" target="_blank">Profil</a>
         <a th:if="${user.userType.name() == 'TRAINER'}"
            th:href="@{'/trainer/profile/' + ${user.idUser}}"
-           class="profile-button profile-trainer">Profil</a>
+           class="profile-button profile-trainer" target="_blank">Profil</a>
       </td>
     </tr>
     </tbody>
@@ -181,6 +190,10 @@
 
   document.getElementById('userSearch').addEventListener('keyup', filterTable);
   document.getElementById('userTypeFilter').addEventListener('change', filterTable);
+
+  function goBack() {
+    window.history.back();
+  }
 </script>
 </body>
 </html>

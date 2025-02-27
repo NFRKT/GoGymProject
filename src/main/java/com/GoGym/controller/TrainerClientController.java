@@ -1,8 +1,10 @@
 package com.GoGym.controller;
 import com.GoGym.module.*;
+import com.GoGym.repository.TrainerDetailsRepository;
 import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.RequestService;
 import com.GoGym.service.TrainerClientService;
+import com.GoGym.service.TrainerReviewService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +29,11 @@ public class TrainerClientController {
     private TrainerClientService trainerClientService;
     @Autowired
     private RequestService requestService;
+    @Autowired
+    private TrainerReviewService trainerReviewService;
+    @Autowired
+    private TrainerDetailsRepository trainerDetailsRepository;
+
     @PreAuthorize("hasAuthority('CLIENT')")
     @GetMapping("/client-panel")
     public String clientPanel(Model model, Authentication authentication) {
@@ -135,7 +146,50 @@ public class TrainerClientController {
     @GetMapping("/listTrainers")
     public String listTrainers(Model model) {
         List<User> trainers = trainerClientService.findAllTrainers();
-        model.addAttribute("trainers", trainers);
+
+        List<Map<String, Object>> trainerList = trainers.stream().map(trainer -> {
+            TrainerDetails details = trainerDetailsRepository.findById(trainer.getIdUser()).orElse(null);
+            String experienceDuration;
+            if (details != null && details.getStartDate() != null) {
+                LocalDate startDate = details.getStartDate().toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+                LocalDate today = LocalDate.now();
+
+                long years = ChronoUnit.YEARS.between(startDate, today);
+                long months = ChronoUnit.MONTHS.between(startDate, today) % 12;
+                long days = ChronoUnit.DAYS.between(startDate, today) % 30; // Pozostałe dni
+
+                if (years >= 1) {
+                    experienceDuration = years + " lat";
+                } else if (months >= 1) {
+                    experienceDuration = months + " miesięcy";
+                } else {
+                    experienceDuration = days + " dni";
+                }
+            } else {
+                experienceDuration = "Brak danych";
+            }
+
+            int clientCount = trainerClientService.countClientsByTrainer(trainer.getIdUser());
+            double averageRating = trainerReviewService.getAverageRatingForTrainer(trainer.getIdUser());
+            String formattedRating = (averageRating == 0.0) ? "Brak ocen" : String.format("%.1f", averageRating);
+
+            Map<String, Object> trainerMap = new HashMap<>();
+            trainerMap.put("idUser", trainer.getIdUser());
+            trainerMap.put("firstName", trainer.getFirstName());
+            trainerMap.put("secondName", trainer.getSecondName());
+            trainerMap.put("phone", details != null ? details.getPhoneNumber() : "Brak danych");
+            trainerMap.put("experienceDuration", experienceDuration);
+            trainerMap.put("clientCount", clientCount);
+            trainerMap.put("averageRating", formattedRating);
+
+            return trainerMap;
+        }).collect(Collectors.toList());
+
+        model.addAttribute("trainers", trainerList);
         return "trainer-list";
     }
+
+
 }

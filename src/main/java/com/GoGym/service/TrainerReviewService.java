@@ -27,6 +27,10 @@ public class TrainerReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono trenera"));
         return trainerReviewRepository.findByTrainer(trainer);
     }
+    public double getAverageRatingForTrainer(Long trainerId) {
+        Double avgRating = trainerReviewRepository.getAverageRatingForTrainer(trainerId);
+        return avgRating != null ? avgRating : 0.0;
+    }
 
     public TrainerReview addReview(Long trainerId, Long clientId, int rating, String comment) {
         if (rating < 1 || rating > 5) {
