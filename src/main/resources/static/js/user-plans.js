@@ -118,26 +118,35 @@
         .catch(console.error);
     }
 
-    function updateExerciseUI(button, status) {
-      button.textContent = status ? "Cofnij ukończenie" : "Oznacz jako wykonane";
-      const exerciseElem = button.closest(".exercise");
-      const statusContainer = exerciseElem.querySelector(".status-icon");
-      if (statusContainer) {
-        statusContainer.classList.toggle("completed", status);
-        statusContainer.classList.toggle("not-completed", !status);
-      }
-      const dayElement = button.closest("[data-day-id]");
-      if (!dayElement) return;
-      const dayId = dayElement.getAttribute("data-day-id");
-      fetch(`/update-day-status/${dayId}`, { method: "POST" })
-        .then(checkStatus)
-        .then(response => response.json())
-        .then(data => {
-          updateDayUI(data);
-          updatePlanStatusFromElement(button);
-        })
-        .catch(console.error);
+function updateExerciseUI(button, status) {
+  button.textContent = status ? "Cofnij ukończenie" : "Oznacz jako wykonane";
+  const exerciseElem = button.closest(".exercise");
+  // Zakładamy, że element wyświetlający status ćwiczenia ma klasę "status-badge"
+  const statusContainer = exerciseElem.querySelector(".status-badge");
+  if (statusContainer) {
+    if (status) {
+      statusContainer.classList.remove("notCompleted");
+      statusContainer.classList.add("completed");
+      statusContainer.textContent = "UKOŃCZONY";
+    } else {
+      statusContainer.classList.remove("completed");
+      statusContainer.classList.add("notCompleted");
+      statusContainer.textContent = "NIEUKOŃCZONE";
     }
+  }
+  const dayElement = button.closest("[data-day-id]");
+  if (!dayElement) return;
+  const dayId = dayElement.getAttribute("data-day-id");
+  fetch(`/update-day-status/${dayId}`, { method: "POST" })
+    .then(checkStatus)
+    .then(response => response.json())
+    .then(data => {
+      updateDayUI(data);
+      updatePlanStatusFromElement(button);
+    })
+    .catch(console.error);
+}
+
 
     function handleRestDayStatusToggle(button) {
       const dayId = button.getAttribute("data-day-id");
@@ -150,25 +159,42 @@
         .catch(console.error);
     }
 
-    function updateDayUI(data) {
-      const dayStatusElement = document.querySelector(`[data-day-id="${data.dayId}"] .status-icon`);
-      if (dayStatusElement) {
-        dayStatusElement.classList.toggle("completed", data.status === "completed");
-        dayStatusElement.classList.toggle("not-completed", data.status !== "completed");
-      }
+function updateDayUI(data) {
+  // Załóżmy, że w elemencie dnia status wyświetlany jest jako badge
+  const dayStatusElement = document.querySelector(`[data-day-id="${data.dayId}"] .status-badge`);
+  if (dayStatusElement) {
+    if (data.status === "completed") {
+      dayStatusElement.classList.remove("active");
+      dayStatusElement.classList.add("completed");
+      dayStatusElement.textContent = "UKOŃCZONY";
+    } else {
+      dayStatusElement.classList.remove("completed");
+      dayStatusElement.classList.add("active");
+      dayStatusElement.textContent = "AKTYWNY";
     }
+  }
+}
 
-    function updateRestDayUI(button, data) {
-      button.textContent = data.status === "completed" ? "Cofnij ukończenie" : "Oznacz jako wykonane";
-      const dayElement = document.querySelector(`[data-day-id="${data.dayId}"]`);
-      if (!dayElement) return;
-      const statusContainer = dayElement.querySelector(".status-icon");
-      if (statusContainer) {
-        statusContainer.classList.toggle("completed", data.status === "completed");
-        statusContainer.classList.toggle("not-completed", data.status !== "completed");
-      }
-      updatePlanStatusFromElement(button);
+
+function updateRestDayUI(button, data) {
+  button.textContent = data.status === "completed" ? "Cofnij ukończenie" : "Oznacz jako wykonane";
+  const dayElement = document.querySelector(`[data-day-id="${data.dayId}"]`);
+  if (!dayElement) return;
+  const statusContainer = dayElement.querySelector(".status-badge");
+  if (statusContainer) {
+    if (data.status === "completed") {
+      statusContainer.classList.remove("active");
+      statusContainer.classList.add("completed");
+      statusContainer.textContent = "UKOŃCZONY";
+    } else {
+      statusContainer.classList.remove("completed");
+      statusContainer.classList.add("active");
+      statusContainer.textContent = "AKTYWNY";
     }
+  }
+  updatePlanStatusFromElement(button);
+}
+
 
     function updatePlanStatusFromElement(element) {
       let planId = null;
@@ -189,21 +215,35 @@
         .catch(console.error);
     }
 
-    function updatePlanUI(data) {
-      const planStatusElement = document.querySelector(`.modal[data-plan-id="${data.planId}"] #plan-status`);
-      if (planStatusElement) {
-        planStatusElement.classList.toggle("completed", data.status === "completed");
-        planStatusElement.classList.toggle("active", data.status !== "completed");
-      }
-      const planPanel = document.querySelector(`.plan-panel[data-plan-id="${data.planId}"] .status-text`);
-      if (planPanel) {
-        const isCompleted = data.status === "completed";
-        planPanel.textContent = isCompleted ? "UKOŃCZONY" : "AKTYWNY";
-        planPanel.classList.remove("completed", "active");
-        planPanel.classList.add(isCompleted ? "completed" : "active");
-        planPanel.style.backgroundColor = isCompleted ? "green" : "orange";
-      }
+function updatePlanUI(data) {
+  const planStatusElement = document.querySelector(`.modal[data-plan-id="${data.planId}"] #plan-status`);
+  if (planStatusElement) {
+    if (data.status === "completed") {
+      planStatusElement.classList.remove("active");
+      planStatusElement.classList.add("completed");
+      planStatusElement.textContent = "UKOŃCZONY";
+    } else {
+      planStatusElement.classList.remove("completed");
+      planStatusElement.classList.add("active");
+      planStatusElement.textContent = "AKTYWNY";
     }
+  }
+  const planPanel = document.querySelector(`.plan-panel[data-plan-id="${data.planId}"] .status-text`);
+  if (planPanel) {
+    if (data.status === "completed") {
+      planPanel.textContent = "UKOŃCZONY";
+      planPanel.classList.remove("active");
+      planPanel.classList.add("completed");
+      planPanel.style.backgroundColor = "#28a745"; // zielony
+    } else {
+      planPanel.textContent = "AKTYWNY";
+      planPanel.classList.remove("completed");
+      planPanel.classList.add("active");
+      planPanel.style.backgroundColor = "#ffc107"; // żółty
+    }
+  }
+}
+
 
     /* ---------- Funkcja checkStatus ---------- */
     function checkStatus(response) {
@@ -404,7 +444,7 @@
       } else {
         videoStatusDiv.innerHTML = `
           <p><a href="${videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a></p>
-          <button type="button" class="delete-video-btn" data-exercise-id="${exerciseId}">Usuń nagranie</button>
+          <button type="button" class="delete-video-btn" data-exercise-id="${exerciseId}" style="padding:5px 10px; font-size:13px;">Usuń nagranie</button>
         `;
       }
       exerciseElement.appendChild(videoStatusDiv);
@@ -416,11 +456,11 @@
       const oldVideoStatus = exerciseElement.querySelector(".video-preview");
       if (oldVideoStatus) oldVideoStatus.remove();
       const videoUploadHtml = `
-        <div class="video-upload-section">
-          <input type="file" class="video-input" data-exercise-id="${exerciseId}" accept="video/*">
-          <button type="button" class="upload-video-btn">Dodaj film</button>
-          <input type="text" class="video-link-input" data-exercise-id="${exerciseId}" placeholder="Lub wklej link do filmu">
-          <button type="button" class="add-link-btn">Dodaj link</button>
+        <div class="video-upload-section" style="margin-top:10px;">
+        <input type="file" class="video-input" data-exercise-id="${exerciseId}" accept="video/*">
+        <button type="button" class="upload-video-btn" style="padding:5px 10px; font-size:13px;">Dodaj film</button>
+        <input type="text" class="video-link-input" data-exercise-id="${exerciseId}" placeholder="Lub wklej link do filmu">
+        <button type="button" class="add-link-btn" style="padding:5px 10px; font-size:13px;">Dodaj link</button>
         </div>
         <div class="loading-spinner" id="spinner-${exerciseId}"></div>
       `;

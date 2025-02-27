@@ -38,11 +38,6 @@ public class ExerciseController {
         this.equipmentService = equipmentService;
     }
 
-    // ******************************
-    // Widoki (HTML)
-    // ******************************
-
-    // Widok listy ćwiczeń
     @GetMapping("/exercises")
     public String getExercises(
             @RequestParam(defaultValue = "0") int page,
@@ -92,7 +87,6 @@ public class ExerciseController {
         return "exercises-list";
     }
 
-    // Widok szczegółów ćwiczenia
     @GetMapping("/exercise/{id}")
     public String getExerciseDetails(@PathVariable Long id, Model model) {
         Exercise exercise = exerciseRepository.findById(id)
@@ -101,49 +95,17 @@ public class ExerciseController {
         return "exercise-details";
     }
 
-    // ******************************
-    // REST API (prefiks /api/exercises)
-    // ******************************
-
-    // Pobranie wszystkich ćwiczeń (JSON)
     @GetMapping("/api/exercises")
     @ResponseBody
     public List<Exercise> getAllExercises() {
         return exerciseService.getAllExercises();
     }
 
-    // Pobranie ćwiczenia po ID (JSON)
     @GetMapping("/api/exercises/{id}")
     @ResponseBody
     public ResponseEntity<Exercise> getExerciseById(@PathVariable Long id) {
         return exerciseService.getExerciseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
-    }
-
-    // Tworzenie nowego ćwiczenia
-    @PostMapping("/api/exercises")
-    @ResponseBody
-    public Exercise createExercise(@RequestBody Exercise exercise) {
-        return exerciseService.createExercise(exercise);
-    }
-
-    // Aktualizacja ćwiczenia
-    @PutMapping("/api/exercises/{id}")
-    @ResponseBody
-    public ResponseEntity<Exercise> updateExercise(@PathVariable Long id, @RequestBody Exercise updatedExercise) {
-        try {
-            return ResponseEntity.ok(exerciseService.updateExercise(id, updatedExercise));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Usuwanie ćwiczenia
-    @DeleteMapping("/api/exercises/{id}")
-    @ResponseBody
-    public ResponseEntity<Void> deleteExercise(@PathVariable Long id) {
-        exerciseService.deleteExercise(id);
-        return ResponseEntity.noContent().build();
     }
 }

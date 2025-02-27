@@ -240,6 +240,28 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 500;
+  font-size: 12px;
+}
+.status-badge.completed {
+  background-color: #28a745;
+}
+.status-badge.active {
+  background-color: #ffc107;
+}
+.status-badge.notCompleted {
+  background-color: #ffc107;
+}
+.plan-description {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
   </style>
 </head>
 <body>
@@ -284,7 +306,6 @@
             <div class="plan-each" th:each="plan : ${activePlans}">
                 <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
                     <h3 class="plan-name" th:text="${plan.name}">Nazwa Planu</h3>
-                    <p><strong>Opis:</strong> <span th:text="${plan.description}">Opis planu...</span></p>
                     <p>
                         <strong>Data:</strong>
                         <span class="start-date" th:text="${plan.startDate}">Data startu</span> -
@@ -310,71 +331,80 @@
                             <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
                             <span class="close-modal">&times;</span>
                         </div>
-                        <div class="status-container">
+                        <label style="font-weight: bolder;">Opis planu:</label>
+                        <p th:if="${plan.description != null}" class="plan-description"
+                           style="font-size:14px; color:#555; margin-top:5px;"
+                           th:text="${plan.description}"></p>
+                        <div class="status-container" style="margin-bottom:20px;">
                             <p>
                                 <strong>Status planu:</strong>
-                                <span id="plan-status" class="status-icon"
-                                      th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
-                    <span class="status-circle"></span>
-                  </span>
+                                <span id="plan-status" class="status-badge"
+                                      th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? ' completed' : ' active'}"
+                                      th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+        </span>
                             </p>
                         </div>
-                        <div th:each="day : ${plan.trainingPlanDays}">
+
+                        <div th:each="day : ${plan.trainingPlanDays}" style="border: 1px solid #ccc; border-radius:8px; margin-bottom:20px; padding:15px;">
                             <div th:data-day-id="${day.idDay}">
-                                <h4>
+                                <h4 style="margin-bottom:10px; color:#303a53;">
                                     <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
                                     - <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
                                 </h4>
-                                <div class="status-container">
-                                    <p>
+                                <div class="status-container" style="margin-bottom:10px;">
+                                    <p style="font-size:13px;">
                                         <strong>Status dnia:</strong>
-                                        <span id="day-status" class="status-icon"
-                                              th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
-                        <span class="status-circle"></span>
-                      </span>
-                                        <button class="add-to-workout-btn" th:data-day-id="${day.idDay}">
+                                        <span class="status-badge"
+                                              th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? ' completed' : ' active'}"
+                                              th:text="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+            </span>
+                                        <button class="add-to-workout-btn" th:data-day-id="${day.idDay}" style="margin-left:10px; padding:5px 10px; font-size:13px;">
                                             Sprawdzanie...
                                         </button>
                                     </p>
                                 </div>
-                                <p>
+                                <p style="margin-bottom:15px; font-size:13px;">
                                     <strong>Notatki:</strong>
                                     <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
                                 </p>
-                                <div th:if="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).rest and #lists.isEmpty(day.exercises)}">
-                                    <button class="toggle-rest-day-status" th:data-day-id="${day.idDay}"
+                                <div th:if="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).rest and #lists.isEmpty(day.exercises)}" style="margin-bottom:15px;">
+                                    <button class="toggle-rest-day-status" th:data-day-id="${day.idDay}" style="padding:5px 10px; font-size:13px;"
                                             th:text="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}">
                                     </button>
                                 </div>
-                                <ul>
-                                    <li class="exercise" th:each="exercise : ${day.exercises}">
-                      <span>
-                        <strong th:text="${exercise.exercise.name}"></strong>
-                        <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
-                          - <span th:text="${exercise.sets}"></span> serie,
-                          <span th:text="${exercise.reps}"></span> powtórzeń,
-                          <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}"></span>
-                        </span>
-                        <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
-                          - <span class="exercise-duration" th:data-seconds="${exercise.duration}" th:text="${exercise.duration}"></span> min,
-                          <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
-                        </span>
-                      </span>
-                                        <div class="status-container">
-                        <span id="exercise-status" class="status-icon"
-                              th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
-                          <span class="status-circle"></span>
-                        </span>
+                                <ul style="list-style: none; padding-left:0;">
+                                    <li class="exercise" th:each="exercise : ${day.exercises}" style="border-top:1px solid #eee; padding-top:10px; margin-top:10px;">
+                                        <div style="margin-bottom:5px; font-size:13px;">
+                                            <strong th:text="${exercise.exercise.name}">Ćwiczenie</strong>
+                                            <a th:href="@{'/exercise/' + ${exercise.exercise.idExercise}}" target="_blank" class="btn" style="background-color: #303a539e; color: #fff; border: none; padding: 2px 2px; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; margin-right: 10px; margin-top: 5px; font-size: 14px; text-decoration: none;">Zobacz ćwiczenie</a>
+                                            <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
+                - <span th:text="${exercise.sets}"></span> serie,
+                <span th:text="${exercise.reps}"></span> powtórzeń,
+                <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}"></span>
+              </span>
+                                            <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+                - <span class="exercise-duration" th:data-seconds="${exercise.duration}" th:text="${exercise.duration}"></span> min,
+                <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
+              </span>
                                         </div>
-                                        <button class="toggle-exercise-status" th:data-exercise-id="${exercise.id}"
+                                        <div class="status-container" style="margin-bottom:5px;">
+                                            <p style="font-size:13px;">
+                                                <strong>Status ćwiczenia:</strong>
+                                                <span id="exercise-status" class="status-badge"
+                                                      th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? ' completed' : ' notCompleted'}"
+                                                      th:text="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'UKOŃCZONY' : 'NIEUKOŃCZONE'}">
+                </span>
+                                            </p>
+                                        </div>
+                                        <button class="toggle-exercise-status" th:data-exercise-id="${exercise.id}" style="padding:5px 10px; font-size:13px;"
                                                 th:text="${exercise.status.name() == 'completed' ? 'Cofnij ukończenie' : 'Oznacz jako wykonane'}"></button>
-                                        <div class="video-upload-section" th:if="${exercise.videoUrl == null}">
+                                        <div class="video-upload-section" th:if="${exercise.videoUrl == null}" style="margin-top:10px;">
                                             <input type="file" class="video-input" th:data-exercise-id="${exercise.id}" accept="video/*">
-                                            <button type="button" class="upload-video-btn">Wgraj film</button>
+                                            <button type="button" class="upload-video-btn" style="padding:5px 10px; font-size:13px;">Dodaj film</button>
                                             <input type="text" class="video-link-input" th:data-exercise-id="${exercise.id}" placeholder="Lub wklej link do filmu">
-                                            <button type="button" class="add-link-btn">Dodaj link</button>
+                                            <button type="button" class="add-link-btn" style="padding:5px 10px; font-size:13px;">Dodaj link</button>
                                         </div>
-                                        <div class="video-preview" th:if="${exercise.videoUrl != null}">
+                                        <div class="video-preview" th:if="${exercise.videoUrl != null}" style="margin-top:10px;">
                                             <video th:if="${exercise.videoUrl.contains('cloudinary.com')}"
                                                    th:src="${exercise.videoUrl}" controls width="300">
                                                 Twoja przeglądarka nie obsługuje odtwarzacza wideo.
@@ -382,13 +412,14 @@
                                             <p th:if="!${exercise.videoUrl.contains('cloudinary.com')}">
                                                 <a th:href="${exercise.videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a>
                                             </p>
-                                            <button type="button" class="delete-video-btn" th:data-exercise-id="${exercise.id}">Usuń nagranie</button>
+                                            <button type="button" class="delete-video-btn" th:data-exercise-id="${exercise.id}" style="padding:5px 10px; font-size:13px;">Usuń nagranie</button>
                                         </div>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
