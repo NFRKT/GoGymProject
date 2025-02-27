@@ -161,13 +161,15 @@
     <table id="new-requests-table">
       <thead>
       <tr>
-        <th>Klient</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
         <th>Akcja</th>
       </tr>
       </thead>
       <tbody>
       <tr th:each="request : ${requests}" th:attr="data-request-id=${request.id}">
-        <td th:text="${request.client.firstName+ ' ' +request.client.secondName }"></td>
+        <td th:text="${request.client.firstName}"></td>
+        <td th:text="${request.client.secondName}"></td>
         <td>
           <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post" class="update-request-form">
             <input type="hidden" name="status" value="accepted">
@@ -184,6 +186,7 @@
       </tr>
       </tbody>
     </table>
+
   </div>
 </div>
 
@@ -192,223 +195,139 @@
 document.addEventListener("DOMContentLoaded", function () {
     const clientsTable = document.querySelector("#clients-table tbody");
     const requestsTable = document.querySelector("#new-requests-table tbody");
-function confirmAction(event, message) {
-    if (!confirm(message)) {
-        event.preventDefault(); // ✅ Anuluj akcję, jeśli użytkownik kliknie „Anuluj”
-        return false; // ✅ Dodatkowe zabezpieczenie przed wysłaniem formularza
-    }
-    return true; // ✅ Jeśli użytkownik kliknął "OK", pozwól wysłać formularz
-}
 
-// ✅ Dodanie eventów do akceptacji / odrzucenia zgłoszenia
-function attachUpdateRequestListener(form) {
-    form.addEventListener("submit", function (event) {
-        let status = new FormData(this).get("status");
-        let message = status === "accepted"
-            ? "Czy na pewno chcesz zaakceptować tę prośbę o współpracę?"
-            : "Czy na pewno chcesz odrzucić tę prośbę o współpracę?";
-        if (!confirmAction(event, message)) return; // ✅ Dodane zabezpieczenie
-    });
-}
-
-// ✅ Dodanie eventów do rezygnacji z klienta
-function attachRemoveClientListener(form) {
-    form.addEventListener("submit", function (event) {
-        if (!confirmAction(event, "Czy na pewno chcesz zakończyć współpracę z tym klientem?")) return;
-    });
-}
-      function checkForNewRequests() {
-          fetch("/requests/new-requests")
-              .then(response => response.json())
-              .then(data => {
-                  let existingRequestIds = new Set(
-                      Array.from(document.querySelectorAll("#new-requests-table tbody tr[data-request-id]"))
-                          .map(row => row.getAttribute("data-request-id"))
-                  );
-                  data.forEach(request => {
-                      if (!existingRequestIds.has(request.id.toString())) {
-                          // Używamy operatora warunkowego aby sprawdzić, czy request.client istnieje
-                          let clientName = request.client
-                              ? request.client.firstName + " " + request.client.secondName
-                              : "Brak danych";
-
-                          let newRow = document.createElement("tr");
-                          newRow.setAttribute("data-request-id", request.id);
-                          newRow.innerHTML = `
-                              <td>${clientName}</td>
-                              <td>
-                                  <form action="/requests/${request.id}/update" method="post" class="update-request-form">
-                                      <input type="hidden" name="status" value="accepted">
-                                      <button class="btn btn-accept" type="submit">Akceptuj</button>
-                                  </form>
-                                  <form action="/requests/${request.id}/update" method="post" class="update-request-form">
-                                      <input type="hidden" name="status" value="rejected">
-                                      <button class="btn btn-delete" type="submit">Odrzuć</button>
-                                  </form>
-                                  <form action="/client/profile/${request.client ? request.client.idUser : ''}" method="get" style="display: inline;" target="_blank">
-                                      <button class="btn btn-info" type="submit">Pokaż profil</button>
-                                  </form>
-                              </td>
-                          `;
-                          document.querySelector("#new-requests-table tbody").appendChild(newRow);
-                          // Przypinamy eventy do formularzy
-                          attachUpdateRequestListener(newRow.querySelectorAll(".update-request-form")[0]);
-                          attachUpdateRequestListener(newRow.querySelectorAll(".update-request-form")[1]);
-                      }
-                  });
-              })
-              .catch(error => console.error("Błąd sprawdzania nowych zgłoszeń:", error));
-      }
-
-    // ✅ Sprawdzanie i usuwanie anulowanych zgłoszeń
-    function checkForRemovedRequests() {
-        fetch("/requests/new-requests")
-            .then(response => response.json())
-            .then(data => {
-                let activeRequestIds = new Set(data.map(request => request.id.toString()));
-
-                document.querySelectorAll("#new-requests-table tbody tr").forEach(row => {
-                    let requestId = row.getAttribute("data-request-id");
-                    if (!activeRequestIds.has(requestId)) {
-                        row.remove(); // 🔹 Usuwa wiersz, jeśli zgłoszenie zostało anulowane
-                    }
-                });
-            })
-            .catch(error => console.error("Błąd sprawdzania usuniętych zgłoszeń:", error));
+    async function fetchData(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error(`🚨 Błąd pobierania danych z ${url}:`, error);
+            return [];
+        }
     }
 
-function checkForRemovedClients() {
-    fetch("/trainer/clients")
-        .then(response => response.json())
-        .then(data => {
-            console.log("📡 Odpowiedź API:", data); // ✅ LOG: co zwraca API
+    async function checkForUpdates() {
+        const [requestsData, clientsData] = await Promise.all([
+            fetchData("/requests/new-requests"),
+            fetchData("/trainer/clients")
+        ]);
 
-            // 🔹 Sprawdzamy, czy `data` to poprawna tablica
-            if (!Array.isArray(data) || data.length === 0) {
-                console.warn("⚠️ Brak poprawnych klientów w odpowiedzi API.");
-                return;
+        updateRequestsTable(requestsData);
+        updateClientsTable(clientsData);
+
+        setTimeout(checkForUpdates, 5000);
+    }
+
+    function updateRequestsTable(data) {
+        const existingRequestIds = new Set([...requestsTable.querySelectorAll("tr")].map(row => row.getAttribute("data-request-id")));
+        const newRequestIds = new Set(data.map(req => req.id.toString()));
+
+        requestsTable.querySelectorAll("tr").forEach(row => {
+            if (!newRequestIds.has(row.getAttribute("data-request-id"))) row.remove();
+        });
+
+        data.forEach(request => {
+            if (!existingRequestIds.has(request.id.toString())) {
+                const newRow = document.createElement("tr");
+                newRow.setAttribute("data-request-id", request.id);
+                newRow.innerHTML = `
+                    <td>${request.firstName}</td>
+                    <td>${request.secondName}</td>
+                    <td>
+                        <form action="/requests/${request.id}/update" method="post" class="update-request-form">
+                            <input type="hidden" name="status" value="accepted">
+                            <button class="btn btn-accept" type="submit">Akceptuj</button>
+                        </form>
+                        <form action="/requests/${request.id}/update" method="post" class="update-request-form">
+                            <input type="hidden" name="status" value="rejected">
+                            <button class="btn btn-delete" type="submit">Odrzuć</button>
+                        </form>
+                        <form action="/client/profile/${request.clientId}" method="get" target="_blank">
+                            <button class="btn btn-info" type="submit">Pokaż profil</button>
+                        </form>
+                    </td>
+                `;
+                requestsTable.appendChild(newRow);
+                attachUpdateRequestListener(newRow.querySelector(".update-request-form"));
+                attachUpdateRequestListener(newRow.querySelectorAll(".update-request-form")[1]);
             }
+        });
+    }
 
-            // 🔹 Sprawdzamy, czy dane zawierają poprawne ID użytkownika
-            let validClients = data.filter(client => client.id && client.firstName && client.secondName);
+    function updateClientsTable(data) {
+        const existingClientIds = new Set([...clientsTable.querySelectorAll("tr")].map(row => row.getAttribute("data-client-id")));
+        const newClientIds = new Set(data.map(client => client.id.toString()));
 
-            if (validClients.length === 0) {
-                console.warn("⚠️ Brak poprawnych klientów po filtracji.");
-                return;
+        clientsTable.querySelectorAll("tr").forEach(row => {
+            if (!newClientIds.has(row.getAttribute("data-client-id"))) row.remove();
+        });
+
+        data.forEach(client => {
+            if (!existingClientIds.has(client.id.toString())) {
+                const newRow = document.createElement("tr");
+                newRow.setAttribute("data-client-id", client.id);
+                newRow.innerHTML = `
+                    <td>${client.firstName}</td>
+                    <td>${client.secondName}</td>
+                    <td>
+                        <form action="/rejectClient" method="post" class="remove-client-form">
+                            <input type="hidden" name="clientId" value="${client.id}">
+                            <button class="btn btn-delete" type="submit">Zrezygnuj ze współpracy</button>
+                        </form>
+                        <form action="/${client.id}/create-plan" method="get" target="_blank">
+                            <button type="submit" class="btn">Stwórz plan</button>
+                        </form>
+                        <form action="/client/profile/${client.id}" method="get" target="_blank">
+                            <button class="btn btn-info" type="submit">Pokaż profil</button>
+                        </form>
+                    </td>
+                `;
+                clientsTable.appendChild(newRow);
+                attachRemoveClientListener(newRow.querySelector(".remove-client-form"));
             }
+        });
+    }
 
-            let currentClientIds = new Set(validClients.map(client => client.id.toString()));
+    function attachUpdateRequestListener(form) {
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const status = form.querySelector("input[name='status']").value;
+            const message = status === "accepted"
+                ? "Czy na pewno chcesz zaakceptować tę prośbę o współpracę?"
+                : "Czy na pewno chcesz odrzucić tę prośbę o współpracę?";
 
-            // 🔹 Usuwamy klientów, których nie ma w nowej liście
-            document.querySelectorAll("#clients-table tbody tr").forEach(row => {
-                let clientId = row.getAttribute("data-client-id");
-                if (!currentClientIds.has(clientId)) {
-                    console.log(`🗑️ Usuwanie klienta o ID: ${clientId}`);
-                    row.remove();
-                }
-            });
+            if (!confirm(message)) return;
 
-            // 🔹 Dodajemy nowych klientów do tabeli
-            validClients.forEach(client => {
-                let clientId = client.id.toString();
-                if (!document.querySelector(`#clients-table tbody tr[data-client-id="${clientId}"]`)) {
-                    console.log(`➕ Dodawanie klienta: ${client.firstName} ${client.secondName}`);
-
-                    let newRow = document.createElement("tr");
-                    newRow.setAttribute("data-client-id", clientId);
-                    newRow.innerHTML = `
-                        <td>${client.firstName}</td>
-                        <td>${client.secondName}</td>
-                        <td>
-                            <form action="/rejectClient" method="post" class="remove-client-form">
-                                <input type="hidden" name="clientId" value="${clientId}">
-                                <button class="btn btn-delete" type="submit">Zrezygnuj ze współpracy</button>
-                            </form>
-                            <form action="/${clientId}/create-plan" method="get" target="_blank">
-                              <button type="submit" class="btn">Stwórz plan</button>
-                            </form>
-                            <form action="/client/profile/${clientId}" method="get" target="_blank">
-                              <button class="btn btn-info" type="submit">Pokaż profil</button>
-                            </form>
-                        </td>
-                    `;
-                    document.querySelector("#clients-table tbody").appendChild(newRow);
-                    attachRemoveClientListener(newRow.querySelector(".remove-client-form"));
-                }
-            });
-
-        })
-        .catch(error => console.error("🚨 Błąd pobierania klientów:", error));
-}
-
-
-    // ✅ Dodanie eventów do istniejących formularzy
-function attachUpdateRequestListener(form) {
-    form.addEventListener("submit", function (event) {
-        event.preventDefault();
-
-        let formData = new FormData(this);
-        let status = formData.get("status");
-
-        fetch(this.action, { method: "POST", body: formData })
-            .then(response => response.json())
-            .then(data => {
-                if (status === "accepted" && data.id && data.firstName && data.secondName) {
-                    let newRow = document.createElement("tr");
-                    newRow.setAttribute("data-client-id", data.id);
-                    newRow.innerHTML = `
-                        <td>${data.firstName}</td>
-                        <td>${data.secondName}</td>
-                        <td>
-                            <form action="/rejectClient" method="post" class="remove-client-form">
-                                <input type="hidden" name="clientId" value="${data.id}">
-                                <button class="btn btn-delete" type="submit">Zrezygnuj ze współpracy</button>
-                            </form>
-                            <form action="/${data.id}/create-plan" method="get" target="_blank">
-                              <button type="submit" class="btn">Stwórz plan</button>
-                            </form>
-                            <form action="/client/profile/${data.id}" method="get" target="_blank">
-                              <button class="btn btn-info" type="submit">Pokaż profil</button>
-                            </form>
-                        </td>
-                    `;
-                    clientsTable.appendChild(newRow);
-                    attachRemoveClientListener(newRow.querySelector(".remove-client-form"));
-                }
-
-                form.closest("tr").remove();
-            })
-            .catch(error => console.error("Błąd:", error));
-    });
-}
-
+            try {
+                const response = await fetch(form.action, { method: "POST", body: new FormData(form) });
+                if (response.ok) form.closest("tr").remove();
+            } catch (error) {
+                console.error("🚨 Błąd aktualizacji statusu:", error);
+            }
+        });
+    }
 
     function attachRemoveClientListener(form) {
-        form.addEventListener("submit", function (event) {
+        form.addEventListener("submit", async function (event) {
             event.preventDefault();
-            let clientId = form.querySelector("input[name='clientId']").value;
+            if (!confirm("Czy na pewno chcesz zakończyć współpracę z tym klientem?")) return;
 
-            fetch(form.action, { method: "POST", body: new FormData(form) })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        form.closest("tr").remove();
-                    }
-                })
-                .catch(error => console.error("Błąd rezygnacji:", error));
+            try {
+                const response = await fetch(form.action, { method: "POST", body: new FormData(form) });
+                if (response.ok) form.closest("tr").remove();
+            } catch (error) {
+                console.error("🚨 Błąd usuwania klienta:", error);
+            }
         });
     }
 
     document.querySelectorAll(".update-request-form").forEach(attachUpdateRequestListener);
     document.querySelectorAll(".remove-client-form").forEach(attachRemoveClientListener);
 
-    // 🔄 Odświeżanie listy zgłoszeń i usuwanie anulowanych co 5 sekund
-    setInterval(() => {
-        checkForNewRequests();
-        checkForRemovedRequests();
-        checkForRemovedClients();
-    }, 5000);
+    checkForUpdates();
 });
+
 </script>
 </body>
 </html>

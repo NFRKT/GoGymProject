@@ -181,6 +181,7 @@ public class RequestController {
                 requestData.put("id", String.valueOf(request.getId()));
                 requestData.put("clientId", String.valueOf(request.getClient().getIdUser()));
                 requestData.put("firstName", request.getClient().getFirstName());
+                requestData.put("secondName", request.getClient().getSecondName());
                 return requestData;
             }).toList();
 
