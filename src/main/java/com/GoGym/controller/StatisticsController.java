@@ -47,10 +47,8 @@ public class StatisticsController {
 
         Map<String, Object> statistics = statisticsService.calculateStatistics(user, year, month);
 
-        // Pobranie poprawnej nazwy miesiąca w mianowniku (pełna nazwa samodzielna)
         String monthName = Month.of(month).getDisplayName(TextStyle.FULL_STANDALONE, Locale.forLanguageTag("pl"));
 
-        // Przekazanie mapy miesięcy do widoku
         Map<Integer, String> monthsMap = IntStream.rangeClosed(1, 12)
                 .boxed()
                 .collect(Collectors.toMap(m -> m, m -> Month.of(m).getDisplayName(TextStyle.FULL_STANDALONE, Locale.forLanguageTag("pl"))));

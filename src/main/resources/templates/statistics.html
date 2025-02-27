@@ -8,167 +8,189 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <title>Statystyki Treningowe</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #6c757d, #343a40);
-      color: #fff;
-      padding: 20px;
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #292d35;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
     }
+
     .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: #212529;
-      border-radius: 15px;
-      padding: 20px;
+      max-width: 900px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      flex: 1;
     }
-    h1, h2 {
+
+    h1 {
       text-align: center;
-      margin-bottom: 20px;
     }
+
     .stat-box {
-      background: #495057;
+      background: rgba(255, 255, 255, 0.15);
       padding: 15px;
       border-radius: 10px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-box h2 {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .stat-box ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .stat-box li {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-box li:last-child {
+      border-bottom: none;
+    }
+
+    .select-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    select {
+      background: #f8f9fa;
+      color: #292d35;
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+    }
+
+   .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+
 <div th:replace="~{header :: header}"></div>
+
 <div class="container">
-  <h1>Statystyki Treningowe</h1>
+  <button class="btn-back" onclick="goBack()">Powrót</button>
+  <h1>📊 Statystyki Treningowe</h1>
 
   <div class="stat-box">
-    <h2>Najczęściej wykonywane ćwiczenia (ogólnie)</h2>
+    <h2>🏋️ Najczęściej wykonywane ćwiczenia (ogólnie)</h2>
     <ul>
       <li th:each="entry : ${statistics.mostCommonExercises}">
-        <span th:text="${entry.key}"></span> - <span th:text="${entry.value}"></span> razy
+        <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span> razy
       </li>
     </ul>
   </div>
 
   <div class="stat-box">
-    <h2>Najczęściej wykonywane ćwiczenia (w miesiącu)</h2>
-
-    <label for="yearEx">Rok:</label>
-    <select id="yearEx" name="year">
-      <option th:each="y : ${#numbers.sequence(2020, 2030)}"
-              th:value="${y}" th:text="${y}"
-              th:selected="${y == year}"></option>
-    </select>
-
-    <label for="monthEx">Miesiąc:</label>
-    <select id="monthEx" name="month">
-      <option th:each="m : ${monthsMap}"
-              th:value="${m.key}"
-              th:text="${m.value}"
-              th:selected="${m.key == month}"></option>
-    </select>
-
+    <h2>📆 Najczęściej wykonywane ćwiczenia w miesiącu</h2>
+    <div class="select-container">
+      <select id="yearEx">
+        <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}" th:selected="${y == year}"></option>
+      </select>
+      <select id="monthEx">
+        <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}" th:selected="${m.key == month}"></option>
+      </select>
+    </div>
     <ul id="mostCommonExercisesInMonth">
       <li th:each="entry : ${statistics.mostCommonExercisesInMonth}">
-        <span th:text="${entry[0]}"></span> - <span th:text="${entry[1]}"></span> razy
+        <strong th:text="${entry[0]}"></strong> – <span th:text="${entry[1]}"></span> razy
       </li>
     </ul>
   </div>
 
-
   <div class="stat-box">
-    <h2>Największy ciężar dla ćwiczeń siłowych</h2>
+    <h2>💪 Największy ciężar dla ćwiczeń siłowych</h2>
     <ul>
       <li th:each="entry : ${statistics.maxWeightExercises}">
-        <span th:text="${entry.key}"></span> - <strong th:text="${entry.value.key}"></strong> kg
-        <span>(<strong th:text="${entry.value.value}"></strong>)</span>
+        <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value.key}"></span> kg (<span th:text="${entry.value.value}"></span>)
       </li>
     </ul>
   </div>
 
-
   <div class="stat-box">
-    <h2>Najdłuższy trening cardio</h2>
+    <h2>⏳ Najdłuższy trening cardio</h2>
     <p th:if="${statistics.longestCardio != null}">
-      <span th:text="${statistics.longestCardio.exerciseName}"></span>:
+      <strong th:text="${statistics.longestCardio.exerciseName}"></strong>:
       <span th:text="${statistics.longestCardio.formattedDuration}"></span>
     </p>
   </div>
 
   <div class="stat-box">
-    <h2>Ilość treningów w miesiącu</h2>
-
-    <label for="yearWo">Rok:</label>
-    <select id="yearWo" name="year">
-      <option th:each="y : ${#numbers.sequence(2020, 2030)}"
-              th:value="${y}" th:text="${y}"
-              th:selected="${y == year}"></option>
-    </select>
-
-    <label for="monthWo">Miesiąc:</label>
-    <select id="monthWo" name="month">
-      <option th:each="m : ${monthsMap}"
-              th:value="${m.key}"
-              th:text="${m.value}"
-              th:selected="${m.key == month}"></option>
-    </select>
-
+    <h2>📅 Ilość treningów w miesiącu</h2>
+    <div class="select-container">
+      <select id="yearWo">
+        <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}" th:selected="${y == year}"></option>
+      </select>
+      <select id="monthWo">
+        <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}" th:selected="${m.key == month}"></option>
+      </select>
+    </div>
     <p>W <span id="selectedMonth" th:text="${monthName}"></span> <span id="selectedYear" th:text="${year}"></span> miałeś <strong id="workoutCount" th:text="${statistics.workoutsCount}"></strong> treningów.</p>
   </div>
 </div>
+
 <div th:replace="~{footer :: footer}"></div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const yearEx = document.getElementById("yearEx");
-    const monthEx = document.getElementById("monthEx");
-    const yearWo = document.getElementById("yearWo");
-    const monthWo = document.getElementById("monthWo");
+    function updateStatistics(url, updateFunc) {
+        fetch(url)
+            .then(response => response.json())
+            .then(data => updateFunc(data))
+            .catch(error => console.error("Błąd aktualizacji:", error));
+    }
 
     function updateExercisesStatistics() {
-        const year = yearEx.value;
-        const month = monthEx.value;
-
-        fetch(`/statistics/update?year=${year}&month=${month}`)
-            .then(response => response.json())
-            .then(data => {
-                // ✅ Aktualizacja najczęściej wykonywanych ćwiczeń w miesiącu
-                const exerciseList = document.querySelector("#mostCommonExercisesInMonth");
-                exerciseList.innerHTML = ""; // Czyszczenie listy przed dodaniem nowych danych
-
-                if (data.mostCommonExercisesInMonth && data.mostCommonExercisesInMonth.length > 0) {
-                    data.mostCommonExercisesInMonth.forEach(entry => {
-                        let li = document.createElement("li");
-                        li.textContent = `${entry[0]} - ${entry[1]} razy`; // `entry[0]` = nazwa ćwiczenia, `entry[1]` = liczba razy
-                        exerciseList.appendChild(li);
-                    });
-                } else {
-                    exerciseList.innerHTML = "<li>Brak danych</li>";
-                }
-            })
-            .catch(error => console.error("Błąd aktualizacji statystyk ćwiczeń:", error));
+        const year = document.getElementById("yearEx").value;
+        const month = document.getElementById("monthEx").value;
+        updateStatistics(`/statistics/update?year=${year}&month=${month}`, (data) => {
+            const list = document.getElementById("mostCommonExercisesInMonth");
+            list.innerHTML = data.mostCommonExercisesInMonth.length > 0
+                ? data.mostCommonExercisesInMonth.map(entry => `<li><strong>${entry[0]}</strong> – ${entry[1]} razy</li>`).join("")
+                : "<li>Brak danych</li>";
+        });
     }
 
     function updateWorkoutsStatistics() {
-        const year = yearWo.value;
-        const month = monthWo.value;
-
-        fetch(`/statistics/update?year=${year}&month=${month}`)
-            .then(response => response.json())
-            .then(data => {
-                // ✅ Aktualizacja ilości treningów w miesiącu
-                document.querySelector("#workoutCount").textContent = data.workoutsCount;
-                document.querySelector("#selectedMonth").textContent = document.getElementById("monthWo").selectedOptions[0].text;
-                document.querySelector("#selectedYear").textContent = year;
-            })
-            .catch(error => console.error("Błąd aktualizacji statystyk treningów:", error));
+        const year = document.getElementById("yearWo").value;
+        const month = document.getElementById("monthWo").value;
+        updateStatistics(`/statistics/update?year=${year}&month=${month}`, (data) => {
+            document.getElementById("workoutCount").textContent = data.workoutsCount;
+            document.getElementById("selectedMonth").textContent = document.getElementById("monthWo").selectedOptions[0].text;
+            document.getElementById("selectedYear").textContent = year;
+        });
     }
 
-    // Nasłuchujemy na zmiany selektorów osobno dla ćwiczeń i treningów
-    yearEx.addEventListener("change", updateExercisesStatistics);
-    monthEx.addEventListener("change", updateExercisesStatistics);
-    yearWo.addEventListener("change", updateWorkoutsStatistics);
-    monthWo.addEventListener("change", updateWorkoutsStatistics);
+    document.getElementById("yearEx").addEventListener("change", updateExercisesStatistics);
+    document.getElementById("monthEx").addEventListener("change", updateExercisesStatistics);
+    document.getElementById("yearWo").addEventListener("change", updateWorkoutsStatistics);
+    document.getElementById("monthWo").addEventListener("change", updateWorkoutsStatistics);
 });
-
-
-
+  function goBack() {
+    window.history.back();
+  }
 </script>
 
 </body>
