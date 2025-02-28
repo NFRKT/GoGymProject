@@ -1,263 +1,213 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <title>Lista Ćwiczeń</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <title>Lista Ćwiczeń</title>
   <style>
-      /* Stylizacja głównego elementu strony */
-      body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(to bottom, #e3f2fd, #ffffff);
-        margin: 0;
-        padding: 0;
-        color: #333;
-      }
+      html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #292d35;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    h1{
+      text-align: center;
+    }
+    /* Filtry */
+    .filter-form {
+      display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;
+      padding: 20px; background: #fff; border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px;
+    }
+    .filter-form select, .filter-form input {
+      padding: 10px; border-radius: 5px; border: 1px solid #ccc;
+      font-size: 1em; background: #fff; width: 200px;
+    }
+    .filter-form input { width: 300px; }
 
-      h1 {
-        text-align: center;
-        color: #007bff;
-        font-size: 2.5em;
-        margin: 20px 0;
-        font-weight: bold;
-      }
 
-      /* Formularz filtrów */
-      form {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        justify-content: center;
-        padding: 20px;
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 30px;
-      }
+    /* Siatka ćwiczeń */
+    .exercise-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+    .exercise-card {
+      background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden; cursor: pointer;
+    }
+    .exercise-card:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+    .exercise-card img { width: 100%; height: 150px; object-fit: cover; }
+    .exercise-card h3 { margin: 15px 0 10px; font-size: 1.2em; color: #007bff; }
+    .exercise-card p { margin: 5px 0; color: #555; font-size: 0.95em; }
 
-      form select,
-      form input {
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        font-size: 1em;
-        background: white;
-        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        position: relative;
-        width: 200px;
-      }
-
-      form select {
-        background: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%22http://www.w3.org/2000/svg%22 viewBox%3D%220 0 4 5%22%3E%3Cpath fill%3D%22%23666%22 d%3D%22M2 0L0 2h4zM2 5L0 3h4z%22/%3E%3C/svg%3E')
-          no-repeat right 10px center;
-        background-size: 10px;
-      }
-
-      form input {
-        width: 300px;
-      }
-
-      form button {
-        padding: 10px 20px;
-        border-radius: 5px;
-        border: none;
-        font-size: 1em;
-        color: white;
-        background: linear-gradient(90deg, #007bff, #0056b3);
-        cursor: pointer;
-        transition: background 0.3s ease;
-      }
-
-      form button:hover {
-        background: linear-gradient(90deg, #0056b3, #00408b);
-      }
-
-      /* Siatka kart ćwiczeń */
-      .exercise-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        padding: 20px;
-      }
-
-      .exercise-card {
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        overflow: hidden;
-        border: 1px solid #e0e0e0;
-        cursor: pointer;
-        position: relative;
-      }
-
-      .exercise-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-      }
-
-      .exercise-card img {
-        max-width: 100%;
-        height: 150px;
-        object-fit: cover;
-      }
-
-      .exercise-card h3 {
-        margin: 15px 0 10px;
-        font-size: 1.2em;
-        color: #007bff;
-      }
-
-      .exercise-card p {
-        margin: 5px 0;
-        color: #555;
-        font-size: 0.95em;
-      }
-
-      .exercise-card a {
-        display: none; /* Usunięcie widocznego linka, bo cała karta jest klikana */
-      }
-
-      .exercise-card::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-      }
-
-      .exercise-card[data-link]:hover::after {
-        cursor: pointer;
-      }
-
-      /* Stylizacja paginacji */
-      .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        padding: 20px 0;
-      }
-
-      .pagination a {
-        padding: 10px 15px;
-        border: 1px solid #007bff;
-        border-radius: 5px;
-        color: #007bff;
-        text-decoration: none;
-        font-weight: bold;
-        transition: background 0.3s ease, color 0.3s ease;
-      }
-
-      .pagination a.active,
-      .pagination a:hover {
-        background: #007bff;
-        color: white;
-      }
-
-      @media (max-width: 768px) {
-        .pagination a {
-          padding: 8px 10px;
-        }
-      }
-    </style>
+    /* Paginacja */
+    .pagination { display: flex; justify-content: center; gap: 10px; padding: 20px 0; }
+    .pagination a {
+      padding: 10px 15px; border: 1px solid #007bff; border-radius: 5px;
+      color: #007bff; text-decoration: none; font-weight: bold;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .pagination a.active, .pagination a:hover { background: #007bff; color: #fff; }
+    .reset-button{
+      background-color: #303a53;
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
-
 <div class="container">
+  <button class="btn-back" onclick="goBack()">Powrót</button>
   <h1>Lista Ćwiczeń</h1>
-  <form id="form" method="get" th:action="@{/exercises}">
+
+  <!-- Filtry -->
+  <form id="filterForm" class="filter-form">
     <select name="difficulty">
-      <option value="" th:selected="${difficulty == null}">Wszystkie trudności</option>
-      <option value="beginner" th:selected="${difficulty == 'beginner'}">Łatwy</option>
-      <option value="intermediate" th:selected="${difficulty == 'intermediate'}">Średni</option>
-      <option value="advanced" th:selected="${difficulty == 'advanced'}">Trudny</option>
+      <option value="">Wszystkie trudności</option>
+      <option value="beginner">Łatwy</option>
+      <option value="intermediate">Średni</option>
+      <option value="advanced">Trudny</option>
     </select>
+
     <select name="bodyPart">
-      <option value="" th:selected="${bodyPart == null}">Wszystkie części ciała</option>
-      <option th:each="part : ${bodyParts}" th:value="${part.name}" th:text="${part.name}">Część ciała</option>
+      <option value="">Wszystkie części ciała</option>
+      <option th:each="part : ${bodyParts}" th:value="${part.name}" th:text="${part.name}"></option>
     </select>
+
     <select name="equipment">
-      <option value="" th:selected="${equipment == null}">Wszystkie sprzęty</option>
-      <option th:each="equip : ${equipments}" th:value="${equip.name}" th:text="${equip.name}">Sprzęt</option>
+      <option value="">Wszystkie sprzęty</option>
+      <option th:each="equip : ${equipments}" th:value="${equip.name}" th:text="${equip.name}"></option>
     </select>
-    <input type="text" name="name" placeholder="Wyszukaj nazwę ćwiczenia" th:value="${name}"/>
-    <button type="submit" onclick="navigatePage(0)">Filtruj</button>
-    <button type="button" onclick="resetFilters()">Resetuj filtry</button>
+
+    <input type="text" name="name" placeholder="Wyszukaj nazwę ćwiczenia"/>
+
+    <button type="button" class="reset-button" onclick="resetFilters()">Resetuj filtry</button>
   </form>
+
   <!-- Siatka ćwiczeń -->
   <div class="exercise-grid">
-    <div th:each="exercise : ${exercisesPage.content}" class="exercise-card" th:attr="data-link=@{/exercise/{id}(id=${exercise.idExercise})}" onclick="redirectTo(this)">
+    <div th:each="exercise : ${exercisesPage.content}" class="exercise-card"
+         th:attr="data-link=@{/exercise/{id}(id=${exercise.idExercise})}"
+         onclick="redirectTo(this)">
       <img th:src="${exercise.jpg}" alt="Exercise Image" class="exercise-image"/>
       <h3 th:text="${exercise.name}">Nazwa ćwiczenia</h3>
       <p th:text="${exercise.difficulty}">Poziom trudności</p>
       <p th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}">Części ciała</p>
     </div>
   </div>
+
   <!-- Paginacja -->
   <div class="pagination">
-    <a th:if="${currentPage > 0}" href="javascript:void(0);" th:attr="onclick=|navigatePage(${currentPage}-1)|">Poprzednia</a>
-    <a th:if="${currentPage < totalPages - 1}" href="javascript:void(0);" th:attr="onclick=|navigatePage(${currentPage}+1)|">Następna</a>
+    <a th:if="${currentPage > 0}" th:href="@{|?page=${currentPage - 1}|}">Poprzednia</a>
+    <a th:if="${currentPage < totalPages - 1}" th:href="@{|?page=${currentPage + 1}|}">Następna</a>
   </div>
-  <li><a href="/home">Home</a></li>
 </div>
 <div th:replace="~{footer :: footer}"></div>
-    <script>
-    document.querySelector('form').addEventListener('submit', function(event) {
-        event.preventDefault();
 
-        const url = new URL(window.location.href);
-        const formData = new FormData(event.target);
-        formData.forEach((value, key) => url.searchParams.set(key, value));
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const exerciseGrid = document.querySelector(".exercise-grid");
+    const paginationContainer = document.querySelector(".pagination");
+    const filterForm = document.querySelector("#filterForm");
 
-        fetch(url, { method: 'GET' })
-            .then(response => response.text())
-            .then(html => {
-                document.querySelector('.exercise-grid').innerHTML =
-                    new DOMParser().parseFromString(html, 'text/html').querySelector('.exercise-grid').innerHTML;
-            });
-    });
+    function redirectTo(element) {
+      const url = element.getAttribute("data-link");
+      if (url) {
+        window.location.href = url;
+      }
+    }
+    window.redirectTo = redirectTo;
 
-    function navigatePage(page) {
-        const url = new URL(window.location.href);
-        // Ustaw numer strony
-        url.searchParams.set("page", page);
-        // Pobierz wartości filtrów z formularza
-        const formData = new FormData(document.querySelector('form'));
-        formData.forEach((value, key) => {
-            if (value) url.searchParams.set(key, value);
-        });
-        // Przekierowanie na nowy URL z parametrami
-        window.location.href = url.href;
+    function updateExercises(page = 0) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("page", page);
+
+      const formData = new FormData(filterForm);
+      formData.forEach((value, key) => {
+        if (value) {
+          url.searchParams.set(key, value);
+        } else {
+          url.searchParams.delete(key);
+        }
+      });
+
+      fetch(url, { method: "GET" })
+          .then(response => response.text())
+          .then(html => {
+              const newDocument = new DOMParser().parseFromString(html, "text/html");
+
+              // Aktualizacja siatki ćwiczeń
+              const newExerciseGrid = newDocument.querySelector(".exercise-grid");
+              if (newExerciseGrid) {
+                  exerciseGrid.innerHTML = newExerciseGrid.innerHTML;
+              }
+
+              // Aktualizacja paginacji
+              const newPagination = newDocument.querySelector(".pagination");
+              if (newPagination) {
+                  paginationContainer.innerHTML = newPagination.innerHTML;
+                  addPaginationEventListeners();
+              } else {
+                  paginationContainer.innerHTML = '';
+              }
+          })
+          .catch(error => console.error("Błąd pobierania ćwiczeń:", error));
     }
 
     function resetFilters() {
-        const form = document.querySelector('form');
-        form.reset(); // Resetuje wszystkie pola formularza
-        const url = new URL(window.location.href);
-        url.searchParams.delete("difficulty");
-        url.searchParams.delete("bodyPart");
-        url.searchParams.delete("equipment");
-        url.searchParams.delete("name");
-        url.searchParams.set("page", 0); // Przejście na pierwszą stronę
-        window.location.href = url.href;
+      filterForm.reset();
+      updateExercises();
     }
-    // Obsługa przekierowania na kliknięcie w kafelek
-    function redirectTo(element) {
-      const link = element.getAttribute('data-link');
-      if (link) {
-        window.location.href = link;
-      }
+
+    // Udostępniamy funkcję resetFilters globalnie
+    window.resetFilters = resetFilters;
+
+    function addPaginationEventListeners() {
+      document.querySelectorAll(".pagination a").forEach(link => {
+        link.addEventListener("click", function (event) {
+          event.preventDefault();
+          let page = new URL(this.href).searchParams.get("page");
+          updateExercises(page);
+        });
+      });
     }
-    </script>
-  </body>
+
+    filterForm.addEventListener("input", () => updateExercises());
+    addPaginationEventListeners();
+  });
+    function goBack() {
+    window.history.back();
+  }
+
+</script>
+</body>
 </html>

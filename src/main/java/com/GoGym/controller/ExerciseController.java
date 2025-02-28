@@ -8,6 +8,7 @@ import com.GoGym.service.EquipmentService;
 import com.GoGym.service.ExerciseService;
 import com.GoGym.repository.ExerciseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,8 +48,9 @@ public class ExerciseController {
             @RequestParam(required = false) String name,
             Model model) {
 
-        int pageSize = 9; // 9 elementów na stronę
-        Pageable pageable = PageRequest.of(page, pageSize);
+        int pageSize = 12;
+
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
 
         // Konwersja difficulty na Enum (jeśli podano)
         Exercise.Difficulty difficultyEnum = null;
@@ -86,6 +88,7 @@ public class ExerciseController {
 
         return "exercises-list";
     }
+
 
     @GetMapping("/exercise/{id}")
     public String getExerciseDetails(@PathVariable Long id, Model model) {

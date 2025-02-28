@@ -124,11 +124,11 @@
 <div class="container">
     <button class="btn-back" onclick="goBack()">Powrót</button>
     <h1>Twoje Treningi</h1>
-    <div>
+    <form method="get" action="#" id="searchForm">
         <label for="workoutDate">Wybierz datę:</label>
-        <input type="date" id="workoutDate" name="date"/>
-        <button onclick="filterWorkouts()" class="btn pagination-btn">Szukaj</button>
-    </div>
+        <input type="date" id="workoutDate" name="date" th:value="${selectedDate}" />
+        <button type="submit" class="btn pagination-btn">Szukaj</button>
+    </form>
     <table>
         <thead>
         <tr>
@@ -182,32 +182,6 @@
   function goBack() {
     window.history.back();
   }
-  function filterWorkouts() {
-    const selectedDate = document.getElementById("workoutDate").value;
-
-    fetch(`/workouts/user-workouts/filter?date=${selectedDate}`)
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById("workoutTableBody");
-            tableBody.innerHTML = ""; // Czyszczenie tabeli przed wypełnieniem nowymi danymi
-
-            data.forEach(workout => {
-                let row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${workout.workoutDate}</td>
-                    <td>${formatIntensity(workout.intensity)}</td>
-                    <td>${workout.startTime || '-'}</td>
-                    <td>${workout.endTime || '-'}</td>
-                    <td class="${workout.trainingPlanDay ? 'planowy' : ''}">
-                        ${workout.trainingPlanDay ? workout.trainingPlanDay.trainingPlan.name : 'Brak'}
-                    </td>
-                    <td><a href="/workouts/user-workouts/${workout.idWorkout}">Zobacz</a></td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => console.error("Błąd pobierania treningów:", error));
-}
 </script>
 </body>
 </html>
