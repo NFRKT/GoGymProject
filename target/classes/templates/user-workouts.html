@@ -1,104 +1,213 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Twoje Treningi</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(to bottom, #6c757d, #343a40);
-      color: #fff;
-      padding: 20px;
+    <title>Twoje Treningi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    html, body {
+      height: 100%;
       margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
     }
-
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
-      background: #212529;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      flex: 1;
     }
-
     h1 {
       text-align: center;
       margin-bottom: 20px;
+      color: #303a53;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 20px;
     }
-
     th, td {
-      border: 1px solid #dee2e6;
-      padding: 8px;
+      padding: 10px;
+      border: 1px solid #ddd;
       text-align: center;
+      font-size: 14px;
     }
-
     th {
-      background-color: #343a40;
+      background-color: #303a53;
       color: #fff;
     }
-
     td {
-      background-color: #495057;
+      background-color: #f8f9fa;
     }
-
+    /* Styl dla planowych treningowych */
+    td.planowy {
+      background-color: #303a53b5;
+      font-weight: bold;
+      color: #212529;
+    }
     a {
       color: #007bff;
       text-decoration: none;
       transition: color 0.3s;
     }
-
     a:hover {
       color: #0056b3;
     }
+    .back-link {
+      display: block;
+      margin: 20px 0;
+      text-align: center;
+      font-size: 16px;
+      color: #007bff;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+       .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 10px;
+    }
 
-    td.planowy {
-  background-color: #ffca28; /* Jasno żółty */
-  font-weight: bold;
-  color: #212529;
-}
+    .pagination-btn {
+        background: #303a53;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.2s;
+        text-decoration: none;
+    }
 
-  </style>
+    .pagination-btn:hover {
+        background: #1d2733;
+    }
+
+    .pagination-btn:disabled {
+        background: #aaa;
+        cursor: not-allowed;
+    }
+
+    .page-numbers {
+        font-size: 16px;
+        font-weight: bold;
+        color: #303a53;
+    }
+    </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-  <h1>Twoje Treningi</h1>
-  <table>
-    <thead>
-    <tr>
-      <th>Data</th>
-      <th>Intensywność</th>
-      <th>Godzina Rozpoczęcia</th>
-      <th>Godzina Zakończenia</th>
-      <th>Plan Treningowy</th> <!-- Nowa kolumna -->
-      <th>Szczegóły</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="workout : ${workouts}">
-      <td th:text="${workout.workoutDate}"></td>
-      <td th:text="${workout.intensity}"></td>
-      <td th:text="${workout.startTime}"></td>
-      <td th:text="${workout.endTime}"></td>
-      <td th:classappend="${workout.trainingPlanDay != null} ? 'planowy'" th:text="${workout.trainingPlanDay != null ? workout.trainingPlanDay.trainingPlan.name : 'Brak'}"></td>
-      <td><a th:href="@{/workouts/{id}(id=${workout.idWorkout})}">Zobacz</a></td>
-    </tr>
-    </tbody>
+    <button class="btn-back" onclick="goBack()">Powrót</button>
+    <h1>Twoje Treningi</h1>
+    <div>
+        <label for="workoutDate">Wybierz datę:</label>
+        <input type="date" id="workoutDate" name="date"/>
+        <button onclick="filterWorkouts()" class="btn pagination-btn">Szukaj</button>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>Data</th>
+            <th>Intensywność</th>
+            <th>Godzina Rozpoczęcia</th>
+            <th>Godzina Zakończenia</th>
+            <th>Plan Treningowy</th>
+            <th>Szczegóły</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="workout : ${workouts}">
+            <td th:text="${workout.workoutDate}"></td>
+            <td>
+            <span th:switch="${workout.intensity.name()}">
+                <span th:case="'low'">Niska</span>
+                <span th:case="'medium'">Średnia</span>
+                <span th:case="'high'">Wysoka</span>
+                <span th:case="*">Brak danych</span>
+            </span>
+            </td>
+            <td th:text="${workout.startTime}"></td>
+            <td th:text="${workout.endTime}"></td>
+            <td th:classappend="${workout.trainingPlanDay != null} ? 'planowy'"
+                th:text="${workout.trainingPlanDay != null ? workout.trainingPlanDay.trainingPlan.name : 'Brak'}"></td>
+            <td><a th:href="@{/workouts/user-workouts/{id}(id=${workout.idWorkout})}">Zobacz</a></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="pagination" th:if="${workouts.totalPages > 1}">
+        <button th:if="${workouts.hasPrevious()}"
+                th:href="@{/workouts/user-workouts(page=${workouts.number - 1})}"
+                class="btn pagination-btn">
+            &laquo; Poprzednia
+        </button>
 
-  </table>
-  <li><a href="/home">Home</a></li>
+        <span class="page-numbers">
+        Strona <strong th:text="${workouts.number + 1}"></strong> z <strong th:text="${workouts.totalPages}"></strong>
+    </span>
+
+        <button th:if="${workouts.hasNext()}"
+                th:href="@{/workouts/user-workouts(page=${workouts.number + 1})}"
+                class="btn pagination-btn">
+            Następna &raquo;
+        </button>
+    </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
+<script>
+  function goBack() {
+    window.history.back();
+  }
+  function filterWorkouts() {
+    const selectedDate = document.getElementById("workoutDate").value;
+
+    fetch(`/workouts/user-workouts/filter?date=${selectedDate}`)
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById("workoutTableBody");
+            tableBody.innerHTML = ""; // Czyszczenie tabeli przed wypełnieniem nowymi danymi
+
+            data.forEach(workout => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${workout.workoutDate}</td>
+                    <td>${formatIntensity(workout.intensity)}</td>
+                    <td>${workout.startTime || '-'}</td>
+                    <td>${workout.endTime || '-'}</td>
+                    <td class="${workout.trainingPlanDay ? 'planowy' : ''}">
+                        ${workout.trainingPlanDay ? workout.trainingPlanDay.trainingPlan.name : 'Brak'}
+                    </td>
+                    <td><a href="/workouts/user-workouts/${workout.idWorkout}">Zobacz</a></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error("Błąd pobierania treningów:", error));
+}
+</script>
 </body>
 </html>

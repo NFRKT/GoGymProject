@@ -4,120 +4,142 @@
   <title>Szczegóły Treningu</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Common styles -->
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(to bottom, #6c757d, #343a40);
-      color: #fff;
-      padding: 20px;
+    html, body {
+      height: 100%;
       margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
     }
-
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
-      background: #212529;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      background: #161f30a3;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      flex: 1;
     }
-
-    h1, h2 {
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #303a53;
+    }
+    h1 {
+      color: white;
       text-align: center;
       margin-bottom: 20px;
     }
-
     .workout-info, .exercise-list {
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f8f9fa;
     }
-
     .workout-info p {
-      margin: 5px 0;
+      margin: 8px 0;
+      font-size: 15px;
+      line-height: 1.4;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 15px;
     }
-
     th, td {
       border: 1px solid #dee2e6;
-      padding: 8px;
-      text-align: left;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
     }
-
     th {
       background-color: #343a40;
       color: #fff;
     }
-
     td {
       background-color: #495057;
+      color: #fff;
     }
-
     .nav-links {
       margin-top: 20px;
       text-align: center;
     }
-
-    .nav-links a {
-      color: #007bff;
+    .nav-links a, .nav-links button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 5px;
+      font-size: 14px;
       text-decoration: none;
-      font-weight: bold;
-      padding: 10px;
-      display: inline-block;
+      cursor: pointer;
+      transition: background-color 0.3s;
     }
-
-    .nav-links a:hover {
-      text-decoration: underline;
+    .nav-links a:hover, .nav-links button:hover {
+      background-color: #0056b3;
     }
-        .edit-btn, .delete-btn {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        margin: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        border-radius: 5px;
+    /* Duration formatting style */
+    .duration {
+      font-size: 14px;
     }
-
-    .delete-btn {
-        background-color: #dc3545;
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      h1, h2 {
+        font-size: 20px;
+      }
+      .workout-info p, th, td {
+        font-size: 13px;
+      }
+      .nav-links a, .nav-links button {
+        font-size: 12px;
+        padding: 8px 10px;
+      }
     }
-
-    .edit-btn:hover {
-        background-color: #0056b3;
-    }
-
-    .delete-btn:hover {
-        background-color: #c82333;
+     .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-  <h1>Szczegóły Treningu</h1>
+  <button class="btn-back" onclick="goBack()">Powrót</button>
+  <h1>Szczegóły Treningu z dnia - <span th:text="${workout.workoutDate}"></span></h1>
 
-  <!-- 🏋️‍♂️ Sekcja informacji o treningu -->
+  <!-- Workout Information Section -->
   <div class="workout-info">
-    <h2>Informacje ogólne</h2>
-    <p><strong>Data:</strong> <span th:text="${workout.workoutDate}"></span></p>
-    <p><strong>Intensywność:</strong> <span th:text="${workout.intensity}"></span></p>
-    <p><strong>Godzina rozpoczęcia:</strong> <span th:text="${workout.startTime} ?: '-'"></span></p>
-    <p><strong>Godzina zakończenia:</strong> <span th:text="${workout.endTime} ?: '-'"></span></p>
+    <h2>Informacje Ogólne</h2>
+    <p><strong>Intensywność:</strong>
+      <span th:if="${workout.intensity.name() == 'low'}">Niska</span>
+      <span th:if="${workout.intensity.name() == 'medium'}">Średnia</span>
+      <span th:if="${workout.intensity.name() == 'high'}">Wysoka</span>
+      <span th:unless="${workout.intensity}">Brak danych</span>
+    </p>
+    <p><strong>Godzina Rozpoczęcia:</strong> <span th:text="${workout.startTime} ?: '-'"></span></p>
+    <p><strong>Godzina Zakończenia:</strong> <span th:text="${workout.endTime} ?: '-'"></span></p>
     <p><strong>Notatki:</strong> <span th:text="${workout.notes} ?: '-'"></span></p>
   </div>
 
-  <!-- 💪 Tabela z ćwiczeniami siłowymi -->
-  <div class="exercise-list"
-       th:if="${workout.workoutExercises.?[exercise.type.name() == 'STRENGTH'].size() > 0}">
+  <!-- Strength Exercises Section -->
+  <div class="exercise-list" th:if="${workout.workoutExercises.?[exercise.type.name() == 'STRENGTH'].size() > 0}">
     <h2>Ćwiczenia Siłowe</h2>
     <table>
       <thead>
@@ -129,7 +151,8 @@
       </tr>
       </thead>
       <tbody>
-      <tr th:each="exercise : ${workout.workoutExercises}" th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
+      <tr th:each="exercise : ${workout.workoutExercises}"
+          th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
         <td th:text="${exercise.exercise.name}"></td>
         <td th:text="${exercise.sets} ?: '-'"></td>
         <td th:text="${exercise.reps} ?: '-'"></td>
@@ -139,9 +162,8 @@
     </table>
   </div>
 
-  <!-- 🏃‍♂️ Tabela z ćwiczeniami cardio -->
-  <div class="exercise-list"
-       th:if="${workout.workoutExercises.?[exercise.type.name() == 'CARDIO'].size() > 0}">
+  <!-- Cardio Exercises Section -->
+  <div class="exercise-list" th:if="${workout.workoutExercises.?[exercise.type.name() == 'CARDIO'].size() > 0}">
     <h2>Ćwiczenia Cardio</h2>
     <table>
       <thead>
@@ -152,7 +174,8 @@
       </tr>
       </thead>
       <tbody>
-      <tr th:each="exercise : ${workout.workoutExercises}" th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+      <tr th:each="exercise : ${workout.workoutExercises}"
+          th:if="${exercise.exercise.type.name() == 'CARDIO'}">
         <td th:text="${exercise.exercise.name}"></td>
         <td class="duration" th:text="${exercise.duration} ?: '-'"></td>
         <td th:text="${exercise.distance} ?: '-'"></td>
@@ -161,61 +184,50 @@
     </table>
   </div>
 
-
-  <!-- 🔗 Nawigacja -->
-  <div class="nav-links">
-    <a href="/home">🏠 Strona Główna</a>
-    <a href="/workouts">📋 Lista Treningów</a>
-
-    <!-- Przyciski Edytuj i Usuń -->
-    <button onclick="editWorkout()" class="edit-btn">✏️ Edytuj</button>
-    <button onclick="deleteWorkout()" class="delete-btn">🗑 Usuń</button>
-  </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <script>
-function formatDuration(durationInSeconds) {
-    if (!durationInSeconds || durationInSeconds === "-") return "-";
-
-    let hours = Math.floor(durationInSeconds / 3600);
-    let minutes = Math.floor((durationInSeconds % 3600) / 60);
-    let seconds = durationInSeconds % 60;
-
-    if (hours > 0) {
-        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    } else {
-        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    function formatDuration(durationInSeconds) {
+      if (!durationInSeconds || durationInSeconds === "-") return "-";
+      let hours = Math.floor(durationInSeconds / 3600);
+      let minutes = Math.floor((durationInSeconds % 3600) / 60);
+      let seconds = durationInSeconds % 60;
+      if (hours > 0) {
+          return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      } else {
+          return `${minutes}:${String(seconds).padStart(2, '0')}`;
+      }
     }
-}
 
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".duration").forEach(el => {
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".duration").forEach(el => {
         let seconds = parseInt(el.textContent, 10);
         el.textContent = formatDuration(seconds);
+      });
     });
-});
 
-function editWorkout() {
-        const workoutId = [[${workout.idWorkout}]];
-        window.location.href = `/workouts/edit/${workoutId}`;
+    function editWorkout() {
+      const workoutId = [[${workout.idWorkout}]];
+      window.location.href = `/workouts/edit/${workoutId}`;
     }
 
     function deleteWorkout() {
-        if (confirm("Czy na pewno chcesz usunąć ten trening?")) {
-            const workoutId = [[${workout.idWorkout}]];
-
-            fetch(`/workouts/delete/${workoutId}`, {
-                method: "DELETE"
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("Błąd usuwania treningu.");
-                alert("Trening został usunięty.");
-                window.location.href = "/workouts";
-            })
-            .catch(error => console.error("Błąd:", error));
-        }
+      if (confirm("Czy na pewno chcesz usunąć ten trening?")) {
+        const workoutId = [[${workout.idWorkout}]];
+        fetch(`/workouts/delete/${workoutId}`, {
+          method: "DELETE"
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Błąd usuwania treningu.");
+          alert("Trening został usunięty.");
+          window.location.href = "/workouts";
+        })
+        .catch(error => console.error("Błąd:", error));
+      }
     }
-
+      function goBack() {
+    window.history.back();
+  }
   </script>
 </body>
 </html>

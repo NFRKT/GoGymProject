@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -80,6 +81,11 @@ public class WorkoutService {
     public Page<Workout> getWorkoutsByUserPage(User user, Pageable pageable) {
         return workoutRepository.findByUser(user, pageable);
     }
+
+    public Page<Workout> getWorkoutsByUserAndDate(User user, LocalDate date, Pageable pageable) {
+        return workoutRepository.findByUserAndWorkoutDate(user, date, pageable);
+    }
+
     public Workout getWorkoutById(Long id) {
         return workoutRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trening o ID " + id + " nie istnieje."));

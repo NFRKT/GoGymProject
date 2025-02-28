@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,5 +18,6 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     Optional<Workout> findByUserAndTrainingPlanDay(User user, TrainingPlanDay trainingPlanDay);
     boolean existsByTrainingPlanDay_IdDay(Long trainingPlanDayId);
     Page<Workout> findByUser(User user, Pageable pageable);
+    Page<Workout> findByUserAndWorkoutDate(User user, LocalDate workoutDate, Pageable pageable);
 }
 

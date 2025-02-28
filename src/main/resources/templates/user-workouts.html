@@ -124,6 +124,11 @@
 <div class="container">
     <button class="btn-back" onclick="goBack()">Powrót</button>
     <h1>Twoje Treningi</h1>
+    <form method="get" action="#" id="searchForm">
+        <label for="workoutDate">Wybierz datę:</label>
+        <input type="date" id="workoutDate" name="date" th:value="${selectedDate}" />
+        <button type="submit" class="btn pagination-btn">Szukaj</button>
+    </form>
     <table>
         <thead>
         <tr>
@@ -138,7 +143,14 @@
         <tbody>
         <tr th:each="workout : ${workouts}">
             <td th:text="${workout.workoutDate}"></td>
-            <td th:text="${workout.intensity}"></td>
+            <td>
+            <span th:switch="${workout.intensity.name()}">
+                <span th:case="'low'">Niska</span>
+                <span th:case="'medium'">Średnia</span>
+                <span th:case="'high'">Wysoka</span>
+                <span th:case="*">Brak danych</span>
+            </span>
+            </td>
             <td th:text="${workout.startTime}"></td>
             <td th:text="${workout.endTime}"></td>
             <td th:classappend="${workout.trainingPlanDay != null} ? 'planowy'"

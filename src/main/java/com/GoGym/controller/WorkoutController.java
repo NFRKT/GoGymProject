@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +26,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -112,23 +114,30 @@ public class WorkoutController {
         return "workout-details";
     }
 
-
     @GetMapping("/user-workouts")
     public String getUserWorkouts(
             @RequestParam(defaultValue = "0") int page,
-            Model model) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            Model model,
+            Authentication authentication) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        User currentUser = customUserDetails.getUser();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
 
         Pageable pageable = PageRequest.of(page, 20, Sort.by("workoutDate").descending());
-        Page<Workout> workouts = workoutService.getWorkoutsByUserPage(currentUser, pageable);
+
+        Page<Workout> workouts;
+        if (date != null) {
+            workouts = workoutService.getWorkoutsByUserAndDate(user, date, pageable);
+        } else {
+            workouts = workoutService.getWorkoutsByUserPage(user, pageable);
+        }
 
         model.addAttribute("workouts", workouts);
+        model.addAttribute("selectedDate", date); // Przekazujemy wybraną datę do widoku
+
         return "user-workouts";
     }
-
 
     @PostMapping("/add-workout-from-day")
     public ResponseEntity<?> addWorkoutFromDay(@RequestBody WorkoutDTO workoutDTO, Principal principal) {
