@@ -67,6 +67,15 @@
     .btn-delete:hover {
       background-color: #c82333;
     }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
     .day-row, .exercise-row {
       margin-bottom: 15px;
       padding: 10px;
@@ -105,7 +114,8 @@
       text-align: center;
       margin-top: 10px;
     }
-  </style>
+
+    </style>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Select2 JS -->
@@ -114,105 +124,124 @@
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="content">
-<div class="form-container">
-    <h2>Edycja planu treningowego</h2>
-    <form id="edit-plan-form">
-        <div>
-            <label for="name">Nazwa planu:</label>
-            <input type="text" id="name" name="name" th:value="${plan.name}" required>
-        </div>
-        <div>
-            <label for="description">Opis planu:</label>
-            <textarea id="description" name="description" th:text="${plan.description}"></textarea>
-        </div>
+    <div class="form-container">
+        <button class="btn-back" onclick="goBack()">Powrót</button>
+        <h2>Edycja planu treningowego</h2>
+        <form id="edit-plan-form">
+            <div>
+                <label for="name">Nazwa planu:</label>
+                <input type="text" id="name" name="name" th:value="${plan.name}" required>
+            </div>
+            <div>
+                <label for="description">Opis planu:</label>
+                <textarea id="description" name="description" th:text="${plan.description}"></textarea>
+            </div>
 
-        <input type="hidden" id="planId" th:value="${plan.idPlan}" />
+            <input type="hidden" id="planId" th:value="${plan.idPlan}"/>
 
-        <h3>Dni planu</h3>
-        <div id="days-container">
-            <div th:each="day, dayStat : ${plan.trainingPlanDays}">
-                <div class="day day-row" th:data-day-id="${day.idDay}">
-                    <input type="hidden" name="dayIds[]" th:value="${day.idDay}">
+            <h3>Dni planu</h3>
+            <div id="days-container">
+                <div th:each="day, dayStat : ${plan.trainingPlanDays}">
+                    <div class="day day-row" th:data-day-id="${day.idDay}">
+                        <input type="hidden" name="dayIds[]" th:value="${day.idDay}">
 
-                    <div>
-                        <label for="dayType-${dayStat.index}">Typ dnia:</label>
-                        <select name="dayType[]" id="dayType-${dayStat.index}">
-                            <option value="training" th:selected="${day.dayType.name() == 'training'}">Trening</option>
-                            <option value="rest" th:selected="${day.dayType.name() == 'rest'}">Odpoczynek</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label for="dayType-${dayStat.index}">Typ dnia:</label>
+                            <select name="dayType[]" id="dayType-${dayStat.index}">
+                                <option value="training" th:selected="${day.dayType.name() == 'training'}">Trening
+                                </option>
+                                <option value="rest" th:selected="${day.dayType.name() == 'rest'}">Odpoczynek</option>
+                            </select>
+                        </div>
 
-                    <div>
-                        <label for="notes-${dayStat.index}">Notatki:</label>
-                        <textarea name="notes[]" id="notes-${dayStat.index}" th:text="${day.notes}"></textarea>
-                    </div>
+                        <div>
+                            <label for="notes-${dayStat.index}">Notatki:</label>
+                            <textarea name="notes[]" id="notes-${dayStat.index}" th:text="${day.notes}"></textarea>
+                        </div>
 
-                    <div>
-                        <h4>Ćwiczenia dnia</h4>
-                        <div class="exercises">
-                            <div th:each="exercise, exerciseStat : ${day.exercises}">
-                                <div class="exercise exercise-row">
-                                    <input type="hidden" name="planExerciseIds[${dayStat.index}][]" th:value="${exercise.idPlanExercise}">
-                                    <input type="hidden" name="exerciseIds[${dayStat.index}][]" th:value="${exercise.idExercise}">
-                                    <div>
-                                        <label>Ćwiczenie:</label>
-                                        <select name="exerciseIds[${dayStat.index}][]" class="exercise-select"
-                                                th:data-type="${exercise.type}" onchange="toggleExerciseFields(this)">
-                                            <option th:each="e : ${exercises}"
-                                                    th:value="${e.idExercise}"
-                                                    th:selected="${e.idExercise == exercise.idExercise}"
-                                                    th:text="${e.name}"
-                                                    th:data-type="${e.type}">
-                                            </option>
-                                        </select>
+                        <div>
+                            <h4>Ćwiczenia dnia</h4>
+                            <div class="exercises">
+                                <div th:each="exercise, exerciseStat : ${day.exercises}">
+                                    <div class="exercise exercise-row">
+                                        <input type="hidden" name="planExerciseIds[${dayStat.index}][]"
+                                               th:value="${exercise.idPlanExercise}">
+                                        <input type="hidden" name="exerciseIds[${dayStat.index}][]"
+                                               th:value="${exercise.idExercise}">
+                                        <div>
+                                            <label>Ćwiczenie:</label>
+                                            <select name="exerciseIds[${dayStat.index}][]" class="exercise-select"
+                                                    th:data-type="${exercise.type}"
+                                                    onchange="toggleExerciseFields(this)">
+                                                <option th:each="e : ${exercises}"
+                                                        th:value="${e.idExercise}"
+                                                        th:selected="${e.idExercise == exercise.idExercise}"
+                                                        th:text="${e.name}"
+                                                        th:data-type="${e.type}">
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="strength-fields"
+                                             th:style="${exercise.type == 'STRENGTH'} ? 'display:block;' : 'display:none;'">
+                                            <div>
+                                                <label>Serie:</label>
+                                                <input type="number" name="sets[${dayStat.index}][]"
+                                                       th:value="${exercise.sets != null ? exercise.sets : ''}">
+                                            </div>
+                                            <div>
+                                                <label>Powtórzenia:</label>
+                                                <input type="number" name="reps[${dayStat.index}][]"
+                                                       th:value="${exercise.reps != null ? exercise.reps : ''}">
+                                            </div>
+                                            <div>
+                                                <label>Obciążenie (kg):</label>
+                                                <input type="number" step="0.1" name="weight[${dayStat.index}][]"
+                                                       th:value="${exercise.weight != null ? exercise.weight : ''}">
+                                            </div>
+                                        </div>
+
+                                        <div class="cardio-fields"
+                                             th:style="${exercise.type == 'CARDIO'} ? 'display:block;' : 'display:none;'">
+                                            <div>
+                                                <label>Czas trwania (mm:ss):</label>
+                                                <th:block
+                                                        th:with="formattedDuration=${exercise.duration != null ? (exercise.duration ge 3600 ? #numbers.formatInteger(exercise.duration / 3600, 2) + ':' + #numbers.formatInteger((exercise.duration % 3600) / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2) : #numbers.formatInteger(exercise.duration / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2)) : ''}">
+                                                    <input type="text" name="duration[${dayStat.index}][]"
+                                                           pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]"
+                                                           placeholder="hh:mm:ss lub mm:ss"
+                                                           th:value="${formattedDuration}">
+                                                </th:block>
+                                            </div>
+                                            <div>
+                                                <label>Dystans (km):</label>
+                                                <input type="number" step="0.1" name="distance[${dayStat.index}][]"
+                                                       th:value="${exercise.distance != null ? exercise.distance : ''}">
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="btn btn-delete" onclick="removeExercise(this)">Usuń
+                                            ćwiczenie
+                                        </button>
                                     </div>
-
-                                    <div class="strength-fields" th:style="${exercise.type == 'STRENGTH'} ? 'display:block;' : 'display:none;'">
-                                        <div>
-                                            <label>Serie:</label>
-                                            <input type="number" name="sets[${dayStat.index}][]" th:value="${exercise.sets != null ? exercise.sets : ''}">
-                                        </div>
-                                        <div>
-                                            <label>Powtórzenia:</label>
-                                            <input type="number" name="reps[${dayStat.index}][]" th:value="${exercise.reps != null ? exercise.reps : ''}">
-                                        </div>
-                                        <div>
-                                            <label>Obciążenie (kg):</label>
-                                            <input type="number" step="0.1" name="weight[${dayStat.index}][]" th:value="${exercise.weight != null ? exercise.weight : ''}">
-                                        </div>
-                                    </div>
-
-                                    <div class="cardio-fields" th:style="${exercise.type == 'CARDIO'} ? 'display:block;' : 'display:none;'">
-                                        <div>
-                                            <label>Czas trwania (mm:ss):</label>
-                                            <th:block th:with="formattedDuration=${exercise.duration != null ? (exercise.duration ge 3600 ? #numbers.formatInteger(exercise.duration / 3600, 2) + ':' + #numbers.formatInteger((exercise.duration % 3600) / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2) : #numbers.formatInteger(exercise.duration / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2)) : ''}">
-                                                <input type="text" name="duration[${dayStat.index}][]" pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]" placeholder="hh:mm:ss lub mm:ss" th:value="${formattedDuration}">
-                                            </th:block>
-                                        </div>
-                                        <div>
-                                            <label>Dystans (km):</label>
-                                            <input type="number" step="0.1" name="distance[${dayStat.index}][]" th:value="${exercise.distance != null ? exercise.distance : ''}">
-                                        </div>
-                                    </div>
-
-                                    <button type="button" class="btn btn-delete" onclick="removeExercise(this)">Usuń ćwiczenie</button>
                                 </div>
                             </div>
+                            <!-- Dla istniejących dni przekazujemy identyfikator jako string -->
+                            <button type="button" class="btn" th:onclick="|addExerciseToDay('${day.idDay}')|">Dodaj
+                                ćwiczenie
+                            </button>
                         </div>
-                        <!-- Dla istniejących dni przekazujemy identyfikator jako string -->
-                        <button type="button" class="btn" th:onclick="|addExerciseToDay('${day.idDay}')|">Dodaj ćwiczenie</button>
+                        <button type="button" class="btn btn-delete" onclick="removeDay(this)">Usuń dzień</button>
                     </div>
-                    <button type="button" class="btn btn-delete" onclick="removeDay(this)">Usuń dzień</button>
                 </div>
             </div>
-        </div>
 
-        <button type="button" class="btn" onclick="addNewDay()">Dodaj nowy dzień</button>
-        <br>
-        <button type="submit" class="btn">Zapisz zmiany</button>
-    </form>
-    <div id="formError" class="error-message" style="display:none;"></div>
-</div>
+            <button type="button" class="btn" onclick="addNewDay()">Dodaj nowy dzień</button>
+            <br>
+            <button type="submit" class="btn">Zapisz zmiany</button>
+        </form>
+        <div id="formError" class="error-message" style="display:none;"></div>
+    </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <script th:inline="javascript">
@@ -562,6 +591,10 @@
             toggleExerciseFields(select);
         });
     });
+    function goBack() {
+        window.history.back();
+    }
+
 </script>
 </body>
 </html>

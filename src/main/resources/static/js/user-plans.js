@@ -439,7 +439,7 @@ function updatePlanUI(data) {
           <video src="${videoUrl}" controls width="300">
             Twoja przeglądarka nie obsługuje odtwarzacza wideo.
           </video>
-          <button type="button" class="delete-video-btn" data-exercise-id="${exerciseId}">Usuń nagranie</button>
+          <button type="button" class="delete-video-btn" style="padding:5px 10px; font-size:13px;" data-exercise-id="${exerciseId}">Usuń nagranie</button>
         `;
       } else {
         videoStatusDiv.innerHTML = `

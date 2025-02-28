@@ -7,6 +7,8 @@ import com.GoGym.module.User;
 import com.GoGym.repository.ExerciseRepository;
 import com.GoGym.repository.WorkoutExerciseRepository;
 import com.GoGym.repository.WorkoutRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +77,9 @@ public class WorkoutService {
     public List<Workout> getWorkoutsByUser(User user) {
         return workoutRepository.findByUserOrderByWorkoutDateDesc(user);
     }
-
+    public Page<Workout> getWorkoutsByUserPage(User user, Pageable pageable) {
+        return workoutRepository.findByUser(user, pageable);
+    }
     public Workout getWorkoutById(Long id) {
         return workoutRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trening o ID " + id + " nie istnieje."));

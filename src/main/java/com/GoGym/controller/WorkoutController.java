@@ -12,6 +12,10 @@ import com.GoGym.service.WorkoutService;
 import com.GoGym.security.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -92,7 +96,7 @@ public class WorkoutController {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/user-workouts/{id}")
     public String getWorkoutDetails(@PathVariable Long id, Model model, Principal principal) {
         Workout workout = workoutService.getWorkoutById(id);
         // Pobranie aktualnie zalogowanego użytkownika
@@ -109,16 +113,22 @@ public class WorkoutController {
     }
 
 
-    @GetMapping
-    public String getUserWorkouts(Model model) {
+    @GetMapping("/user-workouts")
+    public String getUserWorkouts(
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         User currentUser = customUserDetails.getUser();
 
-        List<Workout> workouts = workoutService.getWorkoutsByUser(currentUser);
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("workoutDate").descending());
+        Page<Workout> workouts = workoutService.getWorkoutsByUserPage(currentUser, pageable);
+
         model.addAttribute("workouts", workouts);
         return "user-workouts";
     }
+
 
     @PostMapping("/add-workout-from-day")
     public ResponseEntity<?> addWorkoutFromDay(@RequestBody WorkoutDTO workoutDTO, Principal principal) {
@@ -320,6 +330,6 @@ public class WorkoutController {
 
         workoutRepository.save(existingWorkout);
         log.info("Zaktualizowano trening o ID: {}", existingWorkout.getIdWorkout());
-        return "redirect:/workouts/" + existingWorkout.getIdWorkout();
+        return "redirect:/workouts/user-workouts/" + existingWorkout.getIdWorkout();
     }
 }

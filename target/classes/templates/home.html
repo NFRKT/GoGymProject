@@ -91,7 +91,7 @@
         <a th:href="@{/list-trainers}" class="w3-button w3-blue w3-round">Nasi trenerzy!</a>
         <a th:href="@{/all-user-list}" class="w3-button w3-blue w3-round">Wszyscy użytkownicy!</a>
         <a th:if="${isAdmin}" th:href="@{/admin/panel}" class="w3-button w3-red">Panel Administratora</a>
-        <a th:if="${isUser}" th:href="@{/workouts}" class="w3-button w3-blue w3-round">Twoje treningi</a>
+        <a th:if="${isUser}" th:href="@{/workouts/user-workouts}" class="w3-button w3-blue w3-round">Twoje treningi</a>
         <a th:if="${isUser}" th:href="@{/workouts/create}" class="w3-button w3-blue w3-round">Stwórz trening</a>
         <a th:href="@{/exercises}" class="w3-button w3-blue w3-round">Zobacz ćwiczenia</a>
 

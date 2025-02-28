@@ -1,283 +1,407 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <title>Archiwalne Plany Treningowe</title>
-  <style>
-    .body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Archiwalne Plany Treningowe</title>
+    <style>
+/* Ogólne ustawienia */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
+    }
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      flex: 1;
+    }
+    /* Kontener główny z planami – styl podobny do panelu admina */
+    .plans-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin-bottom: 40px;
+    }
+    /* Filtry – ujednolicone z resztą */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .filters input[type="text"],
+    .filters input[type="date"],
+    .filters select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      min-width: 200px;
+      font-size: 14px;
+    }
+    .filters label {
+      font-size: 14px;
+      color: #303a53;
+    }
+    .reset-button {
+      background-color: #303a53;
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    /* Plans Grid – ujednolicone z innymi widokami */
     .plans-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
     }
+    .plan-each {
+      /* Każdy plan jako karta */
+    }
     .plan-panel {
-      border: 1px solid #ccc;
+      background-color: #fff;
       border-radius: 10px;
       padding: 20px;
-      background-color: #f9f9f9;
-      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .plan-panel:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
     .plan-panel h3 {
-      color: #333;
+      margin-bottom: 10px;
+      color: #303a53;
     }
-    /* Modal */
+    .plan-panel p {
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    .status-container {
+      margin-top: 15px;
+    }
+    .status-text {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #fff;
+      font-size: 13px;
+    }
+    .status-text.completed {
+      background-color: #28a745;
+    }
+    .status-text.active {
+      background-color: #ffc107;
+    }
+    /* Modal – ujednolicone z panelem admina */
     .modal {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.7);
       justify-content: center;
       align-items: center;
+      z-index: 1000;
     }
     .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 80%;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
       max-height: 80%;
       overflow-y: auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      position: relative;
     }
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #303a53;
       margin-bottom: 20px;
     }
     .modal-header h3 {
-      margin: 0;
+      font-size: 24px;
+      color: #303a53;
     }
     .close-modal {
+      font-size: 28px;
+      color: #dc3545;
       cursor: pointer;
-      font-size: 20px;
-      color: red;
+      transition: color 0.2s;
     }
-    .exercise {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 10px;
-      border-bottom: 1px solid #ddd;
+    .close-modal:hover {
+      color: #a71d2a;
     }
-    .status-icon {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .status-circle {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background-color: red;
-    }
-    .status-icon.completed .status-circle {
-      background-color: green;
-    }
-    .status-icon.active .status-circle {
-      background-color: orange;
-    }
-    .plan-panel .status-container {
-      margin-top: 10px;
-    }
-    .plan-panel .status-text {
-      font-weight: bold;
-      padding: 5px 10px;
-      border-radius: 5px;
-      color: white;
-    }
-    .plan-panel .status-text:empty {
-      display: none;
-    }
-    .status-text.completed {
-      background-color: green;
-    }
-    .status-text.active {
-      background-color: orange;
-    }
-    .edit-button {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-    .edit-button:hover {
-      background-color: #0056b3;
-    }
-    .reset-button {
-      background-color: #6c757d;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
+    .modal-content button {
+      background-color: #303a53;
+      color: #fff;
       border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
       cursor: pointer;
-      margin-left: 10px;
+      transition: background-color 0.2s;
+      margin-right: 10px;
+      font-size: 14px;
     }
-    .reset-button:hover {
+    .modal-content button:hover {
+      background-color: #1d2733;
+    }
+    .modal-content button.cancel-btn {
+      background-color: #6c757d;
+    }
+    .modal-content button.cancel-btn:hover {
       background-color: #5a6268;
     }
-  </style>
+    /* Responsywność */
+    @media screen and (max-width: 768px) {
+      .filters input[type="text"],
+      .filters input[type="date"],
+      .filters select {
+        min-width: 150px;
+        font-size: 12px;
+      }
+      .reset-button {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+      .plans-grid {
+        gap: 10px;
+      }
+      .plan-panel {
+        padding: 15px;
+      }
+      .plan-panel h3 {
+        font-size: 16px;
+      }
+      .plan-panel p {
+        font-size: 12px;
+      }
+      .modal-content {
+        padding: 20px;
+      }
+      .modal-header h3 {
+        font-size: 20px;
+      }
+      .btn, .modal-content button {
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+    }
+    /* Loading Spinner */
+    .loading-spinner {
+      display: none;
+      border: 4px solid rgba(0,0,0,0.1);
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      color: white;
+      font-weight: 500;
+      font-size: 12px;
+    }
+    .status-badge.completed {
+      background-color: #28a745;
+    }
+    .status-badge.active {
+      background-color: #ffc107;
+    }
+    .status-badge.notCompleted {
+      background-color: #ffc107;
+    }
+    .plan-description {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<!-- Filtry i sortowanie -->
-<div>
-  <input type="text" id="searchInput" placeholder="Szukaj nazwy planu..." onkeyup="filterPlans()">
-  <label for="dateFilter">Data rozpoczęcia:</label>
-  <input type="date" id="dateFilter" onchange="filterPlans()">
-  <label for="clientSelect">Klient:</label>
-  <select id="clientSelect" onchange="filterPlans()">
-    <option value="">Wszyscy klienci</option>
-    <!-- Jeśli potrzebujesz listy klientów – możesz ją przekazać lub pominąć -->
-  </select>
-  <select id="sortSelect" onchange="sortPlans()">
-    <option value="">Sortuj według...</option>
-    <option value="name">Sortuj według nazwy</option>
-    <option value="startDate">Sortuj według daty rozpoczęcia</option>
-    <option value="status">Sortuj według statusu</option>
-  </select>
-  <label>
-    <input type="checkbox" id="hideCompletedPlans" onchange="filterPlans()"> Ukryj ukończone plany
-  </label>
-  <button onclick="resetFilters()" class="reset-button">Resetuj filtry</button>
-</div>
-
-<!-- Link przechodzący do widoku aktywnych planów -->
-<div style="margin: 20px 0;">
-  <a th:href="@{'/trainer-plans?idUser=' + ${idUser}}">
-    Przejdź do planów aktywnych podopiecznych
-  </a>
-</div>
-
-<h2>Archiwalne Plany Treningowe</h2>
-<div class="plans-grid" th:if="${#lists.isEmpty(archivedPlans)}">
-  <p>Brak dostępnych archiwalnych planów treningowych.</p>
-</div>
-<div class="plans-grid" id="archivedPlansGrid" th:if="${!#lists.isEmpty(archivedPlans)}">
-  <div class="plan-each" th:each="plan : ${archivedPlans}">
-    <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
-      <h3 class="plan-name" th:text="${plan.name}">Nazwa Planu</h3>
-      <p><strong>Opis:</strong> <span th:text="${plan.description}">Opis planu...</span></p>
-      <p>
-        <strong>Data:</strong>
-        <span class="start-date" th:text="${plan.startDate}">Data startu</span> -
-        <span th:text="${plan.endDate}">Data końca</span>
-      </p>
-      <p>
-        <strong>Klient:</strong>
-        <span class="client-name" th:text="${plan.client.firstName + ' ' + plan.client.secondName}">Imię i Nazwisko</span>
-      </p>
-      <div class="status-container">
-        <p>
-          <strong>Status:</strong>
-          <span class="status-text"
-                th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
-                th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
-            </span>
-        </p>
-      </div>
-      <div>
-        <a th:href="@{'/trainer-plans/edit/' + ${plan.idPlan}}" class="edit-button">Edytuj</a>
-      </div>
-      <div>
-        <form th:action="@{'/trainer-plans/delete/' + ${plan.idPlan}}" method="post"
-              onsubmit="return confirm('Czy na pewno chcesz usunąć ten plan?');">
-          <button type="button" class="delete-button"
-                  onclick="deletePlan(this)"
-                  th:data-plan-id="${plan.idPlan}"
-                  style="background-color: #dc3545; color: white; padding: 10px 20px; border-radius: 5px;">
-            Usuń
-          </button>
-        </form>
-      </div>
-    </div>
-    <!-- Modal ze szczegółami planu -->
-    <div class="modal" th:data-plan-id="${plan.idPlan}">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
-          <span class="close-modal">&times;</span>
+<div class="container">
+    <div class="plans-container">
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Szukaj nazwy planu..." onkeyup="filterPlans()">
+            <label for="dateFilter">Data rozpoczęcia:</label>
+            <input type="date" id="dateFilter" onchange="filterPlans()">
+            <label for="clientSelect">Klient:</label>
+            <select id="clientSelect" onchange="filterPlans()">
+                <option value="">Wszyscy klienci</option>
+                <option th:each="client : ${clients}"
+                        th:value="${client.firstName + ' ' + client.secondName}"
+                        th:text="${client.firstName + ' ' + client.secondName}">
+                </option>
+            </select>
+            <select id="sortSelect" onchange="sortPlans()">
+                <option value="">Sortuj według...</option>
+                <option value="name">Sortuj według nazwy</option>
+                <option value="startDate">Sortuj według daty rozpoczęcia</option>
+                <option value="status">Sortuj według statusu</option>
+            </select>
+            <label>
+                <input type="checkbox" id="hideCompletedPlans" onchange="filterPlans()">
+                Ukryj ukończone plany
+            </label>
+            <button onclick="resetFilters()" class="reset-button">Resetuj filtry</button>
         </div>
-        <div class="status-container">
-          <p>
-            <strong>Status planu:</strong>
-            <span id="plan-status" class="status-icon"
-                  th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}">
-                <span class="status-circle"></span>
-              </span>
-          </p>
+
+        <div style="margin-bottom: 20px;">
+            <a th:href="@{'/trainer-plans?idUser=' + ${idUser}}"
+               class="btn"
+               style="background-color: #303a539e; color: #fff; border: none; padding: 2px 2px;
+           border-radius: 5px; cursor: pointer;transition: background-color 0.2s; margin-right: 10px;
+           margin-top: 5px; font-size: 14px; text-decoration: none;">Przejdź do planów aktualnych klientów</a>
         </div>
-        <div th:each="day : ${plan.trainingPlanDays}">
-          <div th:data-day-id="${day.idDay}">
-            <h4>
-              <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
-              -
-              <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
-            </h4>
-            <div class="status-container">
-              <p>
-                <strong>Status dnia:</strong>
-                <span id="day-status" class="status-icon"
-                      th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'completed' : 'not-completed'}">
-                    <span class="status-circle"></span>
-                  </span>
-              </p>
+
+        <h2 style="text-align: center; color: #303a53;">Plany Treningowe Byłych Podopiecznych</h2>
+        <div class="plans-grid" th:if="${#lists.isEmpty(archivedPlans)}">
+            <p style="text-align: center;">Brak dostępnych planów treningowych.</p>
+        </div>
+        <div class="plans-grid" id="archivedPlansGrid" th:if="${!#lists.isEmpty(archivedPlans)}">
+            <div class="plan-each" th:each="plan : ${archivedPlans}">
+                <div class="plan-panel" th:data-plan-id="${plan.idPlan}">
+                    <h3 class="plan-name" th:text="${plan.name}">Nazwa Planu</h3>
+                    <p>
+                        <strong>Data:</strong>
+                        <span class="start-date" th:text="${plan.startDate}">Data startu</span> -
+                        <span th:text="${plan.endDate}">Data końca</span>
+                    </p>
+                    <p>
+                        <strong>Klient:</strong>
+                        <span class="client-name" th:text="${plan.client.firstName + ' ' + plan.client.secondName}">Imię i Nazwisko</span>
+                    </p>
+                    <div class="status-container">
+                        <p>
+                            <strong>Status:</strong>
+                            <span class="status-text"
+                                  th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'completed' : 'active'}"
+                                  th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+          </span>
+                        </p>
+                    </div>
+                </div>
+                <!-- Modal ze szczegółami planu -->
+                <div class="modal" th:data-plan-id="${plan.idPlan}">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 th:text="'Plan: ' + ${plan.name}">Szczegóły Planu</h3>
+                            <span class="close-modal">&times;</span>
+                        </div>
+                        <label style="font-weight: bolder;">Opis planu:</label>
+                        <p th:if="${plan.description != null}" class="plan-description"
+                           style="font-size:14px; color:#555; margin-top:5px;"
+                           th:text="${plan.description}"></p>
+                        <div class="status-container" style="margin-bottom:20px;">
+                            <p>
+                                <strong>Status planu:</strong>
+                                <span id="plan-status" class="status-badge"
+                                      th:classappend="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? ' completed' : ' active'}"
+                                      th:text="${plan.status == T(com.GoGym.module.TrainingPlan.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+                                </span>
+                            </p>
+                        </div>
+                        <div th:each="day : ${plan.trainingPlanDays}"
+                             style="border: 1px solid #ccc; border-radius:8px; margin-bottom:20px; padding:15px;">
+                            <div th:data-day-id="${day.idDay}">
+                                <h4 style="margin-bottom:10px; color:#303a53;">
+                                    <span th:text="${day.dayType == T(com.GoGym.module.TrainingPlanDay.DayType).training ? 'Dzień Treningowy' : 'Regeneracja'}"></span>
+                                    - <span th:text="${#temporals.format(day.date, 'EEEE dd.MM.yyyy')}"></span>
+                                </h4>
+                                <div class="status-container" style="margin-bottom:10px;">
+                                    <p style="font-size:13px;">
+                                        <strong>Status dnia:</strong>
+                                        <span class="status-badge"
+                                              th:classappend="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? ' completed' : ' active'}"
+                                              th:text="${day.status == T(com.GoGym.module.TrainingPlanDay.Status).completed ? 'UKOŃCZONY' : 'AKTYWNY'}">
+                                    </span>
+                                    </p>
+                                </div>
+                                <p style="margin-bottom:15px; font-size:13px;">
+                                    <strong>Notatki:</strong>
+                                    <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
+                                </p>
+                                <ul style="list-style: none; padding-left:0;">
+                                    <li class="exercise" th:each="exercise : ${day.exercises}"
+                                        style="border-top:1px solid #eee; padding-top:10px; margin-top:10px;">
+                                        <div style="margin-bottom:5px; font-size:13px;">
+                                            <strong th:text="${exercise.exercise.name}">Ćwiczenie</strong>
+                                            <a th:href="@{'/exercise/' + ${exercise.exercise.idExercise}}"
+                                               target="_blank" class="btn"
+                                               style="background-color: #303a539e; color: #fff; border: none; padding: 2px 2px; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; margin-right: 10px; margin-top: 5px; font-size: 14px; text-decoration: none;">Zobacz
+                                                ćwiczenie</a>
+                                            <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
+                                            - <span th:text="${exercise.sets}"></span> serie,
+                                            <span th:text="${exercise.reps}"></span> powtórzeń,
+                                            <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}"></span>
+                                          </span>
+                                            <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
+                                            - <span class="exercise-duration" th:data-seconds="${exercise.duration}"
+                                                    th:text="${exercise.duration}"></span> min,
+                                            <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
+                                          </span>
+                                        </div>
+                                        <div class="status-container" style="margin-bottom:5px;">
+                                            <p style="font-size:13px;">
+                                                <strong>Status ćwiczenia:</strong>
+                                                <span id="exercise-status" class="status-badge"
+                                                      th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? ' completed' : ' notCompleted'}"
+                                                      th:text="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'UKOŃCZONY' : 'NIEUKOŃCZONE'}">
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div class="video-preview" th:if="${exercise.videoUrl != null}"
+                                             style="margin-top:10px;">
+                                            <video th:if="${exercise.videoUrl.contains('cloudinary.com')}"
+                                                   th:src="${exercise.videoUrl}" controls width="300">
+                                                Twoja przeglądarka nie obsługuje odtwarzacza wideo.
+                                            </video>
+                                            <p th:if="!${exercise.videoUrl.contains('cloudinary.com')}">
+                                                <a th:href="${exercise.videoUrl}" target="_blank">🔗 Obejrzyj
+                                                    nagranie</a>
+                                            </p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <p>
-              <strong>Notatki:</strong>
-              <span th:text="${day.notes != null ? day.notes : 'Brak notatek'}">Brak notatek</span>
-            </p>
-            <ul>
-              <li class="exercise" th:each="exercise : ${day.exercises}">
-                  <span>
-                    <strong th:text="${exercise.exercise.name}">Nazwa ćwiczenia</strong>
-                    <span th:if="${exercise.exercise.type.name() == 'STRENGTH'}">
-                      - <span th:text="${exercise.sets}"></span> serie,
-                      <span th:text="${exercise.reps}"></span> powtórzeń,
-                      <span th:text="${exercise.weight != null ? exercise.weight + ' kg' : 'bez obciążenia'}">0 kg</span>
-                    </span>
-                    <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
-                      - <span class="exercise-duration"
-                              th:data-seconds="${exercise.duration}"
-                              th:text="${exercise.duration}"></span>,
-                      <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span>
-                    </span>
-                  </span>
-                <div class="status-container">
-                    <span id="exercise-status" class="status-icon"
-                          th:classappend="${exercise.status == T(com.GoGym.module.PlanExercise.Status).completed ? 'completed' : 'not-completed'}">
-                      <span class="status-circle"></span>
-                    </span>
-                </div>
-                <div class="video-preview" th:if="${exercise.videoUrl != null}">
-                  <video th:if="${exercise.videoUrl.contains('cloudinary.com')}"
-                         th:src="${exercise.videoUrl}" controls width="300">
-                    Twoja przeglądarka nie obsługuje odtwarzacza wideo.
-                  </video>
-                  <p th:if="!${exercise.videoUrl.contains('cloudinary.com')}">
-                    <a th:href="${exercise.videoUrl}" target="_blank">🔗 Obejrzyj nagranie</a>
-                  </p>
-                </div>
-              </li>
-            </ul>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <script defer src="/js/trainer-plans.js"></script>

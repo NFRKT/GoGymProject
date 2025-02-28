@@ -212,19 +212,6 @@
         padding: 8px 10px;
       }
     }
-        .status-icon {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .status-circle {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background-color: red;
-    }
-    .status-icon.completed .status-circle { background-color: #28a745; }
-    .status-icon.active .status-circle { background-color: #ffc107; }
     /* Loading Spinner */
     .loading-spinner {
       display: none;
@@ -267,7 +254,6 @@
 <div th:replace="~{header :: header}"></div>
 <div class="container">
     <div class="plans-container">
-        <!-- Filtry -->
         <div class="filters">
             <input type="text" id="searchInput" placeholder="Szukaj nazwy planu..." />
             <label for="dateFilter">Data rozpoczęcia:</label>
@@ -346,7 +332,6 @@
                                 </span>
                             </p>
                         </div>
-
                         <div th:each="day : ${plan.trainingPlanDays}" style="border: 1px solid #ccc; border-radius:8px; margin-bottom:20px; padding:15px;">
                             <div th:data-day-id="${day.idDay}">
                                 <h4 style="margin-bottom:10px; color:#303a53;">

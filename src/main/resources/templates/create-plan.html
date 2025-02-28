@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <title>Stwórz Plan Treningowy</title>
-  <!-- Select2 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Stwórz Plan Treningowy</title>
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
+    <style>
     html, body {
       height: 100%;
       margin: 0;
@@ -67,6 +67,15 @@
     .btn-delete:hover {
       background-color: #c82333;
     }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
     .day-row, .exercise-row {
       margin-bottom: 15px;
       padding: 10px;
@@ -105,8 +114,9 @@
       text-align: center;
       margin-top: 10px;
     }
-  </style>
-  <script th:inline="javascript">
+
+    </style>
+    <script th:inline="javascript">
     // Pobieramy listę ćwiczeń z backendu (np. w formie JSON)
     let exercises = /*[[${exercises}]]*/ [];
 
@@ -188,37 +198,39 @@
         row.querySelector(".cardio-fields").style.display = "none";
       }
     }
-  </script>
+
+    </script>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="content">
-<div class="form-container">
-  <h2>Stwórz Plan Treningowy</h2>
-  <form th:action="@{/create-plan}" method="post" id="planForm">
-    <input type="hidden" name="clientId" th:value="${client.idUser}" />
-    <input type="hidden" name="trainerId" th:value="${trainerId}" />
+    <div class="form-container">
+        <button class="btn-back" onclick="goBack()">Powrót</button>
+        <h2>Stwórz Plan Treningowy</h2>
+        <form th:action="@{/create-plan}" method="post" id="planForm">
+            <input type="hidden" name="clientId" th:value="${client.idUser}"/>
+            <input type="hidden" name="trainerId" th:value="${trainerId}"/>
 
-    <label>Nazwa planu:</label>
-    <input type="text" name="name" required />
+            <label>Nazwa planu:</label>
+            <input type="text" name="name" required/>
 
-    <label>Data początkowa:</label>
-    <input type="date" name="startDate" required />
+            <label>Data początkowa:</label>
+            <input type="date" name="startDate" required/>
 
-    <label>Opis:</label>
-    <textarea name="description" required></textarea>
+            <label>Opis:</label>
+            <textarea name="description" required></textarea>
 
-    <div id="day-list">
-      <h3>Dni w planie:</h3>
-      <!-- Wiersze dni będą dodawane tutaj -->
+            <div id="day-list">
+                <h3>Dni w planie:</h3>
+                <!-- Wiersze dni będą dodawane tutaj -->
+            </div>
+            <!-- Przycisk "Dodaj dzień" umieszczony poniżej listy dni -->
+            <button type="button" class="btn" id="addDayBtn">Dodaj dzień</button>
+
+            <button type="submit" class="btn">Zapisz Plan</button>
+        </form>
+        <div id="formError" class="error-message" style="display:none;"></div>
     </div>
-    <!-- Przycisk "Dodaj dzień" umieszczony poniżej listy dni -->
-    <button type="button" class="btn" id="addDayBtn">Dodaj dzień</button>
-
-    <button type="submit" class="btn">Zapisz Plan</button>
-  </form>
-  <div id="formError" class="error-message" style="display:none;"></div>
-</div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <!-- jQuery -->
@@ -321,6 +333,9 @@
           }
       });
     });
-  </script>
+      function goBack() {
+    window.history.back();
+  }
+</script>
 </body>
 </html>

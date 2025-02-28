@@ -79,6 +79,7 @@ public class PlanController {
 
         List<TrainingPlan> archivedPlans = plans.stream()
                 .filter(plan -> !activeTrainerIds.contains(plan.getTrainer().getIdUser()))
+                .sorted(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed ? 1 : 0))
                 .toList();
 
         model.addAttribute("archivedPlans", archivedPlans);
@@ -98,6 +99,7 @@ public class PlanController {
 
         List<TrainingPlan> activeClientPlans = allPlans.stream()
                 .filter(plan -> activeClientIds.contains(plan.getIdClient()))
+                .sorted(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed ? 1 : 0))
                 .toList();
 
         model.addAttribute("activePlans", activeClientPlans);
@@ -118,6 +120,7 @@ public class PlanController {
 
         List<TrainingPlan> archivedClientPlans = allPlans.stream()
                 .filter(plan -> !activeClientIds.contains(plan.getIdClient()))
+                .sorted(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed ? 1 : 0))
                 .toList();
 
         model.addAttribute("archivedPlans", archivedClientPlans);
