@@ -28,9 +28,10 @@
       justify-content: center;
       padding: 20px;
     }
-    /* Karta odznaki */
+    /* Karta odznaki ustawiona jako flexbox */
     .badge-item {
-      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
       width: 250px;
       text-align: center;
       background: white;
@@ -40,7 +41,7 @@
       margin-bottom: 20px;
       position: relative;
     }
-    /* Jeśli użytkownik posiada odznakę – zielony obrys */
+    /* Wyróżnienie odznaki posiadanej przez użytkownika */
     .badge-item.owned {
       border: 2px solid green;
     }
@@ -60,6 +61,48 @@
       padding: 5px;
       font-size: 12px;
       border-radius: 5px;
+    }
+    /* Kontener dolny – zawsze przy dole karty */
+    .badge-footer {
+      margin-top: auto;
+    }
+    /* Tooltip dla opisu */
+    .badge-tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      color: #007BFF;
+      font-weight: bold;
+    }
+    .badge-tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%; /* chmurka nad tekstem */
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .badge-tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #555 transparent transparent transparent;
+    }
+    .badge-tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
     }
     /* Pasek postępu */
     .progress-bar {
@@ -82,27 +125,33 @@
 <div th:replace="~{header :: header}"></div>
 <div class="content">
   <div class="w3-container w3-padding-64">
-    <h1 class="w3-center">Twoje odznaki</h1>
+    <h1 class="w3-center">Wszystkie odznaki</h1>
     <div class="badge-container">
-      <!-- Iteracja po wszystkich dostępnych odznakach -->
+      <!-- Iterujemy po wszystkich odznakach -->
       <div class="badge-item" th:each="currentBadge : ${allBadges}"
-           th:classappend="${#lists.size(userBadges.?[badge.id == currentBadge.id]) > 0} ? ' owned' : ''">
-        <!-- Jeżeli użytkownik posiada odznakę, wyświetl etykietę -->
-        <div th:if="${#lists.size(userBadges.?[badge.id == currentBadge.id]) > 0}" class="owned-label">
+           th:classappend="${ownedBadgeIds.contains(currentBadge.id)} ? ' owned' : ''">
+        <!-- Etykieta dla odznaki posiadanej -->
+        <div th:if="${ownedBadgeIds.contains(currentBadge.id)}" class="owned-label">
           Posiadana
         </div>
         <img th:src="@{${currentBadge.imageUrl}}" alt="Odznaka">
         <h3 th:text="${currentBadge.name}">Nazwa odznaki</h3>
-        <p th:text="${currentBadge.description}">Opis</p>
-        <div class="progress-bar">
-          <div class="progress-bar-inner"
-               th:style="'width:' + ${badgeProgress[currentBadge.id]} + '%'"
-               th:text="${badgeProgress[currentBadge.id]}">
-            0/0
+        <!-- Kontener na elementy, które mają być zawsze u dołu -->
+        <div class="badge-footer">
+          <!-- Tooltip z napisem "Opis" -->
+          <p class="badge-tooltip">
+            Opis
+            <span class="tooltiptext" th:text="${currentBadge.description}">Opis odznaki</span>
+          </p>
+          <div class="progress-bar">
+            <div class="progress-bar-inner"
+                 th:text="${badgeProgress[currentBadge.id]}">
+              0/0
+            </div>
           </div>
         </div>
       </div>
-      <!-- Jeśli nie ma żadnych odznak -->
+      <!-- Jeśli brak dostępnych odznak -->
       <div th:if="${#lists.isEmpty(allBadges)}" class="w3-center" style="width: 100%;">
         <p>Brak odznak</p>
       </div>

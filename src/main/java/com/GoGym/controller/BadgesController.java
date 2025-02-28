@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @AllArgsConstructor
@@ -41,10 +43,7 @@ public class BadgesController {
         // Pobierz odznaki, które użytkownik już zdobył
         List<UserBadge> userBadges = badgeService.getBadgesForUser(currentUser);
 
-        // Pseudologika liczenia postępów – załóżmy, że mamy:
-        //  - dla "5 Workouts Completed": target = 5, progress = liczba workoutów użytkownika
-        //  - dla "5 Plans Completed": target = 5, progress = liczba ukończonych planów treningowych
-        //  - dla "10 Plan Exercises Completed": target = 10, progress = liczba ukończonych ćwiczeń planowych
+        // Pseudologika liczenia postępów (jak poprzednio)
         int workoutCount = workoutService.getWorkoutsByUser(currentUser).size();
         int completedPlans = (int) trainingPlanService.findPlansByIdClient(currentUser.getIdUser())
                 .stream().filter(plan -> plan.getStatus() == TrainingPlan.Status.completed)
@@ -65,7 +64,6 @@ public class BadgesController {
             }
         }
 
-        // Wylicz postępy dla każdej odznaki
         Map<Long, String> badgeProgress = new HashMap<>();
         for (Badge badge : allBadges) {
             int target = 0;
@@ -83,11 +81,18 @@ public class BadgesController {
             badgeProgress.put(badge.getId(), progress + "/" + target);
         }
 
+        // Przygotowanie zbioru ID posiadanych odznak
+        Set<Long> ownedBadgeIds = userBadges.stream()
+                .map(ub -> ub.getBadge().getId())
+                .collect(Collectors.toSet());
+
         model.addAttribute("allBadges", allBadges);
         model.addAttribute("userBadges", userBadges);
         model.addAttribute("badgeProgress", badgeProgress);
+        model.addAttribute("ownedBadgeIds", ownedBadgeIds);
 
         return "badges"; // Widok badges.html
     }
+
 
 }

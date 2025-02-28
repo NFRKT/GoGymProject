@@ -179,6 +179,11 @@
                 <h3>Ćwiczenia</h3>
                 <a th:href="@{/exercises}">Przejdź</a>
             </div>
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-award"></i>
+                <h3>Odznaki</h3>
+                <a th:href="@{/badges}">Przejdź</a>
+            </div>
         </div>
     </div>
     <!-- Sekcja progress barów dla aktywnych planów treningowych (dla użytkownika) -->
