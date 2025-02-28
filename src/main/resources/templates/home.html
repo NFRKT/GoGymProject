@@ -1,177 +1,263 @@
 <!DOCTYPE html>
-
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>MyBudget - home</title>
+    <title>MyBudget - Home</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Style wspólne -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-    }
-    .content {
+      html, body {
+        height: 100%;
+        margin: 0;
+        font-family: "Lato", sans-serif;
+        display: flex;
+        flex-direction: column;
+        background: rgba(159, 161, 167, 0.07);
+      }
+      .content {
         flex: 1;
-    }
-    body, h1, h2, h3, h4, h5, h6 {
-        font-family: "Lato", sans-serif
-    }
-    .w3-bar, h1, button {
-        font-family: "Montserrat", sans-serif
-    }
-    .fa-bar-chart, .fa-money, .fa-bullseye {
-        font-size: 70px;
-        margin-bottom: 20px;
-    }
-    .highlight-box {
-        padding: 20px;
-        border: 2px solid #ccc;
-        border-radius: 10px;
-        background-color: #f9f9f9;
-        margin: 20px 0;
-    }
-    .dynamic-section {
-        margin-top: 20px;
+      }
+      /* Hero Section */
+      .hero {
+        background: url('/images/hero.jpg') no-repeat center center;
+        background-size: cover;
+        padding: 100px 0;
+        color: white;
+        position: relative;
+      }
+      .hero .overlay {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 50px;
         text-align: center;
-    }
-    .badge-carousel {
-      display: flex;
-      justify-content: center;
-      overflow-x: auto;
-      gap: 10px;
-      padding: 10px;
-      scroll-behavior: smooth;
-      user-select: none;          /* Standard */
-      -webkit-user-select: none;  /* Safari */
-      -moz-user-select: none;     /* Firefox */
-      -ms-user-select: none;      /* IE 10+ */
-    }
-    .badge-item {
-      flex: 0 0 auto;
-      width: 120px;
-      text-align: center;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      background-color: #fff;
-    }
-    .badge-img {
-      width: 100%;
-      height: auto;
-      border-radius: 50%;
-    }
-    .badge-carousel.active {
-      cursor: grabbing;
-      cursor: -webkit-grabbing;
-    }
+      }
+      /* Nawigacja - karty */
+      .nav-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 40px;
+      }
+      .nav-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        width: 250px;
+        text-align: center;
+      }
+      .nav-card i {
+        font-size: 3em;
+        color: #007BFF;
+        margin-bottom: 10px;
+      }
+      .nav-card h3 {
+        margin: 10px 0;
+        font-size: 1.2em;
+      }
+      .nav-card a {
+        display: inline-block;
+        background: #303a53;
+        color: white;
+        padding: 10px 15px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+      /* Responsywność */
+      @media screen and (max-width: 768px) {
+        .hero {
+          padding: 60px 0;
+        }
+        .hero .overlay {
+          padding: 20px;
+        }
+        .nav-card {
+          width: 100%;
+          max-width: 300px;
+        }
+        .nav-card a {
+          font-size: 12px;
+          padding: 8px 10px;
+        }
+      }
+
     </style>
 </head>
 <body>
-
+<!-- Nagłówek -->
 <div th:replace="~{header :: header}"></div>
-<!-- Welcome Section -->
+
+<!-- Hero Section -->
+<header class="hero">
+    <div class="overlay">
+        <h1 class="w3-jumbo">Witaj w GoGym!</h1>
+        <h3>Z nami osiągniesz formę życia!</h3>
+    </div>
+</header>
+
 <div class="content">
-<div class="w3-container w3-padding-64 w3-center">
-    <h1>Witaj w GoGym!</h1>
-    <div class="dynamic-section">
-        <a th:if="${isUser}" href="/client-panel" class="w3-button w3-blue">Panel Klienta</a>
-        <a th:if="${isUser}" th:href="@{/user-plans(idUser=${idUser})}" class="w3-button w3-blue">Moje Plany Treningowe</a>
-        <a th:if="${isUser}" th:href="@{/user-plans-archived(idUser=${idUser})}" class="w3-button w3-blue">Plany Treningowe Byłych Trenerów</a>
-        <a th:if="${isTrainer}" href="/trainer-panel" class="w3-button w3-green">Panel Trenera</a>
-        <a th:if="${isTrainer}" th:href="@{/trainer-plans(idUser=${idUser})}" class="w3-button w3-blue">Plany Treningowe Twoich Podopiecznych</a>
-        <a th:if="${isTrainer}" th:href="@{/trainer-plans-archived(idUser=${idUser})}" class="w3-button w3-blue">Plany Treningowe Byłych Klientów</a>
-        <a th:if="${isTrainer}" th:href="@{/trainer/profile}" class="w3-button w3-blue w3-round">Mój profil trenera</a>
-        <a th:if="${isUser}" th:href="@{/client/profile}" class="w3-button w3-blue w3-round">Mój profil klienta</a>
-        <a th:if="${isUser}" th:href="@{/statistics}" class="w3-button w3-blue w3-round">Moje statystyki treningowe</a>
-        <a th:href="@{/list-trainers}" class="w3-button w3-blue w3-round">Nasi trenerzy!</a>
-        <a th:href="@{/all-user-list}" class="w3-button w3-blue w3-round">Wszyscy użytkownicy!</a>
-        <a th:if="${isAdmin}" th:href="@{/admin/panel}" class="w3-button w3-red">Panel Administratora</a>
-        <a th:if="${isUser}" th:href="@{/workouts/user-workouts}" class="w3-button w3-blue w3-round">Twoje treningi</a>
-        <a th:if="${isUser}" th:href="@{/workouts/create}" class="w3-button w3-blue w3-round">Stwórz trening</a>
-        <a th:href="@{/exercises}" class="w3-button w3-blue w3-round">Zobacz ćwiczenia</a>
-
-
-    </div>
-</div>
-<!-- Sekcja odznak -->
-<div th:if="${isUser}">
-    <h2 class="w3-center">Twoje odznaki</h2>
-    <div class="badge-carousel">
-        <div class="badge-item" th:each="userBadge : ${badges}">
-            <img th:src="@{${userBadge.badge.imageUrl}}" alt="Odznaka" class="badge-img">
-            <p th:text="${userBadge.badge.name}">Odznaka</p>
+    <!-- Nawigacja -->
+    <div class="w3-container w3-padding-64">
+        <h2 class="w3-center">Nawigacja</h2>
+        <div class="nav-cards">
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-user"></i>
+                <h3>Panel Klienta</h3>
+                <a href="/client-panel">Przejdź</a>
+            </div>
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-list-alt"></i>
+                <h3>Moje Plany Treningowe</h3>
+                <a th:href="@{/user-plans(idUser=${idUser})}">Przejdź</a>
+            </div>
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-history"></i>
+                <h3>Plany Archiwalne</h3>
+                <a th:href="@{/user-plans-archived(idUser=${idUser})}">Przejdź</a>
+            </div>
+            <div th:if="${isTrainer}" class="nav-card">
+                <i class="fa fa-user-tie"></i>
+                <h3>Panel Trenera</h3>
+                <a href="/trainer-panel">Przejdź</a>
+            </div>
+            <div th:if="${isTrainer}" class="nav-card">
+                <i class="fa fa-users"></i>
+                <h3>Plany Podopiecznych</h3>
+                <a th:href="@{/trainer-plans(idUser=${idUser})}">Przejdź</a>
+            </div>
+            <div th:if="${isTrainer}" class="nav-card">
+                <i class="fa fa-history"></i>
+                <h3>Archiwalne Plany</h3>
+                <a th:href="@{/trainer-plans-archived(idUser=${idUser})}">Przejdź</a>
+            </div>
+            <div th:if="${isTrainer}" class="nav-card">
+                <i class="fa fa-user-circle"></i>
+                <h3>Mój Profil</h3>
+                <a th:href="@{/trainer/profile}">Przejdź</a>
+            </div>
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-user-circle"></i>
+                <h3>Mój Profil</h3>
+                <a th:href="@{/client/profile}">Przejdź</a>
+            </div>
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-chart-line"></i>
+                <h3>Statystyki</h3>
+                <a th:href="@{/statistics}">Przejdź</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-dumbbell"></i>
+                <h3>Nasi Trenerzy</h3>
+                <a th:href="@{/list-trainers}">Przejdź</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-users"></i>
+                <h3>Wszyscy Użytkownicy</h3>
+                <a th:href="@{/all-user-list}">Przejdź</a>
+            </div>
+            <div th:if="${isAdmin}" class="nav-card">
+                <i class="fa fa-cog"></i>
+                <h3>Panel Administratora</h3>
+                <a th:href="@{/admin/panel}">Przejdź</a>
+            </div>
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-running"></i>
+                <h3>Twoje Treningi</h3>
+                <a th:href="@{/workouts/user-workouts}">Przejdź</a>
+            </div>
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-plus-square"></i>
+                <h3>Stwórz Trening</h3>
+                <a th:href="@{/workouts/create}">Przejdź</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-edit"></i>
+                <h3>Ćwiczenia</h3>
+                <a th:href="@{/exercises}">Przejdź</a>
+            </div>
         </div>
-        <div th:if="${#lists.isEmpty(badges)}" class="badge-item">
-            <p>Brak odznak</p>
+    </div>
+    <!-- Sekcja progress barów dla aktywnych planów treningowych (dla użytkownika) -->
+    <div th:if="${isUser}" class="w3-container w3-padding-64">
+        <h2 class="w3-center">Postępy w planach treningowych</h2>
+        <div th:each="plan : ${activePlans}" style="margin: 20px auto; max-width: 600px;">
+            <p><strong th:text="${plan.name}">Plan treningowy</strong></p>
+            <div class="w3-light-grey w3-round-large" style="width: 100%; margin: 5px 0;">
+                <div class="w3-container w3-blue w3-round-large"
+                     th:style="'width:' + ${progressMap[plan.idPlan]} + '%'"
+                     th:text="${progressMap[plan.idPlan]} + '%'">
+                    0%
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<!-- Sekcja z progress barami dla aktywnych planów treningowych (widoczna tylko dla klienta) -->
-<div th:if="${isUser}">
-    <h2 class="w3-center">Postępy w Twoich planach treningowych</h2>
-    <div th:each="plan : ${activePlans}" style="margin: 20px auto; max-width: 600px;">
-        <p><strong th:text="${plan.name}">Plan treningowy</strong></p>
-        <div class="w3-light-grey w3-round-large" style="width: 100%; margin: 5px 0;">
-            <div class="w3-container w3-blue w3-round-large"
-                 th:style="'width:' + ${progressMap[plan.idPlan]} + '%'"
-                 th:text="${progressMap[plan.idPlan]} + '%'">
-                0%
+    <!-- Sekcja odznak (widoczna dla użytkownika) -->
+    <div th:if="${isUser}" class="w3-container w3-padding-64">
+        <h2 class="w3-center">Twoje odznaki</h2>
+        <div class="nav-cards">
+            <div class="nav-card" th:each="userBadge : ${badges}">
+                <img th:src="@{${userBadge.badge.imageUrl}}" alt="Odznaka"
+                     style="width:100%; height:auto; border-radius:50%;">
+                <h3 th:text="${userBadge.badge.name}">Odznaka</h3>
+            </div>
+            <div th:if="${#lists.isEmpty(badges)}" class="nav-card">
+                <h3>Brak odznak</h3>
             </div>
         </div>
     </div>
 </div>
-</div>
-<!-- Footer -->
+
+<!-- Stopka -->
 <div th:replace="~{footer :: footer}"></div>
+
 <script>
-    // Used to toggle the menu on small screens when clicking on the menu button
+    // Toggle menu na małych ekranach
     function myFunction() {
-        var x = document.getElementById("navDemo");
-        if (x.className.indexOf("w3-show") == -1) {
-            x.className += " w3-show";
-        } else {
-            x.className = x.className.replace(" w3-show", "");
-        }
+      var x = document.getElementById("navDemo");
+      if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+      } else {
+        x.className = x.className.replace(" w3-show", "");
+      }
     }
 
 </script>
 <script>
-  const carousel = document.querySelector('.badge-carousel');
-  let isDown = false;
-  let startX;
-  let scrollLeft;
+    // Prosty skrypt do obsługi przewijania elementów (jeśli potrzebny)
+    const carousel = document.querySelector('.nav-cards');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-  carousel.addEventListener('mousedown', (e) => {
-    isDown = true;
-    carousel.classList.add('active'); // opcjonalnie do stylizacji
-    startX = e.pageX - carousel.offsetLeft;
-    scrollLeft = carousel.scrollLeft;
-  });
+    carousel && carousel.addEventListener('mousedown', (e) => {
+      isDown = true;
+      carousel.classList.add('active');
+      startX = e.pageX - carousel.offsetLeft;
+      scrollLeft = carousel.scrollLeft;
+    });
 
-  carousel.addEventListener('mouseleave', () => {
-    isDown = false;
-    carousel.classList.remove('active');
-  });
+    carousel && carousel.addEventListener('mouseleave', () => {
+      isDown = false;
+      carousel.classList.remove('active');
+    });
 
-  carousel.addEventListener('mouseup', () => {
-    isDown = false;
-    carousel.classList.remove('active');
-  });
+    carousel && carousel.addEventListener('mouseup', () => {
+      isDown = false;
+      carousel.classList.remove('active');
+    });
 
-  carousel.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - carousel.offsetLeft;
-    const walk = (x - startX) * 2; // mnożnik dla szybszego scrollowania
-    carousel.scrollLeft = scrollLeft - walk;
-  });
+    carousel && carousel.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - carousel.offsetLeft;
+      const walk = (x - startX) * 2;
+      carousel.scrollLeft = scrollLeft - walk;
+    });
+
 </script>
 </body>
 </html>
-
-

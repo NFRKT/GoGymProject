@@ -4,130 +4,147 @@
     <title>Twoje Treningi</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- External CSS -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: "Lato", sans-serif;
-      display: flex;
-      flex-direction: column;
-      background-color: #292d35;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      padding: 30px;
-      flex: 1;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #303a53;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      text-align: center;
-      font-size: 14px;
-    }
-    th {
-      background-color: #303a53;
-      color: #fff;
-    }
-    td {
-      background-color: #f8f9fa;
-    }
-    /* Styl dla planowych treningowych */
-    td.planowy {
-      background-color: #303a53b5;
-      font-weight: bold;
-      color: #212529;
-    }
-    a {
-      color: #007bff;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    a:hover {
-      color: #0056b3;
-    }
-    .back-link {
-      display: block;
-      margin: 20px 0;
-      text-align: center;
-      font-size: 16px;
-      color: #007bff;
-      text-decoration: none;
-    }
-    .back-link:hover {
-      text-decoration: underline;
-    }
-       .btn-back {
-      background: #303a53;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .pagination {
+      html, body {
+        height: 100%;
+        margin: 0;
+        font-family: "Lato", sans-serif;
+        display: flex;
+        flex-direction: column;
+        background-color: #292d35;
+      }
+      .container {
+        max-width: 900px;
+        margin: 40px auto;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 30px;
+        flex: 1;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #303a53;
+      }
+      /* Back button styling */
+      .btn-back {
+        background: #303a53;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+      /* Search form styling */
+      form#searchForm {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      form#searchForm label {
+        margin-right: 10px;
+        font-weight: bold;
+      }
+      form#searchForm input[type="date"] {
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        margin-right: 10px;
+      }
+      form#searchForm button {
+        background: #303a53;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      form#searchForm button:hover {
+        background: #1d2733;
+      }
+      /* Table styling */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+        font-size: 14px;
+      }
+      th {
+        background-color: #303a53;
+        color: #fff;
+      }
+      td {
+        background-color: #f8f9fa;
+      }
+      /* Hover effect for table rows */
+      tbody tr:hover {
+        background-color: #e9ecef;
+      }
+      /* Style for planned workouts */
+      td.planowy {
+        background-color: rgba(48, 58, 83, 0.71);
+        font-weight: bold;
+        color: #212529;
+      }
+      /* Link styling */
+      a {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+      a:hover {
+        color: #0056b3;
+      }
+      /* Pagination styling */
+      .pagination {
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 10px;
         margin-top: 20px;
         padding: 10px;
-    }
-
-    .pagination-btn {
+      }
+      .pagination a {
         background: #303a53;
         color: white;
         padding: 8px 16px;
         border-radius: 5px;
         font-size: 14px;
-        cursor: pointer;
-        border: none;
-        transition: background-color 0.2s;
         text-decoration: none;
-    }
-
-    .pagination-btn:hover {
+        transition: background-color 0.2s;
+      }
+      .pagination a:hover {
         background: #1d2733;
-    }
-
-    .pagination-btn:disabled {
-        background: #aaa;
-        cursor: not-allowed;
-    }
-
-    .page-numbers {
+      }
+      .pagination span {
         font-size: 16px;
         font-weight: bold;
         color: #303a53;
-    }
+      }
     </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-    <button class="btn-back" onclick="goBack()">Powrót</button>
+    <a class="btn-back" onclick="goBack()">Powrót</a>
     <h1>Twoje Treningi</h1>
     <form method="get" action="#" id="searchForm">
         <label for="workoutDate">Wybierz datę:</label>
         <input type="date" id="workoutDate" name="date" th:value="${selectedDate}" />
-        <button type="submit" class="btn pagination-btn">Szukaj</button>
+        <button type="submit">Szukaj</button>
     </form>
     <table>
         <thead>
@@ -144,12 +161,12 @@
         <tr th:each="workout : ${workouts}">
             <td th:text="${workout.workoutDate}"></td>
             <td>
-            <span th:switch="${workout.intensity.name()}">
-                <span th:case="'low'">Niska</span>
-                <span th:case="'medium'">Średnia</span>
-                <span th:case="'high'">Wysoka</span>
-                <span th:case="*">Brak danych</span>
-            </span>
+                    <span th:switch="${workout.intensity.name()}">
+                        <span th:case="'low'">Niska</span>
+                        <span th:case="'medium'">Średnia</span>
+                        <span th:case="'high'">Wysoka</span>
+                        <span th:case="*">Brak danych</span>
+                    </span>
             </td>
             <td th:text="${workout.startTime}"></td>
             <td th:text="${workout.endTime}"></td>
@@ -160,21 +177,17 @@
         </tbody>
     </table>
     <div class="pagination" th:if="${workouts.totalPages > 1}">
-        <button th:if="${workouts.hasPrevious()}"
-                th:href="@{/workouts/user-workouts(page=${workouts.number - 1})}"
-                class="btn pagination-btn">
+        <a th:if="${workouts.hasPrevious()}"
+           th:href="@{/workouts/user-workouts(page=${workouts.number - 1})}">
             &laquo; Poprzednia
-        </button>
-
-        <span class="page-numbers">
-        Strona <strong th:text="${workouts.number + 1}"></strong> z <strong th:text="${workouts.totalPages}"></strong>
-    </span>
-
-        <button th:if="${workouts.hasNext()}"
-                th:href="@{/workouts/user-workouts(page=${workouts.number + 1})}"
-                class="btn pagination-btn">
+        </a>
+        <span>
+            Strona <strong th:text="${workouts.number + 1}"></strong> z <strong th:text="${workouts.totalPages}"></strong>
+        </span>
+        <a th:if="${workouts.hasNext()}"
+           th:href="@{/workouts/user-workouts(page=${workouts.number + 1})}">
             Następna &raquo;
-        </button>
+        </a>
     </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>

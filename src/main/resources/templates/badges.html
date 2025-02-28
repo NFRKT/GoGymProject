@@ -4,42 +4,74 @@
   <title>GoGym - Twoje odznaki</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Style wspólne -->
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background: rgba(159, 161, 167, 0.07);
+    }
+    .content {
+      flex: 1;
+    }
+    /* Kontener odznak */
     .badge-container {
       display: flex;
-      overflow-x: auto;
+      flex-wrap: wrap;
       gap: 20px;
-      padding: 20px;
-      user-select: none;
       justify-content: center;
+      padding: 20px;
     }
+    /* Karta odznaki */
     .badge-item {
       flex: 0 0 auto;
-      width: 150px;
+      width: 250px;
       text-align: center;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      background-color: #fff;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    /* Jeśli użytkownik posiada odznakę – zielony obrys */
+    .badge-item.owned {
+      border: 2px solid green;
     }
     .badge-item img {
       width: 100%;
       height: auto;
       border-radius: 50%;
+      margin-bottom: 10px;
     }
+    /* Etykieta „Posiadana” */
+    .owned-label {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: green;
+      color: white;
+      padding: 5px;
+      font-size: 12px;
+      border-radius: 5px;
+    }
+    /* Pasek postępu */
     .progress-bar {
       width: 100%;
-      background-color: #f1f1f1;
+      background: #f2f2f2;
       border-radius: 5px;
       overflow: hidden;
-      margin-top: 5px;
+      margin-top: 10px;
     }
     .progress-bar-inner {
       height: 20px;
-      background-color: #4CAF50;
+      background: #007BFF;
       text-align: center;
       line-height: 20px;
       color: white;
@@ -48,27 +80,32 @@
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
-<div class="w3-container w3-padding-64">
-  <h1 class="w3-center">Twoje odznaki</h1>
-  <div class="badge-container">
-    <div class="badge-item" th:each="badge : ${allBadges}">
-      <img th:src="@{${badge.imageUrl}}" alt="Odznaka">
-      <p th:text="${badge.name}">Nazwa odznaki</p>
-      <p th:text="${badge.description}">Opis</p>
-      <div class="progress-bar">
-        <div class="progress-bar-inner"
-             th:style="'width:' + ${badgeProgress[badge.id]} + ';'"
-             th:text="${badgeProgress[badge.id]}">
-          0/0
+<div class="content">
+  <div class="w3-container w3-padding-64">
+    <h1 class="w3-center">Twoje odznaki</h1>
+    <div class="badge-container">
+      <!-- Iteracja po wszystkich dostępnych odznakach -->
+      <div class="badge-item" th:each="currentBadge : ${allBadges}"
+           th:classappend="${#lists.size(userBadges.?[badge.id == currentBadge.id]) > 0} ? ' owned' : ''">
+        <!-- Jeżeli użytkownik posiada odznakę, wyświetl etykietę -->
+        <div th:if="${#lists.size(userBadges.?[badge.id == currentBadge.id]) > 0}" class="owned-label">
+          Posiadana
+        </div>
+        <img th:src="@{${currentBadge.imageUrl}}" alt="Odznaka">
+        <h3 th:text="${currentBadge.name}">Nazwa odznaki</h3>
+        <p th:text="${currentBadge.description}">Opis</p>
+        <div class="progress-bar">
+          <div class="progress-bar-inner"
+               th:style="'width:' + ${badgeProgress[currentBadge.id]} + '%'"
+               th:text="${badgeProgress[currentBadge.id]}">
+            0/0
+          </div>
         </div>
       </div>
-      <!-- Informacja, czy odznaka została już zdobyta -->
-      <div th:if="${#lists.contains(userBadges.?[badge.id == badge.id], badge)}" style="margin-top: 5px; color: green;">
-        Zdobyta!
+      <!-- Jeśli nie ma żadnych odznak -->
+      <div th:if="${#lists.isEmpty(allBadges)}" class="w3-center" style="width: 100%;">
+        <p>Brak odznak</p>
       </div>
-    </div>
-    <div th:if="${#lists.isEmpty(allBadges)}" class="w3-center">
-      <p>Brak odznak</p>
     </div>
   </div>
 </div>

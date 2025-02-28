@@ -1,23 +1,100 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymelea`f.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Szczegóły Ćwiczenia</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <title>Szczegóły Ćwiczenia</title>
+  <style>
+    body {
+      background-color: #292d35;
+      font-family: 'Lato', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #333;
+    }
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #007bff;
+    }
+    .exercise-image {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .details {
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+    .details p {
+      margin-bottom: 10px;
+    }
+    .description {
+      font-size: 1.1em;
+      padding: 15px;
+      border: 1px solid #007bff;
+      background-color: #f0f8ff;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
+  </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-  <h1 th:text="${exercise.name}"></h1>
-  <img th:src="${exercise.jpg}" alt="Exercise Image">
-  <p th:text="${exercise.description}"></p>
-  <p>Trudność: <span th:text="${exercise.difficulty}"></span></p>
-  <p>Części ciała: <span th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}"></span></p>
-  <p>Sprzęt: <span th:text="${#strings.arrayJoin(exercise.equipment.toArray(), ', ')}"></span></p>
-  <a href="/exercises">Powrót do listy</a>
+  <a href="/exercises" class="back-link">Powrót do listy</a>
+  <h1 th:text="${exercise.name}">Nazwa Ćwiczenia</h1>
+  <img th:src="${exercise.jpg}" alt="Exercise Image" class="exercise-image">
+  <div class="details">
+    <p class="description" th:text="${exercise.description}">Opis ćwiczenia...</p>
+    <p>
+      <strong>Trudność:</strong>
+      <span th:switch="${exercise.difficulty.name()}">
+        <span th:case="'beginner'">Łatwy</span>
+        <span th:case="'intermediate'">Średni</span>
+        <span th:case="'advanced'">Trudny</span>
+        <span th:case="*">Nieznana</span>
+      </span>
+    </p>
+    <p>
+      <strong>Części ciała:</strong>
+      <span th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}">Lista części ciała</span>
+    </p>
+    <p>
+      <strong>Sprzęt:</strong>
+      <span th:text="${#strings.arrayJoin(exercise.equipment.toArray(), ', ')}">Lista sprzętu</span>
+    </p>
+  </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 </body>

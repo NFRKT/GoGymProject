@@ -89,7 +89,6 @@
   <button class="btn-back" onclick="goBack()">Powrót</button>
   <h1>Lista Ćwiczeń</h1>
 
-  <!-- Filtry -->
   <form id="filterForm" class="filter-form">
     <select name="difficulty">
       <option value="">Wszystkie trudności</option>
@@ -120,8 +119,16 @@
          onclick="redirectTo(this)">
       <img th:src="${exercise.jpg}" alt="Exercise Image" class="exercise-image"/>
       <h3 th:text="${exercise.name}">Nazwa ćwiczenia</h3>
-      <p th:text="${exercise.difficulty}">Poziom trudności</p>
-      <p th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}">Części ciała</p>
+      <p>
+        <strong>Poziom trudności:</strong>
+        <span th:switch="${exercise.difficulty.name()}">
+          <span th:case="'beginner'">Łatwy</span>
+          <span th:case="'intermediate'">Średni</span>
+          <span th:case="'advanced'">Trudny</span>
+          <span th:case="*">Nieznana</span>
+        </span>
+      </p>
+      <p><strong>Części ciała:</strong><span th:text="${#strings.arrayJoin(exercise.bodyParts.toArray(), ', ')}"/></p>
     </div>
   </div>
 
