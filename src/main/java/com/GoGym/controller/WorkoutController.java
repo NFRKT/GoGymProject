@@ -90,7 +90,7 @@ public class WorkoutController {
             workout.setUser(currentUser);
             Workout savedWorkout = workoutService.addWorkoutWithExercises(workout, exerciseIds, sets, reps, weight, durations, distances);
             log.info("Workout utworzony o ID: {}", savedWorkout.getIdWorkout());
-            return "redirect:/workouts/" + savedWorkout.getIdWorkout();
+            return "redirect:/workouts/user-workouts/" + savedWorkout.getIdWorkout();
         } catch (Exception e) {
             log.error("Błąd przy tworzeniu treningu", e);
             model.addAttribute("error", "Nie udało się stworzyć workoutu: " + e.getMessage());

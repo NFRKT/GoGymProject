@@ -93,6 +93,15 @@ public class StatisticsService {
                 ).average();
         stats.put("averageWorkoutDuration", avgWorkoutDuration.isPresent() ? formatDuration((int) avgWorkoutDuration.getAsDouble()) : "Brak danych");
 
+        OptionalDouble avgWorkoutDurationAll = workouts.stream()
+                .mapToInt(w -> w.getWorkoutExercises().stream()
+                        .mapToInt(e -> (e.getDuration() != null) ? e.getDuration() : 0)
+                        .sum()
+                ).average();
+        stats.put("averageWorkoutDurationAll", avgWorkoutDurationAll.isPresent() ? formatDuration((int) avgWorkoutDurationAll.getAsDouble()) : "Brak danych");
+
+// Całkowity czas treningów (dla wybranego miesiąca)
+
         // Największa liczba powtórzeń w jednym ćwiczeniu
         // Liczenie największej liczby powtórzeń (serie * powtórzenia)
         Map<String, String> maxRepsExercises = new HashMap<>();
@@ -135,8 +144,6 @@ public class StatisticsService {
 
         stats.put("mostFrequentWorkoutDays", najczesciejDni);
 
-
-        // Całkowity czas treningów w miesiącu
         int totalWorkoutTime = workouts.stream()
                 .filter(w -> w.getWorkoutDate().getYear() == year && w.getWorkoutDate().getMonthValue() == month)
                 .mapToInt(w -> w.getWorkoutExercises().stream()
@@ -144,6 +151,13 @@ public class StatisticsService {
                         .sum()
                 ).sum();
         stats.put("totalWorkoutTime", formatDuration(totalWorkoutTime));
+
+        int totalWorkoutTimeAll = workouts.stream()
+                .mapToInt(w -> w.getWorkoutExercises().stream()
+                        .mapToInt(e -> (e.getDuration() != null) ? e.getDuration() : 0)
+                        .sum()
+                ).sum();
+        stats.put("totalWorkoutTimeAll", formatDuration(totalWorkoutTimeAll));
 
         return stats;
     }

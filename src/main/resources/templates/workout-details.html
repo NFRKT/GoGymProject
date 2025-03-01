@@ -150,7 +150,6 @@
     <p><strong>Godzina Zakończenia:</strong> <span th:text="${workout.endTime} ?: '-'"></span></p>
     <p><strong>Notatki:</strong> <span th:text="${workout.notes} ?: '-'"></span></p>
   </div>
-
   <!-- Strength Exercises Section -->
   <div class="exercise-list" th:if="${workout.workoutExercises.?[exercise.type.name() == 'STRENGTH'].size() > 0}">
     <h2>Ćwiczenia Siłowe</h2>
@@ -233,7 +232,7 @@
         .then(response => {
           if (!response.ok) throw new Error("Błąd usuwania treningu.");
           alert("Trening został usunięty.");
-          window.location.href = "/workouts";
+          window.location.href = "/workouts/user-workouts";
         })
         .catch(error => console.error("Błąd:", error));
       }

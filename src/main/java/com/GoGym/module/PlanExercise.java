@@ -167,7 +167,6 @@ public class PlanExercise {
         return PlanExercise.builder()
                 .reps(dto.getReps())
                 .sets(dto.getSets())
-                //todo uzupelnic status jak bedzie na formularzu
                 .status(Status.notCompleted)
                 .trainingPlan(trainingPlan)
                 .trainingPlanDay(trainingPlanDay)

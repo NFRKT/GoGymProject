@@ -220,7 +220,7 @@ html, body {
 
           const removeButton = document.createElement("button");
           removeButton.type = "button";
-          removeButton.classList.add("btn btn-delete");
+          removeButton.classList.add("btn", "btn-delete");
           removeButton.textContent = "Usuń";
           removeButton.addEventListener("click", function () {
               removeExerciseRow(removeButton);
