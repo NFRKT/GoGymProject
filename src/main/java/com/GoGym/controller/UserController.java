@@ -30,7 +30,7 @@ public class UserController {
     public String showRegisterForm(Model model) {
         model.addAttribute("User", new UserRegistrationDTO());
         model.addAttribute("message", "Register User");
-        return "registerUser";
+        return "register-user";
     }
     @PostMapping("/register")
     public String processRegister(@ModelAttribute UserRegistrationDTO userDTO, Model model) {
@@ -42,7 +42,7 @@ public class UserController {
             model.addAttribute("emailErrorMessage", e.getMessage());
             // Ustawiamy ponownie formularz (jeśli chcesz, aby użytkownik nie musiał wpisywać wszystkiego od nowa)
             model.addAttribute("User", userDTO);
-            return "registerUser";
+            return "register-user";
         }
     }
 

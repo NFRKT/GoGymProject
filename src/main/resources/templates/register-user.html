@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>GoGym - Rejestracja</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .w3-bar, h1, button {
+      font-family: "Montserrat", sans-serif;
+    }
+    body {
+      font-family: "Lato", sans-serif;
+      background: url('/images/hero.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    /* Powiększony formularz rejestracji */
+    .register-container {
+      max-width: 700px;
+      width: 100%;
+      margin: 80px auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .w3-input {
+      padding: 12px;
+      border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      text-align: left;
+      margin-top: 10px;
+    }
+    /* Nowoczesny wygląd select – custom appearance */
+    .register-container select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: white;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='gray' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 12px;
+      cursor: pointer;
+    }
+    .register-container select:focus {
+      border-color: #007BFF;
+      transform: scale(1.02);
+      outline: none;
+    }
+    .error-message {
+      background-color: #ffdddd;
+      color: #d8000c;
+      border: 1px solid #d8000c;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none;
+      text-align: left;
+    }
+    .invalid {
+      border: 2px solid #d8000c !important;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+    .password-container {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar w3-card w3-left-align w3-large" style="background: rgba(20, 30, 48, 0.9); color: white;">
+    <a th:href="@{/gogym}" class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;">GoGym</a>
+    <a th:href="@{/login}" class="w3-bar-item w3-button w3-padding-large w3-right" style="background: transparent; color: white;">Zaloguj się</a>
+  </div>
+</div>
+
+<!-- Content: Formularz rejestracji -->
+<div class="content">
+  <div class="register-container">
+    <h2>Rejestracja użytkownika</h2>
+    <form id="registrationForm" novalidate th:action="@{/register}" th:object="${User}" method="post">
+      <label for="Email">Email:</label>
+      <input class="w3-input w3-border" type="text" id="Email" th:field="*{email}" required/>
+      <div id="emailError" class="error-message"></div>
+      <!-- Powyżej formularza -->
+      <div th:if="${emailErrorMessage}" class="w3-panel w3-red">
+        <p th:text="${emailErrorMessage}"></p>
+      </div>
+
+
+      <label for="Password">Hasło:</label>
+      <div class="password-container">
+        <input class="w3-input w3-border" type="password" id="Password" th:field="*{password}" required/>
+        <button type="button" class="toggle-password" onclick="togglePassword('Password')">
+          <i class="fa fa-eye"></i>
+        </button>
+      </div>
+      <div id="passwordError" class="error-message"></div>
+
+      <label for="ConfirmPassword">Potwierdź hasło:</label>
+      <div class="password-container">
+        <input class="w3-input w3-border" type="password" id="ConfirmPassword" name="confirmPassword" required/>
+        <button type="button" class="toggle-password" onclick="togglePassword('ConfirmPassword')">
+          <i class="fa fa-eye"></i>
+        </button>
+      </div>
+      <div id="confirmPasswordError" class="error-message"></div>
+
+      <label for="First_name">Imię:</label>
+      <input class="w3-input w3-border" type="text" id="First_name" th:field="*{firstName}" required/>
+      <div id="firstNameError" class="error-message"></div>
+
+      <label for="Second_name">Nazwisko:</label>
+      <input class="w3-input w3-border" type="text" id="Second_name" th:field="*{secondName}" required/>
+      <div id="secondNameError" class="error-message"></div>
+
+      <label for="BirthDate">Data urodzenia:</label>
+      <input class="w3-input w3-border" type="date" id="BirthDate" th:field="*{birthDate}" required/>
+      <div id="birthDateError" class="error-message"></div>
+
+      <label for="Gender">Płeć:</label>
+      <select class="w3-input w3-border" id="Gender" th:field="*{gender}">
+        <option value="KOBIETA">Kobieta</option>
+        <option value="MĘŻCZYZNA">Mężczyzna</option>
+      </select>
+
+      <label for="UserType">Typ użytkownika:</label>
+      <select class="w3-input w3-border" id="UserType" th:field="*{userType}">
+        <option value="CLIENT">Użytkownik</option>
+        <option value="TRAINER">Trener</option>
+      </select>
+
+      <!-- Sekcja widoczna tylko dla trenerów -->
+      <div id="trainerFields" style="display: none;">
+        <label for="StartDate">Data rozpoczęcia działalności:</label>
+        <input class="w3-input w3-border" type="date" id="StartDate" th:field="*{startDate}" required/>
+        <div id="startDateError" class="error-message"></div>
+
+        <label for="PhoneNumber">Numer kontaktowy:</label>
+        <input class="w3-input w3-border" type="text" id="PhoneNumber" th:field="*{phoneNumber}" required/>
+        <div id="phoneNumberError" class="error-message"></div>
+
+        <label for="WorkArea">Obszar pracy:</label>
+        <input class="w3-input w3-border" type="text" id="WorkArea" th:field="*{workArea}"/>
+
+        <label>Specjalizacje:</label>
+        <div id="specializations">
+          <div class="specialization-field">
+            <input class="w3-input w3-border" type="text" name="specializations" required/>
+          </div>
+        </div>
+        <button type="button" onclick="addSpecialization()" class="w3-btn w3-blue-grey w3-round-xxlarge" style="margin-top: 10px;">Dodaj specjalizację</button>
+      </div>
+      <br/>
+      <button class="w3-btn w3-blue-grey w3-round-xxlarge" type="submit">Zarejestruj</button>
+    </form>
+  </div>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+    // Toggle navbar dla małych ekranów
+    function toggleMenu() {
+      var x = document.getElementById("navDemo");
+      if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+      } else {
+        x.className = x.className.replace(" w3-show", "");
+      }
+    }
+
+    function togglePassword(fieldId) {
+      var field = document.getElementById(fieldId);
+      if (field.type === "password") {
+        field.type = "text";
+      } else {
+        field.type = "password";
+      }
+    }
+  </script>
+<script>
+    function addSpecialization() {
+      const container = document.getElementById("specializations");
+      const specDiv = document.createElement("div");
+      specDiv.classList.add("specialization-field");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "specializations";
+      input.classList.add("w3-input", "w3-border");
+      input.required = true;
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.textContent = "Usuń";
+      removeBtn.classList.add("w3-btn", "w3-red", "w3-round-xxlarge");
+      removeBtn.style.marginLeft = "10px";
+      removeBtn.onclick = function () {
+        removeSpecialization(specDiv);
+      };
+      specDiv.appendChild(input);
+      specDiv.appendChild(removeBtn);
+      container.appendChild(specDiv);
+    }
+    function removeSpecialization(specDiv) {
+      specDiv.remove();
+    }
+  </script>
+<script>
+    document.getElementById('registrationForm').addEventListener('submit', function(event) {
+      // Reset komunikatu błędu dla potwierdzenia hasła
+      document.getElementById('confirmPasswordError').style.display = 'none';
+
+      var password = document.getElementById('Password').value.trim();
+      var confirmPassword = document.getElementById('ConfirmPassword').value.trim();
+      if (password !== confirmPassword) {
+        document.getElementById('confirmPasswordError').innerText = "Hasła muszą być identyczne.";
+        document.getElementById('confirmPasswordError').style.display = 'block';
+        event.preventDefault();
+      }
+    });
+    function validateForm(event) {
+      let isValid = true;
+      // Pobieramy pola formularza
+      const email = document.getElementById('Email');
+      const password = document.getElementById('Password');
+      const firstName = document.getElementById('First_name');
+      const secondName = document.getElementById('Second_name');
+      const birthDate = document.getElementById('BirthDate');
+      const userType = document.getElementById('UserType');
+
+      // Dodatkowe pola dla trenerów
+      const startDate = document.getElementById('StartDate');
+      const phoneNumber = document.getElementById('PhoneNumber');
+
+      // Definicje regexów
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const nameRegex = /^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+$/;
+      const phoneRegex = /^\+?\d{9,11}$/;
+
+      // Pobieramy elementy komunikatów błędów
+      const emailError = document.getElementById('emailError');
+      const passwordError = document.getElementById('passwordError');
+      const firstNameError = document.getElementById('firstNameError');
+      const secondNameError = document.getElementById('secondNameError');
+      const birthDateError = document.getElementById('birthDateError');
+      const startDateError = document.getElementById('startDateError');
+      const phoneNumberError = document.getElementById('phoneNumberError');
+
+      // Funkcje pomocnicze do resetowania i ustawiania błędów
+      function resetError(field, errorElement) {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+      }
+      function setError(field, errorElement, message) {
+        field.classList.add('invalid');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        isValid = false;
+      }
+
+      // Resetujemy błędy
+      resetError(email, emailError);
+      resetError(password, passwordError);
+      resetError(firstName, firstNameError);
+      resetError(secondName, secondNameError);
+      resetError(birthDate, birthDateError);
+      if(userType.value === "TRAINER") {
+        resetError(startDate, startDateError);
+        resetError(phoneNumber, phoneNumberError);
+      }
+
+      // Walidacja email
+      if (!email.value.trim()) {
+        setError(email, emailError, "Email jest wymagany.");
+      } else if (!emailRegex.test(email.value.trim())) {
+        setError(email, emailError, "Podaj poprawny format email (np. user@example.com).");
+      }
+
+      // Walidacja hasła (minimum 6 znaków)
+      if (!password.value.trim()) {
+        setError(password, passwordError, "Hasło jest wymagane.");
+      } else if (password.value.trim().length < 6) {
+        setError(password, passwordError, "Hasło musi zawierać co najmniej 6 znaków.");
+      }
+
+      // Walidacja imienia
+      if (!firstName.value.trim()) {
+        setError(firstName, firstNameError, "Imię jest wymagane.");
+      } else if (!nameRegex.test(firstName.value.trim())) {
+        setError(firstName, firstNameError, "Imię musi zaczynać się od wielkiej litery i zawierać tylko litery.");
+      }
+
+      // Walidacja nazwiska
+      if (!secondName.value.trim()) {
+        setError(secondName, secondNameError, "Nazwisko jest wymagane.");
+      } else if (!nameRegex.test(secondName.value.trim())) {
+        setError(secondName, secondNameError, "Nazwisko musi zaczynać się od wielkiej litery i zawierać tylko litery.");
+      }
+
+      // Walidacja daty urodzenia (nie w przyszłości)
+      if (!birthDate.value) {
+        setError(birthDate, birthDateError, "Data urodzenia jest wymagana.");
+      } else {
+        const bd = new Date(birthDate.value);
+        const today = new Date();
+        if(bd > today) {
+          setError(birthDate, birthDateError, "Data urodzenia nie może być w przyszłości.");
+        }
+      }
+
+      // Jeśli wybrano typ TRAINER, dodatkowe walidacje
+      if(userType.value === "TRAINER") {
+        if (!startDate.value) {
+          setError(startDate, startDateError, "Data rozpoczęcia działalności jest wymagana.");
+        } else {
+          const sd = new Date(startDate.value);
+          const today = new Date();
+          if(sd > today) {
+            setError(startDate, startDateError, "Data rozpoczęcia nie może być w przyszłości.");
+          }
+        }
+        if (!phoneNumber.value.trim()) {
+          setError(phoneNumber, phoneNumberError, "Numer kontaktowy jest wymagany.");
+        } else if (!phoneRegex.test(phoneNumber.value.trim())) {
+          setError(phoneNumber, phoneNumberError, "Podaj poprawny numer telefonu (9-15 cyfr, opcjonalny + na początku).");
+        }
+      }
+
+      if (!isValid) {
+        event.preventDefault();
+      }
+    }
+    document.getElementById('registrationForm').addEventListener('submit', validateForm);
+    document.addEventListener("DOMContentLoaded", function() {
+      const userTypeSelect = document.getElementById("UserType");
+      const trainerFields = document.getElementById("trainerFields");
+      const trainerInputs = trainerFields.querySelectorAll("input");
+      function toggleTrainerFields() {
+        const isTrainer = userTypeSelect.value === "TRAINER";
+        trainerFields.style.display = isTrainer ? "block" : "none";
+        trainerInputs.forEach(input => {
+          if (isTrainer) {
+            input.removeAttribute("disabled");
+          } else {
+            input.setAttribute("disabled", "disabled");
+          }
+        });
+      }
+      userTypeSelect.addEventListener("change", toggleTrainerFields);
+      document.getElementById("registrationForm").addEventListener("submit", function() {
+        trainerInputs.forEach(input => input.removeAttribute("disabled"));
+      });
+      toggleTrainerFields();
+    });
+  </script>
+</body>
+</html>
