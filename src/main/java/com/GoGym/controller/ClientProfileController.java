@@ -41,7 +41,6 @@ public class ClientProfileController {
     @GetMapping
     public String clientProfile(Model model, Principal principal) {
         User user = userService.findByEmail(principal.getName());
-        // Upewnij się, że użytkownik jest klientem
         if (user.getUserType() != User.UserType.CLIENT) {
             throw new IllegalStateException("Tylko klienci mają profil klienta.");
         }
@@ -73,7 +72,6 @@ public class ClientProfileController {
             clientDetails = new ClientDetails();
             clientDetails.setUser(user);
         }
-        // Dla profilu innego użytkownika isOwnProfile = false, odznaki mogą być wyświetlone, jeśli chcesz
         List<UserBadge> badges = badgeService.getBadgesForUser(user);
         Map<Long, String> badgeProgress = badgeService.calculateBadgeProgress(user);
         model.addAttribute("user", user);

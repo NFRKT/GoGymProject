@@ -63,12 +63,10 @@ public class ChatController {
 
                     String chatName;
                     if (isAdmin) {
-                        // Jeśli admin, pokaż prawdziwe imię i nazwisko użytkownika
                         chatName = chatRoom.getUser().getUserType() == User.UserType.ADMIN
                                 ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
                                 : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName();
                     } else {
-                        // Dla użytkowników zamiast "Admin Admin" pokażemy "Administracja"
                         chatName = isAdminChat ? "Administracja"
                                 : (chatRoom.getUser().equals(user)
                                 ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
@@ -94,7 +92,6 @@ public class ChatController {
 
         List<Message> messages = messageRepository.findByChatRoomId(chatRoomId);
 
-        // Oznacz nieodczytane wiadomości jako przeczytane, jeśli nie zostały wysłane przez aktualnego użytkownika
         List<Message> unreadMessages = messageRepository.findUnreadMessages(chatRoomId, user.getIdUser());
         for (Message message : unreadMessages) {
             message.setRead(true);
@@ -123,7 +120,6 @@ public class ChatController {
         chatRoom.setUser(user);
         chatRoom.setTrainer(trainer);
         chatRoomRepository.save(chatRoom);
-
         return ResponseEntity.ok(chatRoom);
     }
 
@@ -134,26 +130,19 @@ public class ChatController {
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("Nie znaleziono pokoju chatu"));
-
-        // 🛠 POPRAWKA: Pobierz odbiorcę poprawnie!
         User recipient;
         if (chatRoom.getUser().getIdUser().equals(sender.getIdUser())) {
             recipient = chatRoom.getTrainer();
         } else {
             recipient = chatRoom.getUser();
         }
-
-
         Message message = new Message();
         message.setSender(sender);
         message.setChatRoom(chatRoom);
         message.setMessage(messageDTO.getMessage());
         message.setSentAt(LocalDateTime.now());
         message.setRead(false);
-
         messageRepository.save(message);
-
-        // Tworzymy DTO wiadomości do wysłania
         MessageDTO responseMessage = new MessageDTO(
                 message.getId(),
                 sender,
@@ -161,63 +150,38 @@ public class ChatController {
                 message.getSentAt()
         );
 
-        // Wysyłamy wiadomość do pokoju
         messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId, responseMessage);
-
-        System.out.println("📨 Wiadomość wysłana do pokoju " + chatRoomId);
-        System.out.println("👤 Nadawca: " + sender.getFirstName());
-        System.out.println("🎯 Odbiorca: " + recipient.getFirstName());
-
-        // 🔥 Aktualizujemy liczbę nieodczytanych wiadomości dla odbiorcy
         List<Message> unreadMessages = messageRepository.findUnreadMessages(chatRoomId, recipient.getIdUser());
-
-        System.out.println("📬 Nieprzeczytane wiadomości:");
-        for (Message msg : unreadMessages) {
-            System.out.println("📝 ID: " + msg.getId() + " | Nadawca: " + msg.getSender().getFirstName() + " | Treść: " + msg.getMessage());
-        }
-
         long unreadCountForRecipient = messageRepository.countUnreadMessages(chatRoomId, recipient.getIdUser());
-
         messagingTemplate.convertAndSend("/topic/chat/updateUnread", new ChatRoomDTO(
                 chatRoom.getId(),
                 recipient.getIdUser(),
                 recipient.getFirstName() + " " + recipient.getSecondName(),
                 unreadCountForRecipient
         ));
-
-        System.out.println("📬 Nieprzeczytane wiadomości dla odbiorcy (" + recipient.getFirstName() + "): " + unreadCountForRecipient);
     }
-
 
     @DeleteMapping("/{chatRoomId}/messages/{messageId}")
     public ResponseEntity<?> deleteMessage(@PathVariable Long chatRoomId,
                                            @PathVariable Long messageId,
                                            Principal principal) {
-        // Pobranie aktualnego użytkownika
         User currentUser = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
-        // Pobranie wiadomości
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Nie znaleziono wiadomości"));
 
-        // Sprawdzenie, czy wiadomość należy do pokoju
         if (!message.getChatRoom().getId().equals(chatRoomId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Niepoprawny pokój chatu");
         }
 
-        // Weryfikacja, czy aktualny użytkownik jest nadawcą
         if (!message.getSender().equals(currentUser)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Możesz usuwać tylko własne wiadomości");
         }
 
-        // Usuwamy wiadomość
         messageRepository.delete(message);
-
-        // Wysyłamy zdarzenie o usunięciu wiadomości do kanału WebSocket
         messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId + "/delete", messageId);
-
         return ResponseEntity.ok("Wiadomość usunięta");
     }
 
@@ -229,20 +193,13 @@ public class ChatController {
         List<Message> unreadMessages = messageRepository.findUnreadMessages(chatRoomId, user.getIdUser());
         unreadMessages.forEach(msg -> msg.setRead(true));
         messageRepository.saveAll(unreadMessages);
-
-        // 🔥 Powiadamiamy o aktualizacji liczby nieprzeczytanych wiadomości
         long unreadCount = messageRepository.countUnreadMessages(chatRoomId, user.getIdUser());
-
-        // 🔔 Wysłanie powiadomienia o odczytaniu wiadomości
         messagingTemplate.convertAndSend("/topic/chat/updateUnread", new ChatRoomDTO(
                 chatRoomId,
                 user.getIdUser(),
                 user.getFirstName() + " " + user.getSecondName(),
                 unreadCount
         ));
-
-        System.out.println("✅ Wiadomości oznaczone jako przeczytane w pokoju: " + chatRoomId + " przez: " + user.getFirstName());
-
         return ResponseEntity.ok("Wiadomości oznaczone jako przeczytane");
     }
 
@@ -251,7 +208,5 @@ public class ChatController {
         chatService.createAdminChatsOnStartup();
         return ResponseEntity.ok("Wszystkie czaty administratora zostały zainicjalizowane.");
     }
-
-
 }
 

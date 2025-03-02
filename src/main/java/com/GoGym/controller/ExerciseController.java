@@ -38,7 +38,6 @@ public class ExerciseController {
         this.bodyPartService = bodyPartService;
         this.equipmentService = equipmentService;
     }
-
     @GetMapping("/exercises")
     public String getExercises(
             @RequestParam(defaultValue = "0") int page,
@@ -52,7 +51,6 @@ public class ExerciseController {
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
 
-        // Konwersja difficulty na Enum (jeśli podano)
         Exercise.Difficulty difficultyEnum = null;
         if (difficulty != null && !difficulty.isEmpty()) {
             try {
@@ -61,15 +59,12 @@ public class ExerciseController {
                 model.addAttribute("error", "Nieprawidłowy poziom trudności: " + difficulty);
             }
         }
-
-        // Pobieramy listy części ciała i sprzętów
         List<BodyPart> bodyParts = bodyPartService.findAll();
         model.addAttribute("bodyParts", bodyParts);
 
         List<Equipment> equipments = equipmentService.findAll();
         model.addAttribute("equipments", equipments);
 
-        // Filtrowanie ćwiczeń z paginacją
         Page<Exercise> exercisesPage = exerciseRepository.filter(
                 difficultyEnum,
                 (bodyPart != null && !bodyPart.isEmpty()) ? bodyPart : null,
@@ -88,7 +83,6 @@ public class ExerciseController {
 
         return "exercises-list";
     }
-
 
     @GetMapping("/exercise/{id}")
     public String getExerciseDetails(@PathVariable Long id, Model model) {

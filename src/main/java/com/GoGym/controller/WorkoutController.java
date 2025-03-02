@@ -63,7 +63,6 @@ public class WorkoutController {
     @GetMapping("/create")
     public String createWorkoutForm(Model model) {
         List<Exercise> exercises = exerciseService.getAllExercises();
-        log.info("Załadowano ćwiczenia: {}", exercises.size());
         model.addAttribute("workout", new Workout());
         model.addAttribute("exercises", exercises);
         return "create-workout";
@@ -89,7 +88,6 @@ public class WorkoutController {
 
             workout.setUser(currentUser);
             Workout savedWorkout = workoutService.addWorkoutWithExercises(workout, exerciseIds, sets, reps, weight, durations, distances);
-            log.info("Workout utworzony o ID: {}", savedWorkout.getIdWorkout());
             return "redirect:/workouts/user-workouts/" + savedWorkout.getIdWorkout();
         } catch (Exception e) {
             log.error("Błąd przy tworzeniu treningu", e);
@@ -101,11 +99,9 @@ public class WorkoutController {
     @GetMapping("/user-workouts/{id}")
     public String getWorkoutDetails(@PathVariable Long id, Model model, Principal principal) {
         Workout workout = workoutService.getWorkoutById(id);
-        // Pobranie aktualnie zalogowanego użytkownika
         User currentUser = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
-        // Sprawdzenie, czy trening należy do aktualnie zalogowanego użytkownika
         if (!workout.getUser().equals(currentUser)) {
             throw new RuntimeException("Nie masz uprawnień do przeglądania tego treningu.");
         }
@@ -134,14 +130,13 @@ public class WorkoutController {
         }
 
         model.addAttribute("workouts", workouts);
-        model.addAttribute("selectedDate", date); // Przekazujemy wybraną datę do widoku
+        model.addAttribute("selectedDate", date);
 
         return "user-workouts";
     }
 
     @PostMapping("/add-workout-from-day")
     public ResponseEntity<?> addWorkoutFromDay(@RequestBody WorkoutDTO workoutDTO, Principal principal) {
-        log.info("Otrzymane żądanie addWorkoutFromDay: {}", workoutDTO);
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
@@ -180,7 +175,6 @@ public class WorkoutController {
 
         workout.setWorkoutExercises(workoutExercises);
         workoutRepository.save(workout);
-        log.info("Workout dodany z dnia treningowego o ID: {}", day.getIdDay());
         return ResponseEntity.ok("Workout został zapisany!");
     }
 
@@ -204,7 +198,6 @@ public class WorkoutController {
         }
 
         workoutRepository.delete(workout);
-        log.info("Workout usunięty dla dnia o ID: {}", dayId);
         return ResponseEntity.ok("Workout został usunięty!");
     }
 
@@ -220,7 +213,6 @@ public class WorkoutController {
         }
 
         workoutRepository.delete(workout);
-        log.info("Workout o ID {} usunięty przez użytkownika {}", id, user.getIdUser());
         return ResponseEntity.ok("Trening został usunięty.");
     }
 
@@ -241,7 +233,6 @@ public class WorkoutController {
             String allExercisesJson = objectMapper.writeValueAsString(allExercises);
             model.addAttribute("allExercisesJson", allExercisesJson);
         } catch (Exception e) {
-            log.error("Błąd serializacji ćwiczeń do JSON", e);
             throw new RuntimeException("Błąd serializacji ćwiczeń do JSON", e);
         }
 
@@ -269,21 +260,16 @@ public class WorkoutController {
         if (!existingWorkout.getUser().equals(user)) {
             throw new RuntimeException("Nie masz uprawnień do edycji tego treningu.");
         }
-
-        // Aktualizacja podstawowych danych treningu
         existingWorkout.setWorkoutDate(workout.getWorkoutDate());
         existingWorkout.setIntensity(workout.getIntensity());
         existingWorkout.setStartTime(workout.getStartTime());
         existingWorkout.setEndTime(workout.getEndTime());
         existingWorkout.setNotes(workout.getNotes());
 
-        // Usunięcie ćwiczeń, które użytkownik usunął
         if (deletedExerciseIds != null) {
             workoutExerciseRepository.deleteAllById(deletedExerciseIds);
-            log.info("Usunięto ćwiczenia o ID: {}", deletedExerciseIds);
         }
 
-        // Aktualizacja istniejących ćwiczeń
         if (existingExerciseIds != null) {
             for (int i = 0; i < existingExerciseIds.size(); i++) {
                 WorkoutExercise workoutExercise = workoutExerciseRepository.findById(existingExerciseIds.get(i))
@@ -305,11 +291,9 @@ public class WorkoutController {
                     workoutExercise.setWeight(null);
                 }
                 workoutExerciseRepository.save(workoutExercise);
-                log.info("Zaktualizowano ćwiczenie o ID: {}", existingExerciseIds.get(i));
             }
         }
 
-        // Dodanie nowych ćwiczeń
         if (exerciseIds != null) {
             int existingSize = (existingExerciseIds != null) ? existingExerciseIds.size() : 0;
             for (int i = 0; i < exerciseIds.size(); i++) {
@@ -333,12 +317,9 @@ public class WorkoutController {
                     newExercise.setWeight(null);
                 }
                 workoutExerciseRepository.save(newExercise);
-                log.info("Dodano nowe ćwiczenie o ID: {} do treningu o ID: {}", exercise.getIdExercise(), existingWorkout.getIdWorkout());
             }
         }
-
         workoutRepository.save(existingWorkout);
-        log.info("Zaktualizowano trening o ID: {}", existingWorkout.getIdWorkout());
         return "redirect:/workouts/user-workouts/" + existingWorkout.getIdWorkout();
     }
 }

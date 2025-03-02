@@ -102,6 +102,18 @@
         .register-link a:hover {
             text-decoration: underline;
         }
+        .toggle-password {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          border: none;
+          background: none;
+          cursor: pointer;
+        }
+        .password-container {
+          position: relative;
+        }
     </style>
 </head>
 <body>
@@ -129,7 +141,12 @@
         <input class="login-input" type="text" id="username" name="username" placeholder="Login">
         <div id="usernameError" class="error-message"></div>
 
-        <input class="login-input" type="password" id="password" name="password" placeholder="Hasło">
+        <div class="password-container">
+            <input class="login-input" type="password" id="password" name="password" placeholder="Hasło">
+            <button type="button" class="toggle-password" onclick="toggleLoginPassword('password')">
+                <i class="fa-solid fa-eye"></i>
+            </button>
+        </div>
         <div id="passwordError" class="error-message"></div>
 
         <button type="submit" class="login-button">Zaloguj się</button>
@@ -172,6 +189,14 @@
       event.preventDefault();
     }
   });
+  function toggleLoginPassword(fieldId) {
+    var field = document.getElementById(fieldId);
+    if (field.type === "password") {
+      field.type = "text";
+    } else {
+      field.type = "password";
+    }
+  }
 </script>
 
 </body>

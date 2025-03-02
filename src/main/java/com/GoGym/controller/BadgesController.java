@@ -29,21 +29,16 @@ public class BadgesController {
     public final WorkoutService workoutService;
     public final TrainingPlanService trainingPlanService;
 
-
     @GetMapping("/badges")
     public String getBadgesPage(Model model, Authentication authentication) {
-        // Pobieramy zalogowanego użytkownika
         String username = authentication.getName();
         User currentUser = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika"));
 
-        // Pobierz wszystkie dostępne odznaki
         List<Badge> allBadges = badgeRepository.findAll();
 
-        // Pobierz odznaki, które użytkownik już zdobył
         List<UserBadge> userBadges = badgeService.getBadgesForUser(currentUser);
 
-        // Pseudologika liczenia postępów (jak poprzednio)
         int workoutCount = workoutService.getWorkoutsByUser(currentUser).size();
         int completedPlans = (int) trainingPlanService.findPlansByIdClient(currentUser.getIdUser())
                 .stream().filter(plan -> plan.getStatus() == TrainingPlan.Status.completed)
@@ -81,7 +76,6 @@ public class BadgesController {
             badgeProgress.put(badge.getId(), progress + "/" + target);
         }
 
-        // Przygotowanie zbioru ID posiadanych odznak
         Set<Long> ownedBadgeIds = userBadges.stream()
                 .map(ub -> ub.getBadge().getId())
                 .collect(Collectors.toSet());
@@ -91,7 +85,7 @@ public class BadgesController {
         model.addAttribute("badgeProgress", badgeProgress);
         model.addAttribute("ownedBadgeIds", ownedBadgeIds);
 
-        return "badges"; // Widok badges.html
+        return "badges";
     }
 
 

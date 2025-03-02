@@ -17,7 +17,6 @@ public class GlobalControllerAdvice {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             model.addAttribute("idUser", userDetails.getIdUser());
 
-            // Ustawiamy atrybuty dla ról – przykład
             User user = userDetails.getUser();
             if (user != null) {
                 boolean isUser = user.getUserType() == User.UserType.CLIENT;

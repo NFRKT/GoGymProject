@@ -61,8 +61,6 @@ public class RequestController {
             newRequest.setRequestStatus(Request.RequestStatus.pending);
 
             requestRepository.save(newRequest);
-
-            // Powiadomienie dla trenera
             notificationService.createNotification(trainer, loggedInUser, "new_request");
 
             Map<String, String> response = new HashMap<>();
@@ -130,8 +128,6 @@ public class RequestController {
             } else {
                 response.put("status", "unknown");
             }
-
-            // Po zmianie statusu – usuwamy prośbę
             requestRepository.delete(updatedRequest);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {

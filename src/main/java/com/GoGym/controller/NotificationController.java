@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class NotificationController {
 
     private final NotificationService notificationService;
-
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
@@ -40,13 +39,11 @@ public class NotificationController {
 
         return ResponseEntity.ok(notifications);
     }
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
         return ResponseEntity.ok().build();
     }
-
     @PostMapping("/mark-read/{id}")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);

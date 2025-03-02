@@ -23,14 +23,12 @@ public class AllUserController {
 
     @GetMapping("/all-user-list")
     public String allUserList(Model model, Authentication authentication) {
-        // Pobieramy wszystkich użytkowników oprócz adminów
         List<User> users = userRepository.findAll()
                 .stream()
                 .filter(u -> u.getUserType() != null && !u.getUserType().name().equals("ADMIN"))
                 .collect(Collectors.toList());
         model.addAttribute("users", users);
 
-        // Przekazujemy informację o roli zalogowanego użytkownika, jeżeli potrzebna
         boolean isUser = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CLIENT"));
         model.addAttribute("isUser", isUser);

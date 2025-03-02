@@ -39,7 +39,6 @@ public class AdminExerciseController {
         this.workoutExerciseRepository = workoutExerciseRepository;
     }
 
-    // Formularz do stworzenia nowego ćwiczenia
     @GetMapping("/new")
     public String newExerciseForm(Model model) {
         model.addAttribute("exercise", new Exercise());
@@ -56,10 +55,6 @@ public class AdminExerciseController {
         return "admin-exercise-form";
     }
 
-
-
-
-    // Przetwarzanie formularza tworzenia nowego ćwiczenia
     @PostMapping("/new")
     public String createExercise(@ModelAttribute("exercise") Exercise exercise,
                                  @RequestParam(required = false, name = "bodyPartIds") List<Long> bodyPartIds,
@@ -72,22 +67,18 @@ public class AdminExerciseController {
         exercise.setBodyParts(selectedBodyParts);
         exercise.setEquipment(selectedEquipment);
 
-        // Obsługa zdjęcia
         if (!imageFile.isEmpty()) {
-            String fileName = exercise.getName().replaceAll("\\s+", "_").toLowerCase() + ".jpg"; // Nazwa na podstawie ćwiczenia
+            String fileName = exercise.getName().replaceAll("\\s+", "_").toLowerCase() + ".jpg";
             String uploadDir = "src/main/resources/static/images/exercises/";
             Path uploadPath = Paths.get(uploadDir);
 
-            // Tworzenie folderu jeśli nie istnieje
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Zapis pliku
             Path filePath = uploadPath.resolve(fileName);
             Files.write(filePath, imageFile.getBytes());
 
-            // Ustawienie ścieżki do bazy danych
             exercise.setJpg("/images/exercises/" + fileName);
         }
 
@@ -95,7 +86,6 @@ public class AdminExerciseController {
         return "redirect:/admin/panel";
     }
 
-    // Formularz edycji istniejącego ćwiczenia
     @GetMapping("/edit/{id}")
     public String editExerciseForm(@PathVariable Long id, Model model) {
         Exercise exercise = exerciseRepository.findById(id)
@@ -110,13 +100,11 @@ public class AdminExerciseController {
         model.addAttribute("equipments", equipmentRepository.findAll());
         model.addAttribute("difficulties", Exercise.Difficulty.values());
         model.addAttribute("exerciseTypes", Exercise.ExerciseType.values());
-        model.addAttribute("isTypeLocked", isTypeLocked); // Dodajemy flagę do widoku
+        model.addAttribute("isTypeLocked", isTypeLocked);
 
         return "admin-exercise-form";
     }
 
-
-    // Aktualizacja ćwiczenia
     @PostMapping("/edit/{id}")
     public String updateExercise(@PathVariable Long id,
                                  @ModelAttribute("exercise") Exercise exercise,
@@ -137,37 +125,32 @@ public class AdminExerciseController {
         existing.setName(exercise.getName());
         existing.setDescription(exercise.getDescription());
         existing.setDifficulty(exercise.getDifficulty());
-        existing.setJpg(existing.getJpg()); // Domyślnie zachowujemy stare zdjęcie
+        existing.setJpg(existing.getJpg());
 
         Set<BodyPart> selectedBodyParts = new HashSet<>(bodyPartRepository.findAllById(bodyPartIds));
         Set<Equipment> selectedEquipment = new HashSet<>(equipmentRepository.findAllById(equipmentIds));
         existing.setBodyParts(selectedBodyParts);
         existing.setEquipment(selectedEquipment);
 
-// Obsługa zmiany zdjęcia
         if (!imageFile.isEmpty()) {
             String fileName = existing.getName().replaceAll("\\s+", "_").toLowerCase() + ".jpg";
             String uploadDir = "src/main/resources/static/images/exercises/";
             Path uploadPath = Paths.get(uploadDir);
 
-            // Usunięcie starego pliku, jeśli istnieje
             File oldFile = new File(uploadPath + "/" + fileName);
             if (oldFile.exists()) {
                 oldFile.delete();
             }
 
-            // Zapis nowego pliku
             Path filePath = uploadPath.resolve(fileName);
             Files.write(filePath, imageFile.getBytes());
 
-            // Aktualizacja ścieżki w bazie
             existing.setJpg("/images/exercises/" + fileName);
         }
 
         exerciseRepository.save(existing);
         return "redirect:/admin/panel";
     }
-
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String, Object>> deleteExercise(@PathVariable Long id) {
@@ -189,18 +172,12 @@ public class AdminExerciseController {
     @GetMapping("/list")
     public String listExercises(Model model) {
         List<Exercise> exercises = exerciseRepository.findAll();
-        // Dla każdego ćwiczenia ustalamy, czy jest używane w planach lub workoutach
         for (Exercise exercise : exercises) {
             boolean usedInPlans = planExerciseRepository.countByExerciseId(exercise.getIdExercise()) > 0;
             boolean usedInWorkouts = workoutExerciseRepository.countByExerciseId(exercise.getIdExercise()) > 0;
-            // Załóżmy, że Exercise posiada transient pole "used" (lub setter, który nie jest zapisywany do bazy)
             exercise.setUsed(usedInPlans || usedInWorkouts);
         }
         model.addAttribute("exercises", exercises);
         return "admin-exercise-list";
     }
-
-
-
-
 }

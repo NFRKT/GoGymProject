@@ -18,7 +18,6 @@ public class VideoController {
     private static final Logger logger = LoggerFactory.getLogger(VideoController.class);
     private final CloudinaryService cloudinaryService;
     private final PlanExerciseRepository planExerciseRepository;
-    // Możesz dodać stałą na maksymalny rozmiar pliku, np. 100MB (100 * 1024 * 1024 bajtów)
     private static final long MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
 
     public VideoController(CloudinaryService cloudinaryService, PlanExerciseRepository planExerciseRepository) {
@@ -29,17 +28,14 @@ public class VideoController {
     @PostMapping("/upload/{exerciseId}")
     public ResponseEntity<?> uploadVideo(@PathVariable Long exerciseId, @RequestParam("file") MultipartFile file) {
         try {
-            // Sprawdzamy, czy plik nie jest pusty
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("Plik nie może być pusty.");
             }
 
-            // Walidacja rozmiaru pliku (jeśli przekroczony, wyrzucamy odpowiedni komunikat)
             if (file.getSize() > MAX_VIDEO_SIZE) {
                 return ResponseEntity.badRequest().body("Plik jest za duży! Maksymalny rozmiar to 100MB. Spróbuj dodać link do nagrania.");
             }
 
-            // Walidacja typu MIME – akceptujemy tylko pliki wideo
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("video/")) {
                 return ResponseEntity.badRequest().body("Przesłany plik musi być nagraniem wideo.");
@@ -82,7 +78,6 @@ public class VideoController {
             exercise.setVideoUrl(link);
             planExerciseRepository.save(exercise);
 
-            // Zwracamy sam link, aby front-end mógł go użyć jako adres URL
             return ResponseEntity.ok(link);
         } catch (Exception e) {
             logger.error("Błąd podczas dodawania linku do nagrania.", e);
@@ -109,7 +104,6 @@ public class VideoController {
                 return ResponseEntity.internalServerError().body("Błąd podczas usuwania pliku z Cloudinary.");
             }
 
-            // Usunięcie referencji w bazie danych
             exercise.setVideoUrl(null);
             planExerciseRepository.save(exercise);
 

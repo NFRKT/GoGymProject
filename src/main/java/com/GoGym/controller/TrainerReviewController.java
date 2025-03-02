@@ -31,7 +31,6 @@ public class TrainerReviewController {
         return reviews.stream().map(TrainerReviewDTO::new).toList();
     }
 
-
     @PostMapping("/add")
     public ResponseEntity<?> addReview(@RequestParam Long trainerId,
                                        @RequestParam int rating,
@@ -49,7 +48,6 @@ public class TrainerReviewController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Wystąpił błąd"));
         }
     }
-
 
     @PutMapping("/update")
     public Map<String, String> updateReview(@RequestParam Long reviewId,
@@ -75,5 +73,4 @@ public class TrainerReviewController {
             return Map.of("message", "Opinia została usunięta");
         }
     }
-
 }

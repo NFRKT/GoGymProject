@@ -158,7 +158,7 @@ public class TrainerClientController {
 
                 long years = ChronoUnit.YEARS.between(startDate, today);
                 long months = ChronoUnit.MONTHS.between(startDate, today) % 12;
-                long days = ChronoUnit.DAYS.between(startDate, today) % 30; // Pozostałe dni
+                long days = ChronoUnit.DAYS.between(startDate, today) % 30;
 
                 if (years >= 1) {
                     experienceDuration = years + " lat";

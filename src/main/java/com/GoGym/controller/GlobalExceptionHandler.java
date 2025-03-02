@@ -21,19 +21,18 @@ public class GlobalExceptionHandler implements ErrorController {
         if (status != null) {
             int statusCode = Integer.parseInt(status.toString());
             model.addAttribute("status", statusCode);
-            System.out.println("Błąd HTTP: " + statusCode); // 🔥 Debugowanie
             if (statusCode == HttpStatus.FORBIDDEN.value()) {
-                return "error/403"; // 🔥 Zwrot poprawnego widoku 403
+                return "error/403";
             } else if (statusCode == HttpStatus.NOT_FOUND.value()) {
-                return "error/404"; // 🔥 Zwrot poprawnego widoku 404
+                return "error/404";
             }
         }
-        return "redirect:/home"; // 🔥 Zwrot domyślnego błędu
+        return "redirect:/home";
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public String handleAccessDeniedException() {
-        return "redirect:/error/403"; // 🔥 Poprawne przekierowanie na 403
+        return "redirect:/error/403";
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -47,5 +46,4 @@ public class GlobalExceptionHandler implements ErrorController {
     public Map<String, String> handleSecurityException(SecurityException ex) {
         return Map.of("error", "Nie masz uprawnień do wykonania tej operacji");
     }
-
 }

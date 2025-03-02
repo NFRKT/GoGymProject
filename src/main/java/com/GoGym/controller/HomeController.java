@@ -29,14 +29,10 @@ public class HomeController {
 
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private WorkoutRepository workoutRepository;
-
-
     @Autowired
     private TrainingPlanService trainingPlanService;
-
     @Autowired
     private BadgeService badgeService;
 
@@ -97,16 +93,11 @@ public class HomeController {
     }
     @GetMapping({"/", "/gogym"})
     public String landingPage(Model model) {
-        // Pobierz liczbę wszystkich użytkowników
         long userCount = userRepository.count();
-
-        // Liczba trenerów – przyjmujemy, że UserType jest przechowywany jako String w polu userType
         long trainerCount = userRepository.findAll()
                 .stream()
                 .filter(u -> u.getUserType() != null && u.getUserType().toString().equals("TRAINER"))
                 .count();
-
-        // Liczba treningów (workoutów)
         long workoutCount = workoutRepository.count();
 
         model.addAttribute("userCount", userCount);

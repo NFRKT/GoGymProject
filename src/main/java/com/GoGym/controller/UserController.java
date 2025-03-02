@@ -38,9 +38,7 @@ public class UserController {
             userService.registerUser(userDTO);
             return "redirect:/login";
         } catch (IllegalStateException e) {
-            // Dodajemy komunikat błędu do modelu
             model.addAttribute("emailErrorMessage", e.getMessage());
-            // Ustawiamy ponownie formularz (jeśli chcesz, aby użytkownik nie musiał wpisywać wszystkiego od nowa)
             model.addAttribute("User", userDTO);
             return "register-user";
         }

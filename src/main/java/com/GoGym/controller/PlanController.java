@@ -48,10 +48,8 @@ public class PlanController {
                 .map(tc -> tc.getTrainer().getIdUser())
                 .toList();
 
-        // Filtrowanie tylko planów od aktywnych trenerów
         List<TrainingPlan> activeTrainerPlans = plans.stream()
                 .filter(plan -> activeTrainerIds.contains(plan.getTrainer().getIdUser()))
-                // Sortowanie: ACTIVE jako pierwsze, COMPLETED jako drugie
                 .sorted(Comparator.comparing(plan -> plan.getStatus() == TrainingPlan.Status.completed ? 1 : 0))
                 .toList();
 
@@ -184,7 +182,6 @@ public class PlanController {
             day.setDate(start.plusDays(i));
 
             List<PlanExercise> exercisesForDay = new ArrayList<>();
-            // Usunięto warunek ograniczający ćwiczenia tylko do dni treningowych
             for (int j = 0; j < exerciseIds.size(); j++) {
                 if (exerciseDays.get(j) == i) {
                     PlanExercise exercise = new PlanExercise();
@@ -223,8 +220,6 @@ public class PlanController {
         trainingPlanService.createTrainingPlan(plan);
         return "redirect:/trainer-panel";
     }
-
-
     private Integer parseDuration(String duration) {
         if (duration == null || duration.isEmpty()) return null;
 
@@ -353,12 +348,8 @@ public class PlanController {
     public String editPlan(@PathVariable Long id, Model model, Authentication authentication) {
         TrainingPlan plan = trainingPlanRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + id));
-
-        // Pobieramy zalogowanego użytkownika
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User loggedInUser = userDetails.getUser();
-
-        // Sprawdzamy, czy trener edytuje swój własny plan
         if (!plan.getIdTrainer().equals(loggedInUser.getIdUser())) {
             log.warn("Użytkownik {} próbował edytować cudzy plan treningowy (ID: {})", loggedInUser.getIdUser(), id);
             return "redirect:/home";

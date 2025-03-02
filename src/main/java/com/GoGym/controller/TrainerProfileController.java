@@ -96,13 +96,12 @@ public class TrainerProfileController {
     public Map<String, Object> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file, Principal principal) {
         Map<String, Object> response = new HashMap<>();
 
-        long MAX_AVATAR_SIZE = 10 * 1024 * 1024; // 5MB
+        long MAX_AVATAR_SIZE = 10 * 1024 * 1024;
         if (file.getSize() > MAX_AVATAR_SIZE) {
             response.put("success", false);
             response.put("message", "Plik jest za duży. Maksymalny rozmiar to 5MB.");
             return response;
         }
-        // Walidacja typu pliku – akceptujemy tylko obrazy
         if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
             response.put("success", false);
             response.put("message", "Nieobsługiwany typ pliku. Akceptowane są tylko obrazy.");
@@ -117,18 +116,14 @@ public class TrainerProfileController {
                     trainerDetails = new TrainerDetails();
                     trainerDetails.setUser(user);
                 }
-
                 Path uploadDir = Paths.get(AVATAR_UPLOAD_DIR);
                 if (!Files.exists(uploadDir)) {
                     Files.createDirectories(uploadDir);
                 }
-
-                // Usunięcie starego zdjęcia, jeśli istnieje
                 if (trainerDetails.getProfilePicture() != null) {
                     Path oldFilePath = uploadDir.resolve(trainerDetails.getProfilePicture());
                     Files.deleteIfExists(oldFilePath);
                 }
-
                 String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 Path filePath = uploadDir.resolve(fileName);
                 Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
@@ -147,7 +142,6 @@ public class TrainerProfileController {
         }
         return response;
     }
-
 
     @PostMapping("/deleteProfilePicture")
     @ResponseBody
@@ -331,7 +325,6 @@ public class TrainerProfileController {
         }
 
         TrainerExperience experience = experienceOpt.get();
-        // Sprawdzenie, czy doświadczenie należy do zalogowanego trenera
         if (!experience.getTrainer().getUser().getIdUser().equals(user.getIdUser())) {
             response.put("success", false);
             response.put("message", "Brak uprawnień do edycji tego doświadczenia");
@@ -342,27 +335,23 @@ public class TrainerProfileController {
         experience.setGraduationDate(graduationDate);
 
         if (certificationFile != null && !certificationFile.isEmpty()) {
-            // Walidacja typu pliku – akceptujemy PDF oraz obrazy
             String contentType = certificationFile.getContentType();
             if (!(("application/pdf".equals(contentType)) || (contentType != null && contentType.startsWith("image/")))) {
                 response.put("success", false);
                 response.put("message", "Nieobsługiwany typ pliku certyfikatu");
                 return response;
             }
-            // Walidacja rozmiaru pliku (np. maks. 10MB)
-            long MAX_CERTIFICATION_SIZE = 10 * 1024 * 1024; // 10MB
+            long MAX_CERTIFICATION_SIZE = 10 * 1024 * 1024;
             if (certificationFile.getSize() > MAX_CERTIFICATION_SIZE) {
                 response.put("success", false);
                 response.put("message", "Plik jest za duży. Maksymalny rozmiar to 10MB.");
                 return response;
             }
             try {
-                // Usunięcie starego pliku, jeśli istnieje
                 if (experience.getCertificationFile() != null) {
                     Path oldFilePath = Paths.get(CERTIFICATION_UPLOAD_DIR, experience.getCertificationFile());
                     Files.deleteIfExists(oldFilePath);
                 }
-                // Zapis nowego pliku
                 String fileName = UUID.randomUUID() + "_" + certificationFile.getOriginalFilename();
                 Path filePath = Paths.get(CERTIFICATION_UPLOAD_DIR, fileName);
                 Files.createDirectories(filePath.getParent());
@@ -403,7 +392,6 @@ public class TrainerProfileController {
         }
 
         TrainerExperience experience = experienceOpt.get();
-        // Sprawdzenie, czy doświadczenie należy do zalogowanego trenera
         if (!experience.getTrainer().getUser().getIdUser().equals(user.getIdUser())) {
             response.put("success", false);
             response.put("message", "Brak uprawnień do usunięcia tego doświadczenia");
@@ -456,7 +444,6 @@ public class TrainerProfileController {
             return response;
         }
         Date today = new Date();
-        // Ustawiamy godziny na 0, aby porównanie było tylko datowe
         Calendar calToday = Calendar.getInstance();
         calToday.setTime(today);
         calToday.set(Calendar.HOUR_OF_DAY, 0);
@@ -486,8 +473,6 @@ public class TrainerProfileController {
             return response;
         }
         try {
-            // Zakładamy, że enum w klasie User nazywa się Gender i ma wartości KOBIETA oraz MĘŻCZYZNA.
-            // Używamy toUpperCase() aby mieć pewność, że przekazany tekst odpowiada nazwie enuma.
             User.Gender genderEnum = User.Gender.valueOf(gender.trim().toUpperCase());
             user.setGender(genderEnum);
         } catch (IllegalArgumentException e) {
