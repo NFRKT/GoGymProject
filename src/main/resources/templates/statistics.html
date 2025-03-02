@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <title>Statystyki Treningowe</title>
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Statystyki Treningowe</title>
+    <style>
     html, body {
       height: 100%;
       margin: 0;
@@ -138,130 +138,156 @@
         display: block;
     }
 }
-  </style>
+ .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+
+    </style>
 </head>
 <body>
 
 <div th:replace="~{header :: header}"></div>
 
 <div class="container">
-  <button class="btn-back" onclick="goBack()">Powrót</button>
-
-  <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
-  <div class="floating-menu">
-    <a href="#common-exercises">🏋️ Najczęstsze ćwiczenia</a>
-    <a href="#monthly-exercises">📆 Ćwiczenia w miesiącu</a>
-    <a href="#max-weight">💪 Największy ciężar</a>
-    <a href="#longest-cardio">⏳ Najdłuższy cardio</a>
-    <a href="#workout-count">📊 Ilość treningów</a>
-    <a href="#avg-training">🕒 Średnia długość</a>
-    <a href="#max-reps">🔄 Najwięcej powtórzeń</a>
-    <a href="#workout-days">📅 Dni treningowe</a>
-    <a href="#total-time">⏳ Całkowity czas treningów</a>
-  </div>
-
-  <h1 id="top">📊 Statystyki Treningowe</h1>
-
-  <div class="stat-box" id="common-exercises">
-    <h2>🏋️ Najczęściej wykonywane ćwiczenia (ogólnie)</h2>
-    <ul>
-      <li th:each="entry : ${statistics.mostCommonExercises}">
-        <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span> razy
-      </li>
-    </ul>
-  </div>
-
-  <div class="stat-box" id="monthly-exercises">
-    <h2>📆 Najczęściej wykonywane ćwiczenia w miesiącu</h2>
-    <div class="select-container">
-      <select id="yearEx">
-        <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}" th:selected="${y == year}"></option>
-      </select>
-      <select id="monthEx">
-        <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}" th:selected="${m.key == month}"></option>
-      </select>
+    <a href="/home" class="back-link">Powrót</a>
+    <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
+    <div class="floating-menu">
+        <a href="#common-exercises">🏋️ Najczęstsze ćwiczenia</a>
+        <a href="#monthly-exercises">📆 Ćwiczenia w miesiącu</a>
+        <a href="#max-weight">💪 Największy ciężar</a>
+        <a href="#longest-cardio">⏳ Najdłuższy cardio</a>
+        <a href="#workout-count">📊 Ilość treningów</a>
+        <a href="#avg-training">🕒 Średnia długość</a>
+        <a href="#max-reps">🔄 Najwięcej powtórzeń</a>
+        <a href="#workout-days">📅 Dni treningowe</a>
+        <a href="#total-time">⏳ Całkowity czas treningów</a>
     </div>
-    <ul id="mostCommonExercisesInMonth">
-      <li th:each="entry : ${statistics.mostCommonExercisesInMonth}">
-        <strong th:text="${entry[0]}"></strong> – <span th:text="${entry[1]}"></span> razy
-      </li>
-    </ul>
-  </div>
 
-  <div class="stat-box" id="max-weight">
-    <h2>💪 Największy ciężar dla ćwiczeń siłowych</h2>
-    <ul>
-      <li th:each="entry : ${statistics.maxWeightExercises}">
-        <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value.key}"></span> kg (<span th:text="${entry.value.value}"></span>)
-      </li>
-    </ul>
-  </div>
+    <h1 id="top">📊 Statystyki Treningowe</h1>
 
-  <div class="stat-box" id="longest-cardio">
-    <h2>⏳ Najdłuższy trening cardio</h2>
-    <p th:if="${statistics.longestCardio != null}">
-      <strong th:text="${statistics.longestCardio.exerciseName}"></strong>:
-      <span th:text="${statistics.longestCardio.formattedDuration}"></span>
-    </p>
-  </div>
-
-  <div class="stat-box" id="workout-count">
-    <h2>📅 Ilość treningów w miesiącu</h2>
-    <div class="select-container">
-      <select id="yearWo">
-        <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}" th:selected="${y == year}"></option>
-      </select>
-      <select id="monthWo">
-        <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}" th:selected="${m.key == month}"></option>
-      </select>
+    <div class="stat-box" id="common-exercises">
+        <h2>🏋️ Najczęściej wykonywane ćwiczenia (ogólnie)</h2>
+        <ul>
+            <li th:each="entry : ${statistics.mostCommonExercises}">
+                <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span> razy
+            </li>
+        </ul>
     </div>
-    <p>W <span id="selectedMonth" th:text="${monthName}"></span> <span id="selectedYear" th:text="${year}"></span> miałeś <strong id="workoutCount" th:text="${statistics.workoutsCount}"></strong> treningów.</p>
-  </div>
 
-  <div class="stat-box" id="avg-training">
-    <h2>🕒 Średnia długość treningu</h2>
-    <div class="select-container">
-      <select id="yearAvg">
-        <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}" th:selected="${y == year}"></option>
-      </select>
-      <select id="monthAvg">
-        <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}" th:selected="${m.key == month}"></option>
-      </select>
+    <div class="stat-box" id="monthly-exercises">
+        <h2>📆 Najczęściej wykonywane ćwiczenia w miesiącu</h2>
+        <div class="select-container">
+            <select id="yearEx">
+                <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}"
+                        th:selected="${y == year}"></option>
+            </select>
+            <select id="monthEx">
+                <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}"
+                        th:selected="${m.key == month}"></option>
+            </select>
+        </div>
+        <ul id="mostCommonExercisesInMonth">
+            <li th:each="entry : ${statistics.mostCommonExercisesInMonth}">
+                <strong th:text="${entry[0]}"></strong> – <span th:text="${entry[1]}"></span> razy
+            </li>
+        </ul>
     </div>
-    <p>W <span id="selectedMonthAvg" th:text="${monthName}"></span> <span id="selectedYearAvg" th:text="${year}"></span> średnia długość treningu wynosi <strong id="avgDuration" th:text="${statistics.averageWorkoutDuration}"></strong>.</p>
-    <p>Ogółem: <strong th:text="${statistics.averageWorkoutDurationAll}"></strong></p>
-  </div>
 
-  <div class="stat-box" id="max-reps">
-    <h2>🔄 Największa liczba powtórzeń</h2>
-    <ul>
-      <li th:each="entry : ${statistics.maxRepsExercises}">
-        <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span>
-      </li>
-    </ul>
-  </div>
-
-  <div class="stat-box" id="workout-days">
-    <h2>📅 Najczęściej trenowane dni tygodnia</h2>
-    <ul>
-      <li th:each="entry : ${statistics.mostFrequentWorkoutDays}">
-        <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span> razy
-      </li>
-    </ul>
-  </div>
-  <div class="stat-box" id="total-time">
-    <h2>⏳ Całkowity czas treningów</h2>
-    <div class="select-container">
-      <select id="yearTotal">
-        <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}" th:selected="${y == year}"></option>
-      </select>
-      <select id="monthTotal">
-        <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}" th:selected="${m.key == month}"></option>
-      </select>
+    <div class="stat-box" id="max-weight">
+        <h2>💪 Największy ciężar dla ćwiczeń siłowych</h2>
+        <ul>
+            <li th:each="entry : ${statistics.maxWeightExercises}">
+                <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value.key}"></span> kg (<span
+                    th:text="${entry.value.value}"></span>)
+            </li>
+        </ul>
     </div>
-    <p>W <span id="selectedMonthTotal" th:text="${monthName}"></span> <span id="selectedYearTotal" th:text="${year}"></span> całkowity czas treningów wynosi <strong id="totalDuration" th:text="${statistics.totalWorkoutTime}"></strong>.</p>
-    <p>Ogółem: <strong th:text="${statistics.totalWorkoutTimeAll}"></strong></p>
-  </div>
+
+    <div class="stat-box" id="longest-cardio">
+        <h2>⏳ Najdłuższy trening cardio</h2>
+        <p th:if="${statistics.longestCardio != null}">
+            <strong th:text="${statistics.longestCardio.exerciseName}"></strong>:
+            <span th:text="${statistics.longestCardio.formattedDuration}"></span>
+        </p>
+    </div>
+
+    <div class="stat-box" id="workout-count">
+        <h2>📅 Ilość treningów w miesiącu</h2>
+        <div class="select-container">
+            <select id="yearWo">
+                <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}"
+                        th:selected="${y == year}"></option>
+            </select>
+            <select id="monthWo">
+                <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}"
+                        th:selected="${m.key == month}"></option>
+            </select>
+        </div>
+        <p>W <span id="selectedMonth" th:text="${monthName}"></span> <span id="selectedYear" th:text="${year}"></span>
+            miałeś <strong id="workoutCount" th:text="${statistics.workoutsCount}"></strong> treningów.</p>
+    </div>
+
+    <div class="stat-box" id="avg-training">
+        <h2>🕒 Średnia długość treningu</h2>
+        <div class="select-container">
+            <select id="yearAvg">
+                <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}"
+                        th:selected="${y == year}"></option>
+            </select>
+            <select id="monthAvg">
+                <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}"
+                        th:selected="${m.key == month}"></option>
+            </select>
+        </div>
+        <p>W <span id="selectedMonthAvg" th:text="${monthName}"></span> <span id="selectedYearAvg"
+                                                                              th:text="${year}"></span> średnia długość
+            treningu wynosi <strong id="avgDuration" th:text="${statistics.averageWorkoutDuration}"></strong>.</p>
+        <p>Ogółem: <strong th:text="${statistics.averageWorkoutDurationAll}"></strong></p>
+    </div>
+
+    <div class="stat-box" id="max-reps">
+        <h2>🔄 Największa liczba powtórzeń</h2>
+        <ul>
+            <li th:each="entry : ${statistics.maxRepsExercises}">
+                <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="stat-box" id="workout-days">
+        <h2>📅 Najczęściej trenowane dni tygodnia</h2>
+        <ul>
+            <li th:each="entry : ${statistics.mostFrequentWorkoutDays}">
+                <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span> razy
+            </li>
+        </ul>
+    </div>
+    <div class="stat-box" id="total-time">
+        <h2>⏳ Całkowity czas treningów</h2>
+        <div class="select-container">
+            <select id="yearTotal">
+                <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}"
+                        th:selected="${y == year}"></option>
+            </select>
+            <select id="monthTotal">
+                <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}"
+                        th:selected="${m.key == month}"></option>
+            </select>
+        </div>
+        <p>W <span id="selectedMonthTotal" th:text="${monthName}"></span> <span id="selectedYearTotal"
+                                                                                th:text="${year}"></span> całkowity czas
+            treningów wynosi <strong id="totalDuration" th:text="${statistics.totalWorkoutTime}"></strong>.</p>
+        <p>Ogółem: <strong th:text="${statistics.totalWorkoutTimeAll}"></strong></p>
+    </div>
 
 </div>
 
@@ -326,9 +352,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("yearTotal").addEventListener("change", updateTotalStatistics);
     document.getElementById("monthTotal").addEventListener("change", updateTotalStatistics);
 });
-  function goBack() {
-    window.history.back();
-  }
 
 document.addEventListener("DOMContentLoaded", function () {
     const menu = document.querySelector('.floating-menu');
@@ -374,6 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("resize", handleResize);
     handleResize(); // Wywołujemy na start, aby dostosować się do okna
 });
+
 </script>
 </body>
 </html>

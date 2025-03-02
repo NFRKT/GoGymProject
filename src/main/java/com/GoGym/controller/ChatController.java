@@ -75,16 +75,16 @@ public class ChatController {
                                 : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName());
                     }
 
+                    long unreadCount = messageRepository.countUnreadMessages(chatRoom.getId(), user.getIdUser());
                     return new ChatRoomDTO(
                             chatRoom.getId(),
                             isAdminChat ? -1 : (chatRoom.getUser().equals(user) ? chatRoom.getTrainer().getIdUser() : chatRoom.getUser().getIdUser()),
                             chatName,
-                            0
+                            unreadCount
                     );
                 })
                 .collect(Collectors.toList());
     }
-
 
     @GetMapping("/{chatRoomId}/messages")
     @ResponseBody
@@ -245,6 +245,7 @@ public class ChatController {
 
         return ResponseEntity.ok("Wiadomości oznaczone jako przeczytane");
     }
+
     @PostMapping("/admin/init-chats")
     public ResponseEntity<String> initializeAdminChats() {
         chatService.createAdminChatsOnStartup();

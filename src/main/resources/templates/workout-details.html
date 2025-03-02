@@ -120,21 +120,46 @@
         padding: 8px 10px;
       }
     }
-     .btn-back {
-      background: #303a53;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
       text-decoration: none;
-      font-size: 14px;
-      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s ease;
     }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
+    .edit-btn, .delete-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        margin: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+    }
+
+    .edit-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
   </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-  <button class="btn-back" onclick="goBack()">Powrót</button>
+  <a href="/workouts/user-workouts" class="back-link">Powrót do listy</a>
   <h1>Szczegóły Treningu z dnia - <span th:text="${workout.workoutDate}"></span></h1>
 
   <!-- Workout Information Section -->
@@ -195,7 +220,8 @@
       </tbody>
     </table>
   </div>
-
+  <button onclick="editWorkout()" class="edit-btn">✏ Edytuj</button>
+  <button onclick="deleteWorkout()" class="delete-btn">🗑 Usuń</button>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <script>
@@ -237,9 +263,25 @@
         .catch(error => console.error("Błąd:", error));
       }
     }
-      function goBack() {
-    window.history.back();
-  }
+    function editWorkout() {
+      const workoutId = [[${workout.idWorkout}]];
+      window.location.href = `/workouts/edit/${workoutId}`;
+    }
+    function deleteWorkout() {
+          if (confirm("Czy na pewno chcesz usunąć ten trening?")) {
+        const workoutId = [[${workout.idWorkout}]];
+        fetch(`/workouts/delete/${workoutId}`, {
+          method: "DELETE"
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Błąd usuwania treningu.");
+          alert("Trening został usunięty.");
+          window.location.href = "/workouts/user-workouts";
+        })
+        .catch(error => console.error("Błąd:", error));
+      }
+    }
+
   </script>
 </body>
 </html>

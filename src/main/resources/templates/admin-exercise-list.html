@@ -131,6 +131,19 @@
         overflow-x: auto;
       }
     }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
   </style>
 </head>
 <body>
@@ -138,7 +151,7 @@
 <div th:replace="~{header :: header}"></div>
 
 <div class="container">
-  <button class="btn-back" onclick="goBack()">Powrót</button>
+  <a href="/admin/panel" class="back-link">Powrót</a>
   <h2>Lista Ćwiczeń</h2>
 
   <a th:href="@{/admin/exercise/new}" class="btn-add">➕ Dodaj nowe ćwiczenie</a>
@@ -234,10 +247,6 @@
       }
     }
   });
-  function goBack() {
-    window.history.back();
-  }
 </script>
-
 </body>
 </html>

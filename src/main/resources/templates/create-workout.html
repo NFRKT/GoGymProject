@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <title>Stwórz Workout</title>
-  <!-- Select2 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Stwórz Workout</title>
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
+    <style>
 html, body {
       height: 100%;
       margin: 0;
@@ -57,14 +57,18 @@ html, body {
       font-size: 14px;
       margin: 5px;
     }
-    .btn-back {
-      background: #303a53;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
       text-decoration: none;
-      font-size: 14px;
-      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
     }
     .btn:hover {
       opacity: 0.9;
@@ -114,45 +118,46 @@ html, body {
       text-align: center;
       margin-top: 10px;
     }
-  </style>
+
+    </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="content">
-<div class="form-container">
-  <button class="btn-back" onclick="goBack()">Powrót</button>
-  <h2>Stwórz Workout</h2>
-  <form th:action="@{/workouts/create}" th:object="${workout}" method="post">
-    <label for="workoutDate">Data:</label>
-    <input type="date" id="workoutDate" th:field="*{workoutDate}" required>
+    <div class="form-container">
+        <a href="/home" class="back-link">Powrót</a>
+        <h2>Stwórz Workout</h2>
+        <form th:action="@{/workouts/create}" th:object="${workout}" method="post">
+            <label for="workoutDate">Data:</label>
+            <input type="date" id="workoutDate" th:field="*{workoutDate}" required>
 
-    <label for="intensity">Intensywność:</label>
-    <select id="intensity" th:field="*{intensity}" required>
-      <option value="low">Niska</option>
-      <option value="medium">Średnia</option>
-      <option value="high">Wysoka</option>
-    </select>
+            <label for="intensity">Intensywność:</label>
+            <select id="intensity" th:field="*{intensity}" required>
+                <option value="low">Niska</option>
+                <option value="medium">Średnia</option>
+                <option value="high">Wysoka</option>
+            </select>
 
-    <label for="notes">Notatki:</label>
-    <textarea id="notes" th:field="*{notes}" placeholder="Dodaj notatki..."></textarea>
+            <label for="notes">Notatki:</label>
+            <textarea id="notes" th:field="*{notes}" placeholder="Dodaj notatki..."></textarea>
 
-    <label for="start_time">Godzina rozpoczęcia:</label>
-    <input type="time" id="start_time" th:field="*{startTime}" required>
+            <label for="start_time">Godzina rozpoczęcia:</label>
+            <input type="time" id="start_time" th:field="*{startTime}" required>
 
-    <label for="end_time">Godzina zakończenia:</label>
-    <input type="time" id="end_time" th:field="*{endTime}" required>
+            <label for="end_time">Godzina zakończenia:</label>
+            <input type="time" id="end_time" th:field="*{endTime}" required>
 
-    <h3>Dodaj ćwiczenia do treningu:</h3>
-    <button type="button" class="btn" id="addExerciseBtn">Dodaj ćwiczenie</button>
-    <div id="exercise-list"></div>
+            <h3>Dodaj ćwiczenia do treningu:</h3>
+            <button type="button" class="btn" id="addExerciseBtn">Dodaj ćwiczenie</button>
+            <div id="exercise-list"></div>
 
-    <button type="submit" class="btn" >Stwórz trening</button>
-  </form>
+            <button type="submit" class="btn">Stwórz trening</button>
+        </form>
 
-  <div th:if="${error}" class="error-message">
-    <p th:text="${error}"></p>
-  </div>
-</div>
+        <div th:if="${error}" class="error-message">
+            <p th:text="${error}"></p>
+        </div>
+    </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <!-- jQuery (wymagany przez Select2) -->
@@ -160,7 +165,7 @@ html, body {
 <!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script th:inline="javascript">
-    document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
       const exercises = /*[[${exercises}]]*/ [];
 
       const addExerciseButton = document.getElementById("addExerciseBtn");
@@ -278,9 +283,26 @@ html, body {
       const form = document.querySelector('form');
       if (form) {
           form.addEventListener('submit', function(e) {
+              // Sprawdź, czy dodano przynajmniej jedno ćwiczenie
+              if (document.querySelectorAll('.exercise-row').length === 0) {
+                  e.preventDefault();
+                  alert("Trening musi zawierać przynajmniej jedno ćwiczenie.");
+                  return;
+              }
+
               let isValid = true;
               document.querySelectorAll('.exercise-row').forEach(function(row) {
                   const select = row.querySelector('.exercise-select');
+
+                  // Sprawdzenie, czy wybrano ćwiczenie z listy
+                  if (!select.value || select.value.trim() === "") {
+                      isValid = false;
+                      row.classList.add('error');
+                      return;
+                  } else {
+                      row.classList.remove('error');
+                  }
+
                   const selectedOption = select.options[select.selectedIndex];
                   const type = selectedOption ? selectedOption.getAttribute('data-type') : null;
 
@@ -306,24 +328,20 @@ html, body {
               });
               if (!isValid) {
                   e.preventDefault();
-                  alert("Proszę uzupełnić wszystkie wymagane pola: dla ćwiczeń siłowych (serie, powtórzenia) oraz cardio (czas, dystans).");
+                  alert("Proszę uzupełnić wszystkie wymagane pola: wybierz ćwiczenie z listy, a także wpisz serie i powtórzenia (dla ćwiczeń siłowych) lub czas i dystans (dla cardio).");
               }
           });
       }
-    });
+  });
 
-    function removeExerciseRow(button) {
+  function removeExerciseRow(button) {
       const row = button.closest(".exercise-row");
       if (row) {
           row.remove();
       } else {
           console.error("Błąd: Nie znaleziono wiersza ćwiczenia do usunięcia");
       }
-    }
-
-    function goBack() {
-      window.history.back();
-    }
-  </script>
+  }
+</script>
 </body>
 </html>

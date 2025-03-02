@@ -65,12 +65,25 @@
     .invalid {
       border: 2px solid #d8000c !important;
     }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
   </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-  <button class="btn-back" onclick="goBack()">Powrót</button>
+  <a href="/admin/panel" class="back-link">Powrót</a>
   <h2 th:text="${equipment.idEquipment == null} ? 'Nowy Sprzęt' : 'Edytuj Sprzęt'"></h2>
   <form id="equipmentForm" th:action="@{${equipment.idEquipment == null} ? '/admin/equipment/new' : '/admin/equipment/edit/' + ${equipment.idEquipment}}"
         th:object="${equipment}" method="post">
@@ -123,9 +136,6 @@
       if (firstErrorField) firstErrorField.focus();
     }
   });
-  function goBack() {
-    window.history.back();
-  }
 </script>
 </body>
 </html>
