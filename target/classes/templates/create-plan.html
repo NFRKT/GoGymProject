@@ -46,6 +46,9 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
+    textarea {
+      resize: none;
+    }
     .btn {
       background: #303a53;
       color: white;
@@ -113,6 +116,19 @@
       color: red;
       text-align: center;
       margin-top: 10px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
     }
 
     </style>
@@ -199,13 +215,14 @@
       }
     }
 
+
     </script>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="content">
     <div class="form-container">
-        <button class="btn-back" onclick="goBack()">Powrót</button>
+        <a href="/trainer-panel" class="back-link">Powrót</a>
         <h2>Stwórz Plan Treningowy</h2>
         <form th:action="@{/create-plan}" method="post" id="planForm">
             <input type="hidden" name="clientId" th:value="${client.idUser}"/>
@@ -222,11 +239,8 @@
 
             <div id="day-list">
                 <h3>Dni w planie:</h3>
-                <!-- Wiersze dni będą dodawane tutaj -->
             </div>
-            <!-- Przycisk "Dodaj dzień" umieszczony poniżej listy dni -->
             <button type="button" class="btn" id="addDayBtn">Dodaj dzień</button>
-
             <button type="submit" class="btn">Zapisz Plan</button>
         </form>
         <div id="formError" class="error-message" style="display:none;"></div>
@@ -327,15 +341,11 @@
                   }
               }
           });
-
           if (!isValid) {
               e.preventDefault();
           }
       });
     });
-      function goBack() {
-    window.history.back();
-  }
 </script>
 </body>
 </html>

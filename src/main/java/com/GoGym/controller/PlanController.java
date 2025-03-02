@@ -66,7 +66,6 @@ public class PlanController {
         return "user-plans";
     }
 
-
     @PreAuthorize("hasAuthority('CLIENT')")
     @GetMapping("/user-plans-archived")
     public String getUserArchivedPlans(@RequestParam Long idUser, Model model) {
@@ -185,35 +184,33 @@ public class PlanController {
             day.setDate(start.plusDays(i));
 
             List<PlanExercise> exercisesForDay = new ArrayList<>();
-            if (day.getDayType() == TrainingPlanDay.DayType.training) {
-                for (int j = 0; j < exerciseIds.size(); j++) {
-                    if (exerciseDays.get(j) == i) {
-                        PlanExercise exercise = new PlanExercise();
-                        Exercise currentExercise = exerciseRepository.findById(exerciseIds.get(j))
-                                .orElseThrow(RuntimeException::new);
-                        exercise.setExercise(currentExercise);
-                        exercise.setStatus(PlanExercise.Status.notCompleted);
-                        exercise.setTrainingPlan(plan);
-                        exercise.setTrainingPlanDay(day);
+            // Usunięto warunek ograniczający ćwiczenia tylko do dni treningowych
+            for (int j = 0; j < exerciseIds.size(); j++) {
+                if (exerciseDays.get(j) == i) {
+                    PlanExercise exercise = new PlanExercise();
+                    Exercise currentExercise = exerciseRepository.findById(exerciseIds.get(j))
+                            .orElseThrow(RuntimeException::new);
+                    exercise.setExercise(currentExercise);
+                    exercise.setStatus(PlanExercise.Status.notCompleted);
+                    exercise.setTrainingPlan(plan);
+                    exercise.setTrainingPlanDay(day);
 
-                        if (currentExercise.getType() == Exercise.ExerciseType.CARDIO) {
-                            exercise.setSets(null);
-                            exercise.setReps(null);
-                            exercise.setWeight(null);
-                            exercise.setDistance((distance != null && distance.size() > j) ? distance.get(j) : null);
-                            exercise.setDuration((duration != null && duration.size() > j && !duration.get(j).isEmpty())
-                                    ? parseDuration(duration.get(j))
-                                    : null);
-                        } else {
-                            exercise.setSets((sets != null && sets.size() > j) ? sets.get(j) : null);
-                            exercise.setReps((reps != null && reps.size() > j) ? reps.get(j) : null);
-                            exercise.setWeight((weight != null && weight.size() > j) ? weight.get(j) : null);
-                            exercise.setDuration(null);
-                            exercise.setDistance(null);
-                        }
-
-                        exercisesForDay.add(exercise);
+                    if (currentExercise.getType() == Exercise.ExerciseType.CARDIO) {
+                        exercise.setSets(null);
+                        exercise.setReps(null);
+                        exercise.setWeight(null);
+                        exercise.setDistance((distance != null && distance.size() > j) ? distance.get(j) : null);
+                        exercise.setDuration((duration != null && duration.size() > j && !duration.get(j).isEmpty())
+                                ? parseDuration(duration.get(j))
+                                : null);
+                    } else {
+                        exercise.setSets((sets != null && sets.size() > j) ? sets.get(j) : null);
+                        exercise.setReps((reps != null && reps.size() > j) ? reps.get(j) : null);
+                        exercise.setWeight((weight != null && weight.size() > j) ? weight.get(j) : null);
+                        exercise.setDuration(null);
+                        exercise.setDistance(null);
                     }
+                    exercisesForDay.add(exercise);
                 }
             }
             day.setExercises(exercisesForDay);
@@ -228,9 +225,6 @@ public class PlanController {
     }
 
 
-    /**
-     * Parsuje czas trwania z formatu "hh:mm:ss" lub "mm:ss" na liczbę sekund.
-     */
     private Integer parseDuration(String duration) {
         if (duration == null || duration.isEmpty()) return null;
 

@@ -151,7 +151,7 @@
     <div th:if="${isOwnProfile}" style="text-align: center; margin-top: 10px;">
       <form id="uploadProfilePictureForm" enctype="multipart/form-data">
         <input type="file" name="profilePicture" required/>
-        <button type="button" class="btn" onclick="uploadProfilePicture()">Zmień zdjęcie</button>
+        <button type="button" class="btn" onclick="uploadProfilePicture()"formnovalidate>Zmień zdjęcie</button>
       </form>
       <button type="button" class="btn btn-delete" onclick="deleteProfilePicture()">Usuń zdjęcie</button>
     </div>
@@ -210,7 +210,7 @@
       </p>
       <form id="editPhoneNumber" style="display:none;" novalidate onsubmit="event.preventDefault(); updateField('phoneNumberText', 'phoneNumberInput', 'phoneNumber');">
         <input type="text" id="phoneNumberInput" class="w3-input w3-border" required/>
-        <button type="submit" class="btn">Zapisz</button>
+        <button type="submit" class="btn" formnovalidate>Zapisz</button>
       </form>
 
       <!-- Miasto -->
@@ -221,7 +221,7 @@
       </p>
       <form id="editCity" style="display:none;" novalidate onsubmit="event.preventDefault(); updateField('cityText', 'cityInput', 'city');">
         <input type="text" id="cityInput" class="w3-input w3-border" required/>
-        <button type="submit" class="btn">Zapisz</button>
+        <button type="submit" class="btn" formnovalidate>Zapisz</button>
       </form>
     </div>
   </div>
@@ -238,7 +238,7 @@
       </p>
       <form id="editWeight" style="display:none;" novalidate onsubmit="event.preventDefault(); updateNumericField('weightText', 'weightInput', 'weight', 'Waga');">
         <input type="number" id="weightInput" class="w3-input w3-border" step="0.1" required/>
-        <button type="submit" class="btn">Zapisz</button>
+        <button type="submit" class="btn" formnovalidate>Zapisz</button>
       </form>
 
       <!-- Wzrost -->
@@ -249,7 +249,7 @@
       </p>
       <form id="editHeight" style="display:none;" novalidate onsubmit="event.preventDefault(); updateNumericField('heightText', 'heightInput', 'height', 'Wzrost');">
         <input type="number" id="heightInput" class="w3-input w3-border" step="0.1" required/>
-        <button type="submit" class="btn">Zapisz</button>
+        <button type="submit" class="btn" formnovalidate>Zapisz</button>
       </form>
 
       <!-- Talia -->
@@ -260,7 +260,7 @@
       </p>
       <form id="editWaist" style="display:none;" novalidate onsubmit="event.preventDefault(); updateNumericField('waistText', 'waistInput', 'waist', 'Talia');">
         <input type="number" id="waistInput" class="w3-input w3-border" step="0.1" required/>
-        <button type="submit" class="btn">Zapisz</button>
+        <button type="submit" class="btn" formnovalidate>Zapisz</button>
       </form>
 
       <!-- Biodra -->
@@ -271,7 +271,7 @@
       </p>
       <form id="editHips" style="display:none;" novalidate onsubmit="event.preventDefault(); updateNumericField('hipsText', 'hipsInput', 'hips', 'Biodra');">
         <input type="number" id="hipsInput" class="w3-input w3-border" step="0.1" required/>
-        <button type="submit" class="btn">Zapisz</button>
+        <button type="submit" class="btn" formnovalidate>Zapisz</button>
       </form>
 
       <!-- Klatka -->
@@ -282,7 +282,7 @@
       </p>
       <form id="editChest" style="display:none;" novalidate onsubmit="event.preventDefault(); updateNumericField('chestText', 'chestInput', 'chest', 'Klatka');">
         <input type="number" id="chestInput" class="w3-input w3-border" step="0.1" required/>
-        <button type="submit" class="btn">Zapisz</button>
+        <button type="submit" class="btn" formnovalidate>Zapisz</button>
       </form>
     </div>
   </div>
