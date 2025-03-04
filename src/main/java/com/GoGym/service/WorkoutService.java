@@ -33,10 +33,12 @@ public class WorkoutService {
     }
 
     @Transactional
-    public Workout addWorkoutWithExercises(Workout workout, List<Long> exerciseIds, List<Integer> sets, List<Integer> reps,
-                                           List<Double> weight, List<String> durations, List<Double> distances) {
+    public Workout addWorkoutWithExercises(Workout workout, List<Long> exerciseIds, List<Integer> strengthSets, List<Integer> reps,
+                                           List<Double> weight, List<Integer> cardioSets, List<String> durations, List<Double> distances) {
         log.info("Dodawanie treningu dla użytkownika: {}", workout.getUser().getIdUser());
         Workout savedWorkout = workoutRepository.save(workout);
+        int strengthIndex = 0;
+        int cardioIndex = 0;
         for (int i = 0; i < exerciseIds.size(); i++) {
             Long exerciseId = exerciseIds.get(i);
             Exercise exercise = exerciseRepository.findById(exerciseId)
@@ -45,12 +47,15 @@ public class WorkoutService {
             workoutExercise.setWorkout(savedWorkout);
             workoutExercise.setExercise(exercise);
             if (exercise.getType() == Exercise.ExerciseType.STRENGTH) {
-                workoutExercise.setSets(sets.get(i));
-                workoutExercise.setReps(reps.get(i));
-                workoutExercise.setWeight(weight.get(i));
+                workoutExercise.setSets(strengthSets.get(strengthIndex));
+                workoutExercise.setReps(reps.get(strengthIndex));
+                workoutExercise.setWeight(weight.get(strengthIndex));
+                strengthIndex++;
             } else if (exercise.getType() == Exercise.ExerciseType.CARDIO) {
-                workoutExercise.setDuration(durations.get(i) != null ? parseDuration(durations.get(i)) : null);
-                workoutExercise.setDistance(distances.get(i));
+                workoutExercise.setSets(cardioSets.get(cardioIndex));
+                workoutExercise.setDuration(durations.get(cardioIndex) != null ? parseDuration(durations.get(cardioIndex)) : null);
+                workoutExercise.setDistance(distances.get(cardioIndex));
+                cardioIndex++;
             }
             workoutExerciseRepository.save(workoutExercise);
             log.info("Dodano ćwiczenie o ID: {} do treningu", exerciseId);
@@ -64,15 +69,14 @@ public class WorkoutService {
             // Spróbuj sparsować jako liczbę – jeśli to sekundy
             return Integer.parseInt(duration);
         } catch (NumberFormatException e) {
-            // Kontynuujemy parsowanie formatu "hh:mm:ss" lub "mm:ss"
+            String[] parts = duration.split(":");
+            if (parts.length == 2) { // Format mm:ss
+                return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+            } else if (parts.length == 3) { // Format hh:mm:ss
+                return Integer.parseInt(parts[0]) * 3600 + Integer.parseInt(parts[1]) * 60 + Integer.parseInt(parts[2]);
+            }
+            throw new IllegalArgumentException("Niepoprawny format czasu: " + duration);
         }
-        String[] parts = duration.split(":");
-        if (parts.length == 2) { // Format mm:ss
-            return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
-        } else if (parts.length == 3) { // Format hh:mm:ss
-            return Integer.parseInt(parts[0]) * 3600 + Integer.parseInt(parts[1]) * 60 + Integer.parseInt(parts[2]);
-        }
-        throw new IllegalArgumentException("Niepoprawny format czasu: " + duration);
     }
 
     public List<Workout> getWorkoutsByUser(User user) {
@@ -90,5 +94,4 @@ public class WorkoutService {
         return workoutRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trening o ID " + id + " nie istnieje."));
     }
-
 }

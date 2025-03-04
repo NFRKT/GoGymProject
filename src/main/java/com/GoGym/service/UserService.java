@@ -1,5 +1,4 @@
 package com.GoGym.service;
-import com.GoGym.module.ChatRoom;
 import com.GoGym.module.TrainerSpecialization;
 import com.GoGym.module.User;
 import com.GoGym.module.TrainerDetails;
@@ -24,8 +23,6 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private ChatRoomRepository chatRoomRepository;
     @Autowired
     private TrainerDetailsRepository trainerDetailsRepository;
     @Autowired

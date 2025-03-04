@@ -157,6 +157,7 @@ public class PlanController {
             @RequestParam(required = false) List<Integer> sets,
             @RequestParam(required = false) List<Integer> reps,
             @RequestParam(required = false) List<Double> weight,
+            @RequestParam(required = false) List<Integer> cardioSets, // nowy parametr
             @RequestParam(required = false) List<String> duration,
             @RequestParam(required = false) List<Double> distance,
             @RequestParam List<Integer> exerciseDays,
@@ -193,7 +194,8 @@ public class PlanController {
                     exercise.setTrainingPlanDay(day);
 
                     if (currentExercise.getType() == Exercise.ExerciseType.CARDIO) {
-                        exercise.setSets(null);
+                        // Dla CARDIO ustawiamy serie z nowego pola cardioSets
+                        exercise.setSets((cardioSets != null && cardioSets.size() > j) ? cardioSets.get(j) : null);
                         exercise.setReps(null);
                         exercise.setWeight(null);
                         exercise.setDistance((distance != null && distance.size() > j) ? distance.get(j) : null);
@@ -220,6 +222,7 @@ public class PlanController {
         trainingPlanService.createTrainingPlan(plan);
         return "redirect:/trainer-panel";
     }
+
     private Integer parseDuration(String duration) {
         if (duration == null || duration.isEmpty()) return null;
 

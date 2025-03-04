@@ -45,7 +45,6 @@ public class AdminController {
         List<User> clients = userService.getUsersByType(User.UserType.CLIENT);
         List<User> trainers = userService.getUsersByType(User.UserType.TRAINER);
 
-        // Statystyki
         long userCount = userRepository.count();
         long trainerCount = userRepository.findAll()
                 .stream()

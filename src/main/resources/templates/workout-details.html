@@ -48,16 +48,9 @@
       margin: 8px 0;
       font-size: 15px;
       line-height: 1.4;
-    }
-    .workout-info p {
-      margin: 8px 0;
-      font-size: 15px;
-      line-height: 1.4;
-      /* Dodajemy zawijanie długiego tekstu */
       white-space: normal;
       word-wrap: break-word;
     }
-    /* Dla dodatkowej pewności, zawijanie dla span wewnątrz paragrafów */
     .workout-info p span {
       white-space: normal;
       word-wrap: break-word;
@@ -100,11 +93,9 @@
     .nav-links a:hover, .nav-links button:hover {
       background-color: #0056b3;
     }
-    /* Duration formatting style */
     .duration {
       font-size: 14px;
     }
-    /* Responsive adjustments */
     @media screen and (max-width: 768px) {
       .container {
         padding: 20px;
@@ -134,26 +125,24 @@
       background-color: #4a5568;
     }
     .edit-btn, .delete-btn {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        margin: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
     }
-
     .delete-btn {
-        background-color: #dc3545;
+      background-color: #dc3545;
     }
-
     .edit-btn:hover {
-        background-color: #0056b3;
+      background-color: #0056b3;
     }
-
     .delete-btn:hover {
-        background-color: #c82333;
+      background-color: #c82333;
+    }
   </style>
 </head>
 <body>
@@ -175,6 +164,7 @@
     <p><strong>Godzina Zakończenia:</strong> <span th:text="${workout.endTime} ?: '-'"></span></p>
     <p><strong>Notatki:</strong> <span th:text="${workout.notes} ?: '-'"></span></p>
   </div>
+
   <!-- Strength Exercises Section -->
   <div class="exercise-list" th:if="${workout.workoutExercises.?[exercise.type.name() == 'STRENGTH'].size() > 0}">
     <h2>Ćwiczenia Siłowe</h2>
@@ -206,6 +196,7 @@
       <thead>
       <tr>
         <th>Ćwiczenie</th>
+        <th>Serie</th>
         <th>Czas</th>
         <th>Dystans (km)</th>
       </tr>
@@ -214,12 +205,14 @@
       <tr th:each="exercise : ${workout.workoutExercises}"
           th:if="${exercise.exercise.type.name() == 'CARDIO'}">
         <td th:text="${exercise.exercise.name}"></td>
+        <td th:text="${exercise.sets} ?: '-'"></td>
         <td class="duration" th:text="${exercise.duration} ?: '-'"></td>
         <td th:text="${exercise.distance} ?: '-'"></td>
       </tr>
       </tbody>
     </table>
   </div>
+
   <button onclick="editWorkout()" class="edit-btn">✏ Edytuj</button>
   <button onclick="deleteWorkout()" class="delete-btn">🗑 Usuń</button>
 </div>
@@ -263,25 +256,6 @@
         .catch(error => console.error("Błąd:", error));
       }
     }
-    function editWorkout() {
-      const workoutId = [[${workout.idWorkout}]];
-      window.location.href = `/workouts/edit/${workoutId}`;
-    }
-    function deleteWorkout() {
-          if (confirm("Czy na pewno chcesz usunąć ten trening?")) {
-        const workoutId = [[${workout.idWorkout}]];
-        fetch(`/workouts/delete/${workoutId}`, {
-          method: "DELETE"
-        })
-        .then(response => {
-          if (!response.ok) throw new Error("Błąd usuwania treningu.");
-          alert("Trening został usunięty.");
-          window.location.href = "/workouts/user-workouts";
-        })
-        .catch(error => console.error("Błąd:", error));
-      }
-    }
-
   </script>
 </body>
 </html>

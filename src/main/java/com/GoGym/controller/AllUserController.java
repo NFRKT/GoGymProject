@@ -20,7 +20,6 @@ public class AllUserController {
     public AllUserController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
     @GetMapping("/all-user-list")
     public String allUserList(Model model, Authentication authentication) {
         List<User> users = userRepository.findAll()

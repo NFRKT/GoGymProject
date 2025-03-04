@@ -31,18 +31,6 @@
         margin-bottom: 20px;
         color: #303a53;
       }
-      /* Back button styling */
-      .btn-back {
-        background: #303a53;
-        color: white;
-        padding: 8px 12px;
-        border-radius: 5px;
-        text-decoration: none;
-        font-size: 14px;
-        cursor: pointer;
-        margin-bottom: 20px;
-        display: inline-block;
-      }
       /* Search form styling */
       form#searchForm {
         text-align: center;
@@ -131,12 +119,25 @@
         font-weight: bold;
         color: #303a53;
       }
+      .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
     </style>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="container">
-    <a class="btn-back" onclick="goBack()">Powrót</a>
+    <a href="/home" class="back-link">Powrót</a>
     <h1>Twoje Treningi</h1>
     <form method="get" action="#" id="searchForm">
         <label for="workoutDate">Wybierz datę:</label>
@@ -188,10 +189,5 @@
     </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
-<script>
-  function goBack() {
-    window.history.back();
-  }
-</script>
 </body>
 </html>

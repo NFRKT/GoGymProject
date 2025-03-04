@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Edytuj Trening</title>
     <style>
-html, body {
+    html, body {
       height: 100%;
       margin: 0;
       font-family: "Lato", sans-serif;
@@ -16,7 +16,7 @@ html, body {
       flex-direction: column;
       background-color: #292d35;
     }
-    .content{
+    .content {
       flex: 1;
     }
     .form-container {
@@ -119,10 +119,9 @@ html, body {
     textarea {
       resize: none;
     }
-    </style>
+  </style>
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
-
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
@@ -152,7 +151,7 @@ html, body {
             <label>Notatki:</label>
             <textarea name="notes" th:text="${workout.notes}"></textarea>
 
-            <!-- ✅ Ukryte pole przechowujące JSON -->
+            <!-- Ukryte pole przechowujące JSON z ćwiczeniami -->
             <input type="hidden" id="exercisesJson" th:value="${allExercisesJson}"/>
 
             <h3>Ćwiczenia</h3>
@@ -160,12 +159,11 @@ html, body {
 
             <div id="exercises-container">
                 <div th:each="exercise : ${workout.workoutExercises}" class="exercise-row">
-                    <input type="hidden" name="existingExerciseIds" th:value="${exercise.id}"
-                           class="existing-exercise-id">
+                    <!-- Dla istniejących ćwiczeń -->
+                    <input type="hidden" name="existingExerciseIds[]" th:value="${exercise.id}" class="existing-exercise-id">
 
                     <div class="exercise-search-container">
-
-                        <select name="exerciseIds" class="exercise-select" onchange="toggleExerciseFields(this)">
+                        <select name="exerciseIds[]" class="exercise-select" onchange="toggleExerciseFields(this)">
                             <option th:each="ex : ${allExercises}"
                                     th:value="${ex.idExercise}"
                                     th:text="${ex.name}"
@@ -173,26 +171,22 @@ html, body {
                                     th:attr="data-type=${ex.type}">
                             </option>
                         </select>
-
                     </div>
 
-                    <!-- ✅ Sekcja dla ćwiczeń siłowych -->
-                    <div class="strength-fields"
-                         th:style="${exercise.exercise.type.name() == 'STRENGTH' ? 'display: block;' : 'display: none;'}">
-                        <input type="number" name="sets" th:value="${exercise.sets}" placeholder="Serie">
-                        <input type="number" name="reps" th:value="${exercise.reps}" placeholder="Powtórzenia">
-                        <input type="number" name="weight" th:value="${exercise.weight}" placeholder="Ciężar (kg)">
+                    <!-- Sekcja dla ćwiczeń siłowych -->
+                    <div class="strength-fields" th:style="${exercise.exercise.type.name() == 'STRENGTH' ? 'display: block;' : 'display: none;'}">
+                        <input type="number" name="strengthSets[]" th:value="${exercise.sets}" placeholder="Serie">
+                        <input type="number" name="reps[]" th:value="${exercise.reps}" placeholder="Powtórzenia">
+                        <input type="number" name="weight[]" th:value="${exercise.weight}" placeholder="Ciężar (kg)">
                     </div>
 
-                    <!-- 🏃‍♂️ Sekcja dla ćwiczeń Cardio -->
-                    <div class="cardio-fields"
-                         th:style="${exercise.exercise.type.name() == 'CARDIO' ? 'display: block;' : 'display: none;'}">
-                        <input type="text" name="durations" class="duration-input"
+                    <!-- Sekcja dla ćwiczeń Cardio -->
+                    <div class="cardio-fields" th:style="${exercise.exercise.type.name() == 'CARDIO' ? 'display: block;' : 'display: none;'}">
+                        <input type="number" name="cardioSets[]" th:value="${exercise.sets}" placeholder="Serie">
+                        <input type="text" name="durations[]" class="duration-input"
                                th:value="${exercise.duration != null ? exercise.duration : ''}"
                                placeholder="Czas (hh:mm:ss lub mm:ss)">
-
-                        <input type="number" name="distances" th:value="${exercise.distance}"
-                               placeholder="Dystans (km)">
+                        <input type="number" name="distances[]" th:value="${exercise.distance}" placeholder="Dystans (km)">
                     </div>
                     <button type="button" class="btn btn-delete" onclick="removeRow(this)">Usuń</button>
                 </div>
@@ -200,187 +194,183 @@ html, body {
 
             <button type="button" class="btn" id="addExerciseBtn">Dodaj ćwiczenie</button>
             <button type="submit" class="btn">Zapisz zmiany</button>
-
         </form>
     </div>
 </div>
 <div th:replace="~{footer :: footer}"></div>
 <!-- jQuery (wymagany przez Select2) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // ✅ Sprawdź, czy jQuery działa
-    if (typeof jQuery === "undefined") {
+    document.addEventListener("DOMContentLoaded", function() {
+      // Sprawdzenie działania jQuery
+      if (typeof jQuery === "undefined") {
         console.error("jQuery nie jest załadowany! Sprawdź kolejność skryptów.");
         return;
-    }
+      }
 
-    // ✅ Inicjalizacja Select2 dla istniejących <select>
-    $('.exercise-select').select2({
+      // Inicjalizacja Select2 dla istniejących <select>
+      $('.exercise-select').select2({
         placeholder: "Wybierz ćwiczenie...",
         allowClear: true
-    });
+      });
 
+      // Wywołanie toggleExerciseFields dla każdego selecta, aby ustawić właściwy stan (widoczność oraz disable pól)
+      document.querySelectorAll(".exercise-select").forEach(select => {
+        toggleExerciseFields(select);
+      });
 
+      // Upewnienie się, że event listener dla przycisku "Dodaj ćwiczenie" jest dodany tylko raz
+      let addExerciseButton = document.getElementById("addExerciseBtn");
+      if (!addExerciseButton.dataset.listenerAdded) {
+        addExerciseButton.addEventListener("click", addExerciseRow);
+        addExerciseButton.dataset.listenerAdded = "true";
+      }
 
-    // ✅ Obsługa zmiany ćwiczenia (przełączanie między cardio i siłowymi)
-    $(document).on("change", ".exercise-select", function() {
+      $(document).on("change", ".exercise-select", function() {
         toggleExerciseFields(this);
+      });
     });
-});
 
-// ✅ Przełączanie widoczności pól (siłowe/cardio)
-function toggleExerciseFields(select) {
-    let selectedOption = select.options[select.selectedIndex];
-    let type = selectedOption.getAttribute("data-type");
-    let parent = select.closest(".exercise-row");
+    // Funkcja przełączająca widoczność i aktywność pól w zależności od typu ćwiczenia
+    function toggleExerciseFields(select) {
+      let selectedOption = select.options[select.selectedIndex];
+      let type = selectedOption.getAttribute("data-type");
+      let parent = select.closest(".exercise-row");
 
-    if (type === "CARDIO") {
-        parent.querySelector(".strength-fields").style.display = "none";
-        parent.querySelector(".cardio-fields").style.display = "block";
-    } else {
-        parent.querySelector(".strength-fields").style.display = "block";
-        parent.querySelector(".cardio-fields").style.display = "none";
+      if (type === "CARDIO") {
+        // Dla cardio – ukrywamy pola siłowe i wyłączamy je, a pokazujemy pola cardio
+        let strengthFields = parent.querySelector(".strength-fields");
+        let cardioFields = parent.querySelector(".cardio-fields");
+        if (strengthFields) {
+          strengthFields.style.display = "none";
+          strengthFields.querySelectorAll("input").forEach(el => el.disabled = true);
+        }
+        if (cardioFields) {
+          cardioFields.style.display = "block";
+          cardioFields.querySelectorAll("input").forEach(el => el.disabled = false);
+        }
+      } else {
+        // Dla siłowych – pokazujemy pola siłowe i wyłączamy pola cardio
+        let strengthFields = parent.querySelector(".strength-fields");
+        let cardioFields = parent.querySelector(".cardio-fields");
+        if (strengthFields) {
+          strengthFields.style.display = "block";
+          strengthFields.querySelectorAll("input").forEach(el => el.disabled = false);
+        }
+        if (cardioFields) {
+          cardioFields.style.display = "none";
+          cardioFields.querySelectorAll("input").forEach(el => el.disabled = true);
+        }
+      }
     }
-}
 
-// ✅ Usuwanie ćwiczenia
-function removeRow(button) {
-    let row = button.parentNode;
-    let exerciseIdInput = row.querySelector(".existing-exercise-id");
+    // Usuwanie ćwiczenia – zapisujemy ID usuniętych w ukrytym polu
+    function removeRow(button) {
+      let row = button.parentNode;
+      let exerciseIdInput = row.querySelector(".existing-exercise-id");
 
-    if (exerciseIdInput) {
+      if (exerciseIdInput) {
         let deletedExercises = document.getElementById("deletedExerciseIds").value;
         deletedExercises += (deletedExercises ? "," : "") + exerciseIdInput.value;
         document.getElementById("deletedExerciseIds").value = deletedExercises;
+      }
+
+      row.remove();
     }
 
-    row.remove();
-}
-
-// ✅ Formatowanie czasu dla ćwiczeń cardio
-document.addEventListener("DOMContentLoaded", function() {
-    function formatDuration(seconds) {
+    // Formatowanie czasu dla pól duration (dla ćwiczeń cardio)
+    document.addEventListener("DOMContentLoaded", function() {
+      function formatDuration(seconds) {
         if (!seconds || isNaN(seconds)) return "";
-
         let hours = Math.floor(seconds / 3600);
         let minutes = Math.floor((seconds % 3600) / 60);
         let remainingSeconds = seconds % 60;
-
         if (hours > 0) {
-            return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+          return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
         } else {
-            return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+          return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
         }
-    }
+      }
 
-    document.querySelectorAll(".duration-input").forEach(input => {
+      document.querySelectorAll(".duration-input").forEach(input => {
         if (input.value) {
-            input.value = formatDuration(parseInt(input.value, 10));
+          input.value = formatDuration(parseInt(input.value, 10));
         }
-    });
-});
-document.addEventListener("DOMContentLoaded", function() {
-    // ✅ Inicjalizacja Select2 dla istniejących pól
-    $('.exercise-select').select2({
-        placeholder: "Wybierz ćwiczenie...",
-        allowClear: true
+      });
     });
 
-    // ✅ Upewniamy się, że event listener dla przycisku "Dodaj ćwiczenie" jest dodany tylko raz
-    let addExerciseButton = document.getElementById("addExerciseBtn");
-    if (!addExerciseButton.dataset.listenerAdded) {
-        addExerciseButton.addEventListener("click", function() {
-            addExerciseRow();
-        });
-        addExerciseButton.dataset.listenerAdded = "true"; // Zapobiega wielokrotnemu dodaniu eventu
-    }
+    // Funkcja dodająca nowy wiersz ćwiczenia do edycji
+    function addExerciseRow() {
+      let container = document.getElementById("exercises-container");
+      let newRow = document.createElement("div");
+      newRow.classList.add("exercise-row");
 
-    // ✅ Obsługa zmiany ćwiczenia (przełączanie między cardio i siłowymi)
-    $(document).on("change", ".exercise-select", function() {
-        toggleExerciseFields(this);
-    });
-});
+      // Tworzymy nowy select – nazwa jako tablica
+      let select = document.createElement("select");
+      select.name = "exerciseIds[]";
+      select.classList.add("exercise-select");
+      select.setAttribute("onchange", "toggleExerciseFields(this)");
 
-// ✅ Dodawanie nowego wiersza ćwiczenia
-function addExerciseRow() {
-    let container = document.getElementById("exercises-container");
-    let newRow = document.createElement("div");
-    newRow.classList.add("exercise-row");
+      // Dodajemy domyślną opcję
+      let defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = "Wybierz ćwiczenie...";
+      defaultOption.setAttribute("selected", "selected");
+      defaultOption.setAttribute("disabled", "disabled");
+      select.appendChild(defaultOption);
 
-    // Tworzymy nową listę rozwijaną
-    let select = document.createElement("select");
-    select.name = "exerciseIds";
-    select.classList.add("exercise-select");
-    select.setAttribute("onchange", "toggleExerciseFields(this)");
-
-    // Dodajemy opcję domyślną "Wybierz ćwiczenie"
-    let defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = "Wybierz ćwiczenie...";
-    defaultOption.setAttribute("selected", "selected");
-    defaultOption.setAttribute("disabled", "disabled");
-    select.appendChild(defaultOption);
-
-    // Pobieramy listę dostępnych ćwiczeń z pierwszego istniejącego selecta
-    let existingSelect = document.querySelector(".exercise-select");
-    if (existingSelect) {
+      // Pobieramy listę ćwiczeń z ukrytego pola JSON lub istniejącego selecta
+      let existingSelect = document.querySelector(".exercise-select");
+      if (existingSelect) {
         existingSelect.querySelectorAll("option").forEach(option => {
-            let newOption = document.createElement("option");
-            newOption.value = option.value;
-            newOption.textContent = option.textContent;
-            newOption.setAttribute("data-type", option.getAttribute("data-type"));
-            select.appendChild(newOption);
+          let newOption = document.createElement("option");
+          newOption.value = option.value;
+          newOption.textContent = option.textContent;
+          newOption.setAttribute("data-type", option.getAttribute("data-type"));
+          select.appendChild(newOption);
         });
-    }
+      }
 
-    // Tworzymy resztę formularza
-    newRow.innerHTML = `
+      // Budujemy strukturę nowego wiersza – pola nazwane jako tablice
+      newRow.innerHTML = `
         <div class="exercise-search-container"></div>
         <div class="strength-fields" style="display:none;">
-            <input type="number" name="sets" placeholder="Serie">
-            <input type="number" name="reps" placeholder="Powtórzenia">
-            <input type="number" name="weight" placeholder="Ciężar (kg)">
+          <input type="number" name="strengthSets[]" placeholder="Serie">
+          <input type="number" name="reps[]" placeholder="Powtórzenia">
+          <input type="number" name="weight[]" placeholder="Ciężar (kg)">
         </div>
         <div class="cardio-fields" style="display:none;">
-            <input type="text" name="durations" placeholder="Czas (hh:mm:ss lub mm:ss)">
-            <input type="number" name="distances" placeholder="Dystans (km)">
+          <input type="number" name="cardioSets[]" placeholder="Serie">
+          <input type="text" name="durations[]" placeholder="Czas (hh:mm:ss lub mm:ss)">
+          <input type="number" name="distances[]" placeholder="Dystans (km)">
         </div>
         <button type="button" class="btn btn-delete" onclick="removeRow(this)">Usuń</button>
-    `;
+      `;
 
-    // Wstawiamy nowy select na początek exercise-search-container
-    newRow.querySelector(".exercise-search-container").appendChild(select);
+      // Wstawiamy select do kontenera wyszukiwania ćwiczenia
+      newRow.querySelector(".exercise-search-container").appendChild(select);
+      container.appendChild(newRow);
 
-    // Dodajemy wiersz do kontenera
-    container.appendChild(newRow);
-
-    // ✅ Aktywacja Select2 dla nowego elementu
-    $(select).select2({
+      // Aktywacja Select2 dla nowego elementu
+      $(select).select2({
         placeholder: "Wybierz ćwiczenie...",
         allowClear: true
-    });
-}
+      });
+    }
 
-
-// ✅ Funkcja dodająca komunikaty błędów
-function showError(element, message) {
-    let parent = element.closest(".exercise-row") || element.parentElement;
-    parent.classList.add("error");
-
-    let errorMessage = document.createElement("div");
-    errorMessage.classList.add("error-message");
-    errorMessage.style.color = "red";
-    errorMessage.style.marginTop = "5px";
-    errorMessage.innerText = message;
-
-    parent.appendChild(errorMessage);
-}
-
-</script>
+    // Funkcja pomocnicza do wyświetlania komunikatów błędów (opcjonalnie)
+    function showError(element, message) {
+      let parent = element.closest(".exercise-row") || element.parentElement;
+      parent.classList.add("error");
+      let errorMessage = document.createElement("div");
+      errorMessage.classList.add("error-message");
+      errorMessage.style.color = "red";
+      errorMessage.style.marginTop = "5px";
+      errorMessage.innerText = message;
+      parent.appendChild(errorMessage);
+    }
+  </script>
 </body>
 </html>

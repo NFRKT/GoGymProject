@@ -71,9 +71,10 @@ public class WorkoutController {
     @PostMapping("/create")
     public String createWorkout(@ModelAttribute Workout workout,
                                 @RequestParam List<Long> exerciseIds,
-                                @RequestParam(required = false) List<Integer> sets,
+                                @RequestParam(required = false) List<Integer> strengthSets,
                                 @RequestParam(required = false) List<Integer> reps,
                                 @RequestParam(required = false) List<Double> weight,
+                                @RequestParam(required = false) List<Integer> cardioSets,
                                 @RequestParam(required = false) List<String> durations,
                                 @RequestParam(required = false) List<Double> distances,
                                 Model model) {
@@ -87,7 +88,9 @@ public class WorkoutController {
             }
 
             workout.setUser(currentUser);
-            Workout savedWorkout = workoutService.addWorkoutWithExercises(workout, exerciseIds, sets, reps, weight, durations, distances);
+            Workout savedWorkout = workoutService.addWorkoutWithExercises(
+                    workout, exerciseIds, strengthSets, reps, weight, cardioSets, durations, distances
+            );
             return "redirect:/workouts/user-workouts/" + savedWorkout.getIdWorkout();
         } catch (Exception e) {
             log.error("Błąd przy tworzeniu treningu", e);
@@ -162,7 +165,8 @@ public class WorkoutController {
                         we.setSets(planExercise.getSets());
                         we.setReps(planExercise.getReps());
                         we.setWeight(planExercise.getWeight());
-                    } else {
+                    } else if (planExercise.getExercise().getType() == Exercise.ExerciseType.CARDIO) {
+                        we.setSets(planExercise.getSets());
                         we.setDuration(planExercise.getDuration());
                         we.setDistance(planExercise.getDistance());
                     }
@@ -246,9 +250,10 @@ public class WorkoutController {
                                 @RequestParam(required = false) List<Long> existingExerciseIds,
                                 @RequestParam(required = false) List<Long> deletedExerciseIds,
                                 @RequestParam(required = false) List<Long> exerciseIds,
-                                @RequestParam(required = false) List<Integer> sets,
+                                @RequestParam(required = false) List<Integer> strengthSets,
                                 @RequestParam(required = false) List<Integer> reps,
                                 @RequestParam(required = false) List<Double> weight,
+                                @RequestParam(required = false) List<Integer> cardioSets,
                                 @RequestParam(required = false) List<String> durations,
                                 @RequestParam(required = false) List<Double> distances,
                                 Principal principal) {
@@ -270,6 +275,9 @@ public class WorkoutController {
             workoutExerciseRepository.deleteAllById(deletedExerciseIds);
         }
 
+        // Deklarujemy liczniki raz – dla istniejących oraz nowych wierszy
+        int strengthIndex = 0;
+        int cardioIndex = 0;
         if (existingExerciseIds != null) {
             for (int i = 0; i < existingExerciseIds.size(); i++) {
                 WorkoutExercise workoutExercise = workoutExerciseRepository.findById(existingExerciseIds.get(i))
@@ -278,17 +286,19 @@ public class WorkoutController {
                         .orElseThrow(() -> new RuntimeException("Nie znaleziono ćwiczenia"));
                 workoutExercise.setExercise(exercise);
                 if (exercise.getType() == Exercise.ExerciseType.STRENGTH) {
-                    workoutExercise.setSets(sets.get(i));
-                    workoutExercise.setReps(reps.get(i));
-                    workoutExercise.setWeight(weight.get(i));
+                    workoutExercise.setSets(strengthSets.get(strengthIndex));
+                    workoutExercise.setReps(reps.get(strengthIndex));
+                    workoutExercise.setWeight(weight.get(strengthIndex));
                     workoutExercise.setDuration(null);
                     workoutExercise.setDistance(null);
+                    strengthIndex++;
                 } else if (exercise.getType() == Exercise.ExerciseType.CARDIO) {
-                    workoutExercise.setDuration(workoutService.parseDuration(durations.get(i)));
-                    workoutExercise.setDistance(distances.get(i));
-                    workoutExercise.setSets(null);
+                    workoutExercise.setSets(cardioSets.get(cardioIndex));
+                    workoutExercise.setDuration(workoutService.parseDuration(durations.get(cardioIndex)));
+                    workoutExercise.setDistance(distances.get(cardioIndex));
                     workoutExercise.setReps(null);
                     workoutExercise.setWeight(null);
+                    cardioIndex++;
                 }
                 workoutExerciseRepository.save(workoutExercise);
             }
@@ -296,25 +306,27 @@ public class WorkoutController {
 
         if (exerciseIds != null) {
             int existingSize = (existingExerciseIds != null) ? existingExerciseIds.size() : 0;
-            for (int i = 0; i < exerciseIds.size(); i++) {
-                if (i < existingSize) continue;
+            // Nie resetujemy liczników – kontynuujemy od wartości po przetworzeniu istniejących wierszy
+            for (int i = existingSize; i < exerciseIds.size(); i++) {
                 Exercise exercise = exerciseRepository.findById(exerciseIds.get(i))
                         .orElseThrow(() -> new RuntimeException("Nie znaleziono ćwiczenia"));
                 WorkoutExercise newExercise = new WorkoutExercise();
                 newExercise.setWorkout(existingWorkout);
                 newExercise.setExercise(exercise);
                 if (exercise.getType() == Exercise.ExerciseType.STRENGTH) {
-                    newExercise.setSets(sets.get(i));
-                    newExercise.setReps(reps.get(i));
-                    newExercise.setWeight(weight.get(i));
+                    newExercise.setSets(strengthSets.get(strengthIndex));
+                    newExercise.setReps(reps.get(strengthIndex));
+                    newExercise.setWeight(weight.get(strengthIndex));
                     newExercise.setDuration(null);
                     newExercise.setDistance(null);
+                    strengthIndex++;
                 } else if (exercise.getType() == Exercise.ExerciseType.CARDIO) {
-                    newExercise.setDuration(workoutService.parseDuration(durations.get(i)));
-                    newExercise.setDistance(distances.get(i));
-                    newExercise.setSets(null);
+                    newExercise.setSets(cardioSets.get(cardioIndex));
+                    newExercise.setDuration(workoutService.parseDuration(durations.get(cardioIndex)));
+                    newExercise.setDistance(distances.get(cardioIndex));
                     newExercise.setReps(null);
                     newExercise.setWeight(null);
+                    cardioIndex++;
                 }
                 workoutExerciseRepository.save(newExercise);
             }

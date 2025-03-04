@@ -10,113 +10,113 @@
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
     <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: "Lato", sans-serif;
-      display: flex;
-      flex-direction: column;
-      background-color: #292d35;
-    }
-    .content{
-      flex: 1;
-    }
-    .form-container {
-      max-width: 800px;
-      width: 100%;
-      margin: 50px auto;
-      padding: 30px;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      text-align: left;
-    }
-    h2, h3, h4 {
-      margin-bottom: 10px;
-    }
-    label {
-      display: block;
-      margin: 5px 0;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .btn {
-      background: #303a53;
-      color: white;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 5px;
-      text-decoration: none;
-      cursor: pointer;
-      font-size: 14px;
-      margin: 5px;
-    }
-    .btn:hover {
-      opacity: 0.9;
-    }
-    .btn-delete {
-      background-color: #dc3545;
-      color: white;
-    }
-    .btn-delete:hover {
-      background-color: #c82333;
-    }
-    .btn-back {
-      background: #303a53;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .day-row, .exercise-row {
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #f9f9f9;
-    }
-    .select-wrapper {
-      display: block;
-      width: 100%;
-    }
-    /* Select2 customizations */
-    .select2-container .select2-selection--single {
-      height: 40px !important;
-      display: flex;
-      align-items: center;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .select2-container .select2-selection__rendered {
-      font-size: 16px;
-      padding-left: 12px;
-      line-height: 40px !important;
-    }
-    .select2-container .select2-selection__arrow {
-      height: 100% !important;
-      top: 50% !important;
-      transform: translateY(-50%);
-    }
-    .error input,
-    .error .select2-container .select2-selection {
-      border: 2px solid red !important;
-    }
-    .error-message {
-      color: red;
-      text-align: center;
-      margin-top: 10px;
-    }
-    textarea {
-      resize: none;
-    }
+        html, body {
+          height: 100%;
+          margin: 0;
+          font-family: "Lato", sans-serif;
+          display: flex;
+          flex-direction: column;
+          background-color: #292d35;
+        }
+        .content{
+          flex: 1;
+        }
+        .form-container {
+          max-width: 800px;
+          width: 100%;
+          margin: 50px auto;
+          padding: 30px;
+          background: rgba(255, 255, 255, 0.95);
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+          text-align: left;
+        }
+        h2, h3, h4 {
+          margin-bottom: 10px;
+        }
+        label {
+          display: block;
+          margin: 5px 0;
+        }
+        input, select, textarea {
+          width: 100%;
+          padding: 8px;
+          margin-top: 5px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
+        .btn {
+          background: #303a53;
+          color: white;
+          padding: 8px 12px;
+          border: none;
+          border-radius: 5px;
+          text-decoration: none;
+          cursor: pointer;
+          font-size: 14px;
+          margin: 5px;
+        }
+        .btn:hover {
+          opacity: 0.9;
+        }
+        .btn-delete {
+          background-color: #dc3545;
+          color: white;
+        }
+        .btn-delete:hover {
+          background-color: #c82333;
+        }
+        .btn-back {
+          background: #303a53;
+          color: white;
+          padding: 8px 12px;
+          border-radius: 5px;
+          text-decoration: none;
+          font-size: 14px;
+          cursor: pointer;
+        }
+        .day-row, .exercise-row {
+          margin-bottom: 15px;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          background-color: #f9f9f9;
+        }
+        .select-wrapper {
+          display: block;
+          width: 100%;
+        }
+        /* Select2 customizations */
+        .select2-container .select2-selection--single {
+          height: 40px !important;
+          display: flex;
+          align-items: center;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
+        .select2-container .select2-selection__rendered {
+          font-size: 16px;
+          padding-left: 12px;
+          line-height: 40px !important;
+        }
+        .select2-container .select2-selection__arrow {
+          height: 100% !important;
+          top: 50% !important;
+          transform: translateY(-50%);
+        }
+        .error input,
+        .error .select2-container .select2-selection {
+          border: 2px solid red !important;
+        }
+        .error-message {
+          color: red;
+          text-align: center;
+          margin-top: 10px;
+        }
+        textarea {
+          resize: none;
+        }
     </style>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -150,8 +150,7 @@
                         <div>
                             <label for="dayType-${dayStat.index}">Typ dnia:</label>
                             <select name="dayType[]" id="dayType-${dayStat.index}">
-                                <option value="training" th:selected="${day.dayType.name() == 'training'}">Trening
-                                </option>
+                                <option value="training" th:selected="${day.dayType.name() == 'training'}">Trening</option>
                                 <option value="rest" th:selected="${day.dayType.name() == 'rest'}">Odpoczynek</option>
                             </select>
                         </div>
@@ -166,10 +165,8 @@
                             <div class="exercises">
                                 <div th:each="exercise, exerciseStat : ${day.exercises}">
                                     <div class="exercise exercise-row">
-                                        <input type="hidden" name="planExerciseIds[${dayStat.index}][]"
-                                               th:value="${exercise.idPlanExercise}">
-                                        <input type="hidden" name="exerciseIds[${dayStat.index}][]"
-                                               th:value="${exercise.idExercise}">
+                                        <input type="hidden" name="planExerciseIds[${dayStat.index}][]" th:value="${exercise.idPlanExercise}">
+                                        <input type="hidden" name="exerciseIds[${dayStat.index}][]" th:value="${exercise.idExercise}">
                                         <div>
                                             <label>Ćwiczenie:</label>
                                             <select name="exerciseIds[${dayStat.index}][]" class="exercise-select"
@@ -188,50 +185,41 @@
                                              th:style="${exercise.type == 'STRENGTH'} ? 'display:block;' : 'display:none;'">
                                             <div>
                                                 <label>Serie:</label>
-                                                <input type="number" name="sets[${dayStat.index}][]"
-                                                       th:value="${exercise.sets != null ? exercise.sets : ''}">
+                                                <input type="number" name="sets[${dayStat.index}][]" th:value="${exercise.sets != null ? exercise.sets : ''}">
                                             </div>
                                             <div>
                                                 <label>Powtórzenia:</label>
-                                                <input type="number" name="reps[${dayStat.index}][]"
-                                                       th:value="${exercise.reps != null ? exercise.reps : ''}">
+                                                <input type="number" name="reps[${dayStat.index}][]" th:value="${exercise.reps != null ? exercise.reps : ''}">
                                             </div>
                                             <div>
                                                 <label>Obciążenie (kg):</label>
-                                                <input type="number" step="0.1" name="weight[${dayStat.index}][]"
-                                                       th:value="${exercise.weight != null ? exercise.weight : ''}">
+                                                <input type="number" step="0.1" name="weight[${dayStat.index}][]" th:value="${exercise.weight != null ? exercise.weight : ''}">
                                             </div>
                                         </div>
 
                                         <div class="cardio-fields"
                                              th:style="${exercise.type == 'CARDIO'} ? 'display:block;' : 'display:none;'">
                                             <div>
+                                                <label>Serie:</label>
+                                                <input type="number" name="cardioSets[${dayStat.index}][]" th:value="${exercise.sets != null ? exercise.sets : ''}">
+                                            </div>
+                                            <div>
                                                 <label>Czas trwania (mm:ss):</label>
-                                                <th:block
-                                                        th:with="formattedDuration=${exercise.duration != null ? (exercise.duration ge 3600 ? #numbers.formatInteger(exercise.duration / 3600, 2) + ':' + #numbers.formatInteger((exercise.duration % 3600) / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2) : #numbers.formatInteger(exercise.duration / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2)) : ''}">
-                                                    <input type="text" name="duration[${dayStat.index}][]"
-                                                           pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]"
-                                                           placeholder="hh:mm:ss lub mm:ss"
-                                                           th:value="${formattedDuration}">
+                                                <th:block th:with="formattedDuration=${exercise.duration != null ? (exercise.duration ge 3600 ? #numbers.formatInteger(exercise.duration / 3600, 2) + ':' + #numbers.formatInteger((exercise.duration % 3600) / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2) : #numbers.formatInteger(exercise.duration / 60, 2) + ':' + #numbers.formatInteger(exercise.duration % 60, 2)) : ''}">
+                                                    <input type="text" name="duration[${dayStat.index}][]" pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]" placeholder="hh:mm:ss lub mm:ss" th:value="${formattedDuration}">
                                                 </th:block>
                                             </div>
                                             <div>
                                                 <label>Dystans (km):</label>
-                                                <input type="number" step="0.1" name="distance[${dayStat.index}][]"
-                                                       th:value="${exercise.distance != null ? exercise.distance : ''}">
+                                                <input type="number" step="0.1" name="distance[${dayStat.index}][]" th:value="${exercise.distance != null ? exercise.distance : ''}">
                                             </div>
                                         </div>
 
-                                        <button type="button" class="btn btn-delete" onclick="removeExercise(this)">Usuń
-                                            ćwiczenie
-                                        </button>
+                                        <button type="button" class="btn btn-delete" onclick="removeExercise(this)">Usuń ćwiczenie</button>
                                     </div>
                                 </div>
                             </div>
-                            <!-- Dla istniejących dni przekazujemy identyfikator jako string -->
-                            <button type="button" class="btn" th:onclick="|addExerciseToDay('${day.idDay}')|">Dodaj
-                                ćwiczenie
-                            </button>
+                            <button type="button" class="btn" th:onclick="|addExerciseToDay('${day.idDay}')|">Dodaj ćwiczenie</button>
                         </div>
                         <button type="button" class="btn btn-delete" onclick="removeDay(this)">Usuń dzień</button>
                     </div>
@@ -271,10 +259,8 @@
     }
 
     window.addExerciseToDay = function(dayId) {
-        const exercisesContainer = document.querySelector(
-            `#days-container .day[data-day-id="${dayId}"] .exercises`
-        );
-        if (!exercisesContainer) return;
+        const dayElem = document.querySelector(`#days-container .day[data-day-id="${dayId}"]`);
+        if (!dayElem) return;
         const exerciseOptions = exercises.map(e =>
             `<option value="${e.idExercise}" data-type="${e.type}">${e.name}</option>`
         ).join('');
@@ -303,17 +289,21 @@
             </div>
             <div class="cardio-fields" style="display: none;">
                 <div>
+                    <label>Serie:</label>
+                    <input type="number" name="cardioSets[${dayId}][]" min="1">
+                </div>
+                <div>
                     <label>Czas trwania (mm:ss):</label>
                     <input type="text" name="duration[${dayId}][]" pattern="([0-9]{1,2}:)?[0-5][0-9]:[0-5][0-9]" placeholder="hh:mm:ss lub mm:ss" class="duration-input">
                 </div>
                 <div>
                     <label>Dystans (km):</label>
-                    <input type="number" step="0.1" name="distance[${dayId}][]" min="0">
+                    <input type="number" name="distance[${dayId}][]" step="0.1" min="0">
                 </div>
             </div>
             <button type="button" class="btn btn-delete" onclick="removeExercise(this)">Usuń ćwiczenie</button>
         `;
-        exercisesContainer.appendChild(newExercise);
+        dayElem.querySelector('.exercises').appendChild(newExercise);
         $(newExercise).find('.exercise-select').select2({
             placeholder: 'Wybierz ćwiczenie',
             width: 'resolve'
@@ -365,11 +355,9 @@
         formErrorDiv.style.display = "block";
         formErrorDiv.textContent = "Musisz dodać przynajmniej jeden dzień w planie.";
       } else {
-        // Walidacja dni treningowych: sprawdzamy widoczne ćwiczenia
         dayRows.forEach(function(dayRow) {
           const dayType = dayRow.querySelector('select[name="dayType[]"]').value;
           if (dayType === "training") {
-            // Tylko widoczne wiersze ćwiczeń (nieusunięte)
             const exercisesInDay = Array.from(dayRow.querySelectorAll('.exercise-row')).filter(row => row.offsetParent !== null);
             if (exercisesInDay.length === 0) {
               isValid = false;
@@ -383,7 +371,6 @@
         });
       }
 
-      // Nowa walidacja: plan musi zawierać przynajmniej jedno widoczne ćwiczenie (niezależnie od typu dnia)
       const allVisibleExercises = Array.from(document.querySelectorAll('.exercise-row')).filter(row => row.offsetParent !== null);
       if (allVisibleExercises.length === 0) {
           isValid = false;
@@ -391,15 +378,15 @@
           formErrorDiv.textContent = "Plan musi zawierać przynajmniej jedno ćwiczenie.";
       }
 
-      // Walidacja pól w każdej widocznej linii ćwiczenia
       allVisibleExercises.forEach(function(row) {
         const select = row.querySelector('.exercise-select');
         const selectedOption = select.options[select.selectedIndex];
         const type = selectedOption ? selectedOption.getAttribute('data-type') : null;
         if (type === "CARDIO") {
+          const cardioSetsInput = row.querySelector('input[name^="cardioSets"]');
           const durationInput = row.querySelector('input[name^="duration"]');
           const distanceInput = row.querySelector('input[name^="distance"]');
-          if (!durationInput.value.trim() || !distanceInput.value.trim()) {
+          if (!cardioSetsInput.value.trim() || !durationInput.value.trim() || !distanceInput.value.trim()) {
             isValid = false;
             row.classList.add('error');
           } else {
@@ -416,18 +403,14 @@
           }
         }
       });
-
       return isValid;
     }
 
     document.getElementById('edit-plan-form').addEventListener('submit', function (event) {
         event.preventDefault();
-
-        // Walidacja formularza
         if (!validateForm()) {
-            return; // Nie wysyłamy formularza, jeśli walidacja nie przejdzie
+            return;
         }
-
         const formData = collectFormData();
         const planId = document.getElementById('planId').value;
         fetch(`/trainer-plans/update/${planId}`, {
@@ -465,11 +448,6 @@
             trainingPlanDays: []
         };
         document.querySelectorAll('#days-container .day').forEach(dayElem => {
-            const dayIdInput = dayElem.querySelector('input[name^="dayIds"]');
-            if (dayIdInput && dayIdInput.dataset.toDelete === "true") {
-                planData.trainingPlanDays.push({ idDay: dayIdInput.value, delete: true });
-                return;
-            }
             const dayId = dayElem.getAttribute("data-day-id");
             const isNewDay = dayId.startsWith('new-');
             const dayData = {
@@ -478,17 +456,10 @@
                 notes: dayElem.querySelector('textarea[name="notes[]"]').value,
                 exercises: []
             };
-            dayElem.querySelectorAll('.exercise').forEach(exerciseElem => {
+            dayElem.querySelectorAll('.exercise-row').forEach(exerciseElem => {
                 const exerciseSelect = exerciseElem.querySelector('select[name^="exerciseIds"]');
                 const exerciseType = exerciseSelect.options[exerciseSelect.selectedIndex].getAttribute("data-type");
                 const idPlanExerciseInput = exerciseElem.querySelector('input[name^="planExerciseIds"]');
-                if (idPlanExerciseInput && idPlanExerciseInput.dataset.toDelete === "true") {
-                    dayData.exercises.push({
-                        idPlanExercise: idPlanExerciseInput.value,
-                        delete: true
-                    });
-                    return;
-                }
                 const exerciseData = {
                     idPlanExercise: idPlanExerciseInput ? idPlanExerciseInput.value : null,
                     idExercise: exerciseSelect.value,
@@ -498,6 +469,8 @@
                     exerciseData.reps = exerciseElem.querySelector('input[name^="reps"]').value;
                     exerciseData.weight = exerciseElem.querySelector('input[name^="weight"]').value;
                 } else if (exerciseType === "CARDIO") {
+                    const cardioSetsInput = exerciseElem.querySelector('input[name^="cardioSets"]');
+                    exerciseData.sets = cardioSetsInput ? cardioSetsInput.value : null;
                     let durationInput = exerciseElem.querySelector('input[name^="duration"]');
                     exerciseData.duration = convertDurationToSeconds(durationInput.value);
                     exerciseData.distance = exerciseElem.querySelector('input[name^="distance"]').value;
@@ -596,7 +569,6 @@
     function goBack() {
         window.history.back();
     }
-
 </script>
 </body>
 </html>
