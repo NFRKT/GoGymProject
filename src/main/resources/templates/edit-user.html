@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>GoGym - Edycja profilu</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    html, body {
+      background: url('/images/hero.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    .content {
+      flex: 1;
+    }
+    .profile-container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .w3-input {
+      margin-bottom: 15px;
+    }
+    .password-container {
+      position: relative;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    </style>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="content">
+    <div class="profile-container">
+        <h2>Edycja danych osobowych</h2>
+
+        <div th:if="${message}" class="w3-panel w3-green">
+            <p th:text="${message}"></p>
+        </div>
+        <div th:if="${error}" class="w3-panel w3-red">
+            <p th:text="${error}"></p>
+        </div>
+
+        <form th:action="@{/edit-user}" th:object="${user}" method="post">
+            <label for="firstName">Imię:</label>
+            <input type="text" id="firstName" th:field="*{firstName}" class="w3-input" required/>
+
+            <label for="secondName">Nazwisko:</label>
+            <input type="text" id="secondName" th:field="*{secondName}" class="w3-input" required/>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" th:field="*{email}" class="w3-input" required/>
+
+            <label for="birthDate">Data urodzenia:</label>
+            <input type="date" id="birthDate" th:field="*{birthDate}" class="w3-input" required/>
+
+            <label for="gender">Płeć:</label>
+            <select id="gender" th:field="*{gender}" class="w3-input">
+                <option value="KOBIETA" th:selected="${user.gender == 'KOBIETA'}">Kobieta</option>
+                <option value="MĘŻCZYZNA" th:selected="${user.gender == 'MĘŻCZYZNA'}">Mężczyzna</option>
+            </select>
+
+            <label for="currentPassword">Aktualne hasło:</label>
+            <div class="password-container">
+                <input type="password" id="currentPassword" name="currentPassword" class="w3-input" required/>
+                <button type="button" class="toggle-password" onclick="togglePassword('currentPassword')">
+                    <i class="fa fa-eye"></i>
+                </button>
+            </div>
+
+            <label for="newPassword">Nowe hasło (opcjonalnie):</label>
+            <div class="password-container">
+                <input type="password" id="newPassword" name="newPassword" class="w3-input"/>
+                <button type="button" class="toggle-password" onclick="togglePassword('newPassword')">
+                    <i class="fa fa-eye"></i>
+                </button>
+            </div>
+
+            <label for="confirmPassword">Powtórz nowe hasło:</label>
+            <div class="password-container">
+                <input type="password" id="confirmPassword" name="confirmPassword" class="w3-input"/>
+                <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">
+                    <i class="fa fa-eye"></i>
+                </button>
+            </div>
+
+            <button type="submit" class="w3-btn w3-blue-grey">Zaktualizuj profil</button>
+        </form>
+    </div>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+<script>
+  function togglePassword(fieldId) {
+    var field = document.getElementById(fieldId);
+    if (field.type === "password") {
+      field.type = "text";
+    } else {
+      field.type = "password";
+    }
+  }
+
+</script>
+</body>
+</html>

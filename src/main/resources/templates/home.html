@@ -109,6 +109,11 @@
                 <h3>Panel Klienta</h3>
                 <a href="/client-panel">Przejdź</a>
             </div>
+            <div th:if="${isUser or isTrainer}" class="nav-card">
+                <i class="fa fa-user-edit"></i>
+                <h3>Edycja danych osobowych</h3>
+                <a th:href="@{/edit-user}">Przejdź</a>
+            </div>
             <div th:if="${isUser}" class="nav-card">
                 <i class="fa fa-list-alt"></i>
                 <h3>Moje Plany Treningowe</h3>
