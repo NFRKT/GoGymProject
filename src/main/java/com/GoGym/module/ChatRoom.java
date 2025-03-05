@@ -24,7 +24,7 @@ public class ChatRoom {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Message> messages;  // 🔥 Dodaj listę wiadomości
+    private List<Message> messages;
 
     public ChatRoom() {
     }

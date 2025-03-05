@@ -309,7 +309,15 @@ function updatePlanUI(data) {
                 }
                 completedExercises.forEach(ex => {
                   const exerciseRow = document.createElement("div");
-                  exerciseRow.innerHTML = `<p><strong>${ex.exercise?.name || "Nieznane ćwiczenie"}</strong> - ${ex.sets ? `${ex.sets}x${ex.reps}, ${ex.weight ?? "bez obciążenia"} kg` : `${ex.duration} min, ${ex.distance ?? "Brak dystansu"} km`}</p>`;
+                  let details = "";
+                  if(ex.exercise?.type === "CARDIO"){
+                    const durationSeconds = parseInt(ex.duration, 10);
+                    const formattedDuration = formatDuration(durationSeconds);
+                    details = `${ex.sets} serie, ${formattedDuration}, ${ex.distance ?? "Brak dystansu"} km`;
+                  } else {
+                    details = `${ex.sets}x${ex.reps}, ${ex.weight ?? "bez obciążenia"} kg`;
+                  }
+                  exerciseRow.innerHTML = `<p><strong>${ex.exercise?.name || "Nieznane ćwiczenie"}</strong> - ${details}</p>`;
                   document.getElementById("exerciseList").appendChild(exerciseRow);
                 });
                 document.getElementById("workoutModal").style.display = "flex";

@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -53,6 +54,8 @@ public class User {
     @JsonIgnore
     private Set<TrainerClient> trainers; // Trener przypisany do klienta
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ChatRoom> chatRooms;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private TrainerDetails trainerDetails;

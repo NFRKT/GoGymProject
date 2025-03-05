@@ -109,6 +109,16 @@
                 <h3>Panel Klienta</h3>
                 <a href="/client-panel">Przejdź</a>
             </div>
+            <div th:if="${isTrainer}" class="nav-card">
+                <i class="fa fa-user-tie"></i>
+                <h3>Panel Trenera</h3>
+                <a href="/trainer-panel">Przejdź</a>
+            </div>
+            <div th:if="${isAdmin}" class="nav-card">
+                <i class="fa fa-cog"></i>
+                <h3>Panel Administratora</h3>
+                <a th:href="@{/admin/panel}">Przejdź</a>
+            </div>
             <div th:if="${isUser or isTrainer}" class="nav-card">
                 <i class="fa fa-user-edit"></i>
                 <h3>Edycja danych osobowych</h3>
@@ -121,13 +131,8 @@
             </div>
             <div th:if="${isUser}" class="nav-card">
                 <i class="fa fa-history"></i>
-                <h3>Plany Archiwalne</h3>
+                <h3>Archiwalne Plany</h3>
                 <a th:href="@{/user-plans-archived(idUser=${idUser})}">Przejdź</a>
-            </div>
-            <div th:if="${isTrainer}" class="nav-card">
-                <i class="fa fa-user-tie"></i>
-                <h3>Panel Trenera</h3>
-                <a href="/trainer-panel">Przejdź</a>
             </div>
             <div th:if="${isTrainer}" class="nav-card">
                 <i class="fa fa-users"></i>
@@ -163,11 +168,6 @@
                 <i class="fa fa-users"></i>
                 <h3>Wszyscy Użytkownicy</h3>
                 <a th:href="@{/all-user-list}">Przejdź</a>
-            </div>
-            <div th:if="${isAdmin}" class="nav-card">
-                <i class="fa fa-cog"></i>
-                <h3>Panel Administratora</h3>
-                <a th:href="@{/admin/panel}">Przejdź</a>
             </div>
             <div th:if="${isUser}" class="nav-card">
                 <i class="fa fa-running"></i>

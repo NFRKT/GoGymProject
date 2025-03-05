@@ -165,43 +165,17 @@
       <p>
         <strong>Imię i nazwisko:</strong>
         <span id="nameText" th:text="${user.firstName + ' ' + user.secondName}">Imię Nazwisko</span>
-        <button class="btn btn-edit" onclick="toggleEdit('editNameForm', 'firstNameInput', 'nameText')" th:if="${isOwnProfile}">Edytuj</button>
       </p>
-      <form id="editNameForm" style="display:none;" novalidate>
-        <input type="text" id="firstNameInput" name="firstName" placeholder="Imię" class="w3-input w3-border" required/>
-        <input type="text" id="lastNameInput" name="lastName" placeholder="Nazwisko" class="w3-input w3-border" required/>
-        <button type="submit" class="btn">Zapisz</button>
-        <button type="button" class="btn" onclick="toggleEdit('editNameForm', 'firstNameInput', 'nameText')">Anuluj</button>
-      </form>
-
       <!-- Data urodzenia -->
       <p>
         <strong>Data urodzenia:</strong>
         <span id="birthDateText" th:text="${user.birthDate != null ? #dates.format(user.birthDate, 'yyyy-MM-dd') : 'Nie podano'}">Data urodzenia</span>
-        <button class="btn btn-edit" onclick="toggleEdit('editBirthDateForm', 'birthDateInput', 'birthDateText')" th:if="${isOwnProfile}">Edytuj</button>
       </p>
-      <form id="editBirthDateForm" style="display:none;" novalidate>
-        <input type="date" id="birthDateInput" name="birthDate" class="w3-input w3-border" required/>
-        <button type="submit" class="btn">Zapisz</button>
-        <button type="button" class="btn" onclick="toggleEdit('editBirthDateForm', 'birthDateInput', 'birthDateText')">Anuluj</button>
-      </form>
-
       <!-- Płeć -->
       <p>
         <strong>Płeć:</strong>
         <span id="genderText" th:text="${user.gender != null ? user.gender : 'Nie podano'}">Płeć</span>
-        <button class="btn btn-edit" onclick="toggleEdit('editGenderForm', 'genderInput', 'genderText')" th:if="${isOwnProfile}">Edytuj</button>
       </p>
-      <form id="editGenderForm" style="display:none;" novalidate>
-        <select id="genderInput" name="gender" class="w3-input w3-border" required>
-          <option value="">Wybierz płeć</option>
-          <option value="KOBIETA">Kobieta</option>
-          <option value="MĘŻCZYZNA">Mężczyzna</option>
-        </select>
-        <button type="submit" class="btn">Zapisz</button>
-        <button type="button" class="btn" onclick="toggleEdit('editGenderForm', 'genderInput', 'genderText')">Anuluj</button>
-      </form>
-
       <!-- Numer telefonu -->
       <p>
         <strong>Numer telefonu:</strong>
@@ -400,154 +374,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     if (form.style.display === "none" || form.style.display === "") {
       form.style.display = "block";
-      if(formId === "editNameForm") {
-         let names = text.innerText.trim().split(" ");
-         document.getElementById("firstNameInput").value = names[0] || "";
-         document.getElementById("lastNameInput").value = names.length > 1 ? names.slice(1).join(" ") : "";
-      } else {
-         var input = document.getElementById(inputId);
-         input.value = text.innerText.trim() !== "Nie podano" ? text.innerText.trim() : "";
-      }
+      var input = document.getElementById(inputId);
+      input.value = text.innerText.trim() !== "Nie podano" ? text.innerText.trim() : "";
     } else {
       form.style.display = "none";
     }
   };
-
-  // Obsługa formularza edycji imienia i nazwiska
-  const editNameForm = document.getElementById("editNameForm");
-  if(editNameForm) {
-    editNameForm.addEventListener("submit", function(e) {
-      e.preventDefault();
-      editNameForm.querySelectorAll(".error-message").forEach(el => el.remove());
-      editNameForm.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
-
-      let firstNameInput = document.getElementById("firstNameInput");
-      let lastNameInput = document.getElementById("lastNameInput");
-      let isValid = true;
-      const firstName = firstNameInput.value.trim();
-      const lastName = lastNameInput.value.trim();
-
-      if(firstName === ""){
-        showError(firstNameInput, "Imię jest wymagane.");
-        isValid = false;
-      } else if(firstName.length < 2) {
-        showError(firstNameInput, "Imię musi mieć minimum 2 znaki.");
-        isValid = false;
-      } else if(!/^[A-ZĄĆĘŁŃÓŚŹŻ]/.test(firstName)) {
-        showError(firstNameInput, "Imię musi zaczynać się z dużej litery.");
-        isValid = false;
-      }
-      if(lastName === ""){
-        showError(lastNameInput, "Nazwisko jest wymagane.");
-        isValid = false;
-      } else if(lastName.length < 2) {
-        showError(lastNameInput, "Nazwisko musi mieć minimum 2 znaki.");
-        isValid = false;
-      } else if(!/^[A-ZĄĆĘŁŃÓŚŹŻ]/.test(lastName)) {
-        showError(lastNameInput, "Nazwisko musi zaczynać się z dużej litery.");
-        isValid = false;
-      }
-      if(!isValid) return;
-
-      let data = new URLSearchParams();
-      data.append("firstName", firstName);
-      data.append("lastName", lastName);
-
-      fetch('/client/profile/updateName', {
-        method: "POST",
-        body: data,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-      })
-      .then(response => response.json())
-      .then(result => {
-        if(result.success){
-          document.getElementById("nameText").innerText = firstName + " " + lastName;
-          editNameForm.style.display = "none";
-        } else {
-          alert(result.message || "Błąd aktualizacji danych.");
-        }
-      })
-      .catch(error => console.error("Błąd:", error));
-    });
-  }
-
-  // Obsługa formularza edycji daty urodzenia
-  const editBirthDateForm = document.getElementById("editBirthDateForm");
-  if(editBirthDateForm) {
-    editBirthDateForm.addEventListener("submit", function(e) {
-      e.preventDefault();
-      editBirthDateForm.querySelectorAll(".error-message").forEach(el => el.remove());
-      editBirthDateForm.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
-
-      let birthDateInput = document.getElementById("birthDateInput");
-      let isValid = true;
-      if(birthDateInput.value === ""){
-        showError(birthDateInput, "Data urodzenia jest wymagana.");
-        isValid = false;
-      } else {
-        let selectedDate = new Date(birthDateInput.value);
-        let today = new Date();
-        today.setHours(0,0,0,0);
-        if(selectedDate > today){
-          showError(birthDateInput, "Data urodzenia nie może być w przyszłości.");
-          isValid = false;
-        }
-      }
-      if(!isValid) return;
-
-      let data = new URLSearchParams();
-      data.append("birthDate", birthDateInput.value);
-
-      fetch('/client/profile/updateBirthDate', {
-        method: "POST",
-        body: data,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-      })
-      .then(response => response.json())
-      .then(result => {
-        if(result.success){
-          document.getElementById("birthDateText").innerText = birthDateInput.value;
-          editBirthDateForm.style.display = "none";
-        } else {
-          alert(result.message || "Błąd aktualizacji daty urodzenia.");
-        }
-      })
-      .catch(error => console.error("Błąd:", error));
-    });
-  }
-
-  // Obsługa formularza edycji płci
-  const editGenderForm = document.getElementById("editGenderForm");
-  if(editGenderForm) {
-    editGenderForm.addEventListener("submit", function(e) {
-      e.preventDefault();
-      editGenderForm.querySelectorAll(".error-message").forEach(el => el.remove());
-      editGenderForm.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
-
-      let genderInput = document.getElementById("genderInput");
-      if(genderInput.value === ""){
-        showError(genderInput, "Wybierz płeć.");
-        return;
-      }
-      let data = new URLSearchParams();
-      data.append("gender", genderInput.value);
-      fetch('/client/profile/updateGender', {
-        method: "POST",
-        body: data,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-      })
-      .then(response => response.json())
-      .then(result => {
-        if(result.success){
-          document.getElementById("genderText").innerText = genderInput.value;
-          editGenderForm.style.display = "none";
-        } else {
-          alert(result.message || "Błąd aktualizacji płci.");
-        }
-      })
-      .catch(error => console.error("Błąd:", error));
-    });
-  }
 
   // Obsługa formularzy edycji pól liczbowych: waga, wzrost, talia, biodra, klatka
   const editWeightForm = document.getElementById("editWeight");
