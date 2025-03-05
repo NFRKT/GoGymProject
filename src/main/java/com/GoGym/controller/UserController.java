@@ -70,7 +70,7 @@ public class UserController {
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             model.addAttribute("error", "Aktualne hasło jest niepoprawne.");
-            return "edit-user";
+            return "edit-profile";
         }
 
         user.setFirstName(userForm.getFirstName());
@@ -80,9 +80,13 @@ public class UserController {
         user.setGender(userForm.getGender());
 
         if (newPassword != null && !newPassword.trim().isEmpty()) {
+            if (newPassword.trim().length() < 6) {
+                model.addAttribute("error", "Hasło musi zawierać co najmniej 6 znaków.");
+                return "edit-profile";
+            }
             if (!newPassword.equals(confirmPassword)) {
                 model.addAttribute("error", "Nowe hasło i potwierdzenie nie są zgodne.");
-                return "edit-user";
+                return "edit-profile";
             }
             String encodedNewPassword = passwordEncoder.encode(newPassword);
             user.setPassword(encodedNewPassword);

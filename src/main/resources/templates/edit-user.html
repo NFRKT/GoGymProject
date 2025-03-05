@@ -43,7 +43,11 @@
       border: none;
       cursor: pointer;
     }
-
+    .error-message {
+      color: red;
+      font-size: 0.9em;
+      display: none;
+    }
     </style>
 </head>
 <body>
@@ -59,18 +63,22 @@
             <p th:text="${error}"></p>
         </div>
 
-        <form th:action="@{/edit-user}" th:object="${user}" method="post">
+        <form id="profileForm" th:action="@{/edit-user}" th:object="${user}" method="post">
             <label for="firstName">Imię:</label>
             <input type="text" id="firstName" th:field="*{firstName}" class="w3-input" required/>
+            <div id="firstNameError" class="error-message"></div>
 
             <label for="secondName">Nazwisko:</label>
             <input type="text" id="secondName" th:field="*{secondName}" class="w3-input" required/>
+            <div id="secondNameError" class="error-message"></div>
 
             <label for="email">Email:</label>
             <input type="email" id="email" th:field="*{email}" class="w3-input" required/>
+            <div id="emailError" class="error-message"></div>
 
             <label for="birthDate">Data urodzenia:</label>
             <input type="date" id="birthDate" th:field="*{birthDate}" class="w3-input" required/>
+            <div id="birthDateError" class="error-message"></div>
 
             <label for="gender">Płeć:</label>
             <select id="gender" th:field="*{gender}" class="w3-input">
@@ -93,6 +101,7 @@
                     <i class="fa fa-eye"></i>
                 </button>
             </div>
+            <div id="newPasswordError" class="error-message"></div>
 
             <label for="confirmPassword">Powtórz nowe hasło:</label>
             <div class="password-container">
@@ -116,7 +125,100 @@
       field.type = "password";
     }
   }
+document.getElementById('profileForm').addEventListener('submit', validateForm);
 
+  function validateForm(event) {
+    var isValid = true;
+
+    // Pobieramy pola formularza
+    var email = document.getElementById('email');
+    var firstName = document.getElementById('firstName');
+    var secondName = document.getElementById('secondName');
+    var birthDate = document.getElementById('birthDate');
+    var newPassword = document.getElementById('newPassword');
+    var confirmPassword = document.getElementById('confirmPassword');
+
+    // Pobieramy elementy komunikatów błędów (jeśli nie istnieją – tworzymy)
+    var emailError = document.getElementById('emailError');
+    var firstNameError = document.getElementById('firstNameError');
+    var secondNameError = document.getElementById('secondNameError');
+    var birthDateError = document.getElementById('birthDateError');
+    var newPasswordError = document.getElementById('newPasswordError');
+
+    // Reset komunikatów
+    emailError.style.display = 'none';
+    firstNameError.style.display = 'none';
+    secondNameError.style.display = 'none';
+    birthDateError.style.display = 'none';
+    newPasswordError.style.display = 'none';
+
+    // Definicje wyrażeń regularnych
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var nameRegex = /^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+$/;
+
+    // Walidacja email
+    if (!email.value.trim()) {
+      emailError.textContent = "Email jest wymagany.";
+      emailError.style.display = 'block';
+      isValid = false;
+    } else if (!emailRegex.test(email.value.trim())) {
+      emailError.textContent = "Podaj poprawny format email (np. user@example.com).";
+      emailError.style.display = 'block';
+      isValid = false;
+    }
+
+    // Walidacja imienia
+    if (!firstName.value.trim()) {
+      firstNameError.textContent = "Imię jest wymagane.";
+      firstNameError.style.display = 'block';
+      isValid = false;
+    } else if (!nameRegex.test(firstName.value.trim())) {
+      firstNameError.textContent = "Imię musi zaczynać się od wielkiej litery i zawierać tylko litery.";
+      firstNameError.style.display = 'block';
+      isValid = false;
+    }
+
+    // Walidacja nazwiska
+    if (!secondName.value.trim()) {
+      secondNameError.textContent = "Nazwisko jest wymagane.";
+      secondNameError.style.display = 'block';
+      isValid = false;
+    } else if (!nameRegex.test(secondName.value.trim())) {
+      secondNameError.textContent = "Nazwisko musi zaczynać się od wielkiej litery i zawierać tylko litery.";
+      secondNameError.style.display = 'block';
+      isValid = false;
+    }
+
+    // Walidacja daty urodzenia – użytkownik musi mieć co najmniej 13 lat
+    if (birthDate.value.trim() !== "") {
+      var birthDateVal = new Date(birthDate.value);
+      var today = new Date();
+      var tenYearsAgo = new Date(today.getFullYear() - 13, today.getMonth(), today.getDate());
+      if (birthDateVal > tenYearsAgo) {
+        birthDateError.textContent = "Musisz mieć co najmniej 13 lat.";
+        birthDateError.style.display = 'block';
+        isValid = false;
+      }
+    }
+
+    // Walidacja nowego hasła – jeśli użytkownik je podał
+    if (newPassword.value.trim() !== "") {
+      if (newPassword.value.trim().length < 6) {
+        newPasswordError.textContent = "Hasło musi zawierać co najmniej 6 znaków.";
+        newPasswordError.style.display = 'block';
+        isValid = false;
+      }
+      if (newPassword.value.trim() !== confirmPassword.value.trim()) {
+        newPasswordError.textContent = "Nowe hasło i potwierdzenie nie są zgodne.";
+        newPasswordError.style.display = 'block';
+        isValid = false;
+      }
+    }
+
+    if (!isValid) {
+      event.preventDefault();
+    }
+  }
 </script>
 </body>
 </html>
