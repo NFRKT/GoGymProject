@@ -9,7 +9,7 @@ public class TrainerReviewDTO {
     private String createdAt;
     private Long clientId;
     private String clientFirstName;
-    private String clientSecondName;
+    private String clientLastName;
 
     public TrainerReviewDTO(TrainerReview review) {
         this.id = review.getId();
@@ -19,7 +19,7 @@ public class TrainerReviewDTO {
         if (review.getClient() != null) {
             this.clientId = review.getClient().getIdUser();
             this.clientFirstName = review.getClient().getFirstName();
-            this.clientSecondName = review.getClient().getSecondName();
+            this.clientLastName = review.getClient().getLastName();
         }
     }
 
@@ -29,5 +29,5 @@ public class TrainerReviewDTO {
     public String getCreatedAt() { return createdAt; }
     public Long getClientId() { return clientId; }
     public String getClientFirstName() { return clientFirstName; }
-    public String getClientSecondName() { return clientSecondName; }
+    public String getClientLastName() { return clientLastName; }
 }

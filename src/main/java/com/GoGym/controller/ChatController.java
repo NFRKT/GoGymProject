@@ -64,13 +64,13 @@ public class ChatController {
                     String chatName;
                     if (isAdmin) {
                         chatName = chatRoom.getUser().getUserType() == User.UserType.ADMIN
-                                ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
-                                : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName();
+                                ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getLastName()
+                                : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getLastName();
                     } else {
                         chatName = isAdminChat ? "Administracja"
                                 : (chatRoom.getUser().equals(user)
-                                ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getSecondName()
-                                : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getSecondName());
+                                ? chatRoom.getTrainer().getFirstName() + " " + chatRoom.getTrainer().getLastName()
+                                : chatRoom.getUser().getFirstName() + " " + chatRoom.getUser().getLastName());
                     }
 
                     long unreadCount = messageRepository.countUnreadMessages(chatRoom.getId(), user.getIdUser());
@@ -156,7 +156,7 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/chat/updateUnread", new ChatRoomDTO(
                 chatRoom.getId(),
                 recipient.getIdUser(),
-                recipient.getFirstName() + " " + recipient.getSecondName(),
+                recipient.getFirstName() + " " + recipient.getLastName(),
                 unreadCountForRecipient
         ));
     }
@@ -197,7 +197,7 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/chat/updateUnread", new ChatRoomDTO(
                 chatRoomId,
                 user.getIdUser(),
-                user.getFirstName() + " " + user.getSecondName(),
+                user.getFirstName() + " " + user.getLastName(),
                 unreadCount
         ));
         return ResponseEntity.ok("Wiadomości oznaczone jako przeczytane");

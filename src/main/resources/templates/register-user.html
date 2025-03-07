@@ -152,9 +152,9 @@
       <input class="w3-input w3-border" type="text" id="First_name" th:field="*{firstName}" required/>
       <div id="firstNameError" class="error-message"></div>
 
-      <label for="Second_name">Nazwisko:</label>
-      <input class="w3-input w3-border" type="text" id="Second_name" th:field="*{secondName}" required/>
-      <div id="secondNameError" class="error-message"></div>
+      <label for="Last_name">Nazwisko:</label>
+      <input class="w3-input w3-border" type="text" id="Last_name" th:field="*{lastName}" required/>
+      <div id="lastNameError" class="error-message"></div>
 
       <label for="BirthDate">Data urodzenia:</label>
       <input class="w3-input w3-border" type="date" id="BirthDate" th:field="*{birthDate}" required/>
@@ -267,7 +267,7 @@
       const email = document.getElementById('Email');
       const password = document.getElementById('Password');
       const firstName = document.getElementById('First_name');
-      const secondName = document.getElementById('Second_name');
+      const lastName = document.getElementById('Last_name');
       const birthDate = document.getElementById('BirthDate');
       const userType = document.getElementById('UserType');
 
@@ -284,7 +284,7 @@
       const emailError = document.getElementById('emailError');
       const passwordError = document.getElementById('passwordError');
       const firstNameError = document.getElementById('firstNameError');
-      const secondNameError = document.getElementById('secondNameError');
+      const lastNameError = document.getElementById('lastNameError');
       const birthDateError = document.getElementById('birthDateError');
       const startDateError = document.getElementById('startDateError');
       const phoneNumberError = document.getElementById('phoneNumberError');
@@ -305,7 +305,7 @@
       resetError(email, emailError);
       resetError(password, passwordError);
       resetError(firstName, firstNameError);
-      resetError(secondName, secondNameError);
+      resetError(lastName, lastNameError);
       resetError(birthDate, birthDateError);
       if(userType.value === "TRAINER") {
         resetError(startDate, startDateError);
@@ -334,10 +334,10 @@
       }
 
       // Walidacja nazwiska
-      if (!secondName.value.trim()) {
-        setError(secondName, secondNameError, "Nazwisko jest wymagane.");
-      } else if (!nameRegex.test(secondName.value.trim())) {
-        setError(secondName, secondNameError, "Nazwisko musi zaczynać się od wielkiej litery i zawierać tylko litery.");
+      if (!lastName.value.trim()) {
+        setError(lastName, lastNameError, "Nazwisko jest wymagane.");
+      } else if (!nameRegex.test(lastName.value.trim())) {
+        setError(lastName, lastNameError, "Nazwisko musi zaczynać się od wielkiej litery i zawierać tylko litery.");
       }
 
       // Walidacja daty urodzenia (nie w przyszłości)

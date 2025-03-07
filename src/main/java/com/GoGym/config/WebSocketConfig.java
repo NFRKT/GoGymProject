@@ -7,17 +7,17 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Configuration
-@EnableWebSocketMessageBroker  // ✅ Aktywacja WebSocket STOMP
+@EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");  // ✅ Wiadomości będą na "/topic/chat/{chatRoomId}"
-        config.setApplicationDestinationPrefixes("/app");  // ✅ Klient wysyła na "/app/chat/{chatRoomId}"
+        config.enableSimpleBroker("/topic");
+        config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").withSockJS();  // ✅ Punkt WebSocket dla klientów
+        registry.addEndpoint("/ws").withSockJS();
     }
 }

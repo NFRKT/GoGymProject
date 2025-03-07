@@ -133,7 +133,7 @@
     <tbody>
     <tr th:each="user : ${users}" th:data-type="${user.userType}">
       <td th:text="${user.email}">user@example.com</td>
-      <td th:text="${user.firstName + ' ' + user.secondName}">Imię Nazwisko</td>
+      <td th:text="${user.firstName + ' ' + user.lastName}">Imię Nazwisko</td>
       <td>
         <span th:if="${user.userType.name() == 'CLIENT'}" class="role-badge role-client">Klient</span>
         <span th:if="${user.userType.name() == 'TRAINER'}" class="role-badge role-trainer">Trener</span>

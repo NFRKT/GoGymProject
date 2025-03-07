@@ -120,7 +120,7 @@ public class TrainerClientController {
         List<Map<String, String>> response = clients.stream().map(client -> Map.of(
                 "id", String.valueOf(client.getClient().getIdUser()),
                 "firstName", client.getClient().getFirstName(),
-                "secondName", client.getClient().getSecondName()
+                "lastName", client.getClient().getLastName()
         )).collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
@@ -136,7 +136,7 @@ public class TrainerClientController {
         List<Map<String, String>> response = trainers.stream().map(trainer -> Map.of(
                 "id", String.valueOf(trainer.getTrainer().getIdUser()),
                 "firstName", trainer.getTrainer().getFirstName(),
-                "secondName", trainer.getTrainer().getSecondName()
+                "lastName", trainer.getTrainer().getLastName()
         )).collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
@@ -178,7 +178,7 @@ public class TrainerClientController {
             Map<String, Object> trainerMap = new HashMap<>();
             trainerMap.put("idUser", trainer.getIdUser());
             trainerMap.put("firstName", trainer.getFirstName());
-            trainerMap.put("secondName", trainer.getSecondName());
+            trainerMap.put("lastName", trainer.getLastName());
             trainerMap.put("phone", details != null ? details.getPhoneNumber() : "Brak danych");
             trainerMap.put("experienceDuration", experienceDuration);
             trainerMap.put("clientCount", clientCount);

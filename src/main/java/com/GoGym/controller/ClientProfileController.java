@@ -219,11 +219,11 @@ public class ClientProfileController {
             return response;
         }
         user.setFirstName(firstName.trim());
-        user.setSecondName(lastName.trim());
+        user.setLastName(lastName.trim());
         userService.saveUser(user);
         response.put("success", true);
         response.put("firstName", user.getFirstName());
-        response.put("lastName", user.getSecondName());
+        response.put("lastName", user.getLastName());
         return response;
     }
 

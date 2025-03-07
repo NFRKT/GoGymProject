@@ -425,7 +425,7 @@ public class TrainerProfileController {
             return response;
         }
         user.setFirstName(firstName.trim());
-        user.setSecondName(lastName.trim());
+        user.setLastName(lastName.trim());
         userRepository.save(user);
         response.put("success", true);
         return response;

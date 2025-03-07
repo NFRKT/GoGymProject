@@ -831,7 +831,7 @@ CREATE TABLE `user` (
   `email` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `first_name` varchar(30) NOT NULL,
-  `second_name` varchar(30) NOT NULL,
+  `last_name` varchar(30) NOT NULL,
   `birth_date` date NOT NULL,
   `gender` enum('KOBIETA','MĘŻCZYZNA') NOT NULL,
   `user_type` enum('UŻYTKOWNIK','TRENER') NOT NULL
@@ -841,7 +841,7 @@ CREATE TABLE `user` (
 -- Zrzut danych tabeli `user`
 --
 
-INSERT INTO `user` (`id_user`, `email`, `password`, `first_name`, `second_name`, `birth_date`, `gender`, `user_type`) VALUES
+INSERT INTO `user` (`id_user`, `email`, `password`, `first_name`, `last_name`, `birth_date`, `gender`, `user_type`) VALUES
 (2, 'A', '$2a$10$fk5ZhEsdK0eCJglnxznvVeVoxrZCfIYgVs3v7.oOQo4muXGowXvjm', 'Aa', 'Aa', '2025-01-02', 'KOBIETA', 'UŻYTKOWNIK'),
 (3, 'jan@jan.pl', '$2a$10$1YRXlh0SPlA5pUMmiEhYGOfaTTvvc3RyFF8HPZuV/MYEg6pU5QD5S', 'Jan', 'Dziwok', '2001-10-02', 'MĘŻCZYZNA', 'TRENER'),
 (4, 'b', '$2a$10$eRJbNm5HNpB6IWhHp6sKD.UOMcUK3Va.dmNyzkDLUnR5AA73TVIeS', 'Bb', 'Bb', '2025-01-06', 'KOBIETA', 'TRENER'),

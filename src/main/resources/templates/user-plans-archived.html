@@ -278,8 +278,8 @@
         <select id="trainerSelect">
             <option value="">Wszyscy trenerzy</option>
             <option th:each="trainer : ${trainers}"
-                    th:value="${trainer.firstName + ' ' + trainer.secondName}"
-                    th:text="${trainer.firstName + ' ' + trainer.secondName}"></option>
+                    th:value="${trainer.firstName + ' ' + trainer.lastName}"
+                    th:text="${trainer.firstName + ' ' + trainer.lastName}"></option>
         </select>
         <select id="sortSelect">
             <option value="">Sortuj według...</option>
@@ -308,7 +308,7 @@
                 </p>
                 <p>
                     <strong>Trener:</strong>
-                    <span class="trainer-name" th:text="${plan.trainer.firstName + ' ' + plan.trainer.secondName}">Imię i Nazwisko</span>
+                    <span class="trainer-name" th:text="${plan.trainer.firstName + ' ' + plan.trainer.lastName}">Imię i Nazwisko</span>
                 </p>
                 <div class="status-container">
                     <p>

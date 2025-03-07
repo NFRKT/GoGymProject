@@ -40,7 +40,7 @@ public class UserService {
         User.Gender genderEnum = User.Gender.valueOf(userDTO.getGender().toUpperCase());
 
         User newUser = new User(null, userDTO.getEmail(), encodedPassword, userDTO.getFirstName(),
-                userDTO.getSecondName(), userDTO.getBirthDate(), genderEnum, userTypeEnum);
+                userDTO.getLastName(), userDTO.getBirthDate(), genderEnum, userTypeEnum);
 
         User savedUser = userRepository.save(newUser);
 

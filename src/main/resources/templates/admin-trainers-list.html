@@ -126,7 +126,7 @@
       <tr th:each="trainer : ${trainers}">
         <td th:text="${trainer.idUser}"></td>
         <td th:text="${trainer.firstName}"></td>
-        <td th:text="${trainer.secondName}"></td>
+        <td th:text="${trainer.lastName}"></td>
         <td th:text="${trainer.email}"></td>
         <td>
           <a th:href="@{/trainer/profile/{id}(id=${trainer.idUser})}" class="btn btn-profile">Profil</a>

@@ -74,7 +74,7 @@ public class UserController {
         }
 
         user.setFirstName(userForm.getFirstName());
-        user.setSecondName(userForm.getSecondName());
+        user.setLastName(userForm.getLastName());
         user.setEmail(userForm.getEmail());
         user.setBirthDate(userForm.getBirthDate());
         user.setGender(userForm.getGender());

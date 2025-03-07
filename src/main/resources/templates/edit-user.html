@@ -68,9 +68,9 @@
             <input type="text" id="firstName" th:field="*{firstName}" class="w3-input" required/>
             <div id="firstNameError" class="error-message"></div>
 
-            <label for="secondName">Nazwisko:</label>
-            <input type="text" id="secondName" th:field="*{secondName}" class="w3-input" required/>
-            <div id="secondNameError" class="error-message"></div>
+            <label for="lastName">Nazwisko:</label>
+            <input type="text" id="lastName" th:field="*{lastName}" class="w3-input" required/>
+            <div id="lastNameError" class="error-message"></div>
 
             <label for="email">Email:</label>
             <input type="email" id="email" th:field="*{email}" class="w3-input" required/>
@@ -133,7 +133,7 @@ document.getElementById('profileForm').addEventListener('submit', validateForm);
     // Pobieramy pola formularza
     var email = document.getElementById('email');
     var firstName = document.getElementById('firstName');
-    var secondName = document.getElementById('secondName');
+    var lastName = document.getElementById('lastName');
     var birthDate = document.getElementById('birthDate');
     var newPassword = document.getElementById('newPassword');
     var confirmPassword = document.getElementById('confirmPassword');
@@ -141,14 +141,14 @@ document.getElementById('profileForm').addEventListener('submit', validateForm);
     // Pobieramy elementy komunikatów błędów (jeśli nie istnieją – tworzymy)
     var emailError = document.getElementById('emailError');
     var firstNameError = document.getElementById('firstNameError');
-    var secondNameError = document.getElementById('secondNameError');
+    var lastNameError = document.getElementById('lastNameError');
     var birthDateError = document.getElementById('birthDateError');
     var newPasswordError = document.getElementById('newPasswordError');
 
     // Reset komunikatów
     emailError.style.display = 'none';
     firstNameError.style.display = 'none';
-    secondNameError.style.display = 'none';
+    lastNameError.style.display = 'none';
     birthDateError.style.display = 'none';
     newPasswordError.style.display = 'none';
 
@@ -179,13 +179,13 @@ document.getElementById('profileForm').addEventListener('submit', validateForm);
     }
 
     // Walidacja nazwiska
-    if (!secondName.value.trim()) {
-      secondNameError.textContent = "Nazwisko jest wymagane.";
-      secondNameError.style.display = 'block';
+    if (!lastName.value.trim()) {
+      lastNameError.textContent = "Nazwisko jest wymagane.";
+      lastNameError.style.display = 'block';
       isValid = false;
-    } else if (!nameRegex.test(secondName.value.trim())) {
-      secondNameError.textContent = "Nazwisko musi zaczynać się od wielkiej litery i zawierać tylko litery.";
-      secondNameError.style.display = 'block';
+    } else if (!nameRegex.test(lastName.value.trim())) {
+      lastNameError.textContent = "Nazwisko musi zaczynać się od wielkiej litery i zawierać tylko litery.";
+      lastNameError.style.display = 'block';
       isValid = false;
     }
 

@@ -12,7 +12,7 @@ public class UserRegistrationDTO {
     private String email;
     private String password;
     private String firstName;
-    private String secondName;
+    private String lastName;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
     private String gender;
@@ -27,12 +27,12 @@ public class UserRegistrationDTO {
 
     public UserRegistrationDTO() {}
 
-    public UserRegistrationDTO(String email, String password, String firstName, String secondName,
+    public UserRegistrationDTO(String email, String password, String firstName, String lastName,
                                Date birthDate, String gender, String userType, Date startDate, String phoneNumber, String workArea, List<String> specializations) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
-        this.secondName = secondName;
+        this.lastName = lastName;
         this.birthDate = birthDate;
         this.gender = gender;
         this.userType = userType;
@@ -64,12 +64,12 @@ public class UserRegistrationDTO {
         this.firstName = firstName;
     }
 
-    public String getSecondName() {
-        return secondName;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setSecondName(String secondName) {
-        this.secondName = secondName;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Date getBirthDate() {

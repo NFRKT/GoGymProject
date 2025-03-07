@@ -23,8 +23,8 @@ public class User {
     @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "second_name")
-    private String secondName;
+    @Column(name = "last_name")
+    private String lastName;
 
     @Column(name = "birth_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -75,13 +75,13 @@ public class User {
         this.idUser = idUser;
     }
 
-    public User(Long idUser, String email, String password, String firstName, String secondName,
+    public User(Long idUser, String email, String password, String firstName, String lastName,
                 Date birthDate, Gender gender, UserType userType) {
         this.idUser = idUser;
         this.email = email;
         this.password = password;
         this.firstName = firstName;
-        this.secondName = secondName;
+        this.lastName = lastName;
         this.birthDate = birthDate;
         this.gender = gender;
         this.userType = userType;
@@ -115,12 +115,12 @@ public class User {
         this.firstName = firstName;
     }
 
-    public String getSecondName() {
-        return secondName;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setSecondName(String secondName) {
-        this.secondName = secondName;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Date getBirthDate() {

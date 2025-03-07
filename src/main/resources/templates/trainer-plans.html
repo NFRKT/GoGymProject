@@ -301,8 +301,8 @@
         <select id="clientSelect" onchange="filterPlans()">
             <option value="">Wszyscy klienci</option>
             <option th:each="client : ${clients}"
-                    th:value="${client.firstName + ' ' + client.secondName}"
-                    th:text="${client.firstName + ' ' + client.secondName}">
+                    th:value="${client.firstName + ' ' + client.lastName}"
+                    th:text="${client.firstName + ' ' + client.lastName}">
             </option>
         </select>
         <select id="sortSelect" onchange="sortPlans()">
@@ -332,7 +332,7 @@
                 </p>
                 <p>
                     <strong>Klient:</strong>
-                    <span class="client-name" th:text="${plan.client.firstName + ' ' + plan.client.secondName}">Imię i Nazwisko</span>
+                    <span class="client-name" th:text="${plan.client.firstName + ' ' + plan.client.lastName}">Imię i Nazwisko</span>
                 </p>
                 <div class="status-container">
                     <p>

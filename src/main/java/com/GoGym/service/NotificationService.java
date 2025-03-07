@@ -31,31 +31,31 @@ public class NotificationService {
 
         switch (status) {
             case "accepted":
-                message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getSecondName() + " została zaakceptowana!";
+                message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getLastName() + " została zaakceptowana!";
                 break;
             case "rejected":
-                message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getSecondName() + " została odrzucona.";
+                message = "Twoja prośba o współpracę z trenerem " + trainer.getFirstName() + " " + trainer.getLastName() + " została odrzucona.";
                 break;
             case "trainer_resigned":
-                message = "Trener " + trainer.getFirstName() + " " + trainer.getSecondName() + " zakończył z Tobą współpracę.";
+                message = "Trener " + trainer.getFirstName() + " " + trainer.getLastName() + " zakończył z Tobą współpracę.";
                 break;
             case "new_plan":
-                message = "Twój trener " + trainer.getFirstName() + " " + trainer.getSecondName() + " stworzył dla Ciebie nowy plan: " + additionalInfo + ".";
+                message = "Twój trener " + trainer.getFirstName() + " " + trainer.getLastName() + " stworzył dla Ciebie nowy plan: " + additionalInfo + ".";
                 break;
             case "updated_plan":
-                message = "Twój trener " + trainer.getFirstName() + " " + trainer.getSecondName() + " edytował Twój plan: " + additionalInfo + ".";
+                message = "Twój trener " + trainer.getFirstName() + " " + trainer.getLastName() + " edytował Twój plan: " + additionalInfo + ".";
                 break;
             case "new_request":
-                message = "Nowa prośba o współpracę od " + trainer.getFirstName() + " " + trainer.getSecondName() + ".";
+                message = "Nowa prośba o współpracę od " + trainer.getFirstName() + " " + trainer.getLastName() + ".";
                 break;
             case "day_updated":
-                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył dzień treningowy: " + additionalInfo  + ".";
+                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getLastName() + " ukończył dzień treningowy: " + additionalInfo  + ".";
                 break;
             case "plan_completed":
-                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył plan treningowy: " + additionalInfo + ".";
+                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getLastName() + " ukończył plan treningowy: " + additionalInfo + ".";
                 break;
             case "rest_day_completed":
-                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getSecondName() + " ukończył dzień regeneracyjny: " + additionalInfo + ".";
+                message = "Twój klient " + trainer.getFirstName() + " " + trainer.getLastName() + " ukończył dzień regeneracyjny: " + additionalInfo + ".";
                 break;
             case "badge_awarded":
                 message = "Gratulacje! Otrzymałeś odznakę: " + additionalInfo + ".";

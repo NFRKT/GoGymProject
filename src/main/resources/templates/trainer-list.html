@@ -117,7 +117,7 @@
     </thead>
     <tbody>
     <tr th:each="trainer : ${trainers}">
-      <td th:text="${trainer.firstName + ' ' + trainer.secondName}">Jan Kowalski</td>
+      <td th:text="${trainer.firstName + ' ' + trainer.lastName}">Jan Kowalski</td>
       <td th:text="${trainer.phone}">123-456-789</td>
       <td th:text="${trainer.experienceDuration}">5 lat</td>
       <td th:text="${trainer.clientCount}">10</td>

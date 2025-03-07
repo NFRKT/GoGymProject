@@ -119,7 +119,7 @@ public class RequestController {
                 trainerClientService.createTrainerClient(trainer.getIdUser(), client.getIdUser());
                 response.put("status", "accepted");
                 response.put("firstName", client.getFirstName());
-                response.put("secondName", client.getSecondName());
+                response.put("lastName", client.getLastName());
                 response.put("id", String.valueOf(client.getIdUser()));
                 notificationService.createNotification(client, trainer, "accepted");
             } else if (requestStatus == Request.RequestStatus.rejected) {
@@ -152,7 +152,7 @@ public class RequestController {
                 Map<String, String> trainerData = new HashMap<>();
                 trainerData.put("id", String.valueOf(trainerClient.getTrainer().getIdUser()));
                 trainerData.put("firstName", trainerClient.getTrainer().getFirstName());
-                trainerData.put("secondName", trainerClient.getTrainer().getSecondName());
+                trainerData.put("lastName", trainerClient.getTrainer().getLastName());
                 return trainerData;
             }).toList();
             return ResponseEntity.ok(response);
@@ -177,7 +177,7 @@ public class RequestController {
                 requestData.put("id", String.valueOf(request.getId()));
                 requestData.put("clientId", String.valueOf(request.getClient().getIdUser()));
                 requestData.put("firstName", request.getClient().getFirstName());
-                requestData.put("secondName", request.getClient().getSecondName());
+                requestData.put("lastName", request.getClient().getLastName());
                 return requestData;
             }).toList();
 
