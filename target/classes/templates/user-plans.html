@@ -472,5 +472,19 @@
     window.history.back();
   }
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const openPlanId = urlParams.get("openPlan");
+
+    if (openPlanId) {
+        let modal = document.querySelector(`[data-plan-id="${openPlanId}"]`);
+        if (modal) {
+            modal.style.display = "block"; // Otwiera modal
+        }
+    }
+});
+</script>
+
 </body>
 </html>

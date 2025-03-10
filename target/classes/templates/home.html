@@ -189,10 +189,13 @@
                 <h3>Odznaki</h3>
                 <a th:href="@{/badges}">Przejdź</a>
             </div>
+            <div th:if="${isUser}" class="nav-card">
+                <i class="fa fa-calendar-days"></i>
+                <h3>Kalendarz treningowy</h3>
+                <a th:href="@{/calendar}">Przejdź</a>
+            </div>
         </div>
     </div>
-    <li><a th:href="@{/calendar}">📅 Kalendarz treningowy</a></li>
-
     <!-- Sekcja progress barów dla aktywnych planów treningowych (dla użytkownika) -->
     <div th:if="${isUser}" class="w3-container w3-padding-64">
         <h2 class="w3-center">Postępy w planach treningowych</h2>
