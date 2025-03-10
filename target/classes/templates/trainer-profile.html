@@ -282,7 +282,7 @@
         <div class="info">
             <p>
                 <strong>Imię i nazwisko:</strong>
-                <span id="nameText" th:text="${user.firstName + ' ' + user.secondName}">Imię Nazwisko</span>
+                <span id="nameText" th:text="${user.firstName + ' ' + user.lastName}">Imię Nazwisko</span>
             </p>
             <p>
                 <strong>Data urodzenia:</strong>
@@ -717,7 +717,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function createReviewElement(review, isUserReview) {
         let li = document.createElement("li");
-        li.innerHTML = `<strong>${review.clientFirstName} ${review.clientSecondName}:</strong>
+        li.innerHTML = `<strong>${review.clientFirstName} ${review.clientLastName}:</strong>
                         ${"⭐".repeat(review.rating)}
                         <p>${review.comment ? review.comment : "Brak komentarza"}</p>
                         <small>${new Date(review.createdAt).toLocaleDateString()}</small>`;

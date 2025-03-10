@@ -141,7 +141,7 @@
         <tbody>
         <tr th:each="trainer : ${clientTrainers}" th:attr="data-trainer-id=${trainer.trainer.idUser}">
           <td th:text="${trainer.trainer.firstName}"></td>
-          <td th:text="${trainer.trainer.secondName}"></td>
+          <td th:text="${trainer.trainer.lastName}"></td>
           <td>
             <form th:action="@{/rejectTrainer}" method="post" class="remove-trainer-form">
               <input type="hidden" name="trainerId" th:value="${trainer.trainer.idUser}" />
@@ -159,7 +159,7 @@
           <option value="">-- Wybierz trenera --</option>
           <option th:each="trainer : ${trainers}"
                   th:value="${trainer.idUser}"
-                  th:text="${trainer != null ? trainer.firstName + ' ' + trainer.secondName : 'Nieznany trener'}"
+                  th:text="${trainer != null ? trainer.firstName + ' ' + trainer.lastName : 'Nieznany trener'}"
                   th:disabled="${trainer == null || #lists.contains(currentTrainerIds, trainer.idUser) || #lists.contains(pendingTrainerIds, trainer.idUser)}">
           </option>
         </select>
@@ -177,7 +177,7 @@
         </thead>
         <tbody>
         <tr th:each="request : ${requests}" th:if="${request.requestStatus.name() == 'pending'}" th:attr="data-request-id=${request.id}">
-          <td th:text="${request.trainer != null ? request.trainer.firstName + ' ' + request.trainer.secondName : 'Brak trenera'}"></td>
+          <td th:text="${request.trainer != null ? request.trainer.firstName + ' ' + request.trainer.lastName : 'Brak trenera'}"></td>
           <td th:text="${#dates.format(request.requestDate, 'yyyy-MM-dd HH:mm')}"></td>
           <td>
             <form class="cancel-request-form" th:action="@{/requests/{id}/cancel(id=${request.id})}" method="post">
@@ -265,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 newRow.setAttribute("data-trainer-id", trainer.id);
                 newRow.innerHTML = `
                     <td>${trainer.firstName}</td>
-                    <td>${trainer.secondName}</td>
+                    <td>${trainer.lastName}</td>
                     <td>
                         <form action="/rejectTrainer" method="post" class="remove-trainer-form">
                             <input type="hidden" name="trainerId" value="${trainer.id}">

@@ -140,7 +140,7 @@
       <tbody>
       <tr th:each="client : ${trainerClients}" th:attr="data-client-id=${client.client.idUser}">
         <td th:text="${client.client.firstName}"></td>
-        <td th:text="${client.client.secondName}"></td>
+        <td th:text="${client.client.lastName}"></td>
         <td>
           <form th:action="@{/rejectClient}" method="post" class="remove-client-form">
             <input type="hidden" name="clientId" th:value="${client.client.idUser}" />
@@ -169,7 +169,7 @@
       <tbody>
       <tr th:each="request : ${requests}" th:attr="data-request-id=${request.id}">
         <td th:text="${request.client.firstName}"></td>
-        <td th:text="${request.client.secondName}"></td>
+        <td th:text="${request.client.lastName}"></td>
         <td>
           <form th:action="@{/requests/{id}/update(id=${request.id})}" method="post" class="update-request-form">
             <input type="hidden" name="status" value="accepted">
@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 newRow.setAttribute("data-request-id", request.id);
                 newRow.innerHTML = `
                     <td>${request.firstName}</td>
-                    <td>${request.secondName}</td>
+                    <td>${request.lastName}</td>
                     <td>
                         <form action="/requests/${request.id}/update" method="post" class="update-request-form">
                             <input type="hidden" name="status" value="accepted">
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 newRow.setAttribute("data-client-id", client.id);
                 newRow.innerHTML = `
                     <td>${client.firstName}</td>
-                    <td>${client.secondName}</td>
+                    <td>${client.lastName}</td>
                     <td>
                         <form action="/rejectClient" method="post" class="remove-client-form">
                             <input type="hidden" name="clientId" value="${client.id}">

@@ -19,5 +19,7 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     boolean existsByTrainingPlanDay_IdDay(Long trainingPlanDayId);
     Page<Workout> findByUser(User user, Pageable pageable);
     Page<Workout> findByUserAndWorkoutDate(User user, LocalDate workoutDate, Pageable pageable);
+    List<Workout> findByUser_IdUser(Long userId);
+
 }
 

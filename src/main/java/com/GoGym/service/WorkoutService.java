@@ -94,4 +94,7 @@ public class WorkoutService {
         return workoutRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trening o ID " + id + " nie istnieje."));
     }
+    public List<Workout> getWorkoutsForUser(Long userId) {
+        return workoutRepository.findByUser_IdUser(userId);
+    }
 }

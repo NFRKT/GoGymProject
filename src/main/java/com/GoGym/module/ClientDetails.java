@@ -15,11 +15,11 @@ public class ClientDetails {
     @JoinColumn(name = "id_user", nullable = false)
     private User user;
 
-    private Double weight;   // Waga w kg
-    private Double height;   // Wzrost w cm
-    private Double waist;    // Obwód talii
-    private Double hips;     // Obwód bioder
-    private Double chest;    // Obwód klatki piersiowej
+    private Double weight;
+    private Double height;
+    private Double waist;
+    private Double hips;
+    private Double chest;
 
     @Column(name = "profile_picture")
     private String profilePicture;
@@ -28,7 +28,7 @@ public class ClientDetails {
     @Column(name = "city")
     private String city;
     @Temporal(TemporalType.DATE)
-    private Date updateDate; // Data ostatniej aktualizacji danych
+    private Date updateDate;
 
     public ClientDetails() {}
 

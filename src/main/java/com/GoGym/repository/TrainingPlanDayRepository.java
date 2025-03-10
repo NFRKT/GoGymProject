@@ -9,5 +9,5 @@ import java.util.List;
 public interface TrainingPlanDayRepository extends JpaRepository<TrainingPlanDay, Long> {
 
     List<TrainingPlanDay> findByTrainingPlanOrderByDate(TrainingPlan trainingPlan);
-
+    List<TrainingPlanDay> findByTrainingPlan_Client_IdUser(Long userId);
 }

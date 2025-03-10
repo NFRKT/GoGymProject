@@ -26,7 +26,7 @@ public class TrainingPlanDay {
     private TrainingPlan trainingPlan;
 
     @Column(name = "day_type", nullable = false)
-    @Enumerated(EnumType.STRING)// "training" lub "rest"
+    @Enumerated(EnumType.STRING)
     private DayType dayType;
 
     public enum DayType {
@@ -34,14 +34,14 @@ public class TrainingPlanDay {
     }
 
     @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)// "not_completed" lub "completed"
+    @Enumerated(EnumType.STRING)
     private Status status;
     public enum Status {
         notCompleted, completed
     }
 
     @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes; // Opcjonalne notatki do dnia odpoczynku
+    private String notes;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;

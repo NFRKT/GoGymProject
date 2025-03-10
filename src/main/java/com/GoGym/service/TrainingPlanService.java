@@ -171,7 +171,6 @@ public class TrainingPlanService {
         }
     }
 
-
     public void deleteTrainingPlan(Long planId) {
         TrainingPlan plan = trainingPlanRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono planu o ID: " + planId));
@@ -186,5 +185,8 @@ public class TrainingPlanService {
         }
         trainingPlanRepository.delete(plan);
         log.info("Usunięto plan treningowy o ID: {}", planId);
+    }
+    public List<TrainingPlanDay> getTrainingDaysForUser(Long userId) {
+        return trainingPlanDayRepository.findByTrainingPlan_Client_IdUser(userId);
     }
 }
