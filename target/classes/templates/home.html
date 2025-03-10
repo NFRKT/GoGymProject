@@ -194,6 +194,11 @@
                 <h3>Kalendarz treningowy</h3>
                 <a th:href="@{/calendar}">Przejdź</a>
             </div>
+            <div th:if="${isTrainer}" class="nav-card">
+                <i class="fa fa-calendar-days"></i>
+                <h3>Kalendarz treningowy</h3>
+                <a th:href="@{/trainer-calendar}">Przejdź</a>
+            </div>
         </div>
     </div>
     <!-- Sekcja progress barów dla aktywnych planów treningowych (dla użytkownika) -->

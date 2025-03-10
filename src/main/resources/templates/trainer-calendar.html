@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Kalendarz Trenera</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@5.11.3/main.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.3/main.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.10/index.global.min.js"></script>
+  <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: "Lato", sans-serif;
+            display: flex;
+            flex-direction: column;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 40px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            padding: 20px;
+            flex: 1;
+        }
+        h1 {
+            color: #303a53;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 15px;
+            background-color: #303a53;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .back-link:hover {
+            background-color: #4a5568;
+        }
+        .fc-daygrid-event {
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+            font-size: 12px;
+            padding: 2px;
+        }
+        .fc-daygrid-event-dot {
+            display: none; /* Usuwa kropkę obok wydarzenia */
+        }
+        .calendar-controls {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        select {
+            padding: 5px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .btn {
+            background: #303a53;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="container">
+  <a href="/home" class="back-link">Powrót</a>
+  <h1>Kalendarz Trenera</h1>
+  <div class="calendar-controls">
+    <label for="monthSelect">Wybierz miesiąc:</label>
+    <select id="monthSelect">
+      <option value="0">Styczeń</option>
+      <option value="1">Luty</option>
+      <option value="2">Marzec</option>
+      <option value="3">Kwiecień</option>
+      <option value="4">Maj</option>
+      <option value="5">Czerwiec</option>
+      <option value="6">Lipiec</option>
+      <option value="7">Sierpień</option>
+      <option value="8">Wrzesień</option>
+      <option value="9">Październik</option>
+      <option value="10">Listopad</option>
+      <option value="11">Grudzień</option>
+    </select>
+
+    <label for="yearSelect">Wybierz rok:</label>
+    <select id="yearSelect"></select>
+
+    <button id="goToMonth" class="btn">Przejdź</button>
+  </div>
+  <div id="calendar"></div>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+
+        var trainerId = /*[[${trainerId}]]*/ 'null';
+
+        var trainingEvents = /*[[${trainingEvents}]]*/ [];
+
+        trainingEvents.forEach(event => event.extendedProps = { type: 'trainingPlan', clientId: event.clientId });
+
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'pl',
+            events: trainingEvents,
+            customButtons: {
+                myTodayButton: {
+                    text: 'Dzisiaj',
+                    click: function() {
+                        calendar.today();
+                    }
+                }
+            },
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: 'myTodayButton'
+            },
+            eventClick: function(info) {
+                let clientId = info.event.extendedProps.clientId;
+                window.open('/trainer-plans?idUser=' + trainerId, '_blank');
+            },
+            eventDidMount: function(info) {
+                let eventEl = info.el.querySelector('.fc-event-title');
+                if (eventEl) {
+                    eventEl.style.whiteSpace = "normal";
+                    eventEl.style.wordWrap = "break-word";
+                }
+                info.el.style.cursor = "pointer";
+            }
+        });
+
+        calendar.render();
+
+        // Wybór roku z szerokim zakresem
+        var yearSelect = document.getElementById("yearSelect");
+        var currentYear = new Date().getFullYear();
+
+        for (var i = currentYear - 50; i <= currentYear + 50; i++) {
+            var option = document.createElement("option");
+            option.value = i;
+            option.textContent = i;
+            if (i === currentYear) {
+                option.selected = true;
+            }
+            yearSelect.appendChild(option);
+        }
+
+        document.getElementById("goToMonth").addEventListener("click", function () {
+            var selectedMonth = document.getElementById("monthSelect").value;
+            var selectedYear = document.getElementById("yearSelect").value;
+            calendar.gotoDate(new Date(selectedYear, selectedMonth, 1));
+        });
+    });
+</script>
+
+</body>
+</html>
