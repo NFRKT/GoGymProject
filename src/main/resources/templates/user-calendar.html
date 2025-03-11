@@ -174,12 +174,28 @@
                 }
             },
             eventDidMount: function(info) {
-                let eventEl = info.el.querySelector('.fc-event-title');
-                if (eventEl) {
-                    eventEl.style.whiteSpace = "normal";
-                    eventEl.style.wordWrap = "break-word";
+                let eventEl = info.el;
+
+                let titleEl = eventEl.querySelector('.fc-event-title');
+                if (titleEl) {
+                    titleEl.style.whiteSpace = "normal";
+                    titleEl.style.wordWrap = "break-word";
                 }
-                info.el.style.cursor = "pointer";
+
+                let isCompleted = info.event.extendedProps.completed === "true";
+
+                if (isCompleted) {
+                    eventEl.style.border = "4px solid rgb(20 255 0)";
+                    eventEl.style.borderRadius = "8px";
+                    eventEl.style.boxShadow = "0px 0px 15px rgba(20, 255, 0, 0.75)";
+                    eventEl.style.fontWeight = "bold";
+
+                    if (titleEl) {
+                        titleEl.innerHTML = "✅ " + titleEl.innerHTML;
+                    }
+                }
+
+                eventEl.style.cursor = "pointer";
             }
         });
 

@@ -37,25 +37,29 @@ public class UserCalendarController {
 
         // Mapa do przechowywania przypisanych kolorów dla planów
         Map<Long, String> planColors = new HashMap<>();
-        List<String> colors = Arrays.asList("#007bff", "#28a745", "#17a2b8", "#ff5733", "#ffc107", "#6f42c1", "#e83e8c");
+        List<String> colors = Arrays.asList("#007bff", "#28a745", "#17a2b8", "#ff5733", "#b5602f", "#6f42c1", "#e83e8c");
         int colorIndex = 0;
 
         List<Map<String, String>> trainingEvents = new ArrayList<>();
 
         for (TrainingPlanDay day : trainingPlanDays) {
             TrainingPlan plan = day.getTrainingPlan();
+
             if (!planColors.containsKey(plan.getIdPlan())) {
                 planColors.put(plan.getIdPlan(), colors.get(colorIndex % colors.size()));
                 colorIndex++;
             }
 
-            String eventType = day.getDayType() == TrainingPlanDay.DayType.training ? "Dzień Treningowy" : "Dzień Regeneracyjny";
+            boolean isCompleted = day.getStatus() == TrainingPlanDay.Status.completed;
+
+            String eventType = (day.getDayType() == TrainingPlanDay.DayType.training) ? "Dzień Treningowy" : "Dzień Regeneracyjny";
             trainingEvents.add(Map.of(
-                    "id", String.valueOf(plan.getIdPlan()), // ID planu
+                    "id", String.valueOf(plan.getIdPlan()),
                     "title", eventType + " - " + plan.getName(),
                     "start", day.getDate().format(DateTimeFormatter.ISO_LOCAL_DATE),
                     "color", planColors.get(plan.getIdPlan()),
-                    "type", "trainingPlan" // Oznaczenie, że to plan treningowy
+                    "type", "trainingPlan",
+                    "completed", String.valueOf(isCompleted)
             ));
         }
 
@@ -63,11 +67,11 @@ public class UserCalendarController {
         List<Map<String, String>> workoutEvents = workoutService.getWorkoutsForUser(userId)
                 .stream()
                 .map(workout -> Map.of(
-                        "id", String.valueOf(workout.getIdWorkout()), // ID workoutu
+                        "id", String.valueOf(workout.getIdWorkout()),
                         "title", "Workout",
                         "start", workout.getWorkoutDate().format(DateTimeFormatter.ISO_LOCAL_DATE),
                         "color", "#ffc107",
-                        "type", "workout" // Oznaczenie, że to workout
+                        "type", "workout"
                 ))
                 .collect(Collectors.toList());
 
@@ -106,22 +110,25 @@ public class UserCalendarController {
             for (TrainingPlanDay day : trainingPlanDays) {
                 TrainingPlan plan = day.getTrainingPlan();
 
-                // Jeśli ten plan nie ma jeszcze przypisanego koloru, nadaj mu nowy
                 if (!clientPlanColors.get(client.getIdUser()).containsKey(plan.getIdPlan())) {
                     clientPlanColors.get(client.getIdUser()).put(plan.getIdPlan(), colors.get(colorIndex % colors.size()));
                     colorIndex++;
                 }
 
+                boolean isCompleted = day.getStatus() == TrainingPlanDay.Status.completed;
+
                 String eventType = (day.getDayType() == TrainingPlanDay.DayType.training) ? "Dzień Treningowy" : "Dzień Regeneracyjny";
                 trainingEvents.add(Map.of(
-                        "id", String.valueOf(plan.getIdPlan()), // ID planu
+                        "id", String.valueOf(plan.getIdPlan()),
                         "title", eventType + " - " + client.getFirstName() + " " + client.getLastName() + " (" + plan.getName() + ")",
                         "start", day.getDate().format(DateTimeFormatter.ISO_LOCAL_DATE),
-                        "color", clientPlanColors.get(client.getIdUser()).get(plan.getIdPlan()), // Kolor dla planu klienta
+                        "color", clientPlanColors.get(client.getIdUser()).get(plan.getIdPlan()),
                         "type", "trainingPlan",
-                        "clientId", String.valueOf(client.getIdUser()) // ID klienta
+                        "clientId", String.valueOf(client.getIdUser()),
+                        "completed", String.valueOf(isCompleted)
                 ));
             }
+
         }
 
         model.addAttribute("trainingEvents", trainingEvents);
