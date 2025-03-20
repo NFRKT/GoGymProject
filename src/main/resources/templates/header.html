@@ -6,90 +6,6 @@
     <title>GoGym</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body th:fragment="header">
-<div class="w3-top">
-    <div class="w3-bar w3-card w3-left-align w3-large" style="background: rgba(20, 30, 48, 0.9); color: white;">
-        <!-- Logo/link główny -->
-        <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
-           th:href="@{/home}">GoGym</a>
-        <div class="w3-dropdown-hover">
-            <button class="w3-bar-item w3-button w3-padding-large" id="notifications-bell"
-                    style="background: transparent; color: white;">🔔
-            </button>
-            <div class="w3-dropdown-content w3-bar-block w3-border" id="notifications-dropdown"
-                 style="left: 0; top: 100%;">
-                <ul id="notifications-list"></ul>
-            </div>
-        </div>
-        <!-- Przycisk chatu -->
-        <button class="w3-bar-item w3-button w3-padding-large" id="chat-toggle" onclick="toggleChat()"
-                style="background: transparent; color: white;">💬
-        </button>
-        <!-- Ikona hamburgera widoczna tylko na małych ekranach -->
-
-        <a class="w3-bar-item w3-button w3-padding-large w3-right w3-hide-large w3-hide-medium"
-           href="javascript:void(0);" onclick="toggleNavMenu()" style="background: transparent; color: white;">
-            <i class="fa fa-bars"></i>
-        </a>
-        <!-- Menu dla większych ekranów -->
-        <div class="w3-right w3-hide-small" id="navLinks">
-            <a class="w3-bar-item w3-button w3-padding-large" href="/client-panel"
-               style="background: transparent; color: white;" th:if="${isUser}">Panel Klienta</a>
-            <a class="w3-bar-item w3-button w3-padding-large" href="/trainer-panel"
-               style="background: transparent; color: white;" th:if="${isTrainer}">Panel Trenera</a>
-            <a class="w3-bar-item w3-button w3-padding-large" th:href="@{/admin/panel}" th:if="${isAdmin}">Panel
-                Admina</a>
-            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
-               th:href="@{/client/profile}" th:if="${isUser}">Mój Profil</a>
-            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
-               th:href="@{/trainer/profile}" th:if="${isTrainer}">Mój Profil</a>
-            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
-               th:href="@{/user-plans(idUser=${idUser})}" th:if="${isUser}">Plany Treningowe</a>
-            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
-               th:href="@{/trainer-plans(idUser=${idUser})}" th:if="${isTrainer}">Plany Podopiecznych</a>
-            <a class="w3-bar-item w3-button w3-padding-large" href="/logout"
-               style="background: transparent; color: white;">Wyloguj się</a>
-        </div>
-    </div>
-    <!-- Menu rozwijane dla małych ekranów -->
-    <div class="w3-bar-block w3-hide w3-hide-large w3-hide-medium" id="navMenu"
-         style="background: rgba(20, 30, 48, 0.9);">
-        <a class="w3-bar-item w3-button" href="/client-panel" style="background: transparent; color: white;"
-           th:if="${isUser}">Panel Klienta</a>
-        <a class="w3-bar-item w3-button" href="/trainer-panel" style="background: transparent; color: white;"
-           th:if="${isTrainer}">Panel Trenera</a>
-        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/admin/panel}"
-           th:if="${isAdmin}">Panel Administratora</a>
-        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/client/profile}"
-           th:if="${isUser}">Mój Profil</a>
-        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/trainer/profile}"
-           th:if="${isTrainer}">Mój Profil</a>
-        <a class="w3-bar-item w3-button" style="background: transparent; color: white;"
-           th:href="@{/user-plans(idUser=${idUser})}" th:if="${isUser}">Plany Treningowe</a>
-        <a class="w3-bar-item w3-button" style="background: transparent; color: white;"
-           th:href="@{/trainer-plans(idUser=${idUser})}" th:if="${isTrainer}">Plany Podopiecznych</a>
-        <a class="w3-bar-item w3-button" href="/logout" style="background: transparent; color: white;">Wyloguj się</a>
-    </div>
-</div>
-
-<!-- Okienko chatu -->
-<div class="chat-hidden" id="chat-container">
-    <div id="chat-header">
-        <h3>Chat</h3>
-        <button class="close-chat-btn" onclick="toggleChat()">❌</button>
-    </div>
-    <div id="chat-search-container">
-        <input id="chat-search" onkeyup="filterChatRooms()" placeholder="Wyszukaj rozmówcę..." type="text">
-    </div>
-    <div id="chat-rooms">
-        <p>Ładowanie rozmów...</p>
-    </div>
-</div>
-
-<input id="currentUserEmail" sec:authentication="name" type="hidden">
-<input id="currentUserId" th:value="${idUser}" type="hidden"/>
-
-<!-- Style chatu i powiadomień -->
 <style>
     .w3-bar, h1, button {
       font-family: "Montserrat", sans-serif;
@@ -465,6 +381,88 @@
         text-align: center;
     }
 </style>
+<body th:fragment="header">
+<div class="w3-top">
+    <div class="w3-bar w3-card w3-left-align w3-large" style="background: rgba(20, 30, 48, 0.9); color: white;">
+        <!-- Logo/link główny -->
+        <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+           th:href="@{/home}">GoGym</a>
+        <div class="w3-dropdown-hover">
+            <button class="w3-bar-item w3-button w3-padding-large" id="notifications-bell"
+                    style="background: transparent; color: white;">🔔
+            </button>
+            <div class="w3-dropdown-content w3-bar-block w3-border" id="notifications-dropdown"
+                 style="left: 0; top: 100%;">
+                <ul id="notifications-list"></ul>
+            </div>
+        </div>
+        <!-- Przycisk chatu -->
+        <button class="w3-bar-item w3-button w3-padding-large" id="chat-toggle" onclick="toggleChat()"
+                style="background: transparent; color: white;">💬
+        </button>
+        <!-- Ikona hamburgera widoczna tylko na małych ekranach -->
+
+        <a class="w3-bar-item w3-button w3-padding-large w3-right w3-hide-large w3-hide-medium"
+           href="javascript:void(0);" onclick="toggleNavMenu()" style="background: transparent; color: white;">
+            <i class="fa fa-bars"></i>
+        </a>
+        <!-- Menu dla większych ekranów -->
+        <div class="w3-right w3-hide-small" id="navLinks">
+            <a class="w3-bar-item w3-button w3-padding-large" href="/client-panel"
+               style="background: transparent; color: white;" th:if="${isUser}">Panel Klienta</a>
+            <a class="w3-bar-item w3-button w3-padding-large" href="/trainer-panel"
+               style="background: transparent; color: white;" th:if="${isTrainer}">Panel Trenera</a>
+            <a class="w3-bar-item w3-button w3-padding-large" th:href="@{/admin/panel}" th:if="${isAdmin}">Panel
+                Admina</a>
+            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+               th:href="@{/client/profile}" th:if="${isUser}">Mój Profil</a>
+            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+               th:href="@{/trainer/profile}" th:if="${isTrainer}">Mój Profil</a>
+            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+               th:href="@{/user-plans(idUser=${idUser})}" th:if="${isUser}">Plany Treningowe</a>
+            <a class="w3-bar-item w3-button w3-padding-large" style="background: transparent; color: white;"
+               th:href="@{/trainer-plans(idUser=${idUser})}" th:if="${isTrainer}">Plany Podopiecznych</a>
+            <a class="w3-bar-item w3-button w3-padding-large" href="/logout"
+               style="background: transparent; color: white;">Wyloguj się</a>
+        </div>
+    </div>
+    <!-- Menu rozwijane dla małych ekranów -->
+    <div class="w3-bar-block w3-hide w3-hide-large w3-hide-medium" id="navMenu"
+         style="background: rgba(20, 30, 48, 0.9);">
+        <a class="w3-bar-item w3-button" href="/client-panel" style="background: transparent; color: white;"
+           th:if="${isUser}">Panel Klienta</a>
+        <a class="w3-bar-item w3-button" href="/trainer-panel" style="background: transparent; color: white;"
+           th:if="${isTrainer}">Panel Trenera</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/admin/panel}"
+           th:if="${isAdmin}">Panel Administratora</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/client/profile}"
+           th:if="${isUser}">Mój Profil</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;" th:href="@{/trainer/profile}"
+           th:if="${isTrainer}">Mój Profil</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;"
+           th:href="@{/user-plans(idUser=${idUser})}" th:if="${isUser}">Plany Treningowe</a>
+        <a class="w3-bar-item w3-button" style="background: transparent; color: white;"
+           th:href="@{/trainer-plans(idUser=${idUser})}" th:if="${isTrainer}">Plany Podopiecznych</a>
+        <a class="w3-bar-item w3-button" href="/logout" style="background: transparent; color: white;">Wyloguj się</a>
+    </div>
+</div>
+
+<!-- Okienko chatu -->
+<div class="chat-hidden" id="chat-container">
+    <div id="chat-header">
+        <h3>Chat</h3>
+        <button class="close-chat-btn" onclick="toggleChat()">❌</button>
+    </div>
+    <div id="chat-search-container">
+        <input id="chat-search" onkeyup="filterChatRooms()" placeholder="Wyszukaj rozmówcę..." type="text">
+    </div>
+    <div id="chat-rooms">
+        <p>Ładowanie rozmów...</p>
+    </div>
+</div>
+
+<input id="currentUserEmail" sec:authentication="name" type="hidden">
+<input id="currentUserId" th:value="${idUser}" type="hidden"/>
 <script>
 function toggleNavMenu() {
     var menu = document.getElementById("navMenu");

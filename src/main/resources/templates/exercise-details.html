@@ -67,6 +67,20 @@
     .back-link:hover {
       background-color: #4a5568;
     }
+    pre.description {
+      font-size: 1.1em;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
+      padding: 10px;
+      border: 1px solid #292d35;
+      background-color: #303a53d9;
+      color: #fff;
+      border-radius: 8px;
+      font-family: inherit;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -76,7 +90,7 @@
   <h1 th:text="${exercise.name}">Nazwa Ćwiczenia</h1>
   <img th:src="${exercise.jpg}" alt="Exercise Image" class="exercise-image">
   <div class="details">
-    <p class="description" th:text="${exercise.description}">Opis ćwiczenia...</p>
+    <pre class="description" th:text="${exercise.description}">Opis ćwiczenia...</pre>
     <p>
       <strong>Trudność:</strong>
       <span th:switch="${exercise.difficulty.name()}">
