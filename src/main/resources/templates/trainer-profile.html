@@ -473,7 +473,7 @@
             <input type="date" name="graduationDate" class="w3-input w3-border" required/>
 
             <label>Zdjęcie/PDF certyfikatu:</label>
-            <input type="file" id="certificationFile" name="certificationFile" class="w3-input w3-border" accept="image/*,.pdf" required onchange="previewCertificate(event)"/>
+            <input type="file" id="certificationFile" name="certificationFile" class="w3-input w3-border" accept="image/*,.pdf" required/>
 
             <!-- Podgląd załadowanego obrazu -->
             <div class="img-preview-container" id="imgPreviewContainer">
@@ -603,31 +603,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script th:inline="javascript">
 document.addEventListener("DOMContentLoaded", function() {
-  // Funkcja pomocnicza do wyświetlania komunikatów walidacyjnych
-  function showError(input, message) {
-    input.classList.add("input-error");
-    let errorMsg = document.createElement("div");
-    errorMsg.className = "error-message";
-    errorMsg.innerText = message;
-    input.parentNode.appendChild(errorMsg);
-  }
-
-  // Funkcja do przełączania widoczności formularzy edycji
-  window.toggleEdit = function(formId, textId) {
-    let form = document.getElementById(formId);
-    let text = document.getElementById(textId);
-    if (!form || !text) {
-      console.error("Elementy formularza nie zostały znalezione.");
-      return;
-    }
-    if (form.style.display === "none" || form.style.display === "") {
-      form.style.display = "block";
-    } else {
-      form.style.display = "none";
-    }
-  };
-
-document.addEventListener("DOMContentLoaded", function () {
     let trainerId = [[${user.idUser}]];
     let loggedInUserId = [[${isAuthenticated} ? ${userId} : -1]];
     let isAdmin = [[${isAdmin} ? 'true' : 'false']];
@@ -649,7 +624,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (reviewForm) {
         reviewForm.addEventListener("submit", function (event) {
             event.preventDefault();
-
             let formData = new FormData(reviewForm);
             formData.append("trainerId", trainerId);
 
@@ -812,8 +786,6 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Błąd usuwania opinii:", error));
     };
-
-    fetchReviews();
 });
 </script>
 
@@ -1185,17 +1157,23 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
   // Funkcja do podglądu wybranego pliku
-  document.getElementById("certificationFile").addEventListener("change", function(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById("imgPreview").src = e.target.result;
-        document.getElementById("imgPreviewContainer").style.display = "block";
-      };
-      reader.readAsDataURL(file);
-    }
+  document.addEventListener("DOMContentLoaded", function () {
+      const fileInput = document.getElementById("certificationFile");
+      if (fileInput) {  // Sprawdzenie, czy element istnieje
+          fileInput.addEventListener("change", function(event) {
+              const file = event.target.files[0];
+              if (file) {
+                  const reader = new FileReader();
+                  reader.onload = function(e) {
+                      document.getElementById("imgPreview").src = e.target.result;
+                      document.getElementById("imgPreviewContainer").style.display = "block";
+                  };
+                  reader.readAsDataURL(file);
+              }
+          });
+      }
   });
+
 
   // Funkcja usuwania załączonego pliku
   function removeSelectedFile() {

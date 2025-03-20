@@ -178,9 +178,9 @@
       <tr th:each="exercise : ${exercises}">
         <td th:text="${exercise.idExercise}"></td>
         <td th:text="${exercise.name}" class="exercise-name"></td>
-        <td th:text="${exercise.type == 'STRENGTH' ? 'Siłowe' : 'Cardio'}"></td>
-        <td th:text="${exercise.difficulty == 'beginner' ? 'Początkujący'
-                    : (exercise.difficulty == 'intermediate' ? 'Średnio zaawansowany'
+        <td th:text="${exercise.type.name() == 'STRENGTH' ? 'Siłowe' : 'Cardio'}"></td>
+        <td th:text="${exercise.difficulty.name() == 'beginner' ? 'Początkujący'
+                    : (exercise.difficulty.name() == 'intermediate' ? 'Średnio zaawansowany'
                     : 'Zaawansowany')}"></td>
         <td th:text="${#strings.arrayJoin(exercise.bodyParts.![name], ', ')}"></td>
         <td th:text="${#strings.arrayJoin(exercise.equipment.![name], ', ')}"></td>

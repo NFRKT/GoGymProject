@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "User")  // Nazwa tabeli w bazie danych
+@Table(name = "User")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
