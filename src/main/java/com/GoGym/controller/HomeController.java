@@ -1,9 +1,7 @@
 package com.GoGym.controller;
 
 import com.GoGym.module.*;
-import com.GoGym.repository.BadgeRepository;
 import com.GoGym.repository.WorkoutRepository;
-import com.GoGym.security.CustomUserDetails;
 import com.GoGym.service.BadgeService;
 import com.GoGym.service.TrainingPlanService;
 import com.GoGym.repository.UserRepository;
@@ -15,8 +13,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;

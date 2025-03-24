@@ -26,7 +26,7 @@ public class ChatService {
         if (adminOpt.isPresent()) {
             User admin = adminOpt.get();
             List<User> users = userRepository.findAll().stream()
-                    .filter(user -> !user.getUserType().equals(User.UserType.ADMIN)) // Pomijamy admina
+                    .filter(user -> !user.getUserType().equals(User.UserType.ADMIN))
                     .toList();
 
             int createdChats = 0;
@@ -41,9 +41,9 @@ public class ChatService {
                 }
             }
 
-            System.out.println("✅ Wszystkie czaty administratora zostały utworzone: " + createdChats + " nowych rozmów.");
+            System.out.println("Wszystkie czaty administratora zostały utworzone: " + createdChats + " nowych rozmów.");
         } else {
-            System.err.println("⚠️ Nie znaleziono administratora w bazie danych!");
+            System.err.println("Nie znaleziono administratora w bazie danych!");
         }
     }
 
@@ -61,7 +61,7 @@ public class ChatService {
                 chatRoomRepository.save(chatRoom);
             }
         } else {
-            System.err.println("⚠️ Nie znaleziono administratora w bazie danych!");
+            System.err.println("Nie znaleziono administratora w bazie danych!");
         }
     }
 

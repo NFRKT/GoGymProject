@@ -33,7 +33,6 @@ public class PlanController {
     private final TrainingPlanRepository trainingPlanRepository;
     private final PlanExerciseRepository planExerciseRepository;
     private final TrainingPlanDayRepository trainingPlanDayRepository;
-    private final TrainingService trainingService;
     private final TrainerClientService trainerClientService;
     private final NotificationService notificationService;
     private final BadgeService badgeService;
@@ -157,7 +156,7 @@ public class PlanController {
             @RequestParam(required = false) List<Integer> sets,
             @RequestParam(required = false) List<Integer> reps,
             @RequestParam(required = false) List<Double> weight,
-            @RequestParam(required = false) List<Integer> cardioSets, // nowy parametr
+            @RequestParam(required = false) List<Integer> cardioSets,
             @RequestParam(required = false) List<String> duration,
             @RequestParam(required = false) List<Double> distance,
             @RequestParam List<Integer> exerciseDays,
@@ -194,7 +193,6 @@ public class PlanController {
                     exercise.setTrainingPlanDay(day);
 
                     if (currentExercise.getType() == Exercise.ExerciseType.CARDIO) {
-                        // Dla CARDIO ustawiamy serie z nowego pola cardioSets
                         exercise.setSets((cardioSets != null && cardioSets.size() > j) ? cardioSets.get(j) : null);
                         exercise.setReps(null);
                         exercise.setWeight(null);
@@ -398,7 +396,7 @@ public class PlanController {
     public ResponseEntity<TrainingPlanDTO> updatePlan(@PathVariable Long id, @RequestBody TrainingPlanDTO trainingPlanDTO) {
         try {
             log.info("Otrzymano żądanie edycji planu ID: " + id);
-            TrainingPlan updatedTrainingPlan = trainingService.updateTrainingPlan(id, trainingPlanDTO);
+            TrainingPlan updatedTrainingPlan = trainingPlanService.updateTrainingPlan(id, trainingPlanDTO);
 
             TrainingPlanDTO responseDTO = new TrainingPlanDTO();
             responseDTO.setIdPlan(updatedTrainingPlan.getIdPlan());

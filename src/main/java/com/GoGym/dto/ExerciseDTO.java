@@ -13,7 +13,7 @@ public class ExerciseDTO {
     private Integer duration;
     private Double distance;
     private String status;
-    private String type; // Dodaj pole dla typu ćwiczenia
+    private String type;
 
     private boolean delete;
 

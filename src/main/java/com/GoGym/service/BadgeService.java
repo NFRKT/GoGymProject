@@ -37,7 +37,6 @@ public class BadgeService {
         this.notificationService = notificationService;
     }
 
-    // Metoda przyznająca odznakę, jeśli warunek jest spełniony
     public void awardBadgeIfEligible(User user, int achieved, int required, String badgeName) {
         if (achieved >= required && !hasUserBadge(user, badgeName)) {
             Badge badge = badgeRepository.findByName(badgeName)
@@ -61,7 +60,6 @@ public class BadgeService {
         return userBadgeRepository.findByUser(user);
     }
 
-    // Nowa metoda: sprawdzaj i przyznawaj odznaki według określonych kryteriów
     public void checkAndAwardBadgesForUser(User user) {
         // Odznaka za 5 ukończonych planów treningowych
         long completedPlans = trainingPlanRepository.findByIdClient(user.getIdUser())

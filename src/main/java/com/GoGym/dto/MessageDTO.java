@@ -12,7 +12,6 @@ public class MessageDTO {
     private String message;
     private LocalDateTime sentAt;
 
-    // ✅ Konstruktor używany przez WebSocket do wysyłania wiadomości
     public MessageDTO(Long id, User sender, String message, LocalDateTime sentAt) {
         this.id = id;
         this.senderId = sender.getIdUser();
@@ -21,10 +20,8 @@ public class MessageDTO {
         this.sentAt = sentAt;
     }
 
-    // ✅ Konstruktor używany do deserializacji JSON (Spring potrzebuje tego!)
     public MessageDTO() {}
 
-    // ✅ Konstruktor używany do odbioru wiadomości (bez User obiektu)
     public MessageDTO(Long senderId, String message) {
         this.senderId = senderId;
         this.message = message;

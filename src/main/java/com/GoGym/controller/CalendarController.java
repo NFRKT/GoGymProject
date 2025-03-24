@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @AllArgsConstructor
-public class UserCalendarController {
+public class CalendarController {
 
     private final UserService userService;
     private final TrainingPlanService trainingPlanService;
