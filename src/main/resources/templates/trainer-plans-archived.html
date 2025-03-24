@@ -380,7 +380,7 @@
                                         <span th:if="${exercise.exercise.type.name() == 'CARDIO'}">
                                             - <span th:text="${exercise.sets}"></span> serie,
                                               <span class="exercise-duration" th:data-seconds="${exercise.duration}" th:text="${exercise.duration}"></span> czas,
-                                              <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'Brak danych'}"></span> dystans
+                                              <span th:text="${exercise.distance != null ? exercise.distance + ' km' : 'brak konkretnego dystansu'}"></span>
                                         </span>
                                     </div>
                                     <div class="status-container" style="margin-bottom:5px;">

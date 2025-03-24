@@ -385,8 +385,7 @@
         if (type === "CARDIO") {
           const cardioSetsInput = row.querySelector('input[name^="cardioSets"]');
           const durationInput = row.querySelector('input[name^="duration"]');
-          const distanceInput = row.querySelector('input[name^="distance"]');
-          if (!cardioSetsInput.value.trim() || !durationInput.value.trim() || !distanceInput.value.trim()) {
+          if (!cardioSetsInput.value.trim() || !durationInput.value.trim()) {
             isValid = false;
             row.classList.add('error');
           } else {
