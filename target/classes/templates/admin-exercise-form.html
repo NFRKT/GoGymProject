@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title th:text="${exercise.idExercise == null} ? 'Nowe Ćwiczenie' : 'Edytuj Ćwiczenie'">Ćwiczenie</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Zewnętrzne style -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
+    }
+    .content{
+      flex: 1;
+    }
+    .form-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 50px auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: left;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    textarea {
+      resize: none;
+      height: 120px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .w3-input, .w3-select {
+      padding: 12px;
+      border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .w3-input:focus, .w3-select:focus {
+      border-color: #007BFF;
+      transform: scale(1.02);
+      outline: none;
+    }
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: white;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='gray' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 12px;
+      cursor: pointer;
+    }
+    .error-message {
+      color: #d8000c;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none;
+    }
+    .invalid {
+      border: 2px solid #d8000c !important;
+    }
+    .img-preview {
+      display: block;
+      margin-top: 10px;
+      max-width: 200px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+    }
+    /* Ulepszone style przycisków */
+    .w3-btn {
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+      background: #303a53;
+      color: white;
+    }
+    .w3-btn:hover {
+      transform: translateY(-2px);
+      background-color: #546E7A;
+    }
+    .w3-btn.w3-red {
+      background-color: #f44336;
+      color: white;
+    }
+    .w3-btn.w3-red:hover {
+      background-color: #e53935;
+    }
+    .btn-container {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .img-preview-container {
+      position: relative;
+      display: none;
+      width: 200px;
+      margin-top: 10px;
+    }
+    .img-preview {
+      width: 100%;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+    }
+    .remove-img-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
+    textarea {
+      resize: none;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="~{header :: header}"></div>
+<div class="content">
+  <div class="w3-container form-container">
+    <a href="/admin/panel" class="back-link">Powrót</a>
+    <h2 th:text="${exercise.idExercise == null} ? 'Nowe Ćwiczenie' : 'Edytuj Ćwiczenie'"></h2>
+    <!-- Dodajemy zmienną hasExistingImage; jeśli exercise.jpg nie jest null, to wartość będzie true -->
+    <script th:inline="javascript">
+      var bodyParts = /*[[${bodyParts}]]*/ [];
+      var equipments = /*[[${equipments}]]*/ [];
+      var hasExistingImage = /*[[${exercise.jpg != null}]]*/ false;
+  </script>
+    <form id="exerciseForm" th:action="@{${exercise.idExercise == null} ? '/admin/exercise/new' : '/admin/exercise/edit/' + ${exercise.idExercise}}"
+          th:object="${exercise}" method="post" enctype="multipart/form-data" novalidate>
+
+      <label>Nazwa</label>
+      <input class="w3-input" type="text" th:field="*{name}" required />
+      <div class="error-message" id="nameError"></div>
+
+      <label>Opis</label>
+      <textarea class="w3-input" th:field="*{description}" required></textarea>
+      <div class="error-message" id="descriptionError"></div>
+
+      <label>Trudność</label>
+      <select class="w3-select" th:field="*{difficulty}" required>
+        <option value="" disabled selected>Wybierz trudność</option>
+        <option value="beginner" th:selected="${exercise.difficulty == 'beginner'}">Początkujący</option>
+        <option value="intermediate" th:selected="${exercise.difficulty == 'intermediate'}">Średnio zaawansowany</option>
+        <option value="advanced" th:selected="${exercise.difficulty == 'advanced'}">Zaawansowany</option>
+      </select>
+      <div class="error-message" id="difficultyError"></div>
+
+      <label>Typ ćwiczenia</label>
+      <select class="w3-select" th:field="*{type}" th:disabled="${isTypeLocked}" required>
+        <option value="" disabled selected>Wybierz typ ćwiczenia</option>
+        <option value="STRENGTH" th:selected="${exercise.type == 'STRENGTH'}">Siłowe</option>
+        <option value="CARDIO" th:selected="${exercise.type == 'CARDIO'}">Cardio</option>
+      </select>
+      <div class="error-message" id="typeError"></div>
+      <p th:if="${isTypeLocked}" style="color: red; font-weight: bold;">
+        Nie można edytować typu ćwiczenia, ponieważ jest używane w planach lub treningach.
+      </p>
+
+      <label>Część ciała</label>
+      <div id="bodyPartsContainer">
+        <!-- Jeśli edytujemy, wyświetlamy istniejące wartości -->
+        <div class="bodyPartSelect" th:each="bp : ${exercise.bodyParts}">
+          <select class="w3-select" name="bodyPartIds" required>
+            <option value="" disabled>Wybierz część ciała</option>
+            <option th:each="b : ${bodyParts}"
+                    th:value="${b.idBodyPart}"
+                    th:text="${b.name}"
+                    th:selected="${b.idBodyPart == bp.idBodyPart}">
+            </option>
+          </select>
+          <div class="error-message bodyPartError"></div>
+          <button type="button" class="w3-btn w3-red" onclick="removeField(this)">❌</button>
+        </div>
+        <div class="bodyPartSelect" th:if="${exercise.idExercise == null}">
+          <select class="w3-select" name="bodyPartIds" required>
+            <option value="" disabled selected>Wybierz część ciała</option>
+            <option th:each="b : ${bodyParts}"
+                    th:value="${b.idBodyPart}"
+                    th:text="${b.name}">
+            </option>
+          </select>
+          <div class="error-message bodyPartError"></div>
+        </div>
+      </div>
+      <button type="button" class="w3-btn" onclick="addBodyPartField()">➕ Dodaj kolejną część ciała</button>
+
+      <label>Sprzęt</label>
+      <div id="equipmentContainer">
+        <!-- Jeśli edytujemy, wyświetlamy istniejące wartości -->
+        <div class="equipmentSelect" th:each="bp : ${exercise.equipment}">
+          <select class="w3-select" name="equipmentIds" required>
+            <option value="" disabled>Wybierz sprzęt</option>
+            <option th:each="e : ${equipments}"
+                    th:value="${e.idEquipment}"
+                    th:text="${e.name}"
+                    th:selected="${e.idEquipment == bp.idEquipment}">
+            </option>
+          </select>
+          <button type="button" class="w3-btn w3-red" onclick="removeField(this)">❌</button>
+        </div>
+        <!-- Jeśli tworzymy nowe ćwiczenie, dodajemy jedno domyślne pole -->
+        <div class="equipmentSelect" th:if="${exercise.idExercise == null}">
+          <select class="w3-select" name="equipmentIds" required>
+            <option value="" disabled selected>Wybierz sprzęt</option>
+            <option th:each="e : ${equipments}"
+                    th:value="${e.idEquipment}"
+                    th:text="${e.name}">
+            </option>
+          </select>
+          <div class="error-message equipmentError"></div>
+        </div>
+      </div>
+      <button type="button" class="w3-btn" onclick="addEquipmentField()">➕ Dodaj kolejny sprzęt</button>
+
+      <label>Nowe zdjęcie:</label>
+      <input class="w3-input" type="file" name="imageFile" accept=".jpg" id="imageInput"/>
+      <div class="error-message" id="imageError"></div>
+
+      <!-- Podgląd wybranego zdjęcia -->
+      <div class="img-preview-container" id="imgPreviewContainer">
+        <img class="img-preview" id="imgPreview" alt="Podgląd zdjęcia"/>
+        <button type="button" class="remove-img-btn" onclick="removeSelectedFile()">✖</button>
+      </div>
+
+      <p th:if="${exercise.jpg != null}">
+        <label>Obecne zdjęcie:</label><br>
+        <img class="img-preview" th:src="${exercise.jpg}" alt="Zdjęcie ćwiczenia"/>
+      </p>
+
+      <div class="btn-container">
+        <button class="w3-btn" type="submit">Zapisz</button>
+        <a th:href="@{/admin/exercise/list}" class="w3-btn w3-red">Anuluj</a>
+      </div>
+    </form>
+  </div>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+
+<script th:inline="javascript">
+    var bodyParts = /*[[${bodyParts}]]*/ [];
+    var equipments = /*[[${equipments}]]*/ [];
+</script>
+<script>
+  document.getElementById('exerciseForm').addEventListener('submit', function(event) {
+    let isValid = true;
+    let firstErrorField = null;
+
+    function setError(field, message) {
+      field.classList.add('invalid');
+      let errorElem = field.nextElementSibling;
+      if (errorElem && errorElem.classList.contains('error-message')) {
+        errorElem.textContent = message;
+        errorElem.style.display = 'block';
+      }
+      if (!firstErrorField) {
+        firstErrorField = field;
+      }
+      isValid = false;
+    }
+
+    function clearError(field) {
+      field.classList.remove('invalid');
+      let errorElem = field.nextElementSibling;
+      if (errorElem && errorElem.classList.contains('error-message')) {
+        errorElem.style.display = 'none';
+      }
+    }
+
+    // Walidacja nazwy
+    let nameField = document.querySelector('input[name="name"]');
+    if (!nameField.value.trim()) {
+        setError(nameField, "Podaj nazwę ćwiczenia!");
+    } else {
+        clearError(nameField);
+    }
+
+    // Walidacja opisu
+    let descField = document.querySelector('textarea[name="description"]');
+    if (!descField.value.trim()) {
+        setError(descField, "Podaj opis ćwiczenia!");
+    } else {
+        clearError(descField);
+    }
+
+    // Walidacja dynamicznych pól - części ciała
+    let bodyPartFields = document.querySelectorAll('select[name="bodyPartIds"]');
+    bodyPartFields.forEach(function(field) {
+      if (!field.value || !field.value.trim()) {
+        setError(field, "Wybierz część ciała!");
+      } else {
+        clearError(field);
+      }
+    });
+
+    // Walidacja dynamicznych pól - sprzęt
+    let equipmentFields = document.querySelectorAll('select[name="equipmentIds"]');
+    equipmentFields.forEach(function(field) {
+      if (!field.value || !field.value.trim()) {
+        setError(field, "Wybierz sprzęt!");
+      } else {
+        clearError(field);
+      }
+    });
+
+    // Walidacja pola zdjęcia – nowy plik nie jest wymagany, jeśli edytowane ćwiczenie posiada już zdjęcie
+    let fileField = document.querySelector('input[name="imageFile"]');
+    if (!hasExistingImage && !fileField.files.length) {
+        setError(fileField, "Dodaj zdjęcie ćwiczenia!");
+    } else {
+        clearError(fileField);
+    }
+
+    if (!isValid) {
+        event.preventDefault();
+        if (firstErrorField) {
+            firstErrorField.focus();
+        }
+    }
+});
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Funkcja dodająca nowe pole wyboru części ciała
+    window.addBodyPartField = function() {
+      let container = document.getElementById("bodyPartsContainer");
+      let newField = document.createElement("div");
+      newField.classList.add("bodyPartSelect");
+      newField.innerHTML = `
+        <select class="w3-select" name="bodyPartIds" required>
+            <option value="" disabled selected>Wybierz część ciała</option>
+            ${bodyParts.map(bp => `<option value="${bp.idBodyPart}">${bp.name}</option>`).join('')}
+        </select>
+        <div class="error-message bodyPartError"></div>
+        <button type="button" class="w3-btn w3-red" onclick="removeField(this)">❌</button>
+      `;
+      container.appendChild(newField);
+    };
+    // Funkcja dodająca nowe pole wyboru sprzętu
+    window.addEquipmentField = function() {
+      let container = document.getElementById("equipmentContainer");
+      let newField = document.createElement("div");
+      newField.classList.add("equipmentSelect");
+      newField.innerHTML = `
+        <select class="w3-select" name="equipmentIds" required>
+            <option value="" disabled selected>Wybierz sprzęt</option>
+            ${equipments.map(bp => `<option value="${bp.idEquipment}">${bp.name}</option>`).join('')}
+        </select>
+        <div class="error-message equipmentError"></div>
+        <button type="button" class="w3-btn w3-red" onclick="removeField(this)">❌</button>
+      `;
+      container.appendChild(newField);
+    };
+
+    window.removeField = function(button) {
+      let fieldDiv = button.parentElement;
+      let container = fieldDiv.parentElement;
+
+      if (container.id === "bodyPartsContainer") {
+        let fields = container.querySelectorAll(".bodyPartSelect");
+        if (fields.length <= 1) {
+          alert("Musisz mieć przynajmniej jedną część ciała!");
+          return;
+        }
+      } else if (container.id === "equipmentContainer") {
+        let fields = container.querySelectorAll(".equipmentSelect");
+        if (fields.length <= 1) {
+          alert("Musisz mieć przynajmniej jeden sprzęt!");
+          return;
+        }
+      }
+
+      fieldDiv.remove();
+    };
+
+  });
+</script>
+<script>
+  // Funkcja do podglądu wybranego pliku
+  document.getElementById("imageInput").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("imgPreview").src = e.target.result;
+        document.getElementById("imgPreviewContainer").style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Funkcja usuwania załączonego pliku
+  function removeSelectedFile() {
+    document.getElementById("imageInput").value = "";
+    document.getElementById("imgPreviewContainer").style.display = "none";
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Lista Części Ciała</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
+    }
+    .container {
+      max-width: 900px;
+      width: 95%;
+      margin: 50px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+    .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .btn-add {
+      display: block;
+      margin: 20px auto;
+      background: #303a53;
+      color: white;
+      padding: 12px 18px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 16px;
+      max-width: 250px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      min-width: 500px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #f2f2f2;
+    }
+    .btn {
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 14px;
+      margin: 2px;
+    }
+    .btn-edit {
+      background: #303a53;
+      color: white;
+    }
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+    .btn-delete.disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    /* Dodajemy responsywność */
+    @media screen and (max-width: 768px) {
+      .container {
+        margin: 20px auto;
+        padding: 10px;
+      }
+      h2 {
+        font-size: 1.4em;
+      }
+      .btn-add {
+        font-size: 14px;
+        padding: 10px 14px;
+        max-width: 200px;
+      }
+      table {
+        font-size: 12px;
+        min-width: 100%;
+      }
+      th, td {
+        padding: 8px;
+      }
+      .btn {
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+      /* Dodajemy poziomy scroll, gdy tabela jest za szeroka */
+      .table-responsive {
+        overflow-x: auto;
+      }
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
+  </style>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="container">
+  <a href="/admin/panel" class="back-link">Powrót</a>
+  <h2>Lista Części Ciała</h2>
+  <a th:href="@{/admin/bodypart/new}" class="btn-add">➕ Dodaj nową część ciała</a>
+  <table>
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nazwa</th>
+      <th>Akcje</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="bodyPart : ${bodyParts}">
+      <td th:text="${bodyPart.idBodyPart}">1</td>
+      <td th:text="${bodyPart.name}">Nazwa</td>
+      <td>
+        <button type="button" class="btn btn-edit"
+                onclick="window.location.href='/admin/bodypart/edit/' + this.getAttribute('data-id')"
+                th:attr="data-id=${bodyPart.idBodyPart}">
+          ✏️ Edytuj
+        </button>
+        <!-- Jeżeli lista ćwiczeń jest pusta – przycisk aktywny -->
+        <button type="button" class="btn btn-delete"
+                th:if="${#lists.isEmpty(bodyPart.exercises)}"
+                th:attr="data-id=${bodyPart.idBodyPart}"
+                onclick="deleteBodyPart(this)">❌ Usuń</button>
+        <!-- W przeciwnym przypadku – przycisk zablokowany -->
+        <button type="button" class="btn btn-delete disabled"
+                th:if="${!#lists.isEmpty(bodyPart.exercises)}" disabled>❌ Usuń</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+<script>
+    function deleteBodyPart(button) {
+      let id = button.getAttribute("data-id");
+      if (!confirm("Czy na pewno chcesz usunąć tę część ciała?")) return;
+      fetch('/admin/bodypart/delete/' + id, { method: "DELETE" })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert("Część ciała została usunięta.");
+            location.reload();
+          } else {
+            alert(data.message);
+          }
+        })
+        .catch(error => console.error("Błąd:", error));
+    }
+  </script>
+</body>
+</html>

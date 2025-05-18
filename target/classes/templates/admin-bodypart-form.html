@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title th:text="${bodyPart.idBodyPart == null} ? 'Nowa Część Ciała' : 'Edytuj Część Ciała'">Część Ciała</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #292d35;
+    }
+    .container {
+      max-width: 95%;
+      width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .w3-input {
+      padding: 12px;
+      border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #303a53;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+     .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .error-message {
+      color: #d8000c;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .invalid {
+      border: 2px solid #d8000c !important;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
+  </style>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="container">
+  <a href="/admin/panel" class="back-link">Powrót</a>
+  <h2 th:text="${bodyPart.idBodyPart == null} ? 'Nowa Część Ciała' : 'Edytuj Część Ciała'"></h2>
+  <form id="bodyPartForm" th:action="@{${bodyPart.idBodyPart == null} ? '/admin/bodypart/new' : '/admin/bodypart/edit/' + ${bodyPart.idBodyPart}}"
+        th:object="${bodyPart}" method="post">
+    <label>Nazwa</label>
+    <input type="text" th:field="*{name}" class="w3-input"/>
+    <div class="error-message" id="nameError"></div>
+    <div style="text-align: center; margin-top: 20px;">
+      <button type="submit" class="btn">Zapisz</button>
+      <a th:href="@{/admin/bodypart/list}" class="btn" style="background: #dc3545; text-decoration: none;">Anuluj</a>
+    </div>
+  </form>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+<script>
+  document.getElementById('bodyPartForm').addEventListener('submit', function(event) {
+    let isValid = true;
+    let firstErrorField = null;
+
+    function setError(field, message) {
+      field.classList.add('invalid');
+      let errorElem = field.nextElementSibling; // zakładamy, że element error-message jest bezpośrednio po polu
+      if (errorElem && errorElem.classList.contains('error-message')) {
+        errorElem.textContent = message;
+        errorElem.style.display = 'block';
+      }
+      if (!firstErrorField) {
+        firstErrorField = field;
+      }
+      isValid = false;
+    }
+
+    function clearError(field) {
+      field.classList.remove('invalid');
+      let errorElem = field.nextElementSibling;
+      if (errorElem && errorElem.classList.contains('error-message')) {
+        errorElem.style.display = 'none';
+      }
+    }
+
+    // Walidacja pola nazwy
+    let nameField = document.querySelector('input[name="name"]');
+    if (!nameField.value.trim()) {
+      setError(nameField, "Podaj nazwę części ciała!");
+    } else {
+      clearError(nameField);
+    }
+
+    if (!isValid) {
+      event.preventDefault();
+      if (firstErrorField) firstErrorField.focus();
+    }
+  });
+</script>
+</body>
+</html>

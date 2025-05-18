@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Lista Trenerów</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Wspólne style -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      background-color: #292d35;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      position: relative;
+      width: 900px;
+      max-width: 95%;
+      margin: 50px auto;
+      padding: 20px 20px 40px 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      min-width: 500px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 2px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-profile {
+      background: #303a53;
+      color: white;
+    }
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+    /* Responsywność */
+    @media screen and (max-width: 768px) {
+      .container {
+        margin: 20px auto;
+        padding: 10px;
+      }
+      h2 {
+        font-size: 1.4em;
+      }
+      table {
+        font-size: 12px;
+        min-width: 100%;
+      }
+      th, td {
+        padding: 8px;
+      }
+      .btn {
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="~{header :: header}"></div>
+
+<div class="container">
+  <a href="/admin/panel" class="back-link">Powrót</a>
+  <h2>Lista Trenerów</h2>
+  <div class="table-container">
+    <table class="w3-table-all w3-hoverable">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Email</th>
+        <th>Profil</th>
+        <th>Akcja</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="trainer : ${trainers}">
+        <td th:text="${trainer.idUser}"></td>
+        <td th:text="${trainer.firstName}"></td>
+        <td th:text="${trainer.lastName}"></td>
+        <td th:text="${trainer.email}"></td>
+        <td>
+          <a th:href="@{/trainer/profile/{id}(id=${trainer.idUser})}" class="btn btn-profile">Profil</a>
+        </td>
+        <td>
+          <button class="btn btn-delete" th:data-id="${trainer.idUser}" onclick="deleteUser(this)">Usuń</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+    function deleteUser(button) {
+      let userId = button.getAttribute("data-id");
+      if (!confirm("Czy na pewno chcesz usunąć tego trenera?")) return;
+      fetch(`/admin/delete-user/${userId}`, { method: "DELETE" })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            let row = button.closest("tr");
+            row.remove();
+            alert("Trener został usunięty.");
+          } else {
+            alert("Błąd usuwania trenera.");
+          }
+        })
+        .catch(error => console.error("Błąd:", error));
+    }
+  </script>
+</body>
+</html>

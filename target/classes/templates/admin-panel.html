@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>GoGym - Panel Administratora</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Style wspólne -->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background: rgba(159, 161, 167, 0.07);
+    }
+    .content {
+      flex: 1;
+    }
+    /* Hero Section */
+    .hero {
+      background: url('/images/hero.jpg') no-repeat center center;
+      background-size: cover;
+      padding: 100px 0;
+      color: white;
+      position: relative;
+    }
+    .hero .overlay {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 50px;
+      text-align: center;
+    }
+    /* Dashboard */
+    .dashboard {
+      padding: 64px 20px;
+    }
+    .dashboard .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .dashboard .card i {
+      color: #007BFF;
+    }
+    .dashboard .card h2 {
+      margin: 10px 0;
+      font-size: 2em;
+    }
+    /* Navigation karty */
+    .nav-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .nav-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      width: 250px;
+      text-align: center;
+    }
+    .nav-card i {
+      font-size: 3em;
+      color: #007BFF;
+      margin-bottom: 10px;
+    }
+    .nav-card h3 {
+      margin: 10px 0;
+      font-size: 1.2em;
+    }
+    .nav-card p {
+      font-size: 0.9em;
+      margin-bottom: 15px;
+    }
+    .nav-card a {
+      display: inline-block;
+      background: #303a53;
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    /* Ogólne przyciski */
+    .btn {
+      background: #303a53;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    /* Tabele */
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 40px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      min-width: 500px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .delete-button {
+      background-color: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    /* Responsywność */
+    @media screen and (max-width: 768px) {
+      .hero {
+        padding: 60px 0;
+      }
+      .hero .overlay {
+        padding: 20px;
+      }
+      .dashboard .card h2 {
+        font-size: 1.5em;
+      }
+      .nav-card {
+        width: 100%;
+        max-width: 300px;
+      }
+      .table-container table {
+        font-size: 12px;
+      }
+      .btn, .btn-back, .nav-card a {
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nagłówek wspólny -->
+<div th:replace="~{header :: header}"></div>
+
+<div class="content">
+    <header class="hero">
+        <div class="overlay">
+            <h1 class="w3-jumbo">Panel Administratora</h1>
+            <h3>Zarządzaj użytkownikami, trenerami i systemem</h3>
+        </div>
+    </header>
+
+    <!-- Dashboard statystyk -->
+    <div class="w3-container dashboard">
+        <div class="w3-row-padding w3-margin-top w3-center">
+            <div class="w3-third card">
+                <i class="fa fa-users w3-xxlarge"></i>
+                <h2 id="userCount">0</h2>
+                <p>Zarejestrowanych użytkowników</p>
+            </div>
+            <div class="w3-third card">
+                <i class="fa fa-dumbbell w3-xxlarge"></i>
+                <h2 id="trainerCount">0</h2>
+                <p>Aktywnych trenerów</p>
+            </div>
+            <div class="w3-third card">
+                <i class="fa fa-check-circle w3-xxlarge"></i>
+                <h2 id="workoutCount">0</h2>
+                <p>Ukończonych treningów</p>
+            </div>
+        </div>
+        <div class="w3-row-padding w3-margin-top w3-center">
+            <div class="w3-third card">
+                <i class="fa fa-running w3-xxlarge"></i>
+                <h2 id="exerciseCount">0</h2>
+                <p>Liczba ćwiczeń</p>
+            </div>
+            <div class="w3-third card">
+                <i class="fa fa-list-alt w3-xxlarge"></i>
+                <h2 id="trainingPlanCount">0</h2>
+                <p>Liczba planów treningowych</p>
+            </div>
+            <div class="w3-third card">
+                <i class="fa fa-handshake w3-xxlarge"></i>
+                <h2 id="collaborationCount">0</h2>
+                <p>Współprac klient-trener</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nawigacja do zarządzania użytkownikami -->
+    <div class="w3-container w3-padding-64">
+        <h2 class="w3-center">Zarządzanie Użytkownikami</h2>
+        <div class="w3-row-padding w3-margin-top w3-center nav-cards">
+            <div class="nav-card">
+                <i class="fa fa-users"></i>
+                <h3>Klienci</h3>
+                <p>Zarządzaj listą klientów.</p>
+                <a th:href="@{/admin/clients/list}">Przejdź</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-user-tie"></i>
+                <h3>Trenerzy</h3>
+                <p>Zarządzaj listą trenerów.</p>
+                <a th:href="@{/admin/trainers/list}">Przejdź</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sekcja Zarządzania Ćwiczeniami i Sprzętem -->
+    <div class="w3-container w3-padding-64">
+        <h2 class="w3-center">Zarządzanie Ćwiczeniami, Częściami Ciała oraz Sprzętem</h2>
+        <div class="w3-row-padding w3-margin-top w3-center nav-cards">
+            <div class="nav-card">
+                <i class="fa fa-plus-circle"></i>
+                <h3>Nowe ćwiczenie</h3>
+                <p>Stwórz nowe ćwiczenie.</p>
+                <a th:href="@{/admin/exercise/new}">Dodaj ćwiczenie</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-edit"></i>
+                <h3>Edytuj/Usuń ćwiczenie</h3>
+                <p>Edytuj lub usuń istniejące ćwiczenie.</p>
+                <a th:href="@{/admin/exercise/list}">Zarządzaj ćwiczeniami</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-plus-square"></i>
+                <h3>Nowa część ciała</h3>
+                <p>Dodaj nową część ciała.</p>
+                <a th:href="@{/admin/bodypart/new}">Dodaj część ciała</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-edit"></i>
+                <h3>Edytuj/Usuń część ciała</h3>
+                <p>Edytuj lub usuń istniejące części ciała.</p>
+                <a th:href="@{/admin/bodypart/list}">Zarządzaj częściami ciała</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-plus-square"></i>
+                <h3>Nowy sprzęt</h3>
+                <p>Dodaj nowy sprzęt.</p>
+                <a th:href="@{/admin/equipment/new}">Dodaj sprzęt</a>
+            </div>
+            <div class="nav-card">
+                <i class="fa fa-edit"></i>
+                <h3>Edytuj/Usuń sprzęt</h3>
+                <p>Edytuj lub usuń istniejące sprzęty.</p>
+                <a th:href="@{/admin/equipment/list}">Zarządzaj sprzętami</a>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- end .content -->
+
+<!-- Stopka -->
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+  // Funkcja animująca licznik (przykładowa implementacja)
+  function animateValue(id, start, end, duration) {
+    let obj = document.getElementById(id);
+    let range = end - start;
+    let increment = range / (duration / 5);
+    let current = start;
+    let step = function() {
+      current += increment;
+      obj.innerText = Math.floor(current);
+      if (current < end) {
+        requestAnimationFrame(step);
+      } else {
+        obj.innerText = end;
+      }
+    };
+    step();
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    animateValue("userCount", 0, [[${userCount}]], 2000);
+    animateValue("trainerCount", 0, [[${trainerCount}]], 2000);
+    animateValue("workoutCount", 0, [[${workoutCount}]], 2000);
+    animateValue("exerciseCount", 0, [[${exerciseCount}]], 2000);
+    animateValue("trainingPlanCount", 0, [[${trainingPlanCount}]], 2000);
+    animateValue("collaborationCount", 0, [[${collaborationCount}]], 2000);
+  });
+</script>
+
+</body>
+</html>

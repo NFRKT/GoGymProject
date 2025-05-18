@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Statystyki Treningowe</title>
+    <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #292d35;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-box h2 {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .stat-box ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .stat-box li {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-box li:last-child {
+      border-bottom: none;
+    }
+
+    .select-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    select {
+      background: #f8f9fa;
+      color: #292d35;
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+    }
+
+   .btn-back {
+      background: #303a53;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+.floating-menu {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    background: rgba(48, 58, 83, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 160px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.floating-menu a {
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.floating-menu a:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Przycisk do zwijania */
+.menu-toggle {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    background: #303a53;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1100;
+    display: none;
+}
+
+/* Ukrycie menu na małych ekranach */
+@media screen and (max-width: 1024px) {
+    .floating-menu {
+        transform: translateX(-200px);
+    }
+    .menu-toggle {
+        display: block;
+    }
+}
+ .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background-color: #303a53;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .back-link:hover {
+      background-color: #4a5568;
+
+    </style>
+</head>
+<body>
+
+<div th:replace="~{header :: header}"></div>
+
+<div class="container">
+    <a href="/home" class="back-link">Powrót</a>
+    <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
+    <div class="floating-menu">
+        <a href="#common-exercises">🏋️ Najczęstsze ćwiczenia</a>
+        <a href="#monthly-exercises">📆 Ćwiczenia w miesiącu</a>
+        <a href="#max-weight">💪 Największy ciężar</a>
+        <a href="#longest-cardio">⏳ Najdłuższy cardio</a>
+        <a href="#workout-count">📊 Ilość treningów</a>
+        <a href="#avg-training">🕒 Średnia długość</a>
+        <a href="#max-reps">🔄 Najwięcej powtórzeń</a>
+        <a href="#workout-days">📅 Dni treningowe</a>
+        <a href="#total-time">⏳ Całkowity czas treningów</a>
+    </div>
+
+    <h1 id="top">📊 Statystyki Treningowe</h1>
+
+    <div class="stat-box" id="common-exercises">
+        <h2>🏋️ Najczęściej wykonywane ćwiczenia (ogólnie)</h2>
+        <ul>
+            <li th:each="entry : ${statistics.mostCommonExercises}">
+                <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span> razy
+            </li>
+        </ul>
+    </div>
+
+    <div class="stat-box" id="monthly-exercises">
+        <h2>📆 Najczęściej wykonywane ćwiczenia w miesiącu</h2>
+        <div class="select-container">
+            <select id="yearEx">
+                <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}"
+                        th:selected="${y == year}"></option>
+            </select>
+            <select id="monthEx">
+                <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}"
+                        th:selected="${m.key == month}"></option>
+            </select>
+        </div>
+        <ul id="mostCommonExercisesInMonth">
+            <li th:each="entry : ${statistics.mostCommonExercisesInMonth}">
+                <strong th:text="${entry[0]}"></strong> – <span th:text="${entry[1]}"></span> razy
+            </li>
+        </ul>
+    </div>
+
+    <div class="stat-box" id="max-weight">
+        <h2>💪 Największy ciężar dla ćwiczeń siłowych</h2>
+        <ul>
+            <li th:each="entry : ${statistics.maxWeightExercises}">
+                <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value.key}"></span> kg (<span
+                    th:text="${entry.value.value}"></span>)
+            </li>
+        </ul>
+    </div>
+
+    <div class="stat-box" id="longest-cardio">
+        <h2>⏳ Najdłuższy trening cardio</h2>
+        <p th:if="${statistics.longestCardio != null}">
+            <strong th:text="${statistics.longestCardio.exerciseName}"></strong>:
+            <span th:text="${statistics.longestCardio.formattedDuration}"></span>
+        </p>
+    </div>
+
+    <div class="stat-box" id="workout-count">
+        <h2>📅 Ilość treningów w miesiącu</h2>
+        <div class="select-container">
+            <select id="yearWo">
+                <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}"
+                        th:selected="${y == year}"></option>
+            </select>
+            <select id="monthWo">
+                <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}"
+                        th:selected="${m.key == month}"></option>
+            </select>
+        </div>
+        <p>W <span id="selectedMonth" th:text="${monthName}"></span> <span id="selectedYear" th:text="${year}"></span>
+            miałeś <strong id="workoutCount" th:text="${statistics.workoutsCount}"></strong> treningów.</p>
+    </div>
+
+    <div class="stat-box" id="avg-training">
+        <h2>🕒 Średnia długość treningu</h2>
+        <div class="select-container">
+            <select id="yearAvg">
+                <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}"
+                        th:selected="${y == year}"></option>
+            </select>
+            <select id="monthAvg">
+                <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}"
+                        th:selected="${m.key == month}"></option>
+            </select>
+        </div>
+        <p>W <span id="selectedMonthAvg" th:text="${monthName}"></span> <span id="selectedYearAvg"
+                                                                              th:text="${year}"></span> średnia długość
+            treningu wynosi <strong id="avgDuration" th:text="${statistics.averageWorkoutDuration}"></strong>.</p>
+        <p>Ogółem: <strong th:text="${statistics.averageWorkoutDurationAll}"></strong></p>
+    </div>
+
+    <div class="stat-box" id="max-reps">
+        <h2>🔄 Największa liczba powtórzeń</h2>
+        <ul>
+            <li th:each="entry : ${statistics.maxRepsExercises}">
+                <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="stat-box" id="workout-days">
+        <h2>📅 Najczęściej trenowane dni tygodnia</h2>
+        <ul>
+            <li th:each="entry : ${statistics.mostFrequentWorkoutDays}">
+                <strong th:text="${entry.key}"></strong> – <span th:text="${entry.value}"></span> razy
+            </li>
+        </ul>
+    </div>
+    <div class="stat-box" id="total-time">
+        <h2>⏳ Całkowity czas treningów</h2>
+        <div class="select-container">
+            <select id="yearTotal">
+                <option th:each="y : ${#numbers.sequence(2020, 2030)}" th:value="${y}" th:text="${y}"
+                        th:selected="${y == year}"></option>
+            </select>
+            <select id="monthTotal">
+                <option th:each="m : ${monthsMap}" th:value="${m.key}" th:text="${m.value}"
+                        th:selected="${m.key == month}"></option>
+            </select>
+        </div>
+        <p>W <span id="selectedMonthTotal" th:text="${monthName}"></span> <span id="selectedYearTotal"
+                                                                                th:text="${year}"></span> całkowity czas
+            treningów wynosi <strong id="totalDuration" th:text="${statistics.totalWorkoutTime}"></strong>.</p>
+        <p>Ogółem: <strong th:text="${statistics.totalWorkoutTimeAll}"></strong></p>
+    </div>
+
+</div>
+
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    function updateStatistics(url, updateFunc) {
+        fetch(url)
+            .then(response => response.json())
+            .then(data => updateFunc(data))
+            .catch(error => console.error("Błąd aktualizacji:", error));
+    }
+
+    function updateExercisesStatistics() {
+        const year = document.getElementById("yearEx").value;
+        const month = document.getElementById("monthEx").value;
+        updateStatistics(`/statistics/update?year=${year}&month=${month}`, (data) => {
+            const list = document.getElementById("mostCommonExercisesInMonth");
+            list.innerHTML = data.mostCommonExercisesInMonth.length > 0
+                ? data.mostCommonExercisesInMonth.map(entry => `<li><strong>${entry[0]}</strong> – ${entry[1]} razy</li>`).join("")
+                : "<li>Brak danych</li>";
+        });
+    }
+
+    function updateWorkoutsStatistics() {
+        const year = document.getElementById("yearWo").value;
+        const month = document.getElementById("monthWo").value;
+        updateStatistics(`/statistics/update?year=${year}&month=${month}`, (data) => {
+            document.getElementById("workoutCount").textContent = data.workoutsCount;
+            document.getElementById("selectedMonth").textContent = document.getElementById("monthWo").selectedOptions[0].text;
+            document.getElementById("selectedYear").textContent = year;
+        });
+    }
+
+    function updateAvgStatistics() {
+      const year = document.getElementById("yearAvg").value;
+      const month = document.getElementById("monthAvg").value;
+      updateStatistics(`/statistics/update?year=${year}&month=${month}`, (data) => {
+        document.getElementById("avgDuration").textContent = data.averageWorkoutDuration;
+        document.getElementById("selectedMonthAvg").textContent = document.getElementById("monthAvg").selectedOptions[0].text;
+        document.getElementById("selectedYearAvg").textContent = year;
+      });
+    }
+
+    function updateTotalStatistics() {
+      const year = document.getElementById("yearTotal").value;
+      const month = document.getElementById("monthTotal").value;
+      updateStatistics(`/statistics/update?year=${year}&month=${month}`, (data) => {
+        document.getElementById("totalDuration").textContent = data.totalWorkoutTime;
+        document.getElementById("selectedMonthTotal").textContent = document.getElementById("monthTotal").selectedOptions[0].text;
+        document.getElementById("selectedYearTotal").textContent = year;
+      });
+    }
+
+    document.getElementById("yearEx").addEventListener("change", updateExercisesStatistics);
+    document.getElementById("monthEx").addEventListener("change", updateExercisesStatistics);
+    document.getElementById("yearWo").addEventListener("change", updateWorkoutsStatistics);
+    document.getElementById("monthWo").addEventListener("change", updateWorkoutsStatistics);
+    document.getElementById("yearAvg").addEventListener("change", updateAvgStatistics);
+    document.getElementById("monthAvg").addEventListener("change", updateAvgStatistics);
+    document.getElementById("yearTotal").addEventListener("change", updateTotalStatistics);
+    document.getElementById("monthTotal").addEventListener("change", updateTotalStatistics);
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const menu = document.querySelector('.floating-menu');
+    const toggleButton = document.querySelector('.menu-toggle');
+
+    // Funkcja przewijania do sekcji
+    document.querySelectorAll('.floating-menu a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute("href").substring(1);
+            document.getElementById(targetId).scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        });
+    });
+
+    // Funkcja do chowania/pokazywania menu
+    function toggleMenu() {
+        if (menu.classList.contains("hidden")) {
+            menu.classList.remove("hidden");
+            menu.style.transform = "translateX(0px)";
+        } else {
+            menu.classList.add("hidden");
+            menu.style.transform = "translateX(-200px)";
+        }
+    }
+
+    // Nasłuchiwanie na zmianę rozmiaru okna - automatycznie pokazuje menu na dużych ekranach
+    function handleResize() {
+        if (window.innerWidth > 1024) {
+            menu.classList.remove("hidden");
+            menu.style.transform = "translateX(0px)";
+        } else if (!menu.classList.contains("hidden")) {
+            menu.style.transform = "translateX(0px)";
+        } else {
+            menu.style.transform = "translateX(-200px)";
+        }
+    }
+
+    // Eventy
+    toggleButton.addEventListener("click", toggleMenu);
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Wywołujemy na start, aby dostosować się do okna
+});
+
+</script>
+</body>
+</html>

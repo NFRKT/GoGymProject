@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>GoGym - Twoje odznaki</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Style wspólne -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      flex-direction: column;
+      background: rgba(159, 161, 167, 0.07);
+    }
+    .content {
+      flex: 1;
+    }
+    /* Kontener odznak */
+    .badge-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      padding: 20px;
+    }
+    /* Karta odznaki ustawiona jako flexbox */
+    .badge-item {
+      display: flex;
+      flex-direction: column;
+      width: 250px;
+      text-align: center;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    /* Wyróżnienie odznaki posiadanej przez użytkownika */
+    .badge-item.owned {
+      border: 2px solid green;
+    }
+    .badge-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+    /* Etykieta „Posiadana” */
+    .owned-label {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: green;
+      color: white;
+      padding: 5px;
+      font-size: 12px;
+      border-radius: 5px;
+    }
+    /* Kontener dolny – zawsze przy dole karty */
+    .badge-footer {
+      margin-top: auto;
+    }
+    /* Tooltip dla opisu */
+    .badge-tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      color: #007BFF;
+      font-weight: bold;
+    }
+    .badge-tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%; /* chmurka nad tekstem */
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .badge-tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #555 transparent transparent transparent;
+    }
+    .badge-tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    /* Pasek postępu */
+    .progress-bar {
+      width: 100%;
+      background: #f2f2f2;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-bar-inner {
+      height: 20px;
+      background: #007BFF;
+      text-align: center;
+      line-height: 20px;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="content">
+  <div class="w3-container w3-padding-64">
+    <h1 class="w3-center">Wszystkie odznaki</h1>
+    <div class="badge-container">
+      <!-- Iterujemy po wszystkich odznakach -->
+      <div class="badge-item" th:each="currentBadge : ${allBadges}"
+           th:classappend="${ownedBadgeIds.contains(currentBadge.id)} ? ' owned' : ''">
+        <!-- Etykieta dla odznaki posiadanej -->
+        <div th:if="${ownedBadgeIds.contains(currentBadge.id)}" class="owned-label">
+          Posiadana
+        </div>
+        <img th:src="@{${currentBadge.imageUrl}}" alt="Odznaka">
+        <h3 th:text="${currentBadge.name}">Nazwa odznaki</h3>
+        <!-- Kontener na elementy, które mają być zawsze u dołu -->
+        <div class="badge-footer">
+          <!-- Tooltip z napisem "Opis" -->
+          <p class="badge-tooltip">
+            Opis
+            <span class="tooltiptext" th:text="${currentBadge.description}">Opis odznaki</span>
+          </p>
+          <div class="progress-bar">
+            <div class="progress-bar-inner"
+                 th:text="${badgeProgress[currentBadge.id]}">
+              0/0
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Jeśli brak dostępnych odznak -->
+      <div th:if="${#lists.isEmpty(allBadges)}" class="w3-center" style="width: 100%;">
+        <p>Brak odznak</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div th:replace="~{footer :: footer}"></div>
+</body>
+</html>
